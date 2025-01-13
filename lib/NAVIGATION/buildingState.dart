@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:geodesy/geodesy.dart';
 import 'package:iwaymaps/NAVIGATION/waypoint.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
+import 'APIMODELS/GlobalAnnotation.dart';
 import 'APIMODELS/beaconData.dart';
 import '/IWAYPLUS/APIMODELS/buildingAll.dart';
 import 'APIMODELS/landmark.dart';
@@ -32,6 +33,7 @@ class Building{
   static HashMap<String, beacon> apibeaconmap = HashMap();
   static String thresh = "";
   static Map<String,List<PathModel>> waypoint = {};
+  static MainModel? GlobalAnnotation = null;
   static Map<String,g.LatLng> allBuildingID = {
   };
   Map<String,Map<int, g.LatLng>> ARCoordinates = {};

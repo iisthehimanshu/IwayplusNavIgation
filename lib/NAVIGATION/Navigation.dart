@@ -50,6 +50,7 @@ import '../newSearchPage.dart';
 import '../path_snapper.dart';
 import '/IWAYPLUS/API/RatingsaveAPI.dart';
 import 'API/DataVersionApi.dart';
+import 'API/OutdoorAnnotation.dart';
 import 'API/PolyLineApi.dart';
 import 'API/outBuilding.dart';
 import 'API/waypoint.dart';
@@ -1588,9 +1589,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         print("already exists a landmark ${markerId.value}");
       }
       nearbyLandmarks[markerId] = Marker(
-        markerId: MarkerId("$name#$id"),
+        markerId: MarkerId("$name#${visible?"true":"false"}"),
         position: point,
-        visible: true,
+        visible: visible,
         icon: optionLandmark,
       );
     });
@@ -1984,6 +1985,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     speak(convertTolng("Confirm Your Location Amongst Below Given List", _currentLocale, ''), _currentLocale);
     focusOnPinLandmark(LatLng(double.parse(landmarks.first.properties!.latitude!), double.parse(landmarks.first.properties!.longitude!)));
     for (var landmark in landmarks) {
+
       addNearbyLandmarkMarkers(LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),landmark.sId??"", landmark.name??"", !landmark.properties!.isWaypoint);
     }
   }
@@ -3134,12 +3136,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         buildingAllApi.getStoredAllBuildingID().entries.map((entry) async {
           var key = entry.key;
 
+
           SingletonFunctionController.building.floor[key] = 0;
           print("apicalls testing 1 for $key");
+
+          if(key == buildingAllApi.outdoorID){
+            var waypointData = await GlobalAnnotation().fetchGlobalAnnotationData(key);
+            Building.GlobalAnnotation = waypointData;
+            //return;
+          }
+
           try {
-            var waypointData = await waypointapi()
-                .fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
-            Building.waypoint[key] = waypointData;
+              var waypointData = await waypointapi()
+                  .fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
+              Building.waypoint[key] = waypointData;
           } catch (_) {}
           print("apicalls testing 2 for $key");
           if (key != buildingAllApi.getSelectedBuildingID()) {
@@ -7490,9 +7500,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     List<int> path = [];
 
     try {
+      Map<String, List<dynamic>> adjList = {};
+
       PathModel model = Building.waypoint[bid]!
           .firstWhere((element) => element.floor == floor);
-      Map<String, List<dynamic>> adjList = model.pathNetwork;
+      adjList = model.pathNetwork;
+
       path = await findShortestPath(
           adjList,
           sourceX,

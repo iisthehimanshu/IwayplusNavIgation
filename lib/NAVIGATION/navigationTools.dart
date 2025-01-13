@@ -1383,6 +1383,16 @@ class tools {
       }
     });
 
+    bool isAlreadyPresent(int x, int y){
+      bool v = false;
+      nodesQueue.forEach((node){
+        if(node.coordinateX == x && node.coordinateY == y){
+          v = true;
+        }
+      });
+      return v;
+    }
+
     final polylineData = SingletonFunctionController.building.polylinedatamap;
     polylineData.forEach((key,value){
       if(key == Beacon.buildingID ){
@@ -1392,7 +1402,7 @@ class tools {
               polyline.nodes!.forEach((node){
                 double d = calculateDistance(pCoord, [node.coordx!, node.coordy!]);
                 print("waypoint distance is $d");
-                if (d < distance) {
+                if (d < distance && !isAlreadyPresent(node.coordx!,node.coordy!)) {
                   print("foundwaypoint to option");
                   var closestLandmark = queue[0];
                   double minDistance = calculateDistance([node.coordx!, node.coordy!], [closestLandmark.coordinateX!,closestLandmark.coordinateY!]);
@@ -1412,8 +1422,7 @@ class tools {
                   duplicateLandmark.properties!.latitude = node.lat.toString();
                   duplicateLandmark.properties!.longitude = node.lon.toString();
                   duplicateLandmark.properties!.isWaypoint = true;
-                  duplicateLandmark.sId = "Himanshu";
-                  duplicateLandmark.name = node.sId;
+                  duplicateLandmark.sId = node.sId;
                   nodesQueue.add(duplicateLandmark);
                 }
               });
@@ -1422,6 +1431,7 @@ class tools {
         });
       }
     });
+
     queue.forEach((value){
       print("queue id ${value.sId}");
     });

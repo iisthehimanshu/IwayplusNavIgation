@@ -40,10 +40,9 @@ import '/NAVIGATION/DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import '/NAVIGATION/HomeNestedSearch.dart';
 import '/NAVIGATION/Navigation.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
-import 'FIREBASE NOTIFICATION API/FCMServer.dart';
 import 'MODELS/VenueModel.dart';
 import 'NotificationScreen.dart';
-
+import 'package:iwaymaps/IWAYPLUS/FIREBASE NOTIFICATION API/PushNotifications.dart';
 
 class VenueSelectionScreen extends StatefulWidget{
 
@@ -67,7 +66,6 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   @override
   void initState(){
     super.initState();
-    //PushNotifications.showSimpleNotificationwithButton(title: "", body:"", payload: "", imageUrl: '');
     NotificationSocket.receiveMessage();
     // checkForUpdate();
     //startScan();
@@ -201,6 +199,7 @@ if(userLoc!=null){
    //if ((locBox.get('location')==null)?false:locBox.get('location')) {
       try{
         Position? position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+        Geolocator.getLocationAccuracy();
         return position;
       }catch(e){
         print("error in location fetching");
@@ -217,14 +216,8 @@ if(userLoc!=null){
 
   }
 
-  String? _FCMToken = infoBox.get("FCMToken");
 
   void apiCall() async  {
-    if(_FCMToken != null){
-      try {
-        await FCMServer().sendFCM(_FCMToken!);
-      }catch(e){}
-    }
     await buildingAllApi().fetchBuildingAllData().then((value) {
       print(value);
       setState(() {
@@ -401,12 +394,13 @@ if(userLoc!=null){
               icon: Icon(Icons.notifications_none_outlined),
               color: Color(0xff18181b),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BluetoothScanAndroid(),
-                  ),
-                );
+                PushNotifications.showSimpleNotification(body: "",payload: "",title: "Title");
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => BluetoothScanAndroid(),
+                //   ),
+                // );
               },
             ),
             Container(

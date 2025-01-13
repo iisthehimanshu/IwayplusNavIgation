@@ -46,13 +46,16 @@ class _BluetoothScanAndroidState extends State<BluetoothScanAndroid> {
     try{
       await methodChannel.invokeMethod('startScan');
       setState(() {
-        isScanning = false;
+        isScanning = true;
       });
     } on PlatformException catch(e){
       print("Failed to start scan: ${e.message}");
     }
   }
   Future<void> _stopScan() async {
+    setState(() {
+      isScanning = false;
+    });
     try {
       await methodChannel.invokeMethod('stopScan');
     } on PlatformException catch (e) {
@@ -86,6 +89,10 @@ class _BluetoothScanAndroidState extends State<BluetoothScanAndroid> {
 
 
   void _listenToScanUpdates() {
+    isScanning = true;
+    setState(() {
+
+    });
     String deviceMacId = "";
     // Start listening to the stream continuously
     _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
@@ -136,7 +143,8 @@ class _BluetoothScanAndroidState extends State<BluetoothScanAndroid> {
         if (rssiValues.isNotEmpty) {
           rssiValues.forEach((key, value) {
             if (deviceMacId != key) {
-              if (value.isNotEmpty) value.removeAt(0);
+              if(value.length>0)
+              value.removeAt(0);
             }else{
               print("deviceMacId--");
             }
@@ -146,7 +154,8 @@ class _BluetoothScanAndroidState extends State<BluetoothScanAndroid> {
         if (rssiWeight.isNotEmpty) {
           rssiWeight.forEach((key, value) {
             if (deviceMacId != key) {
-              if (value.isNotEmpty) value.removeAt(0);
+              if(value.length>0)
+              value.removeAt(0);
             }
           });
         }
@@ -154,6 +163,8 @@ class _BluetoothScanAndroidState extends State<BluetoothScanAndroid> {
 
         });
       });
+    }else{
+      print("ELsecase");
     }
   }
 
@@ -213,7 +224,7 @@ class _BluetoothScanAndroidState extends State<BluetoothScanAndroid> {
         print(newList);
 
         // Add the average to the map
-        averagedRssiValues[deviceList[address]!] = average;
+        averagedRssiValues[deviceList[address]!] = double.parse(average.toStringAsFixed(3));;
       } else {
         print("Warning: RSSI list for $address is empty.");
       }
@@ -258,52 +269,55 @@ class _BluetoothScanAndroidState extends State<BluetoothScanAndroid> {
           ),
         ],
       ),
-      body: Container(
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: rssiValues.length,
-          itemBuilder: (context, index) {
-            String deviceName = rssiValues.keys.elementAt(index);
-            String deviceShowName = deviceNames[rssiValues.keys.elementAt(index)]??"";
-            List<double> weightReading = rssiWeight[deviceName]??[];
-            List<int> readings = rssiValues[deviceName]??[];
-            print(readings);
-
-            return Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    deviceShowName,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      body: Column(
+        children: [
+          Container(
+            height: 400,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: rssiValues.length,
+              itemBuilder: (context, index) {
+                String deviceName = rssiValues.keys.elementAt(index);
+                String deviceShowName = deviceNames[rssiValues.keys.elementAt(index)]??"";
+                List<double> weightReading = rssiWeight[deviceName]??[];
+                List<int> readings = rssiValues[deviceName]??[];
+                return Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        deviceShowName,
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 4),
+                      Column(
+                        children: readings.map((rssi) =>
+                            Padding(
+                              padding: EdgeInsets.only(right: 8.0),
+                              child: Text('$rssi'),
+                            )
+                        ).toList(),
+                      ),
+                      Divider(),
+                      Column(
+                        children: weightReading.map((rssi) =>
+                            Padding(
+                              padding: EdgeInsets.only(right: 8.0),
+                              child: Text('$rssi'),
+                            )
+                        ).toList(),
+                      ),
+                      Divider(height: 3,color: Colors.black,),
+                    ],
                   ),
-                  SizedBox(height: 4),
-                  Column(
-                    children: readings.map((rssi) =>
-                        Padding(
-                          padding: EdgeInsets.only(right: 8.0),
-                          child: Text('$rssi'),
-                        )
-                    ).toList(),
-                  ),
-                  Divider(),
-                  Text("${weightReading[weightReading.length-1]}"),
-                  Text("${weightReading[0]}"),
-                  Column(
-                    children: weightReading.map((rssi) =>
-                        Padding(
-                          padding: EdgeInsets.only(right: 8.0),
-                          child: Text('$rssi'),
-                        )
-                    ).toList(),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
+                );
+              },
+            ),
+          ),
+          Text(rssiAverage.toString()),
+        ],
+      )
     );
   }
 }

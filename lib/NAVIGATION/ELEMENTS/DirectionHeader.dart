@@ -6,6 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localization/flutter_localization.dart';
@@ -36,7 +38,8 @@ class DirectionHeader extends StatefulWidget {
   UserState user;
   String getSemanticValue;
   BuildContext context;
-  final Function(String nearestBeacon, {bool render}) paint;
+  final  Function(String? nearestBeacon,String? polyID, gmap.LatLng? gpsCoordinates,
+      {bool speakTTS, bool render}) paint;
   final Function(String nearestBeacon) repaint;
   final Function() reroute;
   final Function() moveUser;
@@ -441,7 +444,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 DirectionIndex = nextTurnIndex;
                 //need to render on beacon for aiims jammu
                 print("calling expected function");
-                widget.paint(nearestBeacon, render: false);
+                widget.paint(nearestBeacon, null, null, render: false);
                 return true;
               }
             }
@@ -1292,13 +1295,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                                             .user
                                             .pathobj
                                             .directions[DirectionIndex]
-                                            .distanceToNextTurn !=
+                                            .distanceToNextTurnInFeet !=
                                         null &&
                                     widget
                                             .user
                                             .pathobj
                                             .directions[DirectionIndex]
-                                            .distanceToNextTurn! <=
+                                            .distanceToNextTurnInFeet! <=
                                         5 &&
                                     DirectionIndex + 1 <
                                         widget.user.pathobj.directions.length) {
@@ -1467,7 +1470,7 @@ class scrollableDirection extends StatelessWidget {
         } else if (DirectionIndex == nextTurnIndex) {
           return '$steps';
         } else {
-          return '${tools.convertFeet((listOfDirections[DirectionIndex].distanceToNextTurn ?? 1).toInt(), context)}';
+          return '${tools.convertFeet((listOfDirections[DirectionIndex].distanceToNextTurnInFeet ?? 1).toInt(), context)}';
         }
       } else {
         return "";

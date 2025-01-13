@@ -1,6 +1,8 @@
 
 import 'package:flutter/material.dart';
-import '/IWAYPLUS/Elements/HelperClass.dart';
+
+import '../../IWAYPLUS/Elements/HelperClass.dart';
+import '../navigationTools.dart';
 
 class SearchpageResults extends StatefulWidget {
   final Function(String name, String location, String ID, String bid) onClicked;
@@ -103,16 +105,20 @@ class _SearchpageResultsState extends State<SearchpageResults> {
                     children: [
                       Container(
                         margin: EdgeInsets.only(top: 12, left: 18),
-                        child: Text(
-                          widget.name,
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff000000),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width-100, // Adjust width if needed
                           ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
+                          child: Text(
+                            widget.name,
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xff000000),
+                            ),
+                            maxLines: null,
+                          ),
                         ),
                       ),
                       Container(

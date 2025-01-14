@@ -4146,7 +4146,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         northeast: LatLng(maxLat, maxLng),
       );
       // Adjust bounds for top and bottom UI panels
-      final double paddingFactor = 0.1; // Adjust as per your UI layout
+      final double paddingFactor = 0.05; // Adjust as per your UI layout
       bounds = _adjustBoundsForPanels(bounds, paddingFactor);
       // Calculate zoom level dynamically
       final double distance = _calculateDistance(bounds.southwest, bounds.northeast);
@@ -6912,8 +6912,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           s[0], s[1], SingletonFunctionController.building.patchData[sBid]);
       dvalue = tools.localtoglobal(
           d[0], d[1], SingletonFunctionController.building.patchData[dBid]);
-      setCameraPositionusingCoords(
-          [LatLng(svalue[0], svalue[1]), LatLng(dvalue[0], dvalue[1])]);
+      // setCameraPositionusingCoords(
+      //     [LatLng(svalue[0], svalue[1]), LatLng(dvalue[0], dvalue[1])]);
       createMarkersAndDirections(PathState.singleCellListPath,lifts);
 
       double time = 0;
@@ -7037,8 +7037,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             PathState.sourceX, PathState.sourceY, SingletonFunctionController.building.patchData[PathState.sourceBid]);
         dvalue = tools.localtoglobal(
             PathState.destinationX,PathState.destinationY, SingletonFunctionController.building.patchData[PathState.destinationBid]);
-        setCameraPositionusingCoords(
-            [LatLng(svalue[0], svalue[1]), LatLng(dvalue[0], dvalue[1])]);
+        // setCameraPositionusingCoords(
+        //     [LatLng(svalue[0], svalue[1]), LatLng(dvalue[0], dvalue[1])]);
         fetchrouteFutures.add(() => fetchroute(
             PathState.sourceX,
             PathState.sourceY,
@@ -7534,8 +7534,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   late BitmapDescriptor sourceIcon;
   late BitmapDescriptor destinationIcon;
 
-
-
+List<int> pathList=[];
+List<LatLng> currentCoordinates=[];
+int currentFloor=0;
+String currentBid="";
+int currentCols=0;
   Future<Map<String, dynamic>> fetchroute(
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
       {String? bid = null,
@@ -7671,17 +7674,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
       List<LatLng> coordinates = [];
       if (PathState.sourceBid == bid && floor == PathState.sourceFloor) {
+         setCameraPositionusingCoords(
+             [LatLng(svalue[0], svalue[1]), LatLng(dvalue[0], dvalue[1])]);
         for (int i = 0; i<path.length-2;i++) {
           int node = path[i];
           int node1=path[i+2];
-          // int row1 = (node1 % numCols); //divide by floor length
-          // int col1 = (node1 ~/ numCols);
+          int row1 = (node1 % numCols); //divide by floor length
+          int col1 = (node1 ~/ numCols);
           int row = (node % numCols); //divide by floor length
           int col = (node ~/ numCols); //divide by floor length
           List<double> value = tools.localtoglobal(
               row, col, SingletonFunctionController.building.patchData[bid]);
-    //       List<double> value1 = tools.localtoglobal(
-    // row1, col1, SingletonFunctionController.building.patchData[bid]);
+           List<double> value1 = tools.localtoglobal(row1, col1, SingletonFunctionController.building.patchData[bid]);
           coordinates.add(LatLng(value[0], value[1]));
           if (singleroute[bid] == null) {
             singleroute.putIfAbsent(bid, () => Map());
@@ -7713,11 +7717,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             });
           }
           print("rendering path");
-
+          // alignMapToPath([value[0],value[1]], [value1[0],value1[1]]);
           await Future.delayed(Duration(microseconds: 1500));
           coordinates.add(LatLng(value[0], value[1]));
-          // alignMapToPath([value[0],value[1]], [value1[0],value1[1]]);
+
+
+
         }
+        setState(() {
+          pathList=path;
+          currentCols=numCols;
+          currentBid=bid;
+          currentCoordinates=coordinates;
+          currentFloor=floor;
+        });
       } else {
         coordinates=[];
         if (singleroute[bid] == null) {
@@ -8068,6 +8081,55 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   }
 bool _isPlaying=false;
+  callPreviewAnimation() async {
+    singleroute.clear();
+    for (int i = 0; i<pathList.length-2;i++) {
+      int node = pathList[i];
+      int node1=pathList[i+2];
+      int row1 = (node1 % currentCols); //divide by floor length
+      int col1 = (node1 ~/ currentCols);
+      int row = (node % currentCols); //divide by floor length
+      int col = (node ~/ currentCols); //divide by floor length
+      List<double> value = tools.localtoglobal(
+          row, col, SingletonFunctionController.building.patchData[currentBid]);
+      List<double> value1 = tools.localtoglobal(row1, col1, SingletonFunctionController.building.patchData[currentBid]);
+      currentCoordinates.add(LatLng(value[0], value[1]));
+      if (singleroute[currentBid] == null) {
+        singleroute.putIfAbsent(currentBid, () => Map());
+      }
+      if (singleroute[currentBid]![currentFloor] != null) {
+        gmap.Polyline oldPolyline = singleroute[currentBid]![currentFloor]!.firstWhere(
+              (polyline) => polyline.polylineId.value == currentBid,
+        );
+        gmap.Polyline updatedPolyline = gmap.Polyline(
+          polylineId: oldPolyline.polylineId,
+          points: currentCoordinates,
+          color: oldPolyline.color,
+          width: oldPolyline.width,
+        );
+        setState((){
+          // Remove the old polyline and add the updated polyline
+          singleroute[currentBid]![currentFloor]!.remove(oldPolyline);
+          singleroute[currentBid]![currentFloor]!.add(updatedPolyline);
+        });
+      } else {
+        setState(() {
+          singleroute[currentBid]!.putIfAbsent(currentFloor, () => Set());
+          singleroute[currentBid]![currentFloor]?.add(gmap.Polyline(
+            polylineId: PolylineId("$currentBid"),
+            points: currentCoordinates,
+            color: Colors.blueAccent,
+            width: 8,
+          ));
+        });
+      }
+      print("rendering path");
+      await alignMapToPath([value[0],value[1]], [value1[0],value1[1]]);
+      await Future.delayed(Duration(microseconds: 2500));
+      currentCoordinates.add(LatLng(value[0], value[1]));
+
+    }
+  }
   PanelController _routeDetailPannelController = new PanelController();
   bool startingNavigation = false;
   List<Widget> directionWidgets = [];
@@ -8516,13 +8578,15 @@ bool _isPlaying=false;
                                                   setState(() {
                                                     _isPlaying=!_isPlaying;
                                                   });
-                                                  String msg=(pathState().sourceFloor!=pathState().destinationFloor)?tools.generateNarration(UserState.mapPathGuide,isMultiFloor: true):tools.generateNarration(UserState.mapPathGuide,isMultiFloor: false);
-                                                  print("narration ${msg}");
-                                                  speak(msg, _currentLocale).whenComplete((){
-                                                    setState(() {
-                                                      _isPlaying=false;
-                                                    });
-                                                  });
+                                                  //currently using for play preview animation
+                                                  callPreviewAnimation();
+                                                  // String msg=(pathState().sourceFloor!=pathState().destinationFloor)?tools.generateNarration(UserState.mapPathGuide,isMultiFloor: true):tools.generateNarration(UserState.mapPathGuide,isMultiFloor: false);
+                                                  // print("narration ${msg}");
+                                                  // speak(msg, _currentLocale).whenComplete((){
+                                                  //   setState(() {
+                                                  //     _isPlaying=false;
+                                                  //   });
+                                                  // });
                                                 },
                                                 icon:Icon(Icons.play_circle_outline_rounded),color: (_isPlaying)?Colors.blue:Colors.black,)),
                                           Spacer(),
@@ -9517,12 +9581,12 @@ bool _isPlaying=false;
           (Route<dynamic> route) => false,
     );
   }
-  void alignMapToPath(List<double> A, List<double> B) async {
+  Future<void> alignMapToPath(List<double> A, List<double> B) async {
     print("enteredddd");
     print(onStart);
     double screenHeight=MediaQuery.of(context).size.height;
     double pixelRatio=MediaQuery.of(context).devicePixelRatio;
-    mapState.tilt = 0.0;
+    mapState.tilt = 52.5;
     List<double> val = tools.localtoglobal(
         user.showcoordX.toInt(),
         user.showcoordY.toInt(),
@@ -9543,7 +9607,7 @@ bool _isPlaying=false;
     // Convert the new screen coordinate back to LatLng
     LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: newX, y: newY));
     setState(() {
-      _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+      _googleMapController.moveCamera(CameraUpdate.newCameraPosition(
         CameraPosition(
             target: (onStart==false)?mapState.target:mapState.target,
             zoom: mapState.zoom,

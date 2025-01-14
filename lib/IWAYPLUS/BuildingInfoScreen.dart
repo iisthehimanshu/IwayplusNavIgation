@@ -101,7 +101,6 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
       allBuildingID[element.sId!] = kk;
     });
   }
-
   void apiCall() async{
     BuildingAPI().fetchBuildData().then((value){
       setState(() {

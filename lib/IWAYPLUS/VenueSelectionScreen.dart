@@ -25,6 +25,7 @@ import 'package:iwaymaps/NAVIGATION/UserState.dart';
 import 'package:new_version_plus/new_version_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:iwaymaps/NAVIGATION/IOSScannerScreen.dart';
 
 import '/NAVIGATION/APIMODELS/Building.dart';
 import '/IWAYPLUS/APIMODELS/buildingAll.dart';
@@ -394,13 +395,13 @@ if(userLoc!=null){
               icon: Icon(Icons.notifications_none_outlined),
               color: Color(0xff18181b),
               onPressed: () {
-                PushNotifications.showSimpleNotification(body: "",payload: "",title: "Title");
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => BluetoothScanAndroid(),
-                //   ),
-                // );
+                // PushNotifications.showSimpleNotification(body: "",payload: "",title: "Title");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => IOSScannerScreen(),
+                  ),
+                );
               },
             ),
             Container(

@@ -601,10 +601,21 @@ class tools {
   }
 
 
+
   static double PathDistance(List<Cell> mergedList) {
     double totalDistance = 0.0;
 
     if (mergedList.isEmpty) return totalDistance;
+
+    if (mergedList.every((item) => (item.bid == buildingAllApi.outdoorID && item.floor == mergedList.first.floor))) {
+      for (int i = 1; i < mergedList.length; i++) {
+        var prevCell = mergedList[i - 1];
+        var currentCell = mergedList[i];
+        totalDistance += tools.calculateAerialDist(prevCell.lat, prevCell.lng, currentCell.lat, currentCell.lng);
+      }
+      return totalDistance * 3.28084; // because distance was in m and had to return in feet
+    }
+
 
     if(mergedList.every((item) => (item.bid == mergedList.first.bid && item.floor == mergedList.first.floor))){
       return mergedList.length.toDouble();

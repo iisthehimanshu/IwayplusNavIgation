@@ -117,6 +117,8 @@ List<String> findNearestAndSecondNearestVertices(
   double minDistToCoord2 = double.infinity;
   double secondMinDistToCoord2 = double.infinity;
 
+  print("source and destination points are $coord1 and $coord2");
+
   // Iterate through each vertex in the pathNetwork
   pathNetwork.forEach((vertex, neighbors) {
     List<int> v = vertex.split(',').map((e) => int.parse(e)).toList();

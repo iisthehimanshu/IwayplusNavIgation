@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+import 'package:iwaymaps/NAVIGATION/config.dart';
 import '../../../../NAVIGATION/API/RefreshTokenAPI.dart';
 import '../../../DATABASE/BOXES/SignINAPIModelBox.dart';
 import '../../../Elements/UserCredential.dart';
@@ -10,7 +11,7 @@ import '../MODELS/SignInAPIModel.dart';
 
 class SignInAPI{
 
-  final String baseUrl = "https://maps.iwayplus.in/auth/signin2";
+  final String baseUrl = "${AppConfig.baseUrl}/auth/signin2";
 
   Future<SignInApiModel?> signIN(String username, String password) async {
     //final signindataBox = FavouriteDataBaseModelBox.getData();

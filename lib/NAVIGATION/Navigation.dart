@@ -4116,7 +4116,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       List<LatLng> selectedRoomMarker1, {
         List<LatLng>? selectedRoomMarker2,
       }) async {
-    if (_isCameraAnimating || _googleMapController == null) {
+    if (_isCameraAnimating || _googleMapController == null){
       return; // If already animating or controller is null, exit
     }
     setState((){
@@ -4146,13 +4146,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         northeast: LatLng(maxLat, maxLng),
       );
       // Adjust bounds for top and bottom UI panels
-      final double paddingFactor = 0.05; // Adjust as per your UI layout
+      final double paddingFactor = 0.1; // Adjust as per your UI layout
       bounds = _adjustBoundsForPanels(bounds, paddingFactor);
       // Calculate zoom level dynamically
       final double distance = _calculateDistance(bounds.southwest, bounds.northeast);
       final double targetZoom = _calculateZoomLevel(bounds, distance);
       // Animate camera movement
-      const int steps = 30;
+      const int steps = 60;
       const Duration stepDuration = Duration(milliseconds: 20);
       final currentZoom = await _googleMapController.getZoomLevel();
       LatLng center = LatLng(
@@ -4175,7 +4175,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         // Delay for smooth animation
         await Future.delayed(stepDuration);
       }
-    } finally {
+    }finally{
       setState(() {
         _isCameraAnimating = false;
       });
@@ -7533,9 +7533,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   late LatLng destinationPosition;
   late BitmapDescriptor sourceIcon;
   late BitmapDescriptor destinationIcon;
-
 List<int> pathList=[];
-List<LatLng> currentCoordinates=[];
 int currentFloor=0;
 String currentBid="";
 int currentCols=0;
@@ -7626,7 +7624,6 @@ int currentCols=0;
 
     List<double> svalue = [];
     List<double> dvalue = [];
-
     if (path.isNotEmpty) {
       if (SingletonFunctionController.building.floor[bid] != floor) {
         setState(() {
@@ -7643,19 +7640,16 @@ int currentCols=0;
             SingletonFunctionController
                 .building.polylinedatamap[bid]!.polyline!.floors!);
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
-
         UserState.xdiff = dvalue[0];
         UserState.ydiff = dvalue[1];
       } else {
         UserState.xdiff = 0;
         UserState.ydiff = 0;
       }
-
       svalue = tools.localtoglobal(sourceX, sourceY,
           SingletonFunctionController.building.patchData[bid]);
       dvalue = tools.localtoglobal(destinationX, destinationY,
           SingletonFunctionController.building.patchData[bid]);
-
       // if(sourceX == PathState.sourceX || sourceY == PathState.sourceY){
       //   List<double> p1 = tools.localtoglobal(PathState.sourceX, PathState.sourceY,
       //       SingletonFunctionController.building.patchData[PathState.sourceBid]);
@@ -7706,7 +7700,7 @@ int currentCols=0;
               singleroute[bid]![floor]!.add(updatedPolyline);
             });
           } else {
-            setState(() {
+            setState((){
               singleroute[bid]!.putIfAbsent(floor, () => Set());
               singleroute[bid]![floor]?.add(gmap.Polyline(
                 polylineId: PolylineId("$bid"),
@@ -7716,19 +7710,14 @@ int currentCols=0;
               ));
             });
           }
-          print("rendering path");
-          // alignMapToPath([value[0],value[1]], [value1[0],value1[1]]);
-          await Future.delayed(Duration(microseconds: 1500));
+         // alignMapToPath([value[0],value[1]], [value1[0],value1[1]]);
+          await Future.delayed(Duration(microseconds:1500));
           coordinates.add(LatLng(value[0], value[1]));
-
-
-
         }
         setState(() {
           pathList=path;
           currentCols=numCols;
           currentBid=bid;
-          currentCoordinates=coordinates;
           currentFloor=floor;
         });
       } else {
@@ -7745,7 +7734,6 @@ int currentCols=0;
 
           coordinates.add(LatLng(value[0], value[1]));
         }
-
         setState(() {
           singleroute[bid]!.putIfAbsent(floor, () => Set());
           singleroute[bid]![floor]?.add(gmap.Polyline(
@@ -7817,8 +7805,6 @@ int currentCols=0;
 
         }
       }
-
-
       setState(() {
         if (renderDestination && liftName == null) {
           innerMarker.add(
@@ -8081,54 +8067,83 @@ int currentCols=0;
 
   }
 bool _isPlaying=false;
-  callPreviewAnimation() async {
-    singleroute.clear();
-    for (int i = 0; i<pathList.length-2;i++) {
-      int node = pathList[i];
-      int node1=pathList[i+2];
-      int row1 = (node1 % currentCols); //divide by floor length
-      int col1 = (node1 ~/ currentCols);
-      int row = (node % currentCols); //divide by floor length
-      int col = (node ~/ currentCols); //divide by floor length
-      List<double> value = tools.localtoglobal(
-          row, col, SingletonFunctionController.building.patchData[currentBid]);
-      List<double> value1 = tools.localtoglobal(row1, col1, SingletonFunctionController.building.patchData[currentBid]);
-      currentCoordinates.add(LatLng(value[0], value[1]));
-      if (singleroute[currentBid] == null) {
-        singleroute.putIfAbsent(currentBid, () => Map());
-      }
-      if (singleroute[currentBid]![currentFloor] != null) {
-        gmap.Polyline oldPolyline = singleroute[currentBid]![currentFloor]!.firstWhere(
-              (polyline) => polyline.polylineId.value == currentBid,
-        );
-        gmap.Polyline updatedPolyline = gmap.Polyline(
-          polylineId: oldPolyline.polylineId,
-          points: currentCoordinates,
-          color: oldPolyline.color,
-          width: oldPolyline.width,
-        );
-        setState((){
-          // Remove the old polyline and add the updated polyline
-          singleroute[currentBid]![currentFloor]!.remove(oldPolyline);
-          singleroute[currentBid]![currentFloor]!.add(updatedPolyline);
-        });
-      } else {
-        setState(() {
-          singleroute[currentBid]!.putIfAbsent(currentFloor, () => Set());
-          singleroute[currentBid]![currentFloor]?.add(gmap.Polyline(
-            polylineId: PolylineId("$currentBid"),
+  Future<void> callPreviewAnimation() async {
+    print("singleRoute ${singleroute}");
+    List<LatLng> currentCoordinates=[];
+    Set<Marker> innerMarker=Set();
+    await SingletonFunctionController.building.landmarkdata!.then((value) async {
+      List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(user.cellPath, value.landmarksMap!, 5);
+      List<int> turnPoints=tools.getTurnpoints(pathList, currentCols);
+      for (int i = 0; i<pathList.length-2;i++){
+        int node = pathList[i];
+        int node1=pathList[i+2];
+        int row1 = (node1 % currentCols); //divide by floor length
+        int col1 = (node1 ~/ currentCols);
+        int row = (node % currentCols); //divide by floor length
+        int col = (node ~/ currentCols); //divide by floor length
+        List<double> value = tools.localtoglobal(
+            row, col, SingletonFunctionController.building.patchData[currentBid]);
+        List<double> value1 = tools.localtoglobal(row1, col1, SingletonFunctionController.building.patchData[currentBid]);
+        currentCoordinates.add(LatLng(value[0], value[1]));
+        if (singleroute[currentBid] == null) {
+          singleroute.putIfAbsent(currentBid, () => Map());
+        }
+        if (singleroute[currentBid]![currentFloor] != null) {
+          gmap.Polyline oldPolyline = singleroute[currentBid]![currentFloor]!.firstWhere(
+                (polyline) => polyline.polylineId.value == currentBid,
+          );
+          gmap.Polyline updatedPolyline = gmap.Polyline(
+            polylineId: oldPolyline.polylineId,
             points: currentCoordinates,
-            color: Colors.blueAccent,
-            width: 8,
-          ));
-        });
+            color: oldPolyline.color,
+            width: oldPolyline.width,
+          );
+          setState((){
+            if(i<nearbyLandmarks.length-1){
+               try{
+                List<double> value1 = tools.localtoglobal(nearbyLandmarks[i].coordinateX!, nearbyLandmarks[i].coordinateY!, SingletonFunctionController.building.patchData[currentBid]);
+                innerMarker.add(
+                  Marker(
+                    markerId: MarkerId('previewMarker${nearbyLandmarks[i].sId}'),
+                    position: LatLng(value1[0],value[1]),
+                    icon: BitmapDescriptor.defaultMarker,
+                  ),
+                );
+              }catch(e){
+                print("error in preview markers ${e}");
+              }
+            }
+            // Remove the old polyline and add the updated polyline
+            singleroute[currentBid]![currentFloor]!.remove(oldPolyline);
+            singleroute[currentBid]![currentFloor]!.add(updatedPolyline);
+          });
+        } else {
+          setState((){
+            singleroute[currentBid]!.putIfAbsent(currentFloor, () => Set());
+            singleroute[currentBid]![currentFloor]?.add(gmap.Polyline(
+              polylineId: PolylineId("$currentBid"),
+              points: currentCoordinates,
+              color: Colors.blueAccent,
+              width: 8,
+            ));
+          });
+        }
+        if(turnPoints.contains(node))
+        {
+          print("rendering path");
+          await alignMapToPath([value[0],value[1]], [value1[0],value1[1]],isTurn:true);
+        }else{
+          await alignMapToPath([value[0],value[1]], [value1[0],value1[1]]);
+        }
+        await Future.delayed(Duration(microseconds: 2500));
+        currentCoordinates.add(LatLng(value[0], value[1]));
       }
-      print("rendering path");
-      await alignMapToPath([value[0],value[1]], [value1[0],value1[1]]);
-      await Future.delayed(Duration(microseconds: 2500));
-      currentCoordinates.add(LatLng(value[0], value[1]));
+    });
+    PathState.innerMarker[currentFloor] = innerMarker;
+    pathMarkers.putIfAbsent(currentBid, () => Map());
+    pathMarkers[currentBid]![currentFloor] = innerMarker;
 
-    }
+
   }
   PanelController _routeDetailPannelController = new PanelController();
   bool startingNavigation = false;
@@ -8575,11 +8590,17 @@ bool _isPlaying=false;
                                             excludeSemantics: true,
                                             child: IconButton(
                                                 onPressed: () {
-                                                  setState(() {
+                                                  setState((){
                                                     _isPlaying=!_isPlaying;
+                                                    singleroute.clear();
+                                                    pathCovered.clear();
                                                   });
                                                   //currently using for play preview animation
-                                                  callPreviewAnimation();
+                                                  callPreviewAnimation().then((value){
+                                                    setState((){
+                                                      _isPlaying=false;
+                                                    });
+                                                  });
                                                   // String msg=(pathState().sourceFloor!=pathState().destinationFloor)?tools.generateNarration(UserState.mapPathGuide,isMultiFloor: true):tools.generateNarration(UserState.mapPathGuide,isMultiFloor: false);
                                                   // print("narration ${msg}");
                                                   // speak(msg, _currentLocale).whenComplete((){
@@ -8593,9 +8614,9 @@ bool _isPlaying=false;
                                           Semantics(
                                             excludeSemantics: true,
                                             child: IconButton(
-                                                onPressed: () {
+                                                onPressed:(){
                                                   showMarkers();
-                                                  setState(() {
+                                                  setState((){
                                                     _isBuildingPannelOpen =
                                                     true;
                                                     _isRoutePanelOpen = false;
@@ -8603,12 +8624,7 @@ bool _isPlaying=false;
                                                   widget.directLandID = "";
                                                   selectedroomMarker.clear();
                                                   pathMarkers.clear();
-
-                                                  SingletonFunctionController
-                                                      .building
-                                                      .selectedLandmarkID =
-                                                  null;
-
+                                                  SingletonFunctionController.building.selectedLandmarkID = null;
                                                   PathState =
                                                       pathState.withValues(
                                                           -1,
@@ -8635,7 +8651,7 @@ bool _isPlaying=false;
                                                   fitPolygonInScreen(
                                                       patch.first);
                                                   exitNavigation();
-                                                  setState(() {
+                                                  setState((){
                                                     onStart=false;
                                                     startingNavigation=false;
                                                   });
@@ -8648,9 +8664,9 @@ bool _isPlaying=false;
                                             child: Container(
                                               margin: EdgeInsets.only(right:10),
                                               child: IconButton(
-                                                  onPressed: () {
+                                                  onPressed:(){
                                                     showMarkers();
-                                                    setState(() {
+                                                    setState((){
                                                       _isBuildingPannelOpen =
                                                       true;
                                                       _isRoutePanelOpen = false;
@@ -8658,39 +8674,27 @@ bool _isPlaying=false;
                                                     widget.directLandID = "";
                                                     selectedroomMarker.clear();
                                                     pathMarkers.clear();
-
                                                     SingletonFunctionController
                                                         .building
-                                                        .selectedLandmarkID =
-                                                    null;
-
-                                                    PathState =
-                                                        pathState.withValues(
-                                                            -1,
-                                                            -1,
-                                                            -1,
-                                                            -1,
-                                                            -1,
-                                                            -1,
+                                                        .selectedLandmarkID = null;
+                                                    PathState = pathState.withValues(-1, -1, -1, -1, -1, -1,
                                                             null,
                                                             0);
                                                     PathState.path.clear();
                                                     PathState.sourcePolyID = "";
-                                                    PathState.destinationPolyID =
-                                                    "";
+                                                    PathState.destinationPolyID ="";
                                                     PathState.sourceBid = "";
                                                     PathState.destinationBid = "";
                                                     singleroute.clear();
                                                     //realWorldPath.clear();
                                                     PathState.directions = [];
                                                     interBuildingPath.clear();
-                                                    //  if(user.isnavigating==false){
+                                                   // if(user.isnavigating==false){
                                                     clearPathVariables();
-                                                    //}
-                                                    fitPolygonInScreen(
-                                                        patch.first);
+                                                   //}
+                                                    fitPolygonInScreen(patch.first);
                                                     exitNavigation();
-                                                    setState(() {
+                                                    setState((){
                                                       onStart=false;
                                                       startingNavigation=false;
                                                     });
@@ -9522,7 +9526,6 @@ bool _isPlaying=false;
                           PathState.sourcePolyID,
                           PathState.destinationPolyID,
                           "com.iwayplus.accessibleashoka");
-
                       if (_feedback.isNotEmpty) {}
                       showFeedback = false;
                       _feedbackController.hide();
@@ -9581,7 +9584,7 @@ bool _isPlaying=false;
           (Route<dynamic> route) => false,
     );
   }
-  Future<void> alignMapToPath(List<double> A, List<double> B) async {
+  Future<void> alignMapToPath(List<double> A, List<double> B,{bool isTurn=false}) async {
     print("enteredddd");
     print(onStart);
     double screenHeight=MediaQuery.of(context).size.height;
@@ -9607,13 +9610,27 @@ bool _isPlaying=false;
     // Convert the new screen coordinate back to LatLng
     LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: newX, y: newY));
     setState(() {
-      _googleMapController.moveCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(
-            target: (onStart==false)?mapState.target:mapState.target,
-            zoom: mapState.zoom,
-            bearing: mapState.bearing!,
-            tilt: mapState.tilt),
-      ));
+      if(isTurn){
+         Future.delayed(Duration(microseconds: 2500)).then((onValue){
+           _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+             CameraPosition(
+                 target: (onStart==false)?mapState.target:mapState.target,
+                 zoom: mapState.zoom,
+                 bearing: mapState.bearing!,
+                 tilt: mapState.tilt),
+           ));
+         });
+
+      }else{
+        _googleMapController.moveCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(
+              target: (onStart==false)?mapState.target:mapState.target,
+              zoom: mapState.zoom,
+              bearing: mapState.bearing!,
+              tilt: mapState.tilt),
+        ));
+      }
+
 
     });
   }
@@ -9820,10 +9837,7 @@ bool _isPlaying=false;
           }
         }
       }
-    } catch (e) {
-
-    }
-
+    }catch(e){}
     return Visibility(
         visible: _isnavigationPannelOpen,
         child: Stack(
@@ -10015,8 +10029,8 @@ bool _isPlaying=false;
         ));
   }
   final FocusNode _focusNodeB = FocusNode();
-  void exitNavigation() {
-    setState(() {
+  void exitNavigation(){
+    setState((){
       if (PathState.didPathStart) {
         showFeedback = true;
         Future.delayed(Duration(seconds: 5));
@@ -10036,20 +10050,16 @@ bool _isPlaying=false;
     PathState.path.clear();
     PathState.sourcePolyID = "";
     PathState.destinationPolyID = "";
-    singleroute.clear(); pathCovered.clear();
+    singleroute.clear();
+    pathCovered.clear();
     fitPolygonInScreen(patch.first);
-    setState(() {
-      if (markers.length > 0) {
-        List<double> lvalue = tools.localtoglobal(
-            user.showcoordX.toInt(),
-            user.showcoordY.toInt(),
-            SingletonFunctionController.building.patchData[user.bid]);
-        markers[user.bid]?[0] = customMarker.move(
-            LatLng(lvalue[0], lvalue[1]), markers[user.bid]![0]);
+    setState((){
+      if (markers.length > 0){
+        List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(),user.showcoordY.toInt(),SingletonFunctionController.building.patchData[user.bid]);
+        markers[user.bid]?[0] = customMarker.move(LatLng(lvalue[0], lvalue[1]), markers[user.bid]![0]);
       }
     });
   }
-
   bool rerouting = false;
   Widget reroutePannel(context) {
     return Visibility(

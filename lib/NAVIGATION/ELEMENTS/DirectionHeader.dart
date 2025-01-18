@@ -856,7 +856,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   ""),
               _currentLocale,
               prevpause: true);
-
           //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
         } else if (widget.direction == "Straight") {
           Vibration.vibrate();

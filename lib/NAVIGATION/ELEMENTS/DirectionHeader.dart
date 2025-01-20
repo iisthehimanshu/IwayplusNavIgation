@@ -30,6 +30,8 @@ import '../directionClass.dart';
 import '../Navigation.dart';
 import '../navigationTools.dart';
 import '../singletonClass.dart';
+import 'package:iwaymaps/NAVIGATION/BluetoothScanIOSClass.dart';
+
 
 class DirectionHeader extends StatefulWidget {
   String direction;
@@ -98,6 +100,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   bool isSpeaking = false;
   String? threshold;
 
+  late Timer Device_timer;
+
+
 
   void initTts() {
     flutterTts.setCompletionHandler(() {
@@ -130,13 +135,17 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     //     });
     //   }
     // }
-    Future.delayed(Duration(seconds: 4)).then((_) {
-      bluetoothScanAndroidClass.startbin();
-      bluetoothScanAndroidClass.emptyBin();
-      setState(() {
-        bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
+    if(Platform.isAndroid) {
+      Future.delayed(Duration(seconds: 4)).then((_) {
+        bluetoothScanAndroidClass.startbin();
+        bluetoothScanAndroidClass.emptyBin();
+        setState(() {
+          bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
+        });
       });
-    });
+    }else if(Platform.isIOS){
+      final scannedDevices = BluetoothScanIOSClass.startScan();
+    }
 
 
 
@@ -144,14 +153,24 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     setState(() {});
     //btadapter.startScanning(Building.apibeaconmap);
-    _timer = Timer.periodic(Duration(milliseconds: 1000), (timer) {
-      print("widget.user.pathobj.index");
-      print(widget.user.pathobj.index);
+    if(Platform.isAndroid) {
+      _timer = Timer.periodic(Duration(milliseconds: 1000), (timer) {
+        // print("widget.user.pathobj.index");
+        // print(widget.user.pathobj.index);
 
-      if (widget.user.pathobj.index > 3) {
-        listenToBin();
-      }
-    });
+        if (widget.user.pathobj.index > 3) {
+          listenToBin();
+        }
+      });
+    }else if(Platform.isIOS){
+      Device_timer = Timer.periodic(Duration(milliseconds: 1000), (timer)  {
+        try {
+          listenToBin();
+        } catch (e) {
+          print("Error getting best device: $e");
+        }
+      });
+    }
 
     btadapter.numberOfSample.clear();
     btadapter.rs.clear();
@@ -241,6 +260,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   @override
   void dispose() {
     bluetoothScanAndroidClass.stopScan();
+    BluetoothScanIOSClass.stopScan();
+    Device_timer.cancel();
     disposed = true;
     flutterTts.stop();
     _timer.cancel();
@@ -262,35 +283,87 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   String? highestKey;
   double highestAverage = double.negativeInfinity;
 
-  double highestweight = 3.25;
-  bool listenToBin()  {
+
+
+  double highestweight = Platform.isIOS?2.8 : 3.25;
+
+  String? parseString(String input) {
+    final regex = RegExp(r'Optional\("(.+?)"\)\s+(\d+\.\d+)');
+    final match = regex.firstMatch(input);
+
+    if (match != null) {
+      final device = match.group(1); // Extracts "IW622"
+      final value = double.tryParse(match.group(2) ?? '0'); // Extracts 6.0 as a double
+
+      // print("Device: $device");
+      // print("Value: $value");
+      return device;
+    } else {
+      print("No match found!");
+      return "";
+    }
+  }
+
+  String? parseStringT(String input) {
+    final regex = RegExp(r'Optional\("(.+?)"\)\s+(\d+\.\d+)');
+    final match = regex.firstMatch(input);
+
+    if (match != null) {
+      final device = match.group(1); // Extracts "IW622"
+      final value = double.tryParse(match.group(2) ?? '0'); // Extracts 6.0 as a double
+
+      // print("Device: $device");
+      // print("Value: $value");
+      return value.toString();
+    } else {
+      print("No match found!");
+      return "";
+    }
+  }
+
+
+  Future<bool> listenToBin()  async {
     // print("listentobin");
 
     String nearestBeacon = "";
-    sumMap.clear();
-    // sumMap = btadapter.calculateAverage();
-    nearestBeacon = bluetoothScanAndroidClass.closestDeviceDetails;
-    sumMapAvg = bluetoothScanAndroidClass.rssiAverage;
-    threshold = bluetoothScanAndroidClass.closestRSSI;
-    print("---nearestBeacon");
-    print(nearestBeacon);
-    debuglNearestbeacon = nearestBeacon;
-    sumMap = bluetoothScanAndroidClass.giveSumMapCallBack();
-    print("listenToBin${sumMap} ");
 
-    sumMap.forEach((key, value) {
-      if (value.isNotEmpty) {
-        double average = value.reduce((a, b) => a + b) / value.length;
-        print("--average");
-        print(average);
-        if (average > highestAverage) {
-          highestAverage = average;
-          highestKey = key;
+    if(Platform.isAndroid) {
+      sumMap.clear();
+      // sumMap = btadapter.calculateAverage();
+      nearestBeacon = bluetoothScanAndroidClass.closestDeviceDetails;
+      sumMapAvg = bluetoothScanAndroidClass.rssiAverage;
+      threshold = bluetoothScanAndroidClass.closestRSSI;
+      // print("---nearestBeacon");
+      // print(nearestBeacon);
+      debuglNearestbeacon = nearestBeacon;
+      sumMap = bluetoothScanAndroidClass.giveSumMapCallBack();
+      // print("listenToBin${sumMap} ");
+
+      sumMap.forEach((key, value) {
+        if (value.isNotEmpty) {
+          double average = value.reduce((a, b) => a + b) / value.length;
+          // print("--average");
+          // print(average);
+          if (average > highestAverage) {
+            highestAverage = average;
+            highestKey = key;
+          }
+        } else {
+          print("else---");
         }
-      }else{
-        print("else---");
-      }
-    });
+      });
+    }else if(Platform.isIOS){
+      String receivedStringFromIOS = await BluetoothScanIOSClass.getBestDevice();
+      print("receivedStringFromIOS");
+      print(receivedStringFromIOS);
+      nearestBeacon = parseString(receivedStringFromIOS)??"";
+
+      threshold = parseStringT(receivedStringFromIOS)??"";
+      debuglNearestbeacon = "${nearestBeacon} ${threshold}";
+    }
+    print("highestweight");
+    print(highestweight);
+
 
 
     // setState(() {
@@ -302,14 +375,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     // });
 
 
-    print("threshold");
-    print(Building.apibeaconmap);
-    print(sumMap);
-    // threshold = widget.user.building!.patchData[widget.user.bid]!.patchData!.realtimeLocalisationThreshold??'5';
-    //threshold = '3.5';
-    print(widget.user.building!.patchData[widget.user.bid]!.patchData!
-        .realtimeLocalisationThreshold);
-    print(threshold);
+    // print("threshold");
+    // print(Building.apibeaconmap);
+    // print(sumMap);
+    // // threshold = widget.user.building!.patchData[widget.user.bid]!.patchData!.realtimeLocalisationThreshold??'5';
+    // //threshold = '3.5';
+    // print(widget.user.building!.patchData[widget.user.bid]!.patchData!
+    //     .realtimeLocalisationThreshold);
+    // print(threshold);
     //
     sortedsumMap.clear();
     //
@@ -1373,12 +1446,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   children: [
                     //Text("Beacon ${highestKey} - ${highestAverage}"),
                     Text(debuglNearestbeacon),
-                    Text(sumMap.entries.map((entry) => '${entry.key}: ${entry.value.join(", ")}').join("\n")),
-                    //Text(displayString),
-                    Text("-------"),
-                    Text(sumMapAvg.toString()),
-                    Text("${highestAverage} ${threshold.toString()}")
-
+                    // Text(sumMap.entries.map((entry) => '${entry.key}: ${entry.value.join(", ")}').join("\n")),
+                    // //Text(displayString),
+                    // Text("-------"),
+                    // Text(sumMapAvg.toString()),
+                    // Text("${highestAverage} ${threshold.toString()}")
+                    //
 
                     // Text(Building.apibeaconmap.containsKey(debuglNearestbeacon).toString()),
                   ],

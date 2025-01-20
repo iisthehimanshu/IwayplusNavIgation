@@ -212,6 +212,7 @@ class _BluetoothScanAndroidState extends State<BluetoothScanAndroid> {
     Map<String, double> averagedRssiValues = {};
 
     rssiWeight.forEach((address, rssiList) {
+
       if (rssiList.isNotEmpty) {
         // Calculate average if the list is not empty
         double average = rssiList.reduce((a, b) => a + b) / rssiList.length;

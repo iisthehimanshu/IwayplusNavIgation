@@ -162,7 +162,7 @@ class BluetoothScanAndroidClass{
     // }
   }
 
-  Future<void> listenToScanInitialLocalization(HashMap<String, beacon> apibeaconmap) async {
+  Future<String> listenToScanInitialLocalization(HashMap<String, beacon> apibeaconmap) async {
     print("listenToScanInitialLocalization");
     Map<String, String> IL_DEVICE_NAME = {};
     Map<String, List<int>> IL_RSSI_VALUES = {};
@@ -221,10 +221,17 @@ class BluetoothScanAndroidClass{
     }
 
     print("Closest Device Details: $closestDeviceDetails");
-    if(closestDeviceDetails != "No devices found"){
-      SingletonFunctionController.SC_LOCALIZED_BEACON = "";
-      SingletonFunctionController.SC_LOCALIZED_BEACON = closestDeviceDetails;
-    }
+    // if(closestDeviceDetails != "No devices found"){
+    //
+    // }
+    SingletonFunctionController.SC_LOCALIZED_BEACON = "";
+    SingletonFunctionController.SC_LOCALIZED_BEACON = closestDeviceDetails;
+    stopScan();
+    return closestDeviceDetails;
+
+
+
+
   }
 
 
@@ -243,7 +250,6 @@ class BluetoothScanAndroidClass{
         print("iffffff");
         print(deviceDetails.DeviceName);
         deviceNames[deviceDetails.DeviceAddress] = deviceDetails.DeviceName;
-
 
         rssiValues.putIfAbsent(deviceDetails.DeviceAddress, () => []);
         rssiWeight.putIfAbsent(deviceDetails.DeviceAddress, () => []);

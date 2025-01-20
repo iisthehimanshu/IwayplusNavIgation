@@ -13,6 +13,7 @@ import 'API/beaconapi.dart';
 import 'APIMODELS/beaconData.dart';
 import 'VersioInfo.dart';
 import 'bluetooth_scanning.dart';
+import 'package:iwaymaps/NAVIGATION/BluetoothScanIOSClass.dart';
 
 class SingletonFunctionController {
   bool _isRunning = false;
@@ -23,10 +24,11 @@ class SingletonFunctionController {
   static Future<void>? timer;
   static String currentBeacon = "";
   static String SC_LOCALIZED_BEACON = "";
+
   BluetoothScanAndroidClass bluetoothScanAndroidClass = BluetoothScanAndroidClass();
   static Map<String, double> SC_IL_RSSI_AVERAGE = {};
 
-
+  BluetoothScanIOSClass bluetoothScanIOSClass = BluetoothScanIOSClass();
 
   bool isBinEmpty() {
     for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
@@ -87,15 +89,21 @@ class SingletonFunctionController {
           // print("apibeaconmap");
           // print(apibeaconmap);
           // blueToothAndroid.listenToScanUpdates(apibeaconmap);
-          await bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap);
+          await bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap).then((value) {
+            SC_LOCALIZED_BEACON = value;
+            bluetoothScanAndroidClass.stopScan();
+          });
 
           // bluetoothScanAndroidClass.stopScan();
           // btadapter.startScanning(apibeaconmap);
 
-        }else{
-          btadapter.startScanningIOS(apibeaconmap);
+        }else if(Platform.isIOS){
+          print("isIOS");
+          String resp = await BluetoothScanIOSClass.getInitialLocalizedDevice();
+
+          //await btadapter.startScanningIOS(apibeaconmap);
         }
-        timer= Future.delayed((await FlutterBluePlus.isOn==true)?Duration(seconds:9):Duration(seconds:0));
+        //timer= Future.delayed((await FlutterBluePlus.isOn==true)?Duration(seconds:9):Duration(seconds:0));
       });
 
       // Simulate a long-running task

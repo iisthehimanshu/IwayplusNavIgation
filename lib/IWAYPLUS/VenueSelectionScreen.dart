@@ -399,7 +399,7 @@ if(userLoc!=null){
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => IOSScannerScreen(),
+                    builder: (context) => BluetoothScanAndroid(),
                   ),
                 );
               },

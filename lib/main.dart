@@ -38,8 +38,6 @@ import 'IWAYPLUS/MainScreen.dart';
 import '/NAVIGATION/Navigation.dart';
 import 'dart:io' show Platform;
 
-
-
 final navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {

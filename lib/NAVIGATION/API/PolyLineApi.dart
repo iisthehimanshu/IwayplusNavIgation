@@ -30,7 +30,7 @@ class PolyLineApi {
   String getDecryptedData(String encryptedData){
     Map<String, dynamic> encryptedResponseBody = json.decode(encryptedData);
     String newResponse=encryptDecrypt(encryptedResponseBody['encryptedData'], "xX7/kWYt6cjSDMwB4wJPOBI+/AwC+Lfbd610sWfwywU=");
-    print("new response ${newResponse}");
+    //print("new response ${newResponse}");
     Map<String,dynamic> originalList = jsonDecode(newResponse);
     // Wrap in landmarks header
     Map<String, dynamic> wrappedResponse = {

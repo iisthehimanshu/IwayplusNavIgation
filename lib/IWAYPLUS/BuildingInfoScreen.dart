@@ -102,7 +102,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     });
   }
 
-  void apiCall() async{
+  void apiCall() async {
     BuildingAPI().fetchBuildData().then((value){
       setState(() {
         dd = value.data!;

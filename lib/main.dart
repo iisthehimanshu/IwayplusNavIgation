@@ -237,6 +237,7 @@ class WebApp extends StatefulWidget {
 class _WebAppState extends State<WebApp> {
   final FlutterLocalization localization = FlutterLocalization.instance;
   var SignInDatabasebox = Hive.box('SignInDatabase');
+
   @override
   void initState() {
     configureLocalization();

@@ -10,6 +10,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
+import '../../NAVIGATION/Navigation.dart';
 import '../Elements/HelperClass.dart';
 import '../MainScreen.dart';
 import 'ForgetPassword.dart';
@@ -177,7 +178,7 @@ class _SignInState extends State<SignIn> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => MainScreen(initialIndex: 0),
+          builder: (context) => Navigation(),
         ),
             (route) => false,
       );

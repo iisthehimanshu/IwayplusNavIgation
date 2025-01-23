@@ -21,20 +21,12 @@ class buildingAllApi {
   var versionBox = Hive.box('VersionData');
   String accessToken = signInBox.get("accessToken");
   static outdoormodel? outBuildingData = null;
-  static String selectedID="";
-  static String selectedBuildingID="";
+  static String selectedID="66794105b80a6778c53c4856";//66794105b80a6778c53c4856
+  static String selectedBuildingID="66794105b80a6778c53c4856";
   static String selectedVenue="";
-  static Map<String,g.LatLng> allBuildingID = {
-  };
-  // static String selectedID="65d8833adb333f89456e6519";
-  // static String selectedBuildingID="65d8833adb333f89456e6519";
-  // static String selectedVenue="65d8833adb333f89456e6519";
-  // static Map<String,g.LatLng> allBuildingID = {"65d8835adb333f89456e687f": g.LatLng( 28.947238, 77.100917),
-  //   "65d8833adb333f89456e6519": g.LatLng(28.947236, 77.101992),
-  //   "65d8825cdb333f89456d0562": g.LatLng( 28.945987, 77.10206)
-  // };
+  static Map<String,g.LatLng> allBuildingID = {"66794105b80a6778c53c4856": g.LatLng(32.564752072362936, 75.03653526306154),"6792141b6f7a7ae557b1f8bb": g.LatLng(32.564752072362936,
+      75.03653526306154)};
   static String outdoorID = "";
-
 
   void checkForUpdate() async {
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();

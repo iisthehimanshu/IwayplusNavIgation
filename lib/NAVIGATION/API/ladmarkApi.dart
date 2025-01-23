@@ -65,7 +65,7 @@ String getDecryptedData(String encryptedData){
     if (response.statusCode == 200) {
       try{
         Map<String, dynamic> responseBody = json.decode(response.body);
-        print("checkid $id");
+        print("checkid $responseBody");
         String APITime = responseBody['landmarks'][0]['updatedAt']!;
         final landmarkData = LandMarkApiModel(responseBody: responseBody);
 

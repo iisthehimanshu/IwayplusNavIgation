@@ -199,13 +199,13 @@ requestLocationPermission();
               return SignIn();
             }else{
               // _initDeepLinkListener(context);
-              return MainScreen(initialIndex: 0);
+              return Navigation();
             } // Redirect to Sign-In screen if user is not authenticated
           } else {
             print("googleSignInUserName");
             print(googleSignInUserName);
             // _initDeepLinkListener(context);
-            return MainScreen(initialIndex: 0); // Redirect to MainScreen if user is authenticated
+            return Navigation(); // Redirect to MainScreen if user is authenticated
           }
         },
       ),
@@ -254,7 +254,7 @@ class _WebAppState extends State<WebApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: SignInDatabasebox.containsKey("accessToken")?MainScreen(initialIndex: 0):SignIn());
+    return MaterialApp(home: SignInDatabasebox.containsKey("accessToken")?Navigation():SignIn());
   }
 }
 

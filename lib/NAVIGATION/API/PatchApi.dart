@@ -34,7 +34,7 @@ class patchAPI {
   String getDecryptedData(String encryptedData){
     Map<String, dynamic> encryptedResponseBody = json.decode(encryptedData);
     String newResponse=encryptDecrypt(encryptedResponseBody['encryptedData'], "xX7/kWYt6cjSDMwB4wJPOBI+/AwC+Lfbd610sWfwywU=");
-    print("new response ${newResponse}");
+    // //print("new response ${newResponse}");
     Map<String,dynamic> originalList = jsonDecode(newResponse);
     // Wrap in landmarks header
     Map<String, dynamic> wrappedResponse = {
@@ -75,7 +75,7 @@ class patchAPI {
       headers: {
         'Content-Type': 'application/json',
         'x-access-token': accessToken,
-        'Authorization': 'e28cdb80-c69a-11ef-aa4e-e7aa7912987a'
+      //  'Authorization': 'e28cdb80-c69a-11ef-aa4e-e7aa7912987a'
       },
     );
     if (response.statusCode == 200) {

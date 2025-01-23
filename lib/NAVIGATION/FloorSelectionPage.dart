@@ -75,7 +75,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
       });
     }
     optionListForUI.add(widget.filterName);
-    optionListForUI.add(widget.filterBuildingName);
     print("Floorselection");
     print(widget.floors);
     if(widget.filterName!=""){

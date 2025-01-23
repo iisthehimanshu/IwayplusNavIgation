@@ -36,8 +36,12 @@
 	<string>To add or access events to your calendar</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Scan QR codes</string>
+
 	<key>NSContactsUsageDescription</key>
+
 	<string>To add access contact information</string>
+	<key>CFBundleName</key>
+    <string>flutter_local_notifications_example</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app needs to access the location in order to enhance navigation in the background.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
@@ -87,6 +91,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
+
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>

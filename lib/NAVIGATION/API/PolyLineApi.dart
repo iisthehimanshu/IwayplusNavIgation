@@ -30,7 +30,7 @@ class PolyLineApi {
   String getDecryptedData(String encryptedData){
     Map<String, dynamic> encryptedResponseBody = json.decode(encryptedData);
     String newResponse=encryptDecrypt(encryptedResponseBody['encryptedData'], "xX7/kWYt6cjSDMwB4wJPOBI+/AwC+Lfbd610sWfwywU=");
-    print("new response ${newResponse}");
+    //print("new response ${newResponse}");
     Map<String,dynamic> originalList = jsonDecode(newResponse);
     // Wrap in landmarks header
     Map<String, dynamic> wrappedResponse = {
@@ -64,14 +64,13 @@ class PolyLineApi {
       headers: {
         'Content-Type': 'application/json',
         'x-access-token': accessToken,
-        'Authorization': 'e28cdb80-c69a-11ef-aa4e-e7aa7912987a'
+        //'Authorization': 'e28cdb80-c69a-11ef-aa4e-e7aa7912987a'
       },
     );
     if (response.statusCode == 200) {
       try{
         Map<String, dynamic> responseBody = json.decode(response.body);
         final polyLineData = PolyLineAPIModel(responseBody: responseBody);
-
         print("POLYLINE API DATA FROM API");
         PolyLineBox.put(polylinedata.fromJson(responseBody).polyline!.buildingID,polyLineData);
         polyLineData.save();
@@ -80,14 +79,13 @@ class PolyLineApi {
         String finalResponse=getDecryptedData(response.body);
         Map<String, dynamic> responseBody = json.decode(finalResponse);
         final polyLineData = PolyLineAPIModel(responseBody: responseBody);
-
         print("POLYLINE API DATA FROM API");
         PolyLineBox.put(polylinedata.fromJson(responseBody).polyline!.buildingID,polyLineData);
         polyLineData.save();
         return polylinedata.fromJson(responseBody);
       }
-
-    }else if (response.statusCode == 403) {
+    }
+    else if (response.statusCode == 403) {
       print("POLYLINE API in error 403");
       String newAccessToken = await RefreshTokenAPI.refresh();
       print('Refresh done');

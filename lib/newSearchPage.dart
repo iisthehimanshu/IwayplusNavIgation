@@ -47,17 +47,10 @@ class _NewsearchpageState extends State<NewSearchPage> {
   String wordsSpoken = "";
   bool micselected = false;
   bool promptLoader = false;
+  bool isUpdated=true;
 
 
-  List<String> optionListForUI = [
-    'Washroom',
-    'Cafeteria',
-    'Drinking water',
-    'ATM',
-    'Entry',
-    'Lift',
-    'Reception',
-  ];
+  Set<String> optionListForUI ={};
 
 
   IconData getIcon(String option) {
@@ -82,6 +75,49 @@ class _NewsearchpageState extends State<NewSearchPage> {
   }
 
 
+  Future<void> loadLandmarkData() async {
+    setState(() {
+      isUpdated=true;
+    });
+   try {
+     print("entered here");
+     await Future.forEach(
+         landmarkData.landmarksMap!.entries, (MapEntry keyValue) async {
+       var value = keyValue.value;
+       if (value.name != null &&
+           (value.element!.subType == "restRoom" ||
+               value.element!.subType == "Cafeteria" ||
+               value.element!.subType == "main entry" ||
+               value.element!.subType == "Help Desk | Reception" ||
+               value.element!.subType == "lift" ||
+               value.element!.subType == "ATM" ||
+               value.element!.subType == "Drinking Water")) {
+         print("entered here");
+         if (value.element!.subType == "restRoom") {
+           optionListForUI.add("Washroom");
+         } else if (value.element!.subType == "Cafeteria") {
+           print("landmark id is ${value.sId}  with building id ${value.buildingID}");
+           optionListForUI.add("Cafeteria");
+         } else if (value.element!.subType == "main entry") {
+           optionListForUI.add("Entry");
+         } else if (value.element!.subType == "lift") {
+           optionListForUI.add("Lift");
+         } else if (value.element!.subType == "Drinking Water") {
+           optionListForUI.add("Drinking Water");
+         } else if (value.element!.subType == "Help Desk | Reception") {
+           optionListForUI.add("Reception");
+         } else if (value.element!.subType == "ATM") {
+           optionListForUI.add("ATM");
+         }
+       }
+     });
+   }catch(e){
+     print("error in updating liist ${e}");
+   }
+    setState(() {
+      isUpdated=false;
+    });
+  }
 
   @override
   void initState() {
@@ -97,6 +133,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
         search(_controller.text.toLowerCase());
       });
     }
+    loadLandmarkData();
     super.initState();
   }
 
@@ -109,6 +146,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
       } else {
         // print("Filter cleared");
         topSearchesFunc();
+        loadLandmarkData();
         searchResults = [];
       }
     });
@@ -278,11 +316,11 @@ class _NewsearchpageState extends State<NewSearchPage> {
       searcCategoryhResults.clear();
       optionListItemBuildingName.clear();
     });
-    if (containsSearchText(optionListForUI, searchText)) {
+    if (containsSearchText(optionListForUI.toList(), searchText)) {
       setState(() {
         category = true;
       });
-      vall = indexOfCaseInsensitive(optionListForUI, searchText);
+      vall = indexOfCaseInsensitive(optionListForUI.toList(), searchText);
       if (landmarkData.landmarksMap != null) {
         landmarkData.landmarksMap!.forEach((key, value) {
           if (value.name != null && value.element!.subType != "beacons") {
@@ -520,40 +558,44 @@ class _NewsearchpageState extends State<NewSearchPage> {
               child: Semantics(
                 label: "Facilities Filter",
                 header: true,
-                child: Container(
-                  margin: EdgeInsets.only(left: 7,top: 4),
+                child:(isUpdated==false)?
+                Container(
+                  margin: EdgeInsets.only(left: 7, top: 4),
                   width: screenWidth,
                   child: ChipsChoice<int>.single(
                     value: vall,
                     onChanged: (val) {
                       print("this is working");
-                      if(HelperClass.SemanticEnabled) {
+                      if (HelperClass.SemanticEnabled) {
                         // speak("${optionListForUI[val]} selected");
                       }
-                      if(_controller.text.isNotEmpty && vall!=-1){
-                        setState((){
-                          vall=-1;
+
+                      // Reset vall to -1 if input text is not empty and a valid option is selected
+                      if (_controller.text.isNotEmpty && vall != -1) {
+                        setState(() {
+                          vall = -1;
                         });
                       }
-                      selectedButton = optionListForUI[val];
-                      setState(() => vall = val);
-                      lastval = val;
-                      _controller.text = optionListForUI[val];
-                      search(optionListForUI[val].toLowerCase());
 
+                      // Set the selected option
+                      selectedButton = optionListForUI.toList()[val];
+                      setState(() {
+                        vall = val;
+                      });
+
+                      lastval = val;
+                      _controller.text = optionListForUI.toList()[val];
+                      search(optionListForUI.toList()[val].toLowerCase());
                     },
                     choiceItems: C2Choice.listFrom<int, String>(
-                      source: optionListForUI,
+                      source: optionListForUI.toList(),
                       value: (i, v) => i,
                       label: (i, v) => v,
                     ),
                     choiceBuilder: (item, i) {
-                      if(!item.selected){
-                        vall = -1;
-                      }
                       return DestinationPageChipsWidget(
                         svgPath: '',
-                        text: optionListForUI[i],
+                        text: optionListForUI.toList()[i],
                         onSelect: item.select!,
                         selected: item.selected,
                         onTap: (String Text) {
@@ -562,21 +604,21 @@ class _NewsearchpageState extends State<NewSearchPage> {
                             search(Text);
                           } else {
                             setState(() {
-                              _controller.text="";
+                              _controller.text = "";
                               searchResults = [];
-                              searcCategoryhResults=[];
+                              searcCategoryhResults = [];
                               vall = -1;
                             });
-                            //searcCategoryhResults = [];
-
                           }
-                        }, icon: getIcon(optionListForUI[i].toLowerCase()),
+                        },
+                        icon: getIcon(optionListForUI.toList()[i].toLowerCase()),
                       );
                     },
                     direction: Axis.horizontal,
                   ),
-                ),
+                ):Container(),
               ),
+
             ),
             Flexible(
                 flex: 1,

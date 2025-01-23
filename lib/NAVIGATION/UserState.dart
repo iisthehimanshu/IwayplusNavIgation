@@ -57,6 +57,7 @@ class UserState {
   static String lngCode = 'en';
   static int cols = 0;
   static int rows = 0;
+  static List<Map<String, dynamic>> mapPathGuide=[];
   static Map<String, Map<int, List<int>>> nonWalkable = {};
   static Function reroute = () {};
   static Function closeNavigation = () {};

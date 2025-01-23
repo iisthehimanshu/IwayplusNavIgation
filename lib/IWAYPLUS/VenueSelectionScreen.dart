@@ -17,6 +17,7 @@ import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
 import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
 import 'package:iwaymaps/NAVIGATION/API/RefreshTokenAPI.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/WayPointModelBOX.dart';
+import '../NAVIGATION/BluetoothScanAndroid.dart';
 import '/IWAYPLUS/Elements/HelperClass.dart';
 import '/IWAYPLUS/Elements/UserCredential.dart';
 import '/IWAYPLUS/Elements/buildingCard.dart';
@@ -24,6 +25,7 @@ import 'package:iwaymaps/NAVIGATION/UserState.dart';
 import 'package:new_version_plus/new_version_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:iwaymaps/NAVIGATION/IOSScannerScreen.dart';
 
 import '/NAVIGATION/APIMODELS/Building.dart';
 import '/IWAYPLUS/APIMODELS/buildingAll.dart';
@@ -41,7 +43,7 @@ import '/NAVIGATION/Navigation.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'MODELS/VenueModel.dart';
 import 'NotificationScreen.dart';
-
+import 'package:iwaymaps/IWAYPLUS/FIREBASE NOTIFICATION API/PushNotifications.dart';
 
 class VenueSelectionScreen extends StatefulWidget{
 
@@ -65,7 +67,6 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   @override
   void initState(){
     super.initState();
-    //PushNotifications.showSimpleNotificationwithButton(title: "", body:"", payload: "", imageUrl: '');
     NotificationSocket.receiveMessage();
     // checkForUpdate();
     //startScan();
@@ -340,6 +341,7 @@ if(userLoc!=null){
             child: InkWell(
               onTap: (){
                 RefreshTokenAPI.refresh();
+
               },
               child: Container(
                 alignment: Alignment.bottomLeft,
@@ -393,10 +395,11 @@ if(userLoc!=null){
               icon: Icon(Icons.notifications_none_outlined),
               color: Color(0xff18181b),
               onPressed: () {
+                // PushNotifications.showSimpleNotification(body: "",payload: "",title: "Title");
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => NotificationScreen(),
+                    builder: (context) => BluetoothScanAndroid(),
                   ),
                 );
               },

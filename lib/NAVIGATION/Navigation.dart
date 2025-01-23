@@ -2960,7 +2960,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           var key = entry.key;
 
           // try{
-            if(key == buildingAllApi.outdoorID && buildingAllApi.outBuildingData != null && buildingAllApi.outBuildingData!.data!.globalAnnotation!){
+            if(key == buildingAllApi.outdoorID && buildingAllApi.outBuildingData != null && buildingAllApi.outBuildingData!.data!.globalAnnotation! ){
               var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(key);
               Building.GlobalAnnotation = globalData;
               GlobalAnnotationController controller = GlobalAnnotationController(data: globalData, polygonTap: polygonTap, apiController: apiController);
@@ -13616,36 +13616,13 @@ bool _isPlaying=false;
                     ),
                   ) : Container(),
                   SizedBox(height: 28.0),
-                  !user.isnavigating &&
+                  Platform.isAndroid && !user.isnavigating &&
                       (!_isLandmarkPanelOpen &&
                           !_isRoutePanelOpen &&
                           _isBuildingPannelOpen &&
                           !_isnavigationPannelOpen && user.initialallyLocalised)
                       ? FloatingActionButton(
                           onPressed: () async {
-                            // bluetoothScanAndroidClass.startScan();
-                            // _isBuildingPannelOpen = false;
-                            // _isExploreModePannelOpen = true;
-                            // //ExploreModePannelController.open();
-                            //
-                            // await initializeScanAndLandmarkData().then((_){
-                            //   bluetoothScanAndroidClass.listenToScanExploreMode(SingletonFunctionController.apibeaconmap);
-                            // });
-                            //
-                            //
-                            // EM_TIMER = Timer.periodic(Duration(seconds: 3), (_){
-                            //   // bluetoothScanAndroidClass.listenToScanExploreMode(SingletonFunctionController.apibeaconmap).then((_){
-                            //   //   print("bluetoothScanAndroidClass.EM_NEAREST_BEACON_VALUE");
-                            //   //   print(bluetoothScanAndroidClass.EM_NEAREST_BEACON_VALUE.name);
-                            //   // });
-                            //   //print("EM_LastBeacon Closest Device Details: $closestDeviceDetails");
-                            //   // if(closestDeviceDetails != "No devices found" && closestDeviceDetails != EM_LastBeacon){}
-                            //     exploreModePaintUser(SingletonFunctionController.apibeaconmap!,EM_buildingLandmark.landmarksMap!);
-                            //
-                            //
-                            // });
-                            //
-                            //try-----
 
                             if (user.initialallyLocalised) {
                               setState(() {

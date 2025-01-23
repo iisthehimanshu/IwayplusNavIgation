@@ -1,8 +1,4 @@
-
-import 'dart:convert';
-
-
-
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,7 +32,6 @@ import 'IWAYPLUS/FIREBASE NOTIFICATION API/PushNotifications.dart';
 import 'IWAYPLUS/LOGIN SIGNUP/SignIn.dart';
 import 'IWAYPLUS/MainScreen.dart';
 import '/NAVIGATION/Navigation.dart';
-import 'dart:io' show Platform;
 
 final navigatorKey = GlobalKey<NavigatorState>();
 

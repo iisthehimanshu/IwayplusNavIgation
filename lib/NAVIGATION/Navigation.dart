@@ -10869,8 +10869,6 @@ bool _isPlaying=false;
           ),
         ));
   }
-  final FocusNode _focusNodeB = FocusNode();
-  bool rerouting = false;
 
   List<String> optionsTags = [];
   List<String> floorOptionsTags = [];
@@ -13574,7 +13572,7 @@ bool _isPlaying=false;
                         });
                       })
                       : Container(),
-                 !isLiveLocalizing? && !isSemanticEnabled && !PinLandmarkPannel.isPanelOpened()
+                 !isLiveLocalizing?  !isSemanticEnabled && !PinLandmarkPannel.isPanelOpened()
 
                       ? Semantics(
                     label: "Change floor",

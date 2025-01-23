@@ -138,7 +138,7 @@ class PushNotifications {
     required String imageUrl,
   }) async {
 
-    String? filePath = await _downloadAndSaveImage("https://dev.iwayplus.in/uploads/"+imageUrl, 'notification_image');
+    String? filePath = await _downloadAndSaveImage("https://maps.iwayplus.in/uploads/"+imageUrl, 'notification_image');
 
     // Step 2: Create the notification with the downloaded image
     final BigPictureStyleInformation bigPictureStyleInformation =
@@ -176,7 +176,7 @@ class PushNotifications {
     required String imageUrl,
   }) async {
 
-    String? filePath = await _downloadAndSaveImage("https://dev.iwayplus.in/uploads/"+imageUrl, 'notification_image');
+    String? filePath = await _downloadAndSaveImage("https://maps.iwayplus.in/uploads/"+imageUrl, 'notification_image');
 
     // Step 2: Create the notification with the downloaded image
     final BigPictureStyleInformation bigPictureStyleInformation =

@@ -16,6 +16,7 @@ import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
 import 'API/PatchApi.dart';
 import 'APIMODELS/patchDataModel.dart';
+import 'APIMODELS/polylinedata.dart';
 import 'Cell.dart';
 import 'Navigation.dart';
 import 'directionClass.dart';
@@ -1353,6 +1354,100 @@ class tools {
 
 
     return nearestLandmark;
+  }
+
+  static List<Landmarks>? findListOfNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
+
+    List<Landmarks> queue = [];
+    List<Landmarks> nodesQueue = [];
+    int distance=10;
+    List<int> pCoord = [];
+    pCoord.add(Beacon.coordinateX!);
+    pCoord.add(Beacon.coordinateY!);
+    landmarksMap.forEach((key, value) {
+
+      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.coordinateX!=null){
+        if (Beacon.floor! == value.floor) {
+          double d = 0.0;
+          if (value.doorX != null) {
+            d = calculateDistance(
+                pCoord, [value.doorX!, value.doorY!]);
+          }else{
+            d = calculateDistance(
+                pCoord, [value.coordinateX!, value.coordinateY!]);
+          }
+          if (d<distance) {
+            queue.add(value);
+          }
+        }
+      }
+    });
+
+    bool isAlreadyPresent(int x, int y){
+      bool v = false;
+      nodesQueue.forEach((node){
+        if(node.coordinateX == x && node.coordinateY == y){
+          v = true;
+        }
+      });
+      return v;
+    }
+
+    final polylineData = SingletonFunctionController.building.polylinedatamap;
+    polylineData.forEach((key,value){
+      if(key == Beacon.buildingID ){
+        value.polyline!.floors!.forEach((floor){
+          floor.polyArray!.forEach((polyline){
+            if(polyline.polygonType == "Waypoints" && polyline.floor == tools.numericalToAlphabetical(Beacon.floor ?? 0)){
+              polyline.nodes!.forEach((node){
+                double d = calculateDistance(pCoord, [node.coordx!, node.coordy!]);
+                print("waypoint distance is $d");
+                if (d < distance && !isAlreadyPresent(node.coordx!,node.coordy!)) {
+                  print("foundwaypoint to option");
+                  var closestLandmark = queue[0];
+                  double minDistance = calculateDistance([node.coordx!, node.coordy!], [closestLandmark.coordinateX!,closestLandmark.coordinateY!]);
+                  for (var landmark in queue) {
+                    double distance = calculateDistance([node.coordx!, node.coordy!], [landmark.coordinateX!,landmark.coordinateY!]);
+                    if (distance < minDistance) {
+                      minDistance = distance;
+                      closestLandmark = landmark;
+                    }
+                  }
+                  Map<String, dynamic> data = closestLandmark.toJson();
+                  var duplicateLandmark = Landmarks.fromJson(data);
+                  duplicateLandmark.coordinateX = node.coordx;
+                  duplicateLandmark.coordinateY = node.coordy;
+                  duplicateLandmark.doorX = node.coordx;
+                  duplicateLandmark.doorY = node.coordy;
+                  duplicateLandmark.properties!.latitude = node.lat.toString();
+                  duplicateLandmark.properties!.longitude = node.lon.toString();
+                  duplicateLandmark.properties!.isWaypoint = true;
+                  duplicateLandmark.sId = node.sId;
+                  nodesQueue.add(duplicateLandmark);
+                }
+              });
+            }
+          });
+        });
+      }
+    });
+
+    queue.forEach((value){
+      print("queue id ${value.sId}");
+    });
+    nodesQueue.forEach((value){
+      print("nodesQueue id ${value.sId}  [${value.coordinateX},${value.coordinateY}]");
+    });
+    queue.addAll(nodesQueue);
+
+
+
+
+    if(queue.isNotEmpty){
+     return queue;
+    }else{
+      return null;
+    }
   }
 
   static Landmarks? localizefindNearbyLandmarkSecond(UserState user, Map<String, Landmarks> landmarksMap,{bool increaserange = false}) {

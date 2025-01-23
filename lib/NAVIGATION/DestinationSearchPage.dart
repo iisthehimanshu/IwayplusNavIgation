@@ -118,9 +118,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   String finalName = "";
   bool promptLoader = false;
   Set<String> optionListItemBuildingNameNew = {};
-
-
-
   void _onSearchChanged() {
     List<String> promptArray = ["navigate to","take me to"];
     String userInput = _controller.text.toLowerCase();

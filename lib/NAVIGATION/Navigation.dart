@@ -4535,7 +4535,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       points: coordinates,
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
-
                       strokeColor: Color(0xffA38F9F),
                       fillColor: Color(0xffE8E3E7),
                       consumeTapEvents: true,
@@ -7699,7 +7698,7 @@ int currentCols=0;
               singleroute[bid]![floor]!.remove(oldPolyline);
               singleroute[bid]![floor]!.add(updatedPolyline);
             });
-          } else {
+          }else{
             setState((){
               singleroute[bid]!.putIfAbsent(floor, () => Set());
               singleroute[bid]![floor]?.add(gmap.Polyline(
@@ -7722,16 +7721,14 @@ int currentCols=0;
         });
       } else {
         coordinates=[];
-        if (singleroute[bid] == null) {
+        if (singleroute[bid] == null){
           singleroute.putIfAbsent(bid, () => Map());
         }
         for (var node in path) {
           int row = (node % numCols); //divide by floor length
           int col = (node ~/ numCols); //divide by floor length
-
           List<double> value = tools.localtoglobal(
               row, col, SingletonFunctionController.building.patchData[bid]);
-
           coordinates.add(LatLng(value[0], value[1]));
         }
         setState(() {
@@ -7744,7 +7741,6 @@ int currentCols=0;
           ));
         });
       }
-
       final Uint8List tealtorch =
       await getImagesFromMarker('assets/tealtorch.png', 35);
 
@@ -9794,36 +9790,16 @@ bool _isPlaying=false;
                 val = 0;
               }
             }
-          }catch(_){
-
-          }
-
-          //
-          //
-
-          //
+          }catch(_){}
           for (int i = 0; i < getPoints.length; i++) {
-            //
-            //
-            //
-            //
-            //
-
-            //
-
-            //
             if (isPdrStop && (val == 0 || (val<60 && val>-60))) {
-              //
-
               Future.delayed(Duration(milliseconds: 1500)).then((value) => {
                 print("pdr started"),
                 StartPDR(),
               });
-
               setState(() {
                 isPdrStop = false;
               });
-
               break;
             }
             if (getPoints[i][0] == user.showcoordX &&

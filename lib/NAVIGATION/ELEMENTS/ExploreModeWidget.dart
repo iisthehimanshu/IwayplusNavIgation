@@ -3,21 +3,21 @@ import 'package:flutter/material.dart';
 import '../../IWAYPLUS/Elements/HelperClass.dart';
 import '../APIMODELS/landmark.dart';
 import '../navigationTools.dart';
+import '../APIMODELS/landmark.dart';
 
 class ExploreModeWidget extends StatelessWidget {
-  Landmarks currentInfo;
+  nearestLandInfo currentInfo;
   String finalDirection;
+  bool facing;
   
-  ExploreModeWidget(this.currentInfo,this.finalDirection);
+  ExploreModeWidget(this.currentInfo,this.finalDirection,{this.facing = false});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 80,
-      margin: EdgeInsets.only(
-          top: 10,),
+      margin: EdgeInsets.only(top: 10,bottom: 5),
       decoration: BoxDecoration(
-          color: Colors.white,
+          color: facing? Colors.teal:Colors.white,
           border: Border.all(
             color: Color(0xffEBEBEB),
           ),
@@ -27,14 +27,12 @@ class ExploreModeWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Column(
-            crossAxisAlignment:
-            CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
                   Container(
-                    margin: EdgeInsets.only(
-                        top: 12, left: 18),
+                    margin: EdgeInsets.only(top: 12, left: 18,bottom: 12),
                     alignment: Alignment.topLeft,
                     child: Text(
                       HelperClass.truncateString(
@@ -50,33 +48,7 @@ class ExploreModeWidget extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    margin: EdgeInsets.only(
-                        left: 10, top: 14),
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      HelperClass.truncateString(
-                          finalDirection,
-                          30),
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xffa1a1aa),
-                        height: 20 / 12,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Container(
-                    margin: EdgeInsets.only(
-                        left: 18,
-                        top: 3,
-                        bottom: 14,
-                        right: 10),
+                    margin: EdgeInsets.only(left: 10, top: 12, right: 0,bottom: 12),
                     alignment: Alignment.center,
                     child: Text(
                       HelperClass.truncateString(
@@ -94,20 +66,18 @@ class ExploreModeWidget extends StatelessWidget {
                   ),
                   Container(
                     margin: EdgeInsets.only(
-                        top: 3,
-                        bottom: 14,
-                        left: 2),
+                        left: 10, top: 14,bottom: 12),
                     alignment: Alignment.topLeft,
                     child: Text(
                       HelperClass.truncateString(
-                          currentInfo.buildingName!,
+                          finalDirection,
                           30),
                       style: const TextStyle(
                         fontFamily: "Roboto",
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
                         color: Color(0xffa1a1aa),
-                        height: 20 / 14,
+                        height: 20 / 12,
                       ),
                       textAlign: TextAlign.left,
                     ),

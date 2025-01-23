@@ -2,7 +2,6 @@ ${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh
 ${BUILT_PRODUCTS_DIR}/MTBBarcodeScanner/MTBBarcodeScanner.framework
 ${BUILT_PRODUCTS_DIR}/Toast/Toast.framework
 ${BUILT_PRODUCTS_DIR}/Try/Try.framework
-${BUILT_PRODUCTS_DIR}/app_links/app_links.framework
 ${BUILT_PRODUCTS_DIR}/app_settings/app_settings.framework
 ${BUILT_PRODUCTS_DIR}/bluetooth_enable_fork/bluetooth_enable_fork.framework
 ${BUILT_PRODUCTS_DIR}/connectivity_plus/connectivity_plus.framework

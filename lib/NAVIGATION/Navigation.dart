@@ -57,6 +57,7 @@ import 'API/waypoint.dart';
 import 'APIMODELS/DataVersion.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/outdoormodel.dart';
+import 'BluetoothScanAndroidClass.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
 import 'DebugToggle.dart';
@@ -121,6 +122,9 @@ import 'package:lottie/lottie.dart' as lott;
 
 import 'fetchrouteParams.dart';
 import 'navigationTools.dart';
+import 'package:iwaymaps/NAVIGATION/RippleButton.dart';
+import 'package:iwaymaps/NAVIGATION/BluetoothScanIOSClass.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -220,9 +224,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   bool excludeFloorSemanticWork = false;
   bool markerSldShown = true;
   Set<Marker> _markers = Set();
+  Set<Marker> _exploreModeMarker = Set();
+  Set<Marker> _exploreModeDebugBeaconMarker = Set();
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
   final GlobalKey rerouteButton = GlobalKey();
+
+  BluetoothScanAndroidClass bluetoothScanAndroidClass = BluetoothScanAndroidClass();
+
+
 
   //-----------------------------------------------------------------------------------------
   /// Set of displayed markers and cluster markers on the map
@@ -266,164 +276,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   void _initMarkers() async {
     final List<MapMarker> markers = [];
 
-    // mapMarkerLocationMapAndName.forEach((element) async {
-    //   final String values = element.tag;
-    //   final String LandmarkValue = element.landMarkName;
-    //   if(closestBuildingId!=""){
-    //
-    //     if (values == 'Lift' && element.specBuildingID == closestBuildingId) {
-    //       Uint8List iconMarker = await getImagesFromMarker('assets/lift.png', 65);
-    //       markers.add(
-    //         MapMarker(
-    //           id: element.latLng.toString(),
-    //           position: element.latLng,
-    //           icon: BitmapDescriptor.fromBytes(iconMarker),
-    //           Landmarkname: LandmarkValue,
-    //           mapController: _googleMapController,
-    //         ),
-    //       );
-    //     } else if (values == 'Entry'&& element.specBuildingID == closestBuildingId) {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/log-in.png', 65);
-    //       try {
-    //         markers.add(
-    //           MapMarker(
-    //               id: element.latLng.toString(),
-    //               position: element.latLng,
-    //               icon: BitmapDescriptor.fromBytes(iconMarker),
-    //               Landmarkname: LandmarkValue,
-    //               mapController: _googleMapController,
-    //               offset: [0.5,0.5]
-    //           ),
-    //         );
-    //       } catch (e) {}
-    //     } else if (values == 'Pharmacy'&& element.specBuildingID == closestBuildingId) {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/hospital.png', 70);
-    //       markers.add(
-    //         MapMarker(
-    //             id: element.latLng.toString(),
-    //             position: element.latLng,
-    //             icon: BitmapDescriptor.fromBytes(iconMarker),
-    //             Landmarkname: LandmarkValue,
-    //             mapController: _googleMapController),
-    //       );
-    //     } else if (values == 'Kitchen'&& element.specBuildingID == closestBuildingId) {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/cutlery.png', 60);
-    //       markers.add(
-    //         MapMarker(
-    //             id: element.latLng.toString(),
-    //             position: element.latLng,
-    //             icon: BitmapDescriptor.fromBytes(iconMarker),
-    //             Landmarkname: LandmarkValue,
-    //             mapController: _googleMapController),
-    //       );
-    //     } else if (values == 'Female'&& element.specBuildingID == closestBuildingId) {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/Femaletoilet.png', 65);
-    //       markers.add(
-    //         MapMarker(
-    //           id: element.latLng.toString(),
-    //           position: element.latLng,
-    //           icon: BitmapDescriptor.fromBytes(iconMarker),
-    //           Landmarkname: LandmarkValue,
-    //           mapController: _googleMapController,
-    //         ),
-    //       );
-    //     } else if (values == 'Male'&& element.specBuildingID == closestBuildingId) {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/Maletoilet.png', 65);
-    //       markers.add(
-    //         MapMarker(
-    //           id: element.latLng.toString(),
-    //           position: element.latLng,
-    //           icon: BitmapDescriptor.fromBytes(iconMarker),
-    //           Landmarkname: LandmarkValue,
-    //           mapController: _googleMapController,
-    //         ),
-    //       );
-    //     }
-    //   }else{
-    //     if (values == 'Lift') {
-    //       Uint8List iconMarker = await getImagesFromMarker('assets/lift.png', 65);
-    //       markers.add(
-    //         MapMarker(
-    //           id: element.latLng.toString(),
-    //           position: element.latLng,
-    //           icon: BitmapDescriptor.fromBytes(iconMarker),
-    //           Landmarkname: LandmarkValue,
-    //           mapController: _googleMapController,
-    //         ),
-    //       );
-    //     } else if (values == 'Entry') {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/log-in.png', 65);
-    //       try {
-    //         markers.add(
-    //           MapMarker(
-    //               id: element.latLng.toString(),
-    //               position: element.latLng,
-    //               icon: BitmapDescriptor.fromBytes(iconMarker),
-    //               Landmarkname: LandmarkValue,
-    //               mapController: _googleMapController,
-    //               offset: [0.5,0.5]
-    //           ),
-    //         );
-    //       } catch (e) {}
-    //     } else if (values == 'Pharmacy') {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/hospital.png', 70);
-    //       markers.add(
-    //         MapMarker(
-    //             id: element.latLng.toString(),
-    //             position: element.latLng,
-    //             icon: BitmapDescriptor.fromBytes(iconMarker),
-    //             Landmarkname: LandmarkValue,
-    //             mapController: _googleMapController),
-    //       );
-    //     } else if (values == 'Kitchen') {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/cutlery.png', 60);
-    //       markers.add(
-    //         MapMarker(
-    //             id: element.latLng.toString(),
-    //             position: element.latLng,
-    //             icon: BitmapDescriptor.fromBytes(iconMarker),
-    //             Landmarkname: LandmarkValue,
-    //             mapController: _googleMapController),
-    //       );
-    //     } else if (values == 'Female') {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/Femaletoilet.png', 65);
-    //       markers.add(
-    //         MapMarker(
-    //           id: element.latLng.toString(),
-    //           position: element.latLng,
-    //           icon: BitmapDescriptor.fromBytes(iconMarker),
-    //           Landmarkname: LandmarkValue,
-    //           mapController: _googleMapController,
-    //         ),
-    //       );
-    //     } else if (values == 'Male') {
-    //       Uint8List iconMarker =
-    //       await getImagesFromMarker('assets/Maletoilet.png', 65);
-    //       markers.add(
-    //         MapMarker(
-    //           id: element.latLng.toString(),
-    //           position: element.latLng,
-    //           icon: BitmapDescriptor.fromBytes(iconMarker),
-    //           Landmarkname: LandmarkValue,
-    //           mapController: _googleMapController,
-    //         ),
-    //       );
-    //     }
-    //   }
-    //
-    //
-    //
-    //
-    // });
     try {
       for (LatLng keys in _markerLocationsMap.keys) {
         final String values = _markerLocationsMap[keys]!;
@@ -527,8 +379,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     await _updateMarkers11();
   }
 
-  /// Gets the markers and clusters to be displayed on the map for the current zoom level and
-  /// updates state.
   Future<void> _updateMarkers11([double? updatedZoom]) async {
     if (updatedZoom != null && updatedZoom! > 15.5) {
       if (_clusterManager == null || updatedZoom == _currentZoom) return;
@@ -578,6 +428,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     return bytes;
   }
 
+
+  late AnimationController PB_controller;
+  late Animation<double> PBanimation;
+  bool PB_isProgressing = false;
+
   //--------------------------------------------------------------------------------------
   double _progressValue = 0.0;
   @override
@@ -626,6 +481,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       isLoading = true;
     });
 
+    PB_controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 5000),
+    );
+
+    // Define a Tween to animate the progress from 0.0 to 1.0
+    PBanimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: PB_controller,
+        curve: Curves.easeInOut, // Smooth linear curve for even progress
+      ),
+    );
     //  calibrate();
 
     //SingletonFunctionController.btadapter.strtScanningIos(SingletonFunctionController.apibeaconmap);
@@ -680,6 +547,28 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     // fetchlist();
     // filterItems();
   }
+
+  // Start the animation loop
+  void PB_startAnimation() {
+    if (!PB_isProgressing) {
+      setState(() {
+        PB_isProgressing = true;
+      });
+      PB_controller.repeat(); // Make the animation repeat indefinitely
+    }
+  }
+
+  // Stop the animation loop
+  void PB_stopAnimation() {
+    if (PB_isProgressing) {
+      setState(() {
+        PB_isProgressing = false;
+      });
+      PB_controller.stop(); // Stop the animation
+    }
+  }
+
+
   void initializeMarkers() async {
     userloc = await getImagesFromMarker('assets/userloc0.png', 130);
     if (kDebugMode) {
@@ -991,8 +880,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         print(msg);
         PushNotifications.showSimpleNotification(body: "",payload: "",title: msg);
       }else {
+        // PushNotifications.showSimpleNotification(body: "",payload: "",title: msg);
+
         await flutterTts.speak(msg);
       }
+
     }
   }
 
@@ -1392,8 +1284,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   List<String> finalDirections = [];
-  List<String> calcDirectionsExploreMode(List<int> userCords,
-      List<int> newUserCord, List<Landmarks> nearbyLandmarkCoords) {
+
+  List<String> calcDirectionsExploreMode(List<int> userCords, List<int> newUserCord, List<nearestLandInfo> nearbyLandmarkCoords) {
+
     List<String> finalDirections = [];
     for (int i = 0; i < nearbyLandmarkCoords.length; i++) {
       double value = tools.calculateAngle2(userCords, newUserCord, [
@@ -1403,8 +1296,25 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
       //
       //
-      String finalvalue =
-      tools.angleToClocksForNearestLandmarkToBeacon(value, context);
+      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value, context);
+      //
+      finalDirections.add(finalvalue);
+    }
+    return finalDirections;
+  }
+
+  List<String> EM_finalDirections = [];
+  List<String> EM_calcDirectionsExploreMode(List<int> userCords, List<int> newUserCord, List<Landmarks> nearbyLandmarkCoords) {
+    List<String> finalDirections = [];
+    for (int i = 0; i < nearbyLandmarkCoords.length; i++) {
+      double value = tools.calculateAngle2(userCords, newUserCord, [
+        nearbyLandmarkCoords[i].coordinateX!,
+        nearbyLandmarkCoords[i].coordinateY!
+      ]);
+
+      //
+      //
+      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value, context);
       //
       finalDirections.add(finalvalue);
     }
@@ -1878,7 +1788,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
         final landmarkData = await SingletonFunctionController.building.landmarkdata;
         if (landmarkData != null) {
-
           if(providePinSelection){
             SingletonFunctionController.building.listOfNearbyLandmarksToLocalize = tools.findListOfNearbyLandmark(beaconData,
                 landmarkData.landmarksMap!);
@@ -1901,9 +1810,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           }
 
         } else {
+          print("_handleBeaconLocalization2");
           unableToFindLocation();
         }
       } else {
+        print("_handleBeaconLocalization3");
         if (speakTTS) unableToFindLocation();
       }
     } catch (e) {
@@ -1941,6 +1852,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       bool render,
       bool providePinSelection
       ) async {
+
 
     GPS gps = GPS();
     KalmanFilter _kalmanFilter = KalmanFilter();
@@ -2207,7 +2119,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       });
     });
 
-    List<Landmarks> getallnearbylandmark=[];
+    List<nearestLandInfo> getallnearbylandmark=[];
     if(localizedBeacon!=null){
       await SingletonFunctionController.building.landmarkdata!.then((value) {
         getallnearbylandmark = tools.localizefindAllNearbyLandmark(
@@ -2339,10 +2251,45 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
 
     if (speakTTS) {
+      List<double> lvalue = tools.localtoglobal(
+          userSetLocation.doorX!.toInt(),
+          userSetLocation.doorY!.toInt(),
+          SingletonFunctionController.building.patchData[user.bid]
+      );
+
+      List<double> uvalue = tools.localtoglobal(
+          SingletonFunctionController.apibeaconmap[lastBeaconValue]!.coordinateX!.toInt(),
+          SingletonFunctionController.apibeaconmap[lastBeaconValue]!.coordinateY!.toInt(),
+          SingletonFunctionController.building.patchData[user.bid]
+      );
+
+
+      LatLng currentMarkerPosition = LatLng(lvalue[0], lvalue[1]);
+      LatLng newMarkerPosition = LatLng(uvalue[0], uvalue[1]);
+
+      _markerAnimation = LatLngTween(
+        begin: currentMarkerPosition,
+        end: newMarkerPosition,
+      ).animate(CurvedAnimation(
+        parent: _animationController!,
+        curve: Curves.easeInOut,
+      ));
+      // Start the animation
+      _animationController!.forward(from: 0);
+      _animationController!.addListener(() {
+        setState(() {
+          // Update marker position as animation progresses
+          markers[user.bid]?[0] = customMarker.move(
+            _markerAnimation!.value,
+            markers[user.bid]![0],
+          );
+        });
+      });
+
       mapState.zoom = 22.0;
       _googleMapController.animateCamera(
         CameraUpdate.newLatLngZoom(
-          LatLng(user.lat, user.lng),
+          LatLng(lvalue[0], lvalue[1]),
           22, // Specify your custom zoom level here
         ),
       );
@@ -2357,9 +2304,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       }
     });
   }
-
-
-
 
   bool _isExpanded = false;
   String? qrText;
@@ -2870,8 +2814,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   Future<void> requestBluetoothConnectPermission() async {
-    final PermissionStatus permissionStatus =
-    await Permission.bluetoothScan.request();
+    final PermissionStatus permissionStatus = await Permission.bluetoothScan.request();
 
     if (permissionStatus.isGranted) {
       wsocket.message["deviceInfo"]["permissions"]["BLE"] = true;
@@ -2957,12 +2900,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   SingletonFunctionController controller = SingletonFunctionController();
   void apiCalls(context) async {
-    try{
-      await DataVersionApi()
-          .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
-    }catch(e){
-      print(" APICALLS DataVersionApi API TRY-CATCH");
-    }
+    // try{
+    //   await DataVersionApi()
+    //       .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
+    // }catch(e){
+    //   print(" APICALLS DataVersionApi API TRY-CATCH");
+    // }
     _updateProgress();
     print("apicalls testing 1");
     // await Future.wait(buildingAllApi.allBuildingID.entries.map((entry) async {
@@ -2991,6 +2934,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     // Future<void> timer = Future.delayed(Duration(seconds:(widget.directsourceID.length<2)?SingletonFunctionController.btadapter.isScanningOn()==false?9:0:0));
     if(!kIsWeb){
+      print("checkingplat ${Platform.isIOS}");
       (SingletonFunctionController.btadapter.isScanningOn() == false &&
           isBinEmpty() == true)
           ? controller.executeFunction(buildingAllApi.allBuildingID)
@@ -3161,11 +3105,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           } catch (_) {}
           print("apicalls testing 2 for $key");
           if (key != buildingAllApi.getSelectedBuildingID()) {
-            try {
-              await DataVersionApi().fetchDataVersionApiData(key);
-            } catch (e) {}
+            // try {
+            //   await DataVersionApi().fetchDataVersionApiData(key);
+            // } catch (e) {}
             print("apicalls testing 3 for $key");
+            try{
             var patchData = await patchAPI().fetchPatchData(id: key);
+            }catch(e){
+
+            }
             Building.buildingData ??= Map();
 
             Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
@@ -3248,11 +3196,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     print("apicalls testing 8");
     if (widget.directLandID.length < 2) {
       print("apicalls testing 9");
-      localizeUser();
+      localizeUser(beacon: SingletonFunctionController.SC_LOCALIZED_BEACON);
     } else {
       print("apicalls testing 10");
       //got here using a destination qr
-      localizeUser(speakTTS: false);
+      localizeUser(beacon: SingletonFunctionController.SC_LOCALIZED_BEACON,speakTTS: false);
       onLandmarkVenueClicked(widget.directLandID,
           DirectlyStartNavigation: false);
       SingletonFunctionController.building.destinationQr = true;
@@ -3297,7 +3245,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         circleId: CircleId("circle"),
         center: LatLng(lat, lng),
         radius: _animation.value,
-        strokeWidth: 1,
+        strokeWidth: 0,
         strokeColor: Colors.blue,
         fillColor: Colors.lightBlue.withOpacity(0.2),
         zIndex: 2
@@ -3367,26 +3315,31 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   String nearestLandmarkToMacid = "";
 
 
-  Future<void> localizeUser({bool speakTTS = true}) async {
+  Future<void> localizeUser({bool speakTTS = true,String beacon=""}) async {
     double highestweight = 0;
     String nearestBeacon = "";
-    print("binresult ${SingletonFunctionController.btadapter.BIN}");
-    for (int i = 0;
-    i < SingletonFunctionController.btadapter.BIN.length;
-    i++) {
-      if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
-        SingletonFunctionController.btadapter.BIN[i]!.forEach((key, value) {
-          if (value < 0) {
-            value = value * -1;
-          }
-          if (value > highestweight) {
-            highestweight = value;
-            nearestBeacon = key;
-          }
-        });
-        break;
-      }
-    }
+    // print("binresult ${SingletonFunctionController.btadapter.BIN}");
+    // for (int i = 0;
+    // i < SingletonFunctionController.btadapter.BIN.length;
+    // i++) {
+    //   if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
+    //     SingletonFunctionController.btadapter.BIN[i]!.forEach((key, value) {
+    //       if (value < 0) {
+    //         value = value * -1;
+    //       }
+    //       if (value > highestweight) {
+    //         highestweight = value;
+    //         nearestBeacon = key;
+    //       }
+    //     });
+    //     break;
+    //   }
+    // }
+    print("beaconcmaed ${beacon}");
+
+    nearestBeacon = beacon?? SingletonFunctionController.SC_LOCALIZED_BEACON;
+    print("nearestBeacon");
+    print(nearestBeacon);
 
     setState(() {
       //lastBeaconValue = nearestBeacon;
@@ -3401,7 +3354,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         currentBinSIze.add(value.length);
       });
     });
-    SingletonFunctionController.btadapter.stopScanning();
+    //SingletonFunctionController.btadapter.stopScanning();
 
     // sumMap = SingletonFunctionController.btadapter.calculateAverage();
     if (nearestBeacon != "" && Building.apibeaconmap[nearestBeacon] != null) {
@@ -3432,33 +3385,208 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   String nearbeacon = 'null';
   String weight = "null";
   HashMap<int, HashMap<String, double>> testBIn = HashMap();
-  List<Landmarks> getallnearestInfo = [];
+  List<nearestLandInfo> getallnearestInfo = [];
   //Map<String, double> sumMap  = HashMap();
   List<int> currentBinSIze = [];
   Map<String, double> sumMap = new Map();
   Map<String, double> sortedsumMapfordebug = new Map();
   String lastBeaconValue = "";
+  String EM_lastBeaconValue = "";
 
-  Future<void> realTimeReLocalizeUser(
-      HashMap<String, beacon> apibeaconmap) async {
+  List<Landmarks> EM_NearLandmarks = [];
+
+  // Future<void> exploreModePaintUser(HashMap<String, beacon> apibeaconmap, Map<String, Landmarks> EM_buildingLandmark) async{
+  //   print("BluetoothScanAndroidClass.EM_RSSI_VALUES");
+  //   print(BluetoothScanAndroidClass.EM_RSSI_VALUES);
+  //   print(BluetoothScanAndroidClass.EM_DEVICE_NAME);
+  //   print(BluetoothScanAndroidClass.EM_RSSI_WEIGHT);
+  //   BluetoothScanAndroidClass.EM_RSSI_AVERAGE = bluetoothScanAndroidClass.calculateAverageFromRssi(BluetoothScanAndroidClass.EM_RSSI_VALUES, BluetoothScanAndroidClass.EM_DEVICE_NAME, BluetoothScanAndroidClass.EM_RSSI_WEIGHT);
+  //   String closestDeviceDetails = bluetoothScanAndroidClass.EM_findLowestRssiDevice(BluetoothScanAndroidClass.EM_RSSI_AVERAGE);
+  //   beacon EM_NEAREST_BEACON_VALUE = apibeaconmap[closestDeviceDetails]!;
+  //
+  //   print("exploreModePaintUser");
+  //   final Uint8List iconMarker = await getImagesFromMarker('assets/DirectionInstruction_sourceIcon.png', 85);
+  //
+  //   if(EM_NEAREST_BEACON_VALUE.name != EM_lastBeaconValue){
+  //     _exploreModeMarker.clear();
+  //     EM_NearLandmarks = tools.EM_localizefindAllNearbyLandmark(EM_NEAREST_BEACON_VALUE, EM_buildingLandmark);
+  //     EM_NearLandmarks.forEach((landmark){
+  //       List<double> value =[];
+  //       if(landmark.coordinateX != null) {
+  //         value = tools.localtoglobal(landmark.coordinateX!, landmark.coordinateY!, SingletonFunctionController.building.patchData[landmark.sId ?? buildingAllApi.getStoredString()]);
+  //       }
+  //       _exploreModeMarker.add(Marker(
+  //         markerId: MarkerId("${value[0]}, ${value[1]}"),
+  //         position: LatLng(value[0], value[1]),
+  //         icon: BitmapDescriptor.fromBytes(iconMarker),
+  //       ));
+  //       setState(() {});
+  //     });
+  //
+  //
+  //     List<int> tv = tools.eightcelltransition(user.theta);
+  //     EM_finalDirections = EM_calcDirectionsExploreMode(
+  //         [EM_NEAREST_BEACON_VALUE.coordinateX!,EM_NEAREST_BEACON_VALUE.coordinateY!],
+  //         [EM_NEAREST_BEACON_VALUE.coordinateX! + tv[0],EM_NEAREST_BEACON_VALUE.coordinateY! + tv[1]],
+  //         EM_NearLandmarks
+  //     );
+  //     EM_lastBeaconValue = EM_NEAREST_BEACON_VALUE.name!;
+  //     paintUser(EM_NEAREST_BEACON_VALUE.name!,null,null);
+  //     setState(() {});
+  //   }
+  // }
+
+  land EM_buildingLandmark = land();
+  Future<void> initializeScanAndLandmarkData() async {
+    print("initializeScanAndLandmarkData");
+    EM_buildingLandmark = await SingletonFunctionController.building.landmarkdata!;
+
+  }
+  String firstValue = "";
+
+  Future<void> realTimeReLocalizeUser(HashMap<String, beacon> apibeaconmap) async {
+
+    print("apibeaconmap");
+    print(apibeaconmap);
+    print("_exploreModeMarker.length");
+    print(_exploreModeMarker.length);
+
     sumMap.clear();
     setState(() {
       sumMap = SingletonFunctionController.btadapter.calculateAverage();
     });
+    final Uint8List iconMarker = await getImagesFromMarker('assets/dot.png', 30);
 
-    String firstValue = "";
+
+    sumMap.forEach((key, value) {
+      List<double> position = [];
+      if(SingletonFunctionController.apibeaconmap[key]! != null) {
+        if (SingletonFunctionController.apibeaconmap[key]!.coordinateX! != null) {
+          position = tools.localtoglobal(
+              SingletonFunctionController.apibeaconmap[key]!.coordinateX!, SingletonFunctionController.apibeaconmap[key]!.coordinateY!,
+              SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[key]!.sId! ??
+                  buildingAllApi.getStoredString()]);
+          _exploreModeDebugBeaconMarker.add(
+            Marker(
+              markerId: MarkerId("${SingletonFunctionController.apibeaconmap[key]!.name!}${position[0]}, ${position[1]}"),
+              position: LatLng(position[0], position[1]),
+              icon: BitmapDescriptor.fromBytes(iconMarker),
+              onTap: () {},
+            ),
+          );
+        }
+      }
+    });
+    setState(() {
+
+    });
+
+    firstValue = "";
 
     if (sumMap.isNotEmpty) {
       Map<String, double> sortedsumMap = sortMapByValue(sumMap);
       firstValue = sortedsumMap.entries.first.key;
+      final Uint8List iconMarker = await getImagesFromMarker('assets/EM_CurrentLocationMarker.png', 85);
 
-      if (lastBeaconValue != firstValue &&
-          sortedsumMap.entries.first.value >= 0.4) {
+      print("firstValue----");
+      print(sortedsumMap);
+      print(firstValue);
+      print(sortedsumMap.entries.first.value);
+
+
+
+      if (lastBeaconValue != firstValue && sortedsumMap.entries.first.value >= 0.4) {
         SingletonFunctionController.btadapter.stopScanning();
+        _exploreModeMarker.clear();
+
+
 
         await SingletonFunctionController.building.landmarkdata!.then((value) {
-          getallnearestInfo = tools.localizefindAllNearbyLandmark(
-              apibeaconmap[firstValue]!, value.landmarksMap!);
+          getallnearestInfo = tools.localizefindAllNearbyLandmark(apibeaconmap[firstValue]!, value.landmarksMap!);
+          print("getallnearestInfo.length");
+          print(getallnearestInfo.length);
+          print(_exploreModeMarker.length);
+          getallnearestInfo.forEach((landmark) {
+            List<double> value = [];
+            if(landmark.coordinateX != null) {
+              value = tools.localtoglobal(landmark.coordinateX!, landmark.coordinateY!, SingletonFunctionController.building.patchData[landmark.sId ?? buildingAllApi.getStoredString()]);
+            }
+
+            _exploreModeMarker.add(
+              Marker(
+                markerId: MarkerId("${landmark.name}${value[0]}, ${value[1]}"),
+                position: LatLng(value[0], value[1]),
+                icon: BitmapDescriptor.fromBytes(iconMarker),
+                onTap: () {},
+              ),
+            );
+            // _controller12 = AnimationController(
+            //   vsync: this,
+            //   duration: Duration(milliseconds: 900),
+            // );
+            //
+            // _sizeAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
+            //   CurvedAnimation(parent: _controller12!, curve: Curves.easeInOut),
+            // );
+            //
+            // void updateMarkerSize() async {
+            //   double scale = _sizeAnimation?.value ?? 1.0;
+            //   Uint8List resizedIcon = await getImagesFromMarker('assets/EM_CurrentLocationMarker.png', (85 * scale).toInt());
+            //
+            //   setState(() {
+            //     _exploreModeMarker.add(
+            //       Marker(
+            //         markerId: MarkerId("${landmark.name}${value[0]}, ${value[1]}"),
+            //         position: LatLng(value[0], value[1]),
+            //         icon: BitmapDescriptor.fromBytes(resizedIcon),
+            //         onTap: () {},
+            //       ),
+            //     );
+            //   });
+            // }
+            //
+            // // Start the animation
+            // _controller12?.addListener(updateMarkerSize);
+            // _controller12?.repeat(reverse: true);
+            //
+            // // Stop animation after 5 seconds
+            //
+            // print("_exploreModeMarker.length");
+            // print(_exploreModeMarker.length);
+
+            // _exploreModeMarker.add(Marker(
+            //   markerId: MarkerId("${value[0]}, ${value[1]}"),
+            //   position: LatLng(value[0], value[1]),
+            //   icon: BitmapDescriptor.fromBytes(iconMarker),
+            // ));
+            setState(() {});
+          });
+
+          // Timer(Duration(seconds: 5), () {
+          //   _controller12?.stop();
+          //   _controller12?.dispose();
+          //   _controller12 = null;
+          //   _exploreModeMarker.clear();
+          //
+          //
+          //   getallnearestInfo.forEach((landmark) {
+          //     List<double> value = [];
+          //     if(landmark.coordinateX != null) {
+          //       value = tools.localtoglobal(landmark.coordinateX!, landmark.coordinateY!, SingletonFunctionController.building.patchData[landmark.sId ?? buildingAllApi.getStoredString()]);
+          //     }
+          //
+          //     setState(() {
+          //       _exploreModeMarker.add(
+          //         Marker(
+          //           markerId: MarkerId("${landmark.name}${value[0]}, ${value[1]}"),
+          //           position: LatLng(value[0], value[1]),
+          //           icon: BitmapDescriptor.fromBytes(iconMarker),
+          //           onTap: () {},
+          //         ),
+          //       );
+          //     });
+          //   });
+          // });
         });
 
         List<int> tv = tools.eightcelltransition(user.theta);
@@ -9228,6 +9356,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     hint: "Button. Double tap to activate",
 
 
+
                     sortKey: const OrdinalSortKey(1),
                     excludeSemantics: true,
 
@@ -9522,6 +9651,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                   2]
                                   .lng
                             ]);
+
 
                             Future.delayed(Duration(seconds: 2)).then((onValue){
                               setState(() {
@@ -10536,6 +10666,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         'Filters'); // Replace 'yourBoxName' with the name of your box
     return box.length;
   }
+
 
   Widget buildingDetailPannel() {
     buildingAll element = new buildingAll.buildngAllAPIModel();
@@ -11621,16 +11752,85 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   String nearestAddressForPannel = "";
   bool _isExploreModePannelOpen = false;
   PanelController ExploreModePannelController = new PanelController();
+  List<AnimationController> _controllers = [];
+  List<Animation<double>> _animations = [];
+  bool isPressed = false;
+
+  void EM_startAnimation() {
+    if (!isPressed) {
+      setState(() {
+        isPressed = true;
+      });
+      EM_addRipple();
+    }
+  }
+
+  void EM_stopAnimation() {
+    setState(() {
+      isPressed = false;
+    });
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    _controllers.clear();
+    _animations.clear();
+  }
+
+  void EM_addRipple() {
+    if (!isPressed) return;
+
+    final controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+
+    final currentAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: controller,
+        curve: Curves.easeOut,
+      ),
+    );
+
+    currentAnimation.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          _animations.remove(currentAnimation);
+          _controllers.remove(controller);
+        });
+        controller.dispose();
+      }
+    });
+
+    setState(() {
+      _controllers.add(controller);
+      _animations.add(currentAnimation);
+    });
+
+    controller.forward();
+
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (isPressed) {
+        EM_addRipple();
+      }
+    });
+  }
+
+  late StreamSubscription<MagnetometerEvent> magnetometerSubscription;
+
+
   Widget ExploreModePannel() {
     List<Widget> Exwidgets = [];
     for (int i = 0; i < getallnearestInfo.length; i++) {
-      Exwidgets.add(
-          ExploreModeWidget(getallnearestInfo[i], finalDirections[i]));
+      Exwidgets.add(ExploreModeWidget(getallnearestInfo[i], finalDirections[i]));
     }
+    final size = MediaQuery.of(context).size;
+    // Calculate the diagonal length of the screen
+    final screenDiagonal = sqrt(size.width * size.width + size.height * size.height);
+
     return Visibility(
         visible: _isExploreModePannelOpen,
         child: SlidingUpPanel(
-          maxHeight: 90 + 8 + (getallnearestInfo.length * 100),
+          maxHeight: 90+ (getallnearestInfo.length * 100),
           minHeight: 90 + 8,
           controller: ExploreModePannelController,
           panel: Container(
@@ -11666,20 +11866,156 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                         onPressed: () {
                           isLiveLocalizing = false;
                           HelperClass.showToast("Explore mode is disabled");
+                          _exploreModeMarker.clear();
                           _exploreModeTimer!.cancel();
                           _isExploreModePannelOpen = false;
                           _isBuildingPannelOpen = true;
                           lastBeaconValue = "";
+                          magnetometerSubscription.cancel();
                         },
                         icon: Icon(Icons.close))
                   ],
                 ),
                 SizedBox(
-                  height: 8,
+                  height: 0,
                 ),
                 Column(
                   children: Exwidgets,
-                )
+                ),
+                // Spacer(),
+                // Center(
+                //   child: Container(
+                //     width: 60,
+                //     height: 60,
+                //     margin: EdgeInsets.only(bottom: 20,top: 5),
+                //     color: Colors.white,
+                //     child: Center(
+                //       child: GestureDetector(
+                //         onTapDown: (_) => EM_startAnimation(),
+                //         onTapUp: (_) => EM_stopAnimation(),
+                //         onTapCancel: () => EM_stopAnimation(),
+                //         child: Stack(
+                //           alignment: Alignment.center,
+                //           children: [
+                //             // OverflowBox to allow ripple animations to go beyond screen bounds
+                //             OverflowBox(
+                //               maxWidth: double.infinity,
+                //               maxHeight: double.infinity,
+                //               child: Stack(
+                //                 alignment: Alignment.center,
+                //                 children: [
+                //                   ..._animations.map((animation) => AnimatedBuilder(
+                //                     animation: animation,
+                //                     builder: (context, child) {
+                //                       return Container(
+                //                         width: 50 * (1 + animation.value * screenDiagonal / 25),
+                //                         height: 50 * (1 + animation.value * screenDiagonal / 25),
+                //                         decoration: BoxDecoration(
+                //                           shape: BoxShape.circle,
+                //                           gradient: LinearGradient(
+                //                             colors: [
+                //                               Colors.white.withOpacity(0.2 * (1 - animation.value)),
+                //                               Colors.teal.withOpacity(0.2 * (1 - animation.value)),
+                //                               Colors.white.withOpacity(0.2 * (1 - animation.value)),
+                //                             ],
+                //                           ),
+                //                         ),
+                //                       );
+                //                     },
+                //                   )),
+                //                 ],
+                //               ),
+                //             ),
+                //             Container(
+                //               width: 70,
+                //               height: 70,
+                //               decoration: BoxDecoration(
+                //                 shape: BoxShape.circle,
+                //                 // gradient: const LinearGradient(
+                //                 //   colors: [
+                //                 //     Color(0xFF3B82F6),
+                //                 //     Color(0xFF8B5CF6),
+                //                 //     Color(0xFFEC4899),
+                //                 //   ],
+                //                 // ),
+                //                 boxShadow: [
+                //                   BoxShadow(
+                //                     color: Colors.black.withOpacity(0.1),
+                //                     blurRadius: 10,
+                //                     offset: const Offset(0, 4),
+                //                   ),
+                //                 ],
+                //               ),
+                //               child: ElevatedButton(
+                //                 onPressed: () {
+                //
+                //                   magnetometerSubscription = magnetometerEvents.listen((MagnetometerEvent event) {
+                //                     // Calculate angle using atan2 for rotation
+                //                     double angle = atan2(event.y, event.x);
+                //
+                //                     List<int> tv = tools.eightcelltransition(angle);
+                //
+                //                     if(firstValue != "" ) {
+                //                       List<String> finalDirections = calcDirectionsExploreMode([
+                //                             SingletonFunctionController
+                //                                 .apibeaconmap[firstValue]!
+                //                                 .coordinateX!,
+                //                             SingletonFunctionController
+                //                                 .apibeaconmap[firstValue]!
+                //                                 .coordinateY!
+                //                           ], [
+                //                         SingletonFunctionController
+                //                             .apibeaconmap[firstValue]!
+                //                             .coordinateX! + tv[0],
+                //                         SingletonFunctionController
+                //                             .apibeaconmap[firstValue]!
+                //                             .coordinateY! + tv[1]
+                //                       ], getallnearestInfo);
+                //                       print("finalDirections");
+                //                       print(finalDirections);
+                //
+                //                       print(Exwidgets.length);
+                //                       setState(() {
+                //                         Exwidgets.clear();
+                //                         print(Exwidgets.length);
+                //                       });
+                //                       // for (int i = 0; i < getallnearestInfo.length; i++) {
+                //                       //   if(finalDirections[i] == "Front") {
+                //                       //     Exwidgets.add(ExploreModeWidget(getallnearestInfo[i], finalDirections[i], facing: true,));
+                //                       //   }else{
+                //                       //     Exwidgets.add(ExploreModeWidget(
+                //                       //         getallnearestInfo[i],
+                //                       //         finalDirections[i]));
+                //                       //   }
+                //                       // }
+                //                       // setState(() {
+                //                       //
+                //                       // });
+                //                     }
+                //                   });
+                //                 },
+                //                 onFocusChange: (_){
+                //                   magnetometerSubscription.cancel();
+                //
+                //                 },
+                //                 style: ElevatedButton.styleFrom(
+                //                   padding: const EdgeInsets.only(bottom: 12,left: 5,right: 5,top: 5),
+                //                   backgroundColor: Colors.teal,
+                //                   shadowColor: Colors.tealAccent,
+                //                   shape: const CircleBorder(),
+                //                 ),
+                //                 child: Image.asset('assets/real-time-tracking.png',color: Colors.white,),
+                //               ),
+                //             ),
+                //           ],
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // )
+
+
+
               ],
             ),
           ),
@@ -11710,8 +12046,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     return Visibility(
         visible: _isBuildingPannelOpen && !user.isnavigating,
         child: Semantics(
-          label:
-          "You are near ${user.locationName}, ${LocaleData.floor.getString(context)} ${user.floor}",
+          label: "You are near ${user.locationName}, ${LocaleData.floor.getString(context)} ${user.floor}",
           excludeSemantics: true,
           child: SlidingUpPanel(
             controller: _panelController,
@@ -11878,6 +12213,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     return poly;
   }
+
   void _updateMarkers(double zoom) {
     if (SingletonFunctionController.building.updateMarkers) {
       Set<Marker> updatedMarkers = Set();
@@ -12519,6 +12855,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     _messageTimer?.cancel();
     _controller.dispose();
     WidgetsBinding.instance.removeObserver(this);
+    bluetoothScanAndroidClass.stopScan();
+    PB_controller.dispose(); // Dispose of the controller to free up resources
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    magnetometerSubscription.cancel();
+
     super.dispose();
   }
 
@@ -12650,6 +12993,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   //   ));
   // }
 
+  late Timer EM_TIMER;
+  String EM_LastBeacon = "";
+
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -12675,7 +13022,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 EdgeInsets.only(left: 20), // <--- padding added here
                 initialCameraPosition: _initialCameraPosition,
                 myLocationButtonEnabled: false,
-                myLocationEnabled: true,
+                myLocationEnabled: false,
                 zoomControlsEnabled: false,
                 zoomGesturesEnabled: true,
                 mapToolbarEnabled: false,
@@ -12699,7 +13046,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     .union(_markers)
                     .union(focusturnArrow)
                     .union(Markers)
-                    .union(restBuildingMarker).union(debugMarker).union(nearbyLandmarks.values.toSet()),
+                    .union(restBuildingMarker).union(debugMarker).union(nearbyLandmarks.values.toSet()).union(_exploreModeMarker)
+                .union(_exploreModeDebugBeaconMarker),
                 buildingsEnabled: false,
                 compassEnabled: false,
                 rotateGesturesEnabled: true,
@@ -12712,7 +13060,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   _initMarkers();
                 },
                 onCameraMove: (CameraPosition cameraPosition) {
-
                   mapState.cameraposition = cameraPosition; // User has started panning
 
                   // Check zoom level and decide rendering strategy
@@ -12738,11 +13085,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   if (!mapState.interaction) {
                     mapState.zoom = cameraPosition.zoom;
                   }
-
-                  // Update markers based on zoom level
-                  _updateMarkers(cameraPosition.zoom);
-
-                  if (cameraPosition.zoom < 17 || user.isnavigating) {
+                    isLiveLocalizing? () : _updateMarkers(cameraPosition.zoom);
+                    //_updateBuilding(cameraPosition.zoom);
+                  // _updateMarkers(cameraPosition.zoom);
+                  if (cameraPosition.zoom < 17) {
                     _markers.clear();
                     markerSldShown = false;
                   } else {
@@ -12774,6 +13120,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           ),
           //debug----
 
+
           DebugToggle.PDRIcon
               ? Positioned(
               top: 150,
@@ -12790,9 +13137,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               : Container(),
 
           Positioned(
-            bottom: 150.0, // Adjust the position as needed
+            bottom: isLiveLocalizing?screenHeight*0.6:150.0, // Adjust the position as needed
             right: 16.0,
-
             child: Semantics(
               excludeSemantics: false,
               child: Column(
@@ -12850,7 +13196,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       ),
                     ],
                   ),
-                  Visibility(
+                   Visibility(
                     visible: DebugToggle.StepButton,
                     child: Container(
                         decoration: BoxDecoration(
@@ -12890,6 +13236,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
                   SizedBox(height: 28.0),
                   DebugToggle.Slider ? Text("${user.theta}") : Container(),
+                  //Text(SingletonFunctionController.SC_IL_RSSI_AVERAGE.toString()),
 
                   // Text("coord [${user.coordX},${user.coordY}] \n"
                   //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
@@ -12931,7 +13278,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                         });
                       })
                       : Container(),
-                  !isSemanticEnabled && !PinLandmarkPannel.isPanelOpened()
+                 !isLiveLocalizing? && !isSemanticEnabled && !PinLandmarkPannel.isPanelOpened()
+
                       ? Semantics(
                     label: "Change floor",
                     child: SpeedDial(
@@ -13050,7 +13398,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       ),
                     ),
                   )
-                      : nofloorColumn(),
+                      : nofloorColumn() : Container(),
                   SizedBox(height: 28.0), // Adjust the height as needed
 
                   // Container(
@@ -13070,23 +13418,30 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   //   ),
                   // ),
 
-                  isSemanticEnabled && _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen || PinLandmarkPannel.isPanelOpened() ? Container(): Semantics(
+                  !isLiveLocalizing? isSemanticEnabled && _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen || PinLandmarkPannel.isPanelOpened() ? Container(): Semantics(
                     child: FloatingActionButton(
                       onPressed: () async {
                         //  _getUserLocation();
                         SingletonFunctionController.btadapter.emptyBin();
                         if (!user.isnavigating && !isLocalized) {
-
-                          SingletonFunctionController.btadapter
-                              .stopScanning();
+                          SingletonFunctionController.btadapter.stopScanning();
                           if (Platform.isAndroid) {
-                            SingletonFunctionController.btadapter
-                                .startScanning(
-                                SingletonFunctionController.apibeaconmap);
+                            bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap).then((value){
+                              setState(() {
+                                isLocalized = false;
+                              });
+                              localizeUser(beacon: value);
+                            });
                           } else {
-                            SingletonFunctionController.btadapter
-                                .startScanningIOS(
-                                SingletonFunctionController.apibeaconmap);
+                            //SingletonFunctionController.btadapter.startScanningIOS(SingletonFunctionController.apibeaconmap);
+                            BluetoothScanIOSClass.getInitialLocalizedDevice().then((value){
+                              print("localized--");
+                              print(value);
+                              if(value != null){
+                                localizeUser(beacon: value);
+                              }
+
+                            });
                           }
                           setState(() {
                             isLocalized = true;
@@ -13096,9 +13451,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                           late Timer _timer;
                           _timer = Timer.periodic(
                               Duration(milliseconds: 5000), (timer) {
-                            localizeUser();
+                            //localizeUser();
                             _timer.cancel();
                           });
+
+                          // late Timer _timer;
+                          // _timer = Timer.periodic(
+                          //     Duration(milliseconds: 5000), (timer) {
+                          //   localizeUser().then((value) => {
+                          //     setState(() {
+                          //       isLocalized = false;
+                          //     })
+                          //   });
+                          //   _timer.cancel();
+                          // });
                         } else {
                           _recenterMap();
                         }
@@ -13131,7 +13497,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       backgroundColor:
                       Colors.white, // Set the background color of the FAB
                     ),
-                  ),
+                  ) : Container(),
                   SizedBox(height: 28.0),
                   !user.isnavigating &&
                       (!_isLandmarkPanelOpen &&
@@ -13139,63 +13505,90 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                           _isBuildingPannelOpen &&
                           !_isnavigationPannelOpen && user.initialallyLocalised)
                       ? FloatingActionButton(
-                    onPressed: () async {
-                      if (user.initialallyLocalised) {
-                        setState(() {
-                          if (isLiveLocalizing) {
-                            isLiveLocalizing = false;
-                            HelperClass.showToast(
-                                "Explore mode is disabled");
-                            _exploreModeTimer!.cancel();
-                            _isExploreModePannelOpen = false;
-                            _isBuildingPannelOpen = true;
-                            lastBeaconValue = "";
-                          } else {
-                            speak(
-                                "${LocaleData.exploremodenabled.getString(context)}",
-                                _currentLocale);
-                            isLiveLocalizing = true;
-                            HelperClass.showToast(
-                                "Explore mode enabled");
-                            _exploreModeTimer = Timer.periodic(
-                                Duration(milliseconds: 5000),
-                                    (timer) async {
-                                  if (Platform.isAndroid) {
-                                    SingletonFunctionController.btadapter
-                                        .startScanning(
-                                        SingletonFunctionController
-                                            .apibeaconmap);
-                                  } else {
-                                    SingletonFunctionController.btadapter
-                                        .startScanningIOS(
-                                        SingletonFunctionController
-                                            .apibeaconmap);
-                                  }
-                                  Future.delayed(
-                                      Duration(milliseconds: 2000))
-                                      .then((value) => {
-                                    realTimeReLocalizeUser(
-                                        resBeacons)
-                                    // listenToBin()
-                                  });
-                                });
-                            _isBuildingPannelOpen = false;
-                            _isExploreModePannelOpen = true;
-                          }
-                        });
-                      }
-                    },
-                    child: Semantics(
-                      label: "Explore mode",
-                      child: SvgPicture.asset(
-                        "assets/Navigation_RTLIcon.svg",
-                        // color:
-                        // (isLiveLocalizing) ? Colors.white : Colors.cyan,
-                      ),
-                    ),
-                    backgroundColor: Color(
-                        0xff24B9B0), // Set the background color of the FAB
-                  )
+                          onPressed: () async {
+                            // bluetoothScanAndroidClass.startScan();
+                            // _isBuildingPannelOpen = false;
+                            // _isExploreModePannelOpen = true;
+                            // //ExploreModePannelController.open();
+                            //
+                            // await initializeScanAndLandmarkData().then((_){
+                            //   bluetoothScanAndroidClass.listenToScanExploreMode(SingletonFunctionController.apibeaconmap);
+                            // });
+                            //
+                            //
+                            // EM_TIMER = Timer.periodic(Duration(seconds: 3), (_){
+                            //   // bluetoothScanAndroidClass.listenToScanExploreMode(SingletonFunctionController.apibeaconmap).then((_){
+                            //   //   print("bluetoothScanAndroidClass.EM_NEAREST_BEACON_VALUE");
+                            //   //   print(bluetoothScanAndroidClass.EM_NEAREST_BEACON_VALUE.name);
+                            //   // });
+                            //   //print("EM_LastBeacon Closest Device Details: $closestDeviceDetails");
+                            //   // if(closestDeviceDetails != "No devices found" && closestDeviceDetails != EM_LastBeacon){}
+                            //     exploreModePaintUser(SingletonFunctionController.apibeaconmap!,EM_buildingLandmark.landmarksMap!);
+                            //
+                            //
+                            // });
+                            //
+                            //try-----
+
+                            if (user.initialallyLocalised) {
+                              setState(() {
+                                if (isLiveLocalizing) {
+                                  isLiveLocalizing = false;
+                                  HelperClass.showToast(
+                                      "Explore mode is disabled");
+                                  _exploreModeTimer!.cancel();
+                                  _isExploreModePannelOpen = false;
+                                  _isBuildingPannelOpen = true;
+                                  lastBeaconValue = "";
+                                } else {
+                                  speak(
+                                      "${LocaleData.exploremodenabled.getString(context)}",
+                                      _currentLocale);
+                                  isLiveLocalizing = true;
+                                  HelperClass.showToast(
+                                      "Explore mode enabled");
+                                  _exploreModeTimer = Timer.periodic(
+                                      Duration(milliseconds: 4000),
+                                          (timer) async {
+                                        PB_startAnimation();
+                                        if (Platform.isAndroid) {
+                                          SingletonFunctionController.btadapter
+                                              .startScanning(
+                                              SingletonFunctionController
+                                                  .apibeaconmap);
+                                        } else {
+                                          SingletonFunctionController.btadapter
+                                              .startScanningIOS(
+                                              SingletonFunctionController
+                                                  .apibeaconmap);
+                                        }
+                                        Future.delayed(
+                                            Duration(milliseconds: 1500))
+                                            .then((value) => {
+
+                                          realTimeReLocalizeUser(
+                                              resBeacons)
+
+                                            // listenToBin()
+                                        });
+                                      });
+                                  _isBuildingPannelOpen = false;
+                                  _isExploreModePannelOpen = true;
+                                }
+                              });
+                            }
+                          },
+                          child: Semantics(
+                            label: "Explore mode",
+                            child: SvgPicture.asset(
+                              "assets/Navigation_RTLIcon.svg",
+                              // color:
+                              // (isLiveLocalizing) ? Colors.white : Colors.cyan,
+                            ),
+                          ),
+                          backgroundColor: Color(
+                              0xff24B9B0), // Set the background color of the FAB
+                        )
                       : Container(), // Adjust the height as needed// Adjust the height as needed
                   // FloatingActionButton(
                   //   onPressed: () async {
@@ -13242,7 +13635,29 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           // ):Container(),
           SafeArea(
             child: Stack(
-              children:[Positioned(
+              children:[
+
+                Positioned(
+                  top:25,
+                  left: 30,
+                  right: 30,
+                  child: Container(
+                    height: 3,
+                    child: AnimatedBuilder(
+                      animation: PB_controller,
+                      builder: (context, child) {
+                        return LinearProgressIndicator(
+                          borderRadius: BorderRadius.circular(15), // Apply the border radius directly
+                          value: PBanimation.value, // Progress value between 0.0 and 1.0
+                          minHeight: 6.0, // Customize the height of the progress bar
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.teal), // Customize the color
+                          backgroundColor: Colors.grey[300], // Background color of the progress bar
+                        );
+                      },
+                    ),
+                  )
+                ),
+                !isLiveLocalizing? Positioned(
                   top: 16,
                   left: 16,
                   right: 16,
@@ -13263,7 +13678,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                         ),
                       ),
                     ),
-                  ))] ,
+                  )) : Container()] ,
             ),
           ),
           FutureBuilder(

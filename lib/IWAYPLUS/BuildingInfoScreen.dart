@@ -102,7 +102,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     });
   }
 
-  void apiCall() async{
+  void apiCall() async {
     BuildingAPI().fetchBuildData().then((value){
       setState(() {
         dd = value.data!;
@@ -326,31 +326,52 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                               child: ListTile(
                                 onTap: (){
 
-                                 //if((widget.currentLatLng!.latitude.toStringAsFixed(2)==(28.544277333724025).toStringAsFixed(2) && widget.currentLatLng!.longitude.toStringAsFixed(2)==(77.18803031572772).toStringAsFixed(2)) ){
-                                    wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;
-                                    wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;
+                                  buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
+                                  buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
+                                  buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                  print("allbuildingapi");
+                                  print(allBuildingID);
+                                  // while({
+                                  //
+                                  // }
+                                  // while(!bluetoohEnabled){
+                                  //
+                                  // }
+                                  //customEnableBT(context);
+
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => Navigation(),
+                                    ),
+                                  );
 
 
-                                    buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
-                                    buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
-                                    buildingAllApi.setStoredAllBuildingID(allBuildingID);
-                                    print("allbuildingapi");
-                                    print(allBuildingID);
-                                    // while({
-                                    //
-                                    // }
-                                    // while(!bluetoohEnabled){
-                                    //
-                                    // }
-                                    //customEnableBT(context);
-
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => Navigation(),
-                                      ),
-                                    );
-                                //}else{
+                                //  if((widget.currentLatLng!.latitude.toStringAsFixed(2)==(28.544277333724025).toStringAsFixed(2) && widget.currentLatLng!.longitude.toStringAsFixed(2)==(77.18803031572772).toStringAsFixed(2)) ){
+                                //     wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;
+                                //     wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;
+                                //
+                                //
+                                //     buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
+                                //     buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
+                                //     buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                //     print("allbuildingapi");
+                                //     print(allBuildingID);
+                                //     // while({
+                                //     //
+                                //     // }
+                                //     // while(!bluetoohEnabled){
+                                //     //
+                                //     // }
+                                //     //customEnableBT(context);
+                                //
+                                //     Navigator.push(
+                                //       context,
+                                //       MaterialPageRoute(
+                                //         builder: (context) => Navigation(),
+                                //       ),
+                                //     );
+                                // }else{
                                 //     if(widget.dist==0){
                                 //       wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;
                                 //       wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;
@@ -647,7 +668,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                     ],
                   ),
                 ):Container(),
-                widget.venueWebsite != null?Container(
+                widget.venueWebsite != null ?Container(
                   margin: EdgeInsets.only(left: 12,top:12),
                   width: screenWidth,
                   child: Row(

@@ -54,16 +54,6 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>app_links-app_links_ios_privacy.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>app_links.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
 		<key>app_settings.xcscheme</key>
 		<dict>
 			<key>isShown</key>

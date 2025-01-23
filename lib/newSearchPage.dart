@@ -11,6 +11,7 @@ import 'NAVIGATION/APIMODELS/landmark.dart';
 import 'NAVIGATION/ELEMENTS/DestinationPageChipsWidget.dart';
 import 'NAVIGATION/ELEMENTS/SearchpageCategoryResult.dart';
 import 'NAVIGATION/ELEMENTS/SearchpageResults.dart';
+import 'NAVIGATION/singletonClass.dart';
 
 class NewSearchPage extends StatefulWidget {
   String hintText;
@@ -201,12 +202,20 @@ class _NewsearchpageState extends State<NewSearchPage> {
   }
 
   Future<void> fetchlist() async {
+    land? singletonData = await SingletonFunctionController.building.landmarkdata;
+    
+    if(singletonData != null){
+      landmarkData = singletonData;
+      return;
+    }
+
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
       await landmarkApi().fetchLandmarkData(id: key).then((value) {
         landmarkData.mergeLandmarks(value.landmarks);
         //optionListForUI.addAll(fetchCategories(value));
       });
     });
+
 
 
   }
@@ -356,6 +365,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
         );
         // Search using Fuzzy and build results
         final result = fuse.search(normalizedSearchText);
+        result.sort((a, b) => b.score.compareTo(a.score));
         List<SearchpageResults> newResults = [];
         print("result11-${result}");
         result.forEach((fuseResult) {
@@ -380,9 +390,9 @@ class _NewsearchpageState extends State<NewSearchPage> {
             ));
           }
         });
-
+        List<SearchpageResults> reversed = newResults.reversed.toList();
         setState(() {
-          searchResults = newResults.take(25).toList(); // Limit results to 25
+          searchResults = reversed.take(25).toList(); // Limit results to 25
         });
       }
     }

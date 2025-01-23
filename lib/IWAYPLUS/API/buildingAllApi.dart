@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../../NAVIGATION/API/RefreshTokenAPI.dart';
+import '../../NAVIGATION/APIMODELS/outdoormodel.dart';
 import '/NAVIGATION/APIMODELS/beaconData.dart';
 import '/IWAYPLUS/APIMODELS/buildingAll.dart';
 import '/NAVIGATION/APIMODELS/polylinedata.dart';
@@ -19,6 +20,7 @@ class buildingAllApi {
   static var signInBox = Hive.box('SignInDatabase');
   var versionBox = Hive.box('VersionData');
   String accessToken = signInBox.get("accessToken");
+  static outdoormodel? outBuildingData = null;
   static String selectedID="";
   static String selectedBuildingID="";
   static String selectedVenue="";

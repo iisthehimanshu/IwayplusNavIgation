@@ -25,7 +25,6 @@ class RefreshTokenAPI {
         'Content-Type': 'application/json',
       },
     );
-
     if (response.statusCode == 200) {
       print("in refreshTOken");
       Map<String, dynamic> responseBody = json.decode(response.body);

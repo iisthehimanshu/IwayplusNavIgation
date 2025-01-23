@@ -40,7 +40,7 @@ String getDecryptedData(String encryptedData){
     accessToken = signInBox.get("accessToken");
     final LandMarkBox = LandMarkApiModelBox.getData();
     print("version check${VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id)}");
-    print("version check${id}");
+    print("landmark version check${id}");
     if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingLandmarkDataVersionUpdate[id??buildingAllApi.getStoredString()]! == false){
       print("LANDMARK DATA FORM DATABASE ");
       print(id??buildingAllApi.getStoredString());

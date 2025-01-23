@@ -2988,10 +2988,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
               return;
             }
-          // }catch(e){
-          //   print("error in global annotation api");
-          // }
-
 
           try {
               var waypointData = await waypointapi().fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
@@ -3929,10 +3925,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
 
-  Future<void> addselectedRoomMarker(
-      List<LatLng> polygonPoints,String assetPath ,{
-        Color? color,
-      }) async {
+  Future<void> addselectedRoomMarker(List<LatLng> polygonPoints,String assetPath ,{Color? color}) async {
     // Cancel any ongoing animation
     _controller12?.stop();
     _controller12?.dispose();
@@ -4604,7 +4597,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         _isLandmarkPanelOpen = true;
         PathState.directions = [];
         interBuildingPath.clear();
-        addselectedRoomMarker(coordinates);
+        addselectedRoomMarker(coordinates, 'assets/Generic Marker.png');
       }
     });
   }

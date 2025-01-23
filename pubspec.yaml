@@ -91,12 +91,14 @@ dependencies:
   loading_animation_widget: ^1.2.1
   wakelock_plus: ^1.2.7
   widget_to_marker:
-  app_settings: ^5.1.1
   connectivity_plus: ^6.0.3
   string_similarity: ^2.1.1
   new_version_plus: ^0.0.12
   provider: ^6.1.2
   image:
+  arcore_flutter_plugin:
+
+
 
 
 

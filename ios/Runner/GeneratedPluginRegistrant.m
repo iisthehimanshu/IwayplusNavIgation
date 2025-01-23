@@ -6,12 +6,6 @@
 
 #import "GeneratedPluginRegistrant.h"
 
-#if __has_include(<app_settings/AppSettingsPlugin.h>)
-#import <app_settings/AppSettingsPlugin.h>
-#else
-@import app_settings;
-#endif
-
 #if __has_include(<bluetooth_enable_fork/BluetoothEnablePlugin.h>)
 #import <bluetooth_enable_fork/BluetoothEnablePlugin.h>
 #else
@@ -165,7 +159,6 @@
 @implementation GeneratedPluginRegistrant
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
-  [AppSettingsPlugin registerWithRegistrar:[registry registrarForPlugin:@"AppSettingsPlugin"]];
   [BluetoothEnablePlugin registerWithRegistrar:[registry registrarForPlugin:@"BluetoothEnablePlugin"]];
   [ConnectivityPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"ConnectivityPlusPlugin"]];
   [FPPDeviceInfoPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FPPDeviceInfoPlusPlugin"]];

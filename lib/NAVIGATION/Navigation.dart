@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/NAVIGATION/ELEMENTS/PickupLocationPin.dart';
+import 'package:iwaymaps/NAVIGATION/hello_world.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
 import 'package:iwaymaps/NAVIGATION/path.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
@@ -3110,7 +3111,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             // } catch (e) {}
             print("apicalls testing 3 for $key");
             try{
-            var patchData = await patchAPI().fetchPatchData(id: key);
+              var patchData = await patchAPI().fetchPatchData(id: key);
             }catch(e){
 
             }
@@ -13278,7 +13279,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                         });
                       })
                       : Container(),
-                 !isLiveLocalizing? && !isSemanticEnabled && !PinLandmarkPannel.isPanelOpened()
+                 !isLiveLocalizing? !isSemanticEnabled && !PinLandmarkPannel.isPanelOpened()
 
                       ? Semantics(
                     label: "Change floor",
@@ -13417,6 +13418,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   //     ),
                   //   ),
                   // ),
+
 
                   !isLiveLocalizing? isSemanticEnabled && _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen || PinLandmarkPannel.isPanelOpened() ? Container(): Semantics(
                     child: FloatingActionButton(
@@ -13598,6 +13600,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   //   backgroundColor: Color(
                   //       0xff24B9B0), // Set the background color of the FAB
                   // )
+                  SizedBox(height: 20,),
+                  !isLiveLocalizing? FloatingActionButton(
+                    onPressed: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => HelloWorld()));
+                    },
+                    child: Icon(Icons.area_chart_outlined),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                      BorderRadius.circular(25.0), // Change radius here
+                    ),
+                    backgroundColor: Colors.white,
+                  ) : Container(),
                 ],
               ),
             ),

@@ -272,28 +272,19 @@ class BLueToothClass {
     } else {
       BIN[binnumber]![MacId] = 1 * weight[binnumber]!;
     }
-
-
     //print("number of sample---${numberOfSample[MacId]}");
-
   }
+
   Map<String, double> calculateAverage(){
-
     //HelperClass.showToast("Bin ${BIN} \n number $numberOfSample");
-
     Map<String, double> sumMap = {};
-
     // Iterate over each inner map and accumulate the values for each string key
-
     BIN.values.forEach((innerMap) {
       innerMap.forEach((key, value) {
         sumMap[key] = (sumMap[key] ?? 0.0) + value;
       });
     });
-
-
     // Divide the sum by the number of values for each string key
-
     sumMap.forEach((key, sum) {
       int count = numberOfSample[key]!;
       sumMap[key] = sum / count;

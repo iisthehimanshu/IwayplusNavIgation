@@ -11,6 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'Elements/QRLandmarkScreen.dart';
 import 'FavouriteScreen.dart';
 import 'ProfilePage.dart';
+import 'package:iwaymaps/NAVIGATION/RippleButton.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -28,7 +29,7 @@ class _MainScreenState extends State<MainScreen> {
     MapScreen(),
     QRViewExample(frmMainPage: true,),
     FavouriteScreen(),
-    ProfilePage()
+    RippleButton()
   ];
 
   @override

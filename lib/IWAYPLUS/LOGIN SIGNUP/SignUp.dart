@@ -347,7 +347,7 @@ class _SignUpState extends State<SignUp> {
       'Content-Type': 'application/json'
     };
     var request = http.Request(
-        'POST', Uri.parse('https://dev.iwayplus.in/auth/username'));
+        'POST', Uri.parse('https://maps.iwayplus.in/auth/username'));
     request.body = json.encode({"username": username, "appId":"com.iwayplus.navigation"});
     request.headers.addAll(headers);
 

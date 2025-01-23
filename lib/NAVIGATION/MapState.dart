@@ -9,4 +9,5 @@ class MapState{
   LatLng target  = LatLng(60.543833319119475, 77.18729871127312);
   int layer = 1;
   bool aligned = true;
+  CameraPosition? cameraposition;
 }

@@ -74,18 +74,18 @@ class UserState {
 
   UserState(
       {required this.floor,
-      required this.coordX,
-      required this.coordY,
-      required this.lat,
-      required this.lng,
-      required this.theta,
-      this.key = "",
-      this.bid = "",
-      this.showcoordX = 0,
-      this.showcoordY = 0,
-      this.isnavigating = false,
-      this.coordXf = 0.0,
-      this.coordYf = 0.0});
+        required this.coordX,
+        required this.coordY,
+        required this.lat,
+        required this.lng,
+        required this.theta,
+        this.key = "",
+        this.bid = "",
+        this.showcoordX = 0,
+        this.showcoordY = 0,
+        this.isnavigating = false,
+        this.coordXf = 0.0,
+        this.coordYf = 0.0});
 
   Future<void> move(BuildContext context) async {
     List<Cell> turnPoints = [];
@@ -212,7 +212,7 @@ class UserState {
       }
 
       List<int> cellAnalysis =
-          tools.analyzeCell(cellPath, cellPath[pathobj.index]);
+      tools.analyzeCell(cellPath, cellPath[pathobj.index]);
       List<int> transition = cellPath[pathobj.index].move(theta,
           currPointer: cellAnalysis[1], totalCells: cellAnalysis[0]);
 
@@ -290,15 +290,15 @@ class UserState {
         floor == pathobj.destinationFloor && bid == pathobj.destinationBid;
 
     bool isNearLastTurnPoint = tools.calculateDistance(
-            [turnPoints.last.x, turnPoints.last.y],
-            [pathobj.destinationX, pathobj.destinationY]) <
+        [turnPoints.last.x, turnPoints.last.y],
+        [pathobj.destinationX, pathobj.destinationY]) <
         10;
 
     bool isAtLastTurnPoint =
         showcoordX == turnPoints.last.x && showcoordY == turnPoints.last.y;
 
     bool isNearDestination = tools.calculateDistance([showcoordX, showcoordY],
-            [pathobj.destinationX, pathobj.destinationY]) <
+        [pathobj.destinationX, pathobj.destinationY]) <
         6;
 
     return (isSameFloorAndBuilding &&
@@ -390,9 +390,9 @@ class UserState {
 
   bool isInOutdoor() {
     return (bid == buildingAllApi.outdoorID &&
-            cellPath[pathobj.index].bid == buildingAllApi.outdoorID) &&
+        cellPath[pathobj.index].bid == buildingAllApi.outdoorID) &&
         tools.calculateDistance([showcoordX, showcoordY],
-                [cellPath[pathobj.index].x, cellPath[pathobj.index].y]) >=
+            [cellPath[pathobj.index].x, cellPath[pathobj.index].y]) >=
             3;
   }
 
@@ -413,107 +413,99 @@ class UserState {
   }
 
   void handleNearbyLandmarks(BuildContext context) {
-    List<int> transitionvalue = cellPath[pathobj.index].move(theta);
+    List<int> transitionValue = cellPath[pathobj.index].move(theta);
+
     pathState.nearbyLandmarks.retainWhere((element) {
-      if (element.element!.subType == "room door" &&
-          element.properties!.polygonExist != true) {
+      double distance = tools.calculateDistance([
+        showcoordX,
+        showcoordY
+      ], [
+        element.doorX ?? element.coordinateX!,
+        element.doorY ?? element.coordinateY!
+      ]);
 
-        if (tools.calculateDistance([
-              showcoordX,
-              showcoordY
-            ], [
-              element.doorX ?? element.coordinateX!,
-              element.doorY ?? element.coordinateY!
-            ]) <=
-            5) {
-
-          if (!UserState.ttsOnlyTurns) {
-            speak(
-                convertTolng("Passing by ${element.name}", element.name, 0.0,
-                    context, 0.0, "", ""),
-                lngCode);
-          }
+      if (element.element!.subType == "room door" && element.properties!.polygonExist != true) {
+        if (distance <= 5) {
+          _speakPassingBy(context, element.name);
           return false;
-        } else if(tools.calculateDistance([
-          showcoordX,
-          showcoordY
-        ], [
-          element.doorX ?? element.coordinateX!,
-          element.doorY ?? element.coordinateY!
-        ]) <=
-            10) {
-          print("speak passing by ${tools.calculateDistance([
-            showcoordX,
-            showcoordY
-          ], [
-            element.doorX ?? element.coordinateX!,
-            element.doorY ?? element.coordinateY!
-          ])}");
-          double angle = tools.calculateAngle2(
-              [showcoordX, showcoordY],
-              [showcoordX + transitionvalue[0], showcoordY + transitionvalue[1]],
-              [element.coordinateX!, element.coordinateY!]);
-          if (!UserState.ttsOnlyTurns) {
-            if(tools.angleToClocks(angle, context)=="Straight"){
-              speak(
-                //convertTolng(
-                  "${element.name} door ahead",
-                  // element.name!,
-                  // 0.0,
-                  // context,
-                  // 0.0,
-                  // "",
-                  // ""),
-                  lngCode);
-            }else{
-              speak(
-                //convertTolng(
-                  "${element.name} door is on your ${LocaleData.getProperty5(tools.angleToClocks(angle, context), context)}",
-                  // element.name!,
-                  // 0.0,
-                  // context,
-                  // 0.0,
-                  // "",
-                  // ""),
-                  lngCode);
-            }
-
-          }
+        } else if (distance <= 10) {
+          _speakDoorAheadOrDirection(context, element, transitionValue);
           return false;
         }
-      }
-
-
-
-      else if (tools.calculateDistance([
-            showcoordX,
-            showcoordY
-          ], [
-            element.doorX ?? element.coordinateX!,
-            element.doorY ?? element.coordinateY!
-          ]) <=
-          6) {
-        double angle = tools.calculateAngle2(
-            [showcoordX, showcoordY],
-            [showcoordX + transitionvalue[0], showcoordY + transitionvalue[1]],
-            [element.coordinateX!, element.coordinateY!]);
-        if (!UserState.ttsOnlyTurns) {
-          speak(
-              convertTolng(
-                  "${element.name} is on your ${LocaleData.getProperty5(tools.angleToClocks(angle, context), context)}",
-                  element.name!,
-                  0.0,
-                  context,
-                  0.0,
-                  "",
-                  ""),
-              lngCode);
-        }
+      } else if(element.element!.subType == "Alert" && element.properties != null && element.properties!.alertName != null && element.properties!.alertName!.isNotEmpty){
+        _speakAlert(context, element.properties!.alertName);
+      } else if (distance <= 6) {
+        _speakElementDirection(context, element, transitionValue);
         return false;
       }
+
       return true;
     });
   }
+
+  void _speakPassingBy(BuildContext context, String? name) {
+    if (!UserState.ttsOnlyTurns) {
+      speak(
+          convertTolng("Passing by $name", name, 0.0, context, 0.0, "", ""),
+          lngCode
+      );
+    }
+  }
+
+  void _speakDoorAheadOrDirection(BuildContext context, dynamic element, List<int> transitionValue) {
+    double angle = tools.calculateAngle2(
+        [showcoordX, showcoordY],
+        [showcoordX + transitionValue[0], showcoordY + transitionValue[1]],
+        [element.coordinateX!, element.coordinateY!]
+    );
+
+    if (!UserState.ttsOnlyTurns) {
+      String direction = tools.angleToClocks(angle, context);
+      if (direction == "Straight") {
+        speak("${element.name} door ahead", lngCode);
+      } else {
+        speak(
+            "${element.name} door is on your ${LocaleData.getProperty5(direction, context)}",
+            lngCode
+        );
+      }
+    }
+  }
+
+  void _speakAlert(BuildContext context, String? name) {
+    if (!UserState.ttsOnlyTurns) {
+      speak(
+          convertTolng("Alert, $name ahead ", name, 0.0, context, 0.0, "", ""),
+          lngCode
+      );
+    }
+  }
+
+  void _speakElementDirection(BuildContext context, dynamic element, List<int> transitionValue) {
+    double angle = tools.calculateAngle2(
+        [showcoordX, showcoordY],
+        [showcoordX + transitionValue[0], showcoordY + transitionValue[1]],
+        [element.coordinateX!, element.coordinateY!]
+    );
+
+    if (!UserState.ttsOnlyTurns) {
+      speak(
+          convertTolng(
+              "${element.name} is on your ${LocaleData.getProperty5(tools.angleToClocks(angle, context), context)}",
+              element.name!,
+              0.0,
+              context,
+              0.0,
+              "",
+              ""
+          ),
+          lngCode
+      );
+    }
+  }
+
+
+
 
   void updateDisplayCoordinates() {
     showcoordX = cellPath[pathobj.index].x;
@@ -535,7 +527,7 @@ class UserState {
     updateGlobalCoordinates();
 
     String? previousBuildingName =
-        b.Building.buildingData?[cellPath[pathobj.index - 1].bid];
+    b.Building.buildingData?[cellPath[pathobj.index - 1].bid];
     String? nextBuildingName = b.Building.buildingData?[pathobj.destinationBid];
 
     if (previousBuildingName != null && nextBuildingName != null) {
@@ -593,7 +585,7 @@ class UserState {
     coordX = coordX + transitionvalue[0];
     coordY = coordY + transitionvalue[1];
     List<double> values =
-        tools.localtoglobal(coordX, coordY, building!.patchData[bid]);
+    tools.localtoglobal(coordX, coordY, building!.patchData[bid]);
     lat = values[0];
     lng = values[1];
     if (isnavigating && pathobj.path.isNotEmpty && pathobj.numCols![bid]![floor] != 0) {
@@ -644,8 +636,8 @@ class UserState {
     } else if (name != null &&
         msg ==
             "$name is on your ${(
-              tools.angleToClocks(agl, context),
-              context
+            tools.angleToClocks(agl, context),
+            context
             )}") {
       if (lngCode == 'en') {
         return msg;
@@ -676,8 +668,9 @@ class UserState {
       } else {
         return "$destname की ओर आगे बढ़ते रहें";
       }
+    }else{
+      return msg;
     }
-    return "";
   }
 
   Future<void> checkForMerge() async {
@@ -723,7 +716,7 @@ class UserState {
     coordY = showcoordY;
     pathobj.index = index + 1;
     List<double> values =
-        tools.localtoglobal(coordX, coordY, building!.patchData[bid]);
+    tools.localtoglobal(coordX, coordY, building!.patchData[bid]);
     lat = values[0];
     lng = values[1];
     createCircle(values[0], values[1]);
@@ -763,8 +756,8 @@ class UserState {
       for (int j = 0; j < turnPoints.length; j++) {
         if (cellPath[i] == turnPoints[j]) {
           if (tools.calculateDistance(
-                  [cellPath[pathobj.index].x, cellPath[pathobj.index].y],
-                  [turnPoints[j].x, turnPoints[j].y]) <=
+              [cellPath[pathobj.index].x, cellPath[pathobj.index].y],
+              [turnPoints[j].x, turnPoints[j].y]) <=
               10) {
             pathobj.index = cellPath.indexOf(turnPoints[j]);
           }

@@ -101,7 +101,9 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
       allBuildingID[element.sId!] = kk;
     });
   }
-  void apiCall() async{
+
+  void apiCall() async {
+    
     BuildingAPI().fetchBuildData().then((value){
       setState(() {
         dd = value.data!;
@@ -379,8 +381,8 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                         child: ClipRRect(
                                           borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8),bottomLeft:Radius.circular(8),bottomRight: Radius.circular(8)),
                                           child: Image.network(
-                                            // "https://dev.iwayplus.in/uploads/${widget.imageURL}",
-                                            "https://dev.iwayplus.in/uploads/${currentData.venuePhoto}",
+                                            // "https://maps.iwayplus.in/uploads/${widget.imageURL}",
+                                            "https://maps.iwayplus.in/uploads/${currentData.venuePhoto}",
                                             // You can replace the placeholder image URL with your default image URL
                                             errorBuilder: (context, error, stackTrace) {
                                               return Image.asset(
@@ -474,8 +476,8 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                 //         child: ClipRRect(
                                 //           borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8),bottomLeft:Radius.circular(8),bottomRight: Radius.circular(8)),
                                 //           child: Image.network(
-                                //             // "https://dev.iwayplus.in/uploads/${widget.imageURL}",
-                                //             "https://dev.iwayplus.in/uploads/${currentData.venuePhoto}",
+                                //             // "https://maps.iwayplus.in/uploads/${widget.imageURL}",
+                                //             "https://maps.iwayplus.in/uploads/${currentData.venuePhoto}",
                                 //             // You can replace the placeholder image URL with your default image URL
                                 //             errorBuilder: (context, error, stackTrace) {
                                 //               return Image.asset(
@@ -634,7 +636,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                     ],
                   ),
                 ):Container(),
-                widget.venueWebsite != null?Container(
+                widget.venueWebsite != null ?Container(
                   margin: EdgeInsets.only(left: 12,top:12),
                   width: screenWidth,
                   child: Row(

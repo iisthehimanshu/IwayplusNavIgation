@@ -33,7 +33,7 @@ class GPS {
       locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
     ).listen(
           (Position position) {
-            _positionController.add(position); // Forward position updates to the stream
+        _positionController.add(position); // Forward position updates to the stream
       },
     );
   }

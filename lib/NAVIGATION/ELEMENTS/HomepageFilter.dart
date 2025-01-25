@@ -10,7 +10,7 @@ class HomepageFilter extends StatefulWidget {
   final String svgPath;
   final String text;
   bool selected;
-  IconData icon;
+  String icon;
   final Function(bool selected) onSelect;
 
   HomepageFilter({
@@ -60,7 +60,8 @@ class _HomepageFilterState extends State<HomepageFilter> {
           children: <Widget>[
             Container(
               margin: EdgeInsets.only(left: 4),
-              child: Icon(widget.icon,size: 18,),
+              child: Image.asset(widget.icon,width: 20,height: 20,),
+
             ),
             Container(
               margin: EdgeInsets.only(left: 8, right: 4),

@@ -7,7 +7,7 @@ import Foundation
 
 import connectivity_plus
 import device_info_plus
-import flutter_blue_plus
+import flutter_blue_plus_darwin
 import flutter_local_notifications
 import flutter_localization
 import flutter_tts
@@ -17,9 +17,8 @@ import path_provider_foundation
 import share_plus
 import shared_preferences_foundation
 import speech_to_text_macos
-import sqflite
+import sqflite_darwin
 import url_launcher_macos
-import wakelock_plus
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   ConnectivityPlusPlugin.register(with: registry.registrar(forPlugin: "ConnectivityPlusPlugin"))
@@ -36,5 +35,4 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   SpeechToTextMacosPlugin.register(with: registry.registrar(forPlugin: "SpeechToTextMacosPlugin"))
   SqflitePlugin.register(with: registry.registrar(forPlugin: "SqflitePlugin"))
   UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))
-  WakelockPlusMacosPlugin.register(with: registry.registrar(forPlugin: "WakelockPlusMacosPlugin"))
 }

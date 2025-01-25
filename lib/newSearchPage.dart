@@ -34,7 +34,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
   String searchHintString = "";
   List<SearchpageResults> searchResults = [];
   List<Widget> topSearches=[];
-  int vall = -1;
+  int vall = 1;
   Set<String> optionListItemBuildingName = {};
   List<Widget> searcCategoryhResults = [];
   int lastIndex = -1;
@@ -79,12 +79,12 @@ class _NewsearchpageState extends State<NewSearchPage> {
     setState(() {
       isUpdated=true;
     });
-   try {
+   // try {
      print("entered here");
      await Future.forEach(
          landmarkData.landmarksMap!.entries, (MapEntry keyValue) async {
        var value = keyValue.value;
-       if (value.name != null &&
+       if (value.name!= null &&
            (value.element!.subType == "restRoom" ||
                value.element!.subType == "Cafeteria" ||
                value.element!.subType == "main entry" ||
@@ -111,9 +111,14 @@ class _NewsearchpageState extends State<NewSearchPage> {
          }
        }
      });
-   }catch(e){
-     print("error in updating liist ${e}");
-   }
+     for (int i = 0; i < optionListForUI.length; i++){
+       if (optionListForUI.contains(widget.previousFilter)){
+         vall = i;
+       }
+     }
+   // }catch(e){
+   //   print("error in updating liist ${e}");
+   // }
     setState(() {
       isUpdated=false;
     });
@@ -123,6 +128,8 @@ class _NewsearchpageState extends State<NewSearchPage> {
   void initState() {
     // TODO: implement initState
     fetchandBuild();
+
+
     if(widget.hintText!=""){
       searchHintString=widget.hintText;
     }

@@ -4604,7 +4604,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         _isLandmarkPanelOpen = true;
         PathState.directions = [];
         interBuildingPath.clear();
-        addselectedRoomMarker(coordinates);
+        addselectedRoomMarker(coordinates,'assets/Generic Marker.png');
       }
     });
   }
@@ -4709,6 +4709,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       fillColor: Color(0xffE8E3E7),
                       consumeTapEvents: true,
                       onTap: () {
+                        print("polygion tapped");
                         polygonTap(coordinates, polyArray.id!);
                       }));
                 }
@@ -4982,7 +4983,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,'assets/Generic Marker.png',
+                            addselectedRoomMarker(coordinates,'assets/MapMaleWashroom.png',
                                 color: Colors.white);
                           }
                         });
@@ -5010,7 +5011,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                         setState(() {
                           tappedPolygonCoordinates=coordinates;
                         });
-
 
                         moveCameraSmoothly(controller: _googleMapController, targetPosition:  CameraPosition(
                             target: tools.calculateRoomCenterinLatLng(coordinates),zoom:22), currTarget: LatLng(user.lat,user.lng));
@@ -5044,7 +5044,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,'assets/Generic Marker.png',
+                            addselectedRoomMarker(coordinates,'assets/MapFemaleWashroom.png',
                                 color: Colors.white);
                           }
                         });
@@ -5445,7 +5445,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             //   ImageConfiguration(size: Size(44, 44)),
             //   getImagesFromMarker('assets/location_on.png',50),
             // );
-
             BitmapDescriptor textMarker;
             String markerText;
             markerText = landmarks[i].name??"";
@@ -6674,7 +6673,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                         ),
                       ),
                       onPressed: () async {
-                        moveCameraSmoothly(controller: _googleMapController, targetPosition: CameraPosition(target: LatLng(user.lat,user.lng),zoom: 22), currTarget: tools.calculateRoomCenterinLatLng(tappedPolygonCoordinates));
+                        if(tappedPolygonCoordinates.isNotEmpty){
+                          moveCameraSmoothly(controller: _googleMapController, targetPosition: CameraPosition(target: LatLng(user.lat,user.lng),zoom: 22), currTarget: tools.calculateRoomCenterinLatLng(tappedPolygonCoordinates));
+                        }
                         _polygon.clear();
                         cachedPolygon.clear();
                         // circles.clear();
@@ -8182,88 +8183,101 @@ int currentCols=0;
     );
   }
 
-  void addDirectionsWidget(){
-
-  }
+  void addDirectionsWidget(){}
 bool _isPlaying=false;
+  bool _isCancelled = false;
   Future<void> callPreviewAnimation() async {
-    print("singleRoute ${singleroute}");
-    List<LatLng> currentCoordinates=[];
-    Set<Marker> innerMarker=Set();
-    await SingletonFunctionController.building.landmarkdata!.then((value) async {
-      List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(user.cellPath, value.landmarksMap!, 5);
-      List<int> turnPoints=tools.getTurnpoints(pathList, currentCols);
-      for (int i = 0; i<pathList.length-2;i++){
-        int node = pathList[i];
-        int node1=pathList[i+2];
-        int row1 = (node1 % currentCols); //divide by floor length
-        int col1 = (node1 ~/ currentCols);
-        int row = (node % currentCols); //divide by floor length
-        int col = (node ~/ currentCols); //divide by floor length
-        List<double> value = tools.localtoglobal(
-            row, col, SingletonFunctionController.building.patchData[currentBid]);
-        List<double> value1 = tools.localtoglobal(row1, col1, SingletonFunctionController.building.patchData[currentBid]);
-        currentCoordinates.add(LatLng(value[0], value[1]));
-        if (singleroute[currentBid] == null) {
-          singleroute.putIfAbsent(currentBid, () => Map());
-        }
-        if (singleroute[currentBid]![currentFloor] != null) {
-          gmap.Polyline oldPolyline = singleroute[currentBid]![currentFloor]!.firstWhere(
-                (polyline) => polyline.polylineId.value == currentBid,
-          );
-          gmap.Polyline updatedPolyline = gmap.Polyline(
-            polylineId: oldPolyline.polylineId,
-            points: currentCoordinates,
-            color: oldPolyline.color,
-            width: oldPolyline.width,
-          );
-          setState((){
-            if(i<nearbyLandmarks.length-1){
-               try{
-                List<double> value1 = tools.localtoglobal(nearbyLandmarks[i].coordinateX!, nearbyLandmarks[i].coordinateY!, SingletonFunctionController.building.patchData[currentBid]);
-                innerMarker.add(
-                  Marker(
-                    markerId: MarkerId('previewMarker${nearbyLandmarks[i].sId}'),
-                    position: LatLng(value1[0],value[1]),
-                    icon: BitmapDescriptor.defaultMarker,
-                  ),
-                );
-              }catch(e){
-                print("error in preview markers ${e}");
-              }
-            }
-            // Remove the old polyline and add the updated polyline
-            singleroute[currentBid]![currentFloor]!.remove(oldPolyline);
-            singleroute[currentBid]![currentFloor]!.add(updatedPolyline);
-          });
-        } else {
-          setState((){
-            singleroute[currentBid]!.putIfAbsent(currentFloor, () => Set());
-            singleroute[currentBid]![currentFloor]?.add(gmap.Polyline(
-              polylineId: PolylineId("$currentBid"),
+    // If already playing, return immediately
+    if (_isPlaying) return Future.value();
+    // Set the flag to true to indicate the function is running
+    _isPlaying = true;
+    _isCancelled = false;
+    try {
+      print("singleRoute $singleroute");
+      List<LatLng> currentCoordinates = [];
+      Set<Marker> innerMarker = Set();
+      await SingletonFunctionController.building.landmarkdata!.then((value) async {
+        List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(user.cellPath, value.landmarksMap!, 5);
+        List<int> turnPoints = tools.getTurnpoints(pathList, currentCols);
+
+        for (int i = 0; i < pathList.length - 2; i++) {
+          // Check for cancellation before proceeding
+          if (_isCancelled) {
+            print("callPreviewAnimation cancelled.");
+            return;
+          }
+          int node = pathList[i];
+          int node1 = pathList[i + 2];
+          int row1 = (node1 % currentCols); // divide by floor length
+          int col1 = (node1 ~/ currentCols);
+          int row = (node % currentCols); // divide by floor length
+          int col = (node ~/ currentCols);
+
+          List<double> value = tools.localtoglobal(row, col, SingletonFunctionController.building.patchData[currentBid]);
+          List<double> value1 = tools.localtoglobal(row1, col1, SingletonFunctionController.building.patchData[currentBid]);
+          currentCoordinates.add(LatLng(value[0], value[1]));
+
+          if (singleroute[currentBid] == null) {
+            singleroute.putIfAbsent(currentBid, () => Map());
+          }
+
+          if (singleroute[currentBid]![currentFloor] != null) {
+            gmap.Polyline oldPolyline = singleroute[currentBid]![currentFloor]!.firstWhere(
+                  (polyline) => polyline.polylineId.value == currentBid,
+            );
+            gmap.Polyline updatedPolyline = gmap.Polyline(
+              polylineId: oldPolyline.polylineId,
               points: currentCoordinates,
-              color: Colors.blueAccent,
-              width: 8,
-            ));
-          });
-        }
-        if(turnPoints.contains(node))
-        {
-          print("rendering path");
-          await alignMapToPath([value[0],value[1]], [value1[0],value1[1]],isTurn:true);
-        }else{
-          await alignMapToPath([value[0],value[1]], [value1[0],value1[1]]);
-        }
-        await Future.delayed(Duration(microseconds: 2500));
-        currentCoordinates.add(LatLng(value[0], value[1]));
-      }
-    });
-    PathState.innerMarker[currentFloor] = innerMarker;
-    pathMarkers.putIfAbsent(currentBid, () => Map());
-    pathMarkers[currentBid]![currentFloor] = innerMarker;
+              color: oldPolyline.color,
+              width: oldPolyline.width,
+            );
+            setState((){
+              if (i < nearbyLandmarks.length - 1) {
+                // Add additional marker logic here if needed
+              }
+              // Remove the old polyline and add the updated polyline
+              singleroute[currentBid]![currentFloor]!.remove(oldPolyline);
+              singleroute[currentBid]![currentFloor]!.add(updatedPolyline);
+            });
+          }else{
+            setState(() {
+              singleroute[currentBid]!.putIfAbsent(currentFloor, () => Set());
+              singleroute[currentBid]![currentFloor]?.add(gmap.Polyline(
+                polylineId: PolylineId("$currentBid"),
+                points: currentCoordinates,
+                color: Colors.blueAccent,
+                width: 8,
+              ));
+            });
+          }
 
+          if (turnPoints.contains(node)) {
+            print("rendering path");
+            await alignMapToPath([value[0], value[1]], [value1[0], value1[1]], isTurn: true);
+          } else {
+            await alignMapToPath([value[0], value[1]], [value1[0], value1[1]]);
+          }
 
+          // Check for cancellation during delay
+          await Future.delayed(Duration(microseconds: 2500));
+          if (_isCancelled) {
+            print("callPreviewAnimation cancelled during delay.");
+            return;
+          }
+          currentCoordinates.add(LatLng(value[0], value[1]));
+        }
+      });
+      PathState.innerMarker[currentFloor] = innerMarker;
+      pathMarkers.putIfAbsent(currentBid, () => Map());
+      pathMarkers[currentBid]![currentFloor] = innerMarker;
+    } catch (e) {
+      print("Error in callPreviewAnimation: $e");
+    } finally {
+      // Reset the flag to false when function execution completes
+      _isPlaying = false;
+    }
   }
+
   
   final FocusNode _directionFocus=FocusNode();
   final FocusNode _startbuttonFocus=FocusNode();
@@ -8726,16 +8740,16 @@ bool _isPlaying=false;
                                           Semantics(
                                             excludeSemantics: true,
                                             child: IconButton(
-                                                onPressed: () {
+                                                onPressed:(){
                                                   setState((){
-                                                    _isPlaying=!_isPlaying;
                                                     singleroute.clear();
                                                     pathCovered.clear();
+                                                    startingNavigation=false;
                                                   });
                                                   //currently using for play preview animation
                                                   callPreviewAnimation().then((value){
                                                     setState((){
-                                                      _isPlaying=false;
+                                                      startingNavigation=true;
                                                     });
                                                   });
                                                   // String msg=(pathState().sourceFloor!=pathState().destinationFloor)?tools.generateNarration(UserState.mapPathGuide,isMultiFloor: true):tools.generateNarration(UserState.mapPathGuide,isMultiFloor: false);
@@ -8843,8 +8857,6 @@ bool _isPlaying=false;
                                                   )),
                                             ),
                                           ),
-
-
                                         ],
                                       ),
                                       // Text(
@@ -8938,19 +8950,16 @@ bool _isPlaying=false;
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                         children: [
-                                          kIsWeb?Container():Semantics(
+                                          kIsWeb?Container():
+                                          (!startingNavigation)?CircularProgressIndicator():Semantics(
                                             label: "Start Navigation",
                                             hint: "Button. Double tap to activate",
-
-
                                             excludeSemantics: false,
-
-                                            child: ElevatedButton.icon(
+                                            child:
+                                            ElevatedButton.icon(
                                               icon: Icon(Icons.navigation, color: Colors.white),
-                                              label: Text('Start', style: TextStyle(color: Colors.white)),
+                                              label:Text('Start', style: TextStyle(color: Colors.white)),
                                               onPressed: () async {
-
-
                                                 if(startingNavigation){
                                                   tools.setBuildingAngle(
                                                       SingletonFunctionController
@@ -13143,7 +13152,7 @@ bool _isPlaying=false;
             child: Container(
               child: GoogleMap(
                 padding:
-                EdgeInsets.only(left: 20), // <--- padding added here
+                EdgeInsets.only(left: 0), // <--- padding added here
                 initialCameraPosition: _initialCameraPosition,
                 myLocationButtonEnabled: false,
                 myLocationEnabled: false,
@@ -13185,7 +13194,6 @@ bool _isPlaying=false;
                 },
                 onCameraMove: (CameraPosition cameraPosition) {
                   mapState.cameraposition = cameraPosition; // User has started panning
-
                   // Check zoom level and decide rendering strategy
                   if (cameraPosition.zoom > 16.8) {
                     focusBuildingChecker(cameraPosition);
@@ -13195,9 +13203,11 @@ bool _isPlaying=false;
                       outdoorID: buildingAllApi.outdoorID,
                     );
                   } else {
+                    setState(() {
+                      isSemanticEnabled=true;
+                    });
                     renderCampusPatchTransition([buildingAllApi.outdoorID]);
                   }
-
                   // Update map alignment based on camera position
                   mapState.aligned = cameraPosition.target.latitude.toStringAsFixed(5) ==
                       mapState.target.latitude.toStringAsFixed(5);
@@ -13342,7 +13352,6 @@ bool _isPlaying=false;
                                       .nonWalkable[user.bid]![user.floor]!,
                                   reroute);
                               if (isvalid) {
-
                                 user.move(context).then((value) {
                                   print("renderedddd here");
                                   renderHere();
@@ -13357,11 +13366,9 @@ bool _isPlaying=false;
                             },
                             icon: Icon(Icons.directions_walk))),
                   ),
-
                   SizedBox(height: 28.0),
                   DebugToggle.Slider ? Text("${user.theta}") : Container(),
                   //Text(SingletonFunctionController.SC_IL_RSSI_AVERAGE.toString()),
-
                   // Text("coord [${user.coordX},${user.coordY}] \n"
                   //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
                   // "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
@@ -13403,7 +13410,6 @@ bool _isPlaying=false;
                       })
                       : Container(),
                  !isLiveLocalizing?  !isSemanticEnabled && !PinLandmarkPannel.isPanelOpened()
-
                       ? Semantics(
                     label: "Change floor",
                     child: SpeedDial(
@@ -13417,7 +13423,6 @@ bool _isPlaying=false;
                           fontWeight: FontWeight.w500,
                           color: Color(0xff24b9b0),
                           height: 19 / 16,
-
                         ),
                       ),
                       activeIcon: Icons.close,
@@ -13458,6 +13463,7 @@ bool _isPlaying=false;
                                 ? Colors.white
                                 : Color(0xff24b9b0),
                             onTap: () {
+
                               if(revfloorList[i] == PathState.destinationFloor){
                                 _polygon.clear();
                                 _polygon.add(Polygon(
@@ -13470,11 +13476,19 @@ bool _isPlaying=false;
                               }else{
                                 _polygon.clear();
                               }
-
-
                               //_polygon.clear();
                               print("_polygon.length");
                               print(_polygon.length);
+
+                              if(user.initialallyLocalised && revfloorList[i]!=user.floor){
+                                setState(() {
+                                  _isBuildingPannelOpen=false;
+                                });
+                              }else{
+                                setState(() {
+                                  _isBuildingPannelOpen=true;
+                                });
+                              }
 
                               cachedPolygon.clear();
                               circles.clear();
@@ -13514,8 +13528,6 @@ bool _isPlaying=false;
                                     bid: buildingAllApi
                                         .getStoredString());
                               });
-
-
                             },
                           );
                         },
@@ -13564,13 +13576,11 @@ bool _isPlaying=false;
                               if(value != null){
                                 localizeUser(beacon: value);
                               }
-
                             });
                           }
                           setState(() {
                             isLocalized = true;
-                            resBeacons =
-                                SingletonFunctionController.apibeaconmap;
+                            resBeacons = SingletonFunctionController.apibeaconmap;
                           });
                           late Timer _timer;
                           _timer = Timer.periodic(
@@ -13578,7 +13588,6 @@ bool _isPlaying=false;
                             //localizeUser();
                             _timer.cancel();
                           });
-
                           // late Timer _timer;
                           // _timer = Timer.periodic(
                           //     Duration(milliseconds: 5000), (timer) {

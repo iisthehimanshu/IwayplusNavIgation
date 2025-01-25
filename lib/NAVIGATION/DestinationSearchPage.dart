@@ -338,8 +338,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     'Entry',
     'Lift',
     'Reception',
-
-
   ];
   List<IconData> _icons = [
     Icons.wash_sharp,

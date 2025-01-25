@@ -33,18 +33,11 @@ class HomepageSearch extends StatefulWidget {
 class _HomepageSearchState extends State<HomepageSearch> {
   List<String> optionsTags = [];
   List<String> floorOptionsTags = [];
-
   List<String> options = [
     'Washroom', 'Entry',
     'Reception', 'Lift',
   ];
 
-  List<IconData> _icons = [
-    Icons.wash_sharp,
-    Icons.door_front_door_outlined,
-    Icons.desk_sharp,
-    Icons.elevator
-  ];
   //double ratio=0.0;
   String currentSelectedFilter = "";
   int vall = 0;
@@ -105,7 +98,6 @@ class _HomepageSearchState extends State<HomepageSearch> {
                         child: Semantics(
                           sortKey: const OrdinalSortKey(0),
                           label: "${LocaleData.waytogo.getString(context)}",
-
                           child: InkWell(
                             onTap: (){
                               Navigator.push(
@@ -165,7 +157,6 @@ class _HomepageSearchState extends State<HomepageSearch> {
                       ),
                     ),
                   ),
-
                   Container(
                     width: 47,
                     height: 48,
@@ -189,7 +180,6 @@ class _HomepageSearchState extends State<HomepageSearch> {
                             widget.fromSourceAndDestinationPage(value);
                           });
                         },
-
                         icon: Semantics(
                           label: "Get Direction",
                           child: SvgPicture.asset(
@@ -235,25 +225,30 @@ class _HomepageSearchState extends State<HomepageSearch> {
     );
   }
 }
-
-IconData getIcon(String option) {
+List<String> _icons=[
+  'assets/washroomIcon.png',
+  'assets/entryExit.png',
+  'assets/receptionIcon.png',
+  'assets/liftIcon.png'
+];
+String getIcon(String option) {
   switch (option.toLowerCase()) {
     case 'washroom':
-      return Icons.wash_sharp;
+      return 'assets/washroomIcon.png';
     case 'cafeteria':
-      return Icons.local_cafe;
+      return 'assets/cafeteria.png';
     case 'drinking water':
-      return Icons.water_drop;
+      return 'assets/waterPoint.png';
     case 'atm':
-      return Icons.atm_sharp;
+      return 'assets/atmIcon.png';
     case 'entry':
-      return Icons.door_front_door_outlined;
+      return 'assets/entryExit.png';
     case 'lift':
-      return Icons.elevator;
+      return 'assets/liftIcon.png';
     case 'reception':
-      return Icons.desk_sharp;
+      return 'assets/receptionIcon.png';
     default:
-      return Icons.help_outline; // Return a default icon if no match is found
+      return 'assets/washroomIcon.png'; // Return a default icon if no match is found
   }
 }
 

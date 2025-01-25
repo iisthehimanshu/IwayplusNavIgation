@@ -89,7 +89,6 @@ dependencies:
   flutter_beep: ^1.0.0
   qr_code_scanner:
   loading_animation_widget: ^1.2.1
-  wakelock_plus: ^1.2.7
   widget_to_marker:
   app_settings: ^5.1.1
   connectivity_plus: ^6.0.3

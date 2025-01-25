@@ -8716,9 +8716,9 @@ bool _isPlaying=false;
                                               textAlign: TextAlign.left,
                                             ),
                                           ),
-                                          Semantics(
-                                            excludeSemantics: true,
-                                            child: IconButton(
+                                          !kIsWeb?Semantics(
+                                              excludeSemantics: true,
+                                              child: IconButton(
                                                 onPressed: () {
                                                   setState((){
                                                     _isPlaying=!_isPlaying;
@@ -8739,7 +8739,7 @@ bool _isPlaying=false;
                                                   //   });
                                                   // });
                                                 },
-                                                icon:Icon(Icons.play_circle_outline_rounded),color: (_isPlaying)?Colors.blue:Colors.black,)),
+                                                icon:Icon(Icons.play_circle_outline_rounded),color: (_isPlaying)?Colors.blue:Colors.black,)):Container(),
                                           Spacer(),
                                           Semantics(
                                             excludeSemantics: true,
@@ -8808,8 +8808,8 @@ bool _isPlaying=false;
                                                         .building
                                                         .selectedLandmarkID = null;
                                                     PathState = pathState.withValues(-1, -1, -1, -1, -1, -1,
-                                                            null,
-                                                            0);
+                                                        null,
+                                                        0);
                                                     PathState.path.clear();
                                                     PathState.sourcePolyID = "";
                                                     PathState.destinationPolyID ="";
@@ -8819,9 +8819,9 @@ bool _isPlaying=false;
                                                     //realWorldPath.clear();
                                                     PathState.directions = [];
                                                     interBuildingPath.clear();
-                                                   // if(user.isnavigating==false){
+                                                    // if(user.isnavigating==false){
                                                     clearPathVariables();
-                                                   //}
+                                                    //}
                                                     fitPolygonInScreen(patch.first);
                                                     exitNavigation();
                                                     setState((){
@@ -8922,394 +8922,27 @@ bool _isPlaying=false;
                                   crossAxisAlignment:
                                   CrossAxisAlignment.start,
                                   children: [
-                                    // SizedBox(
-                                    //   height: 22,
-                                    // ),
                                     isSemanticEnabled? Container(
                                       padding: EdgeInsets.only(bottom: 0),
                                       color: Colors.white, // Background color set to white
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                         children: [
-                                          kIsWeb?Container():Semantics(
-                                            label: "Start Navigation",
-                                            hint: "Button. Double tap to activate",
-
-
-                                            excludeSemantics: false,
-
-                                            child: ElevatedButton.icon(
-                                              icon: Icon(Icons.navigation, color: Colors.white),
-                                              label: Text('Start', style: TextStyle(color: Colors.white)),
-                                              onPressed: () async {
-
-
-                                                if(startingNavigation){
-                                                  tools.setBuildingAngle(
-                                                      SingletonFunctionController
-                                                          .building
-                                                          .patchData[PathState
-                                                          .sourceBid]!
-                                                          .patchData!
-                                                          .buildingAngle!);
-                                                  if (PathState.sourceX ==
-                                                      PathState
-                                                          .destinationX &&
-                                                      PathState.sourceY ==
-                                                          PathState
-                                                              .destinationY) {
-                                                    //HelperClass.showToast("Source and Destination can not be same");
-                                                    setState(() {
-                                                      _isRoutePanelOpen =
-                                                      false;
-                                                    });
-                                                    closeNavigation();
-                                                    return;
-                                                  }
-                                                  setState(() {
-                                                    circles.clear();
-                                                    _markers.clear();
-                                                    markerSldShown = false;
-
-                                                  });
-                                                  user.onConnection = false;
-                                                  PathState.didPathStart =
-                                                  true;
-
-                                                  UserState.cols =
-                                                  SingletonFunctionController
-                                                      .building
-                                                      .floorDimenssion[
-                                                  PathState
-                                                      .sourceBid]![PathState
-                                                      .sourceFloor]![0];
-                                                  UserState
-                                                      .rows = SingletonFunctionController
-                                                      .building
-                                                      .floorDimenssion[
-                                                  PathState
-                                                      .destinationBid]![PathState
-                                                      .destinationFloor]![1];
-                                                  UserState.lngCode =
-                                                      _currentLocale;
-                                                  UserState.reroute =
-                                                      reroute;
-                                                  UserState
-                                                      .closeNavigation =
-                                                      closeNavigation;
-                                                  UserState.alignMapToPath = alignMapToPath;
-                                                  UserState.startOnPath =
-                                                      startOnPath;
-                                                  UserState.speak = speak;
-                                                  UserState.paintMarker =
-                                                      paintMarker;
-                                                  UserState.createCircle =
-                                                      updateCircle;
-
-                                                  //detected=false;
-                                                  //user.SingletonFunctionController.building = SingletonFunctionController.building;
-                                                  wsocket.message["path"]
-                                                  ["source"] =
-                                                      PathState.sourceName;
-                                                  wsocket.message["path"]
-                                                  ["destination"] =
-                                                      PathState
-                                                          .destinationName;
-                                                  // user.ListofPaths = PathState.listofPaths;
-                                                  // user.patchData = SingletonFunctionController.building.patchData;
-                                                  // user.buildingNumber = PathState.listofPaths.length-1;
-                                                  buildingAllApi
-                                                      .selectedID =
-                                                      PathState.sourceBid;
-                                                  buildingAllApi
-                                                      .selectedBuildingID =
-                                                      PathState.sourceBid;
-                                                  UserState.cols =
-                                                  SingletonFunctionController
-                                                      .building
-                                                      .floorDimenssion[
-                                                  PathState
-                                                      .sourceBid]![PathState
-                                                      .sourceFloor]![0];
-                                                  UserState.rows =
-                                                  SingletonFunctionController
-                                                      .building
-                                                      .floorDimenssion[
-                                                  PathState
-                                                      .sourceBid]![PathState
-                                                      .sourceFloor]![1];
-                                                  user.bid =
-                                                      PathState.sourceBid;
-                                                  user.coordX =
-                                                      PathState.sourceX;
-                                                  user.coordY =
-                                                      PathState.sourceY;
-                                                  user.temporaryExit =
-                                                  false;
-                                                  UserState.reroute =
-                                                      reroute;
-                                                  UserState
-                                                      .closeNavigation =
-                                                      closeNavigation;
-                                                  UserState.alignMapToPath =
-                                                      alignMapToPath;
-                                                  UserState.startOnPath =
-                                                      startOnPath;
-                                                  UserState.speak = speak;
-                                                  UserState.paintMarker =
-                                                      paintMarker;
-                                                  UserState.createCircle =
-                                                      updateCircle;
-                                                  UserState.changeBuilding =
-                                                      changeBuilding;
-                                                  //user.realWorldCoordinates = PathState.realWorldCoordinates;
-                                                  user.floor =
-                                                      PathState.sourceFloor;
-                                                  user.pathobj = PathState;
-                                                  user.path = PathState
-                                                      .singleListPath;
-                                                  user.isnavigating = true;
-                                                  user.cellPath = PathState
-                                                      .singleCellListPath;
-                                                  PathState
-                                                      .singleCellListPath
-                                                      .forEach(
-                                                          (element) {});
-                                                  user
-                                                      .moveToStartofPath()
-                                                      .then((value) async {
-                                                    setState(() {
-                                                      markers.clear();
-                                                      List<double> val = tools.localtoglobal(
-                                                          user.showcoordX
-                                                              .toInt(),
-                                                          user.showcoordY
-                                                              .toInt(),
-                                                          SingletonFunctionController
-                                                              .building
-                                                              .patchData[
-                                                          PathState
-                                                              .sourceBid]);
-                                                      if(markers.isEmpty){
-                                                        print("markers were empty");
-                                                        markers.putIfAbsent(
-                                                            user.bid,
-                                                                () => []);
-                                                        markers[user.bid]
-                                                            ?.add(Marker(
-                                                          markerId: MarkerId(
-                                                              "UserLocation"),
-                                                          position: LatLng(
-                                                              val[0], val[1]),
-                                                          icon:
-                                                          BitmapDescriptor
-                                                              .fromBytes(
-                                                              userloc),
-                                                          anchor: Offset(
-                                                              0.5, 0.829),
-                                                        ));
-                                                      }else{
-                                                        print("markers were not empty");
-                                                      }
-
-
-                                                      val = tools.localtoglobal(
-                                                          user.coordX
-                                                              .toInt(),
-                                                          user.coordY
-                                                              .toInt(),
-                                                          SingletonFunctionController
-                                                              .building
-                                                              .patchData[
-                                                          PathState
-                                                              .sourceBid]);
-
-
-                                                      if (kDebugMode) {
-                                                        markers[user.bid]
-                                                            ?.add(Marker(
-                                                          markerId: MarkerId(
-                                                              "debug"),
-                                                          position: LatLng(
-                                                              val[0],
-                                                              val[1]),
-                                                          icon: BitmapDescriptor
-                                                              .fromBytes(
-                                                              userlocdebug),
-                                                          anchor: Offset(
-                                                              0.5, 0.829),
-                                                        ));
-                                                      }
-                                                      // circles.add(
-                                                      //   Circle(
-                                                      //     circleId: CircleId("circle"),
-                                                      //     center: LatLng(user.lat,user.lng),
-                                                      //     radius: _animation.value,
-                                                      //     strokeWidth: 1,
-                                                      //     strokeColor: Colors.blue,
-                                                      //     fillColor: Colors.lightBlue.withOpacity(0.2),
-                                                      //   ),
-                                                      // );
-                                                    });
-                                                  });
-                                                  _isRoutePanelOpen = false;
-
-                                                  SingletonFunctionController
-                                                      .building
-                                                      .selectedLandmarkID =
-                                                  null;
-
-                                                  _isnavigationPannelOpen =
-                                                  true;
-
-                                                  semanticShouldBeExcluded =
-                                                  false;
-
-                                                  StartPDR();
-
-                                                  if (SingletonFunctionController
-                                                      .building
-                                                      .floor[
-                                                  PathState
-                                                      .sourceBid] !=
-                                                      PathState
-                                                          .sourceFloor) {
-                                                    SingletonFunctionController
-                                                        .building.floor[
-                                                    PathState
-                                                        .sourceBid] =
-                                                        PathState
-                                                            .sourceFloor;
-                                                    createRooms(
-                                                        SingletonFunctionController
-                                                            .building
-                                                            .polylinedatamap[
-                                                        PathState
-                                                            .sourceBid]!,
-                                                        PathState
-                                                            .sourceFloor);
-                                                    SingletonFunctionController
-                                                        .building
-                                                        .landmarkdata!
-                                                        .then((value) {
-                                                      createMarkers(
-                                                          value,
-                                                          PathState
-                                                              .sourceFloor,
-                                                          bid: PathState
-                                                              .sourceBid);
-                                                    });
-                                                  }
-                                                  await Future.delayed(const Duration(milliseconds: 500));
-
-                                                  alignMapToPath([
-                                                    PathState
-                                                        .singleCellListPath[
-                                                    user.pathobj
-                                                        .index]
-                                                        .lat,
-                                                    PathState
-                                                        .singleCellListPath[
-                                                    user.pathobj
-                                                        .index ]
-                                                        .lng
-                                                  ], [
-                                                    PathState
-                                                        .singleCellListPath[
-                                                    user.pathobj
-                                                        .index +
-                                                        2]
-                                                        .lat,
-                                                    PathState
-                                                        .singleCellListPath[
-                                                    user.pathobj
-                                                        .index +
-                                                        2]
-                                                        .lng
-                                                  ]);
-
-                                                  Future.delayed(Duration(seconds: 2)).then((onValue){
-                                                    setState(() {
-                                                      onStart=true;
-                                                    });
-                                                  });
-                                                  user.snapper.setPath(user.cellPath);
-                                                  await user.snapper.startGpsUpdates();
-                                                  user.handleGPS();
-
-                                                }
-
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.blue,
-                                                padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(8.0),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          Semantics(
-                                            label: _routeDetailPannelController
-                                                .isAttached
-                                                ? _routeDetailPannelController
-                                                .isPanelClosed
-                                                ? "Steps Preview"
-                                                : "Close Steps preview"
-                                                : "Steps Preview",
-                                            excludeSemantics: false,
-
-                                            child: Focus(
-                                              child: ElevatedButton.icon(
-                                                icon: Icon(
-                                                  _routeDetailPannelController
-                                                      .isAttached
-                                                      ? _routeDetailPannelController
-                                                      .isPanelClosed
-                                                      ? Icons
-                                                      .short_text_outlined
-                                                      : Icons.map_sharp
-                                                      : Icons
-                                                      .short_text_outlined,
-                                                  color: Colors.blue,
-                                                ),
-                                                label: Text(
-                                                  _routeDetailPannelController
-                                                      .isAttached
-                                                      ? _routeDetailPannelController
-                                                      .isPanelClosed
-                                                      ? "${LocaleData.steps.getString(context)}"
-                                                      : "${LocaleData.maps.getString(context)}"
-                                                      : "${LocaleData.steps.getString(context)}",
-                                                  style: TextStyle(
-                                                    color: Colors.blue,
-                                                  ),
-                                                ),
-                                                onPressed: () {
-                                                  if (_routeDetailPannelController
-                                                      .isPanelOpen) {
-                                                    _routeDetailPannelController
-                                                        .close();
-                                                  } else {
-                                                    _routeDetailPannelController
-                                                        .open();
-                                                    _directionFocus.requestFocus();
-                                                  }
-                                                },
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.white,
-                                                  side: BorderSide(color: Colors.blue),
-                                                  padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(8.0),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
+                                          kIsWeb?Container():startNavigationButton(),
+                                          stepsPreviewButton(),
                                         ],
                                       ),
-                                    ):Container(),
+                                    ):Container(
+                                      padding: EdgeInsets.only(bottom: 0),
+                                      color: Colors.white, // Background color set to white
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          stepsPreviewButton(),
+                                          kIsWeb?Container():startNavigationButton()
+                                        ],
+                                      ),
+                                    ),
                                     Container(
                                       height: screenHeight,
                                       child: SingleChildScrollView(
@@ -9329,72 +8962,6 @@ bool _isPlaying=false;
                                         ),
                                       ),
                                     ),
-                                    isSemanticEnabled? Container(
-                                      padding: EdgeInsets.only(bottom: 0),
-                                      color: Colors.white, // Background color set to white
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Semantics(
-                                            label: _routeDetailPannelController
-                                                .isAttached
-                                                ? _routeDetailPannelController
-                                                .isPanelClosed
-                                                ? "Steps Preview"
-                                                : "Close Steps preview"
-                                                : "Steps Preview",
-                                            excludeSemantics: true,
-
-                                            child: ElevatedButton.icon(
-                                              icon: Icon(
-                                                _routeDetailPannelController
-                                                    .isAttached
-                                                    ? _routeDetailPannelController
-                                                    .isPanelClosed
-                                                    ? Icons
-                                                    .short_text_outlined
-                                                    : Icons.map_sharp
-                                                    : Icons
-                                                    .short_text_outlined,
-                                                color: Colors.blue,
-                                              ),
-                                              label: Text(
-                                                _routeDetailPannelController
-                                                    .isAttached
-                                                    ? _routeDetailPannelController
-                                                    .isPanelClosed
-                                                    ? "${LocaleData.steps.getString(context)}"
-                                                    : "${LocaleData.maps.getString(context)}"
-                                                    : "${LocaleData.steps.getString(context)}",
-                                                style: TextStyle(
-                                                  color: Colors.blue,
-                                                ),
-                                              ),
-                                              onPressed: () {
-                                                if (_routeDetailPannelController
-                                                    .isPanelOpen) {
-                                                  _routeDetailPannelController
-                                                      .close();
-                                                } else {
-                                                  _routeDetailPannelController
-                                                      .open();
-                                                  _directionFocus.requestFocus();
-                                                }
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.white,
-                                                side: BorderSide(color: Colors.blue),
-                                                padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(8.0),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ):Container(),
-
                                   ],
                                 ),
                               )
@@ -9406,404 +8973,399 @@ bool _isPlaying=false;
                   ),
                 )),
           ),
-          isSemanticEnabled? Container(): Positioned(
-            height: screenHeight*0.08,
-            bottom: 0.0, // Adjust as needed
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: EdgeInsets.only(bottom: 0),
-              color: Colors.white, // Background color set to white
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Semantics(
-                    label: _routeDetailPannelController
-                        .isAttached
-                        ? _routeDetailPannelController
-                        .isPanelClosed
-                        ? "Steps Preview"
-                        : "Close Steps preview"
-                        : "Steps Preview",
-                    excludeSemantics: true,
 
-                    child: Focus(
-                      child: ElevatedButton.icon(
-                        icon: Icon(
-                          _routeDetailPannelController
-                              .isAttached
-                              ? _routeDetailPannelController
-                              .isPanelClosed
-                              ? Icons
-                              .short_text_outlined
-                              : Icons.map_sharp
-                              : Icons
-                              .short_text_outlined,
-                          color: Colors.blue,
-                        ),
-                        label: Text(
-                          _routeDetailPannelController
-                              .isAttached
-                              ? _routeDetailPannelController
-                              .isPanelClosed
-                              ? "${LocaleData.steps.getString(context)}"
-                              : "${LocaleData.maps.getString(context)}"
-                              : "${LocaleData.steps.getString(context)}",
-                          style: TextStyle(
-                            color: Colors.blue,
-                          ),
-                        ),
-                        onPressed: () {
-                          if (_routeDetailPannelController
-                              .isPanelOpen) {
-                            _routeDetailPannelController
-                                .close();
-                          } else {
-                            _routeDetailPannelController
-                                .open();
-                            _directionFocus.requestFocus();
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          side: BorderSide(color: Colors.blue),
-                          padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  kIsWeb?Container():Semantics(
-                    label: "Start Navigation",
-                    hint: "Button. Double tap to activate",
+        ],
+      ),
+    );
+  }
+  Widget startNavigationButton(){
+    return Semantics(
+      label: "Start Navigation",
+      hint: "Button. Double tap to activate",
 
 
 
-                    sortKey: const OrdinalSortKey(1),
-                    excludeSemantics: true,
+      sortKey: const OrdinalSortKey(1),
 
-                    child: Focus(
-                      focusNode: _startbuttonFocus,
-                      child: ElevatedButton.icon(
-                        icon: Icon(Icons.navigation, color: Colors.white),
-                        label: Text('Start', style: TextStyle(color: Colors.white)),
-                        onPressed: () async {
-
-
-                          if(startingNavigation){
-                            tools.setBuildingAngle(
-                                SingletonFunctionController
-                                    .building
-                                    .patchData[PathState
-                                    .sourceBid]!
-                                    .patchData!
-                                    .buildingAngle!);
-                            if (PathState.sourceX ==
-                                PathState
-                                    .destinationX &&
-                                PathState.sourceY ==
-                                    PathState
-                                        .destinationY) {
-                              //HelperClass.showToast("Source and Destination can not be same");
-                              setState(() {
-                                _isRoutePanelOpen =
-                                false;
-                              });
-                              closeNavigation();
-                              return;
-                            }
-                            setState(() {
-                              circles.clear();
-                              _markers.clear();
-                              markerSldShown = false;
-
-                            });
-                            user.onConnection = false;
-                            PathState.didPathStart =
-                            true;
-
-                            UserState.cols =
-                            SingletonFunctionController
-                                .building
-                                .floorDimenssion[
-                            PathState
-                                .sourceBid]![PathState
-                                .sourceFloor]![0];
-                            UserState
-                                .rows = SingletonFunctionController
-                                .building
-                                .floorDimenssion[
-                            PathState
-                                .destinationBid]![PathState
-                                .destinationFloor]![1];
-                            UserState.lngCode =
-                                _currentLocale;
-                            UserState.reroute =
-                                reroute;
-                            UserState
-                                .closeNavigation =
-                                closeNavigation;
-                            UserState.alignMapToPath = alignMapToPath;
-                            UserState.startOnPath =
-                                startOnPath;
-                            UserState.speak = speak;
-                            UserState.paintMarker =
-                                paintMarker;
-                            UserState.createCircle =
-                                updateCircle;
-
-                            //detected=false;
-                            //user.SingletonFunctionController.building = SingletonFunctionController.building;
-                            wsocket.message["path"]
-                            ["source"] =
-                                PathState.sourceName;
-                            wsocket.message["path"]
-                            ["destination"] =
-                                PathState
-                                    .destinationName;
-                            // user.ListofPaths = PathState.listofPaths;
-                            // user.patchData = SingletonFunctionController.building.patchData;
-                            // user.buildingNumber = PathState.listofPaths.length-1;
-                            buildingAllApi
-                                .selectedID =
-                                PathState.sourceBid;
-                            buildingAllApi
-                                .selectedBuildingID =
-                                PathState.sourceBid;
-                            UserState.cols =
-                            SingletonFunctionController
-                                .building
-                                .floorDimenssion[
-                            PathState
-                                .sourceBid]![PathState
-                                .sourceFloor]![0];
-                            UserState.rows =
-                            SingletonFunctionController
-                                .building
-                                .floorDimenssion[
-                            PathState
-                                .sourceBid]![PathState
-                                .sourceFloor]![1];
-                            user.bid =
-                                PathState.sourceBid;
-                            user.coordX =
-                                PathState.sourceX;
-                            user.coordY =
-                                PathState.sourceY;
-                            user.temporaryExit =
-                            false;
-                            UserState.reroute =
-                                reroute;
-                            UserState
-                                .closeNavigation =
-                                closeNavigation;
-                            UserState.alignMapToPath =
-                                alignMapToPath;
-                            UserState.startOnPath =
-                                startOnPath;
-                            UserState.speak = speak;
-                            UserState.paintMarker =
-                                paintMarker;
-                            UserState.createCircle =
-                                updateCircle;
-                            UserState.changeBuilding =
-                                changeBuilding;
-                            //user.realWorldCoordinates = PathState.realWorldCoordinates;
-                            user.floor =
-                                PathState.sourceFloor;
-                            user.pathobj = PathState;
-                            user.path = PathState
-                                .singleListPath;
-                            user.isnavigating = true;
-                            user.cellPath = PathState
-                                .singleCellListPath;
-                            PathState
-                                .singleCellListPath
-                                .forEach(
-                                    (element) {});
-                            user
-                                .moveToStartofPath()
-                                .then((value) async {
-                              setState(() {
-                                markers.clear();
-                                List<double> val = tools.localtoglobal(
-                                    user.showcoordX
-                                        .toInt(),
-                                    user.showcoordY
-                                        .toInt(),
-                                    SingletonFunctionController
-                                        .building
-                                        .patchData[
-                                    PathState
-                                        .sourceBid]);
-                                if(markers.isEmpty){
-                                  print("markers were empty");
-                                  markers.putIfAbsent(
-                                      user.bid,
-                                          () => []);
-                                  markers[user.bid]
-                                      ?.add(Marker(
-                                    markerId: MarkerId(
-                                        "UserLocation"),
-                                    position: LatLng(
-                                        val[0], val[1]),
-                                    icon:
-                                    BitmapDescriptor
-                                        .fromBytes(
-                                        userloc),
-                                    anchor: Offset(
-                                        0.5, 0.829),
-                                  ));
-                                }else{
-                                  print("markers were not empty");
-                                }
+      child: Focus(
+        focusNode: _startbuttonFocus,
+        child: Semantics(
+          excludeSemantics: true,
+          child: ElevatedButton.icon(
+            icon: Icon(Icons.navigation, color: Colors.white),
+            label: Text('Start', style: TextStyle(color: Colors.white)),
+            onPressed: () async {
 
 
-                                val = tools.localtoglobal(
-                                    user.coordX
-                                        .toInt(),
-                                    user.coordY
-                                        .toInt(),
-                                    SingletonFunctionController
-                                        .building
-                                        .patchData[
-                                    PathState
-                                        .sourceBid]);
+              if(startingNavigation){
+                tools.setBuildingAngle(
+                    SingletonFunctionController
+                        .building
+                        .patchData[PathState
+                        .sourceBid]!
+                        .patchData!
+                        .buildingAngle!);
+                if (PathState.sourceX ==
+                    PathState
+                        .destinationX &&
+                    PathState.sourceY ==
+                        PathState
+                            .destinationY) {
+                  //HelperClass.showToast("Source and Destination can not be same");
+                  setState(() {
+                    _isRoutePanelOpen =
+                    false;
+                  });
+                  closeNavigation();
+                  return;
+                }
+                setState(() {
+                  circles.clear();
+                  _markers.clear();
+                  markerSldShown = false;
+
+                });
+                user.onConnection = false;
+                PathState.didPathStart =
+                true;
+
+                UserState.cols =
+                SingletonFunctionController
+                    .building
+                    .floorDimenssion[
+                PathState
+                    .sourceBid]![PathState
+                    .sourceFloor]![0];
+                UserState
+                    .rows = SingletonFunctionController
+                    .building
+                    .floorDimenssion[
+                PathState
+                    .destinationBid]![PathState
+                    .destinationFloor]![1];
+                UserState.lngCode =
+                    _currentLocale;
+                UserState.reroute =
+                    reroute;
+                UserState
+                    .closeNavigation =
+                    closeNavigation;
+                UserState.alignMapToPath = alignMapToPath;
+                UserState.startOnPath =
+                    startOnPath;
+                UserState.speak = speak;
+                UserState.paintMarker =
+                    paintMarker;
+                UserState.createCircle =
+                    updateCircle;
+
+                //detected=false;
+                //user.SingletonFunctionController.building = SingletonFunctionController.building;
+                wsocket.message["path"]
+                ["source"] =
+                    PathState.sourceName;
+                wsocket.message["path"]
+                ["destination"] =
+                    PathState
+                        .destinationName;
+                // user.ListofPaths = PathState.listofPaths;
+                // user.patchData = SingletonFunctionController.building.patchData;
+                // user.buildingNumber = PathState.listofPaths.length-1;
+                buildingAllApi
+                    .selectedID =
+                    PathState.sourceBid;
+                buildingAllApi
+                    .selectedBuildingID =
+                    PathState.sourceBid;
+                UserState.cols =
+                SingletonFunctionController
+                    .building
+                    .floorDimenssion[
+                PathState
+                    .sourceBid]![PathState
+                    .sourceFloor]![0];
+                UserState.rows =
+                SingletonFunctionController
+                    .building
+                    .floorDimenssion[
+                PathState
+                    .sourceBid]![PathState
+                    .sourceFloor]![1];
+                user.bid =
+                    PathState.sourceBid;
+                user.coordX =
+                    PathState.sourceX;
+                user.coordY =
+                    PathState.sourceY;
+                user.temporaryExit =
+                false;
+                UserState.reroute =
+                    reroute;
+                UserState
+                    .closeNavigation =
+                    closeNavigation;
+                UserState.alignMapToPath =
+                    alignMapToPath;
+                UserState.startOnPath =
+                    startOnPath;
+                UserState.speak = speak;
+                UserState.paintMarker =
+                    paintMarker;
+                UserState.createCircle =
+                    updateCircle;
+                UserState.changeBuilding =
+                    changeBuilding;
+                //user.realWorldCoordinates = PathState.realWorldCoordinates;
+                user.floor =
+                    PathState.sourceFloor;
+                user.pathobj = PathState;
+                user.path = PathState
+                    .singleListPath;
+                user.isnavigating = true;
+                user.cellPath = PathState
+                    .singleCellListPath;
+                PathState
+                    .singleCellListPath
+                    .forEach(
+                        (element) {});
+                user
+                    .moveToStartofPath()
+                    .then((value) async {
+                  setState(() {
+                    markers.clear();
+                    List<double> val = tools.localtoglobal(
+                        user.showcoordX
+                            .toInt(),
+                        user.showcoordY
+                            .toInt(),
+                        SingletonFunctionController
+                            .building
+                            .patchData[
+                        PathState
+                            .sourceBid]);
+                    if(markers.isEmpty){
+                      print("markers were empty");
+                      markers.putIfAbsent(
+                          user.bid,
+                              () => []);
+                      markers[user.bid]
+                          ?.add(Marker(
+                        markerId: MarkerId(
+                            "UserLocation"),
+                        position: LatLng(
+                            val[0], val[1]),
+                        icon:
+                        BitmapDescriptor
+                            .fromBytes(
+                            userloc),
+                        anchor: Offset(
+                            0.5, 0.829),
+                      ));
+                    }else{
+                      print("markers were not empty");
+                    }
 
 
-                                if (kDebugMode) {
-                                  markers[user.bid]
-                                      ?.add(Marker(
-                                    markerId: MarkerId(
-                                        "debug"),
-                                    position: LatLng(
-                                        val[0],
-                                        val[1]),
-                                    icon: BitmapDescriptor
-                                        .fromBytes(
-                                        userlocdebug),
-                                    anchor: Offset(
-                                        0.5, 0.829),
-                                  ));
-                                }
-                                // circles.add(
-                                //   Circle(
-                                //     circleId: CircleId("circle"),
-                                //     center: LatLng(user.lat,user.lng),
-                                //     radius: _animation.value,
-                                //     strokeWidth: 1,
-                                //     strokeColor: Colors.blue,
-                                //     fillColor: Colors.lightBlue.withOpacity(0.2),
-                                //   ),
-                                // );
-                              });
-                            });
-                            _isRoutePanelOpen = false;
-
-                            SingletonFunctionController
-                                .building
-                                .selectedLandmarkID =
-                            null;
-
-                            _isnavigationPannelOpen =
-                            true;
-
-                            semanticShouldBeExcluded =
-                            false;
-
-                            StartPDR();
-
-                            if (SingletonFunctionController
-                                .building
-                                .floor[
-                            PathState
-                                .sourceBid] !=
-                                PathState
-                                    .sourceFloor) {
-                              SingletonFunctionController
-                                  .building.floor[
-                              PathState
-                                  .sourceBid] =
-                                  PathState
-                                      .sourceFloor;
-                              createRooms(
-                                  SingletonFunctionController
-                                      .building
-                                      .polylinedatamap[
-                                  PathState
-                                      .sourceBid]!,
-                                  PathState
-                                      .sourceFloor);
-                              SingletonFunctionController
-                                  .building
-                                  .landmarkdata!
-                                  .then((value) {
-                                createMarkers(
-                                    value,
-                                    PathState
-                                        .sourceFloor,
-                                    bid: PathState
-                                        .sourceBid);
-                              });
-                            }
-                            await Future.delayed(const Duration(milliseconds: 500));
-
-                            alignMapToPath([
-                              PathState
-                                  .singleCellListPath[
-                              user.pathobj
-                                  .index]
-                                  .lat,
-                              PathState
-                                  .singleCellListPath[
-                              user.pathobj
-                                  .index ]
-                                  .lng
-                            ], [
-                              PathState
-                                  .singleCellListPath[
-                              user.pathobj
-                                  .index +
-                                  2]
-                                  .lat,
-                              PathState
-                                  .singleCellListPath[
-                              user.pathobj
-                                  .index +
-                                  2]
-                                  .lng
-                            ]);
+                    val = tools.localtoglobal(
+                        user.coordX
+                            .toInt(),
+                        user.coordY
+                            .toInt(),
+                        SingletonFunctionController
+                            .building
+                            .patchData[
+                        PathState
+                            .sourceBid]);
 
 
-                            Future.delayed(Duration(seconds: 2)).then((onValue){
-                              setState(() {
-                                onStart=true;
-                              });
-                            });
-                            user.snapper.setPath(user.cellPath);
-                            await user.snapper.startGpsUpdates();
-                            user.handleGPS();
+                    if (kDebugMode) {
+                      markers[user.bid]
+                          ?.add(Marker(
+                        markerId: MarkerId(
+                            "debug"),
+                        position: LatLng(
+                            val[0],
+                            val[1]),
+                        icon: BitmapDescriptor
+                            .fromBytes(
+                            userlocdebug),
+                        anchor: Offset(
+                            0.5, 0.829),
+                      ));
+                    }
+                    // circles.add(
+                    //   Circle(
+                    //     circleId: CircleId("circle"),
+                    //     center: LatLng(user.lat,user.lng),
+                    //     radius: _animation.value,
+                    //     strokeWidth: 1,
+                    //     strokeColor: Colors.blue,
+                    //     fillColor: Colors.lightBlue.withOpacity(0.2),
+                    //   ),
+                    // );
+                  });
+                });
+                _isRoutePanelOpen = false;
 
-                          }
+                SingletonFunctionController
+                    .building
+                    .selectedLandmarkID =
+                null;
 
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                _isnavigationPannelOpen =
+                true;
+
+                semanticShouldBeExcluded =
+                false;
+
+                StartPDR();
+
+                if (SingletonFunctionController
+                    .building
+                    .floor[
+                PathState
+                    .sourceBid] !=
+                    PathState
+                        .sourceFloor) {
+                  SingletonFunctionController
+                      .building.floor[
+                  PathState
+                      .sourceBid] =
+                      PathState
+                          .sourceFloor;
+                  createRooms(
+                      SingletonFunctionController
+                          .building
+                          .polylinedatamap[
+                      PathState
+                          .sourceBid]!,
+                      PathState
+                          .sourceFloor);
+                  SingletonFunctionController
+                      .building
+                      .landmarkdata!
+                      .then((value) {
+                    createMarkers(
+                        value,
+                        PathState
+                            .sourceFloor,
+                        bid: PathState
+                            .sourceBid);
+                  });
+                }
+                await Future.delayed(const Duration(milliseconds: 500));
+
+                alignMapToPath([
+                  PathState
+                      .singleCellListPath[
+                  user.pathobj
+                      .index]
+                      .lat,
+                  PathState
+                      .singleCellListPath[
+                  user.pathobj
+                      .index ]
+                      .lng
+                ], [
+                  PathState
+                      .singleCellListPath[
+                  user.pathobj
+                      .index +
+                      2]
+                      .lat,
+                  PathState
+                      .singleCellListPath[
+                  user.pathobj
+                      .index +
+                      2]
+                      .lng
+                ]);
+
+
+                Future.delayed(Duration(seconds: 2)).then((onValue){
+                  setState(() {
+                    onStart=true;
+                  });
+                });
+                user.snapper.setPath(user.cellPath);
+                await user.snapper.startGpsUpdates();
+                user.handleGPS();
+
+              }
+
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
               ),
             ),
           ),
-        ],
+        ),
+      ),
+    );
+  }
+  Widget stepsPreviewButton(){
+    return Semantics(
+      label: _routeDetailPannelController
+          .isAttached
+          ? _routeDetailPannelController
+          .isPanelClosed
+          ? "Steps Preview"
+          : "Close Steps preview"
+          : "Steps Preview",
+      hint: "Button. Double tap to activate",
+
+      child: Focus(
+        child: Semantics(
+          excludeSemantics: true,
+          child: ElevatedButton.icon(
+            icon: Icon(
+              _routeDetailPannelController
+                  .isAttached
+                  ? _routeDetailPannelController
+                  .isPanelClosed
+                  ? Icons
+                  .short_text_outlined
+                  : Icons.map_sharp
+                  : Icons
+                  .short_text_outlined,
+              color: Colors.blue,
+            ),
+            label: Text(
+              _routeDetailPannelController
+                  .isAttached
+                  ? _routeDetailPannelController
+                  .isPanelClosed
+                  ? "${LocaleData.steps.getString(context)}"
+                  : "${LocaleData.maps.getString(context)}"
+                  : "${LocaleData.steps.getString(context)}",
+              style: TextStyle(
+                color: Colors.blue,
+              ),
+            ),
+            onPressed: () {
+              if (_routeDetailPannelController
+                  .isPanelOpen) {
+                _routeDetailPannelController
+                    .close();
+              } else {
+                _routeDetailPannelController
+                    .open();
+                _directionFocus.requestFocus();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              side: BorderSide(color: Colors.blue),
+              padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

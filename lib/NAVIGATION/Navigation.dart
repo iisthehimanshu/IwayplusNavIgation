@@ -13616,7 +13616,7 @@ bool _isPlaying=false;
                     ),
                   ) : Container(),
                   SizedBox(height: 28.0),
-                  Platform.isAndroid && !user.isnavigating &&
+                 (!kIsWeb &&  Platform.isAndroid) && !user.isnavigating &&
                       (!_isLandmarkPanelOpen &&
                           !_isRoutePanelOpen &&
                           _isBuildingPannelOpen &&

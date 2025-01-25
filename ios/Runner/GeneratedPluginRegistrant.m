@@ -6,6 +6,12 @@
 
 #import "GeneratedPluginRegistrant.h"
 
+#if __has_include(<ar_flutter_plugin_flutterflow/ArFlutterPlugin.h>)
+#import <ar_flutter_plugin_flutterflow/ArFlutterPlugin.h>
+#else
+@import ar_flutter_plugin_flutterflow;
+#endif
+
 #if __has_include(<bluetooth_enable_fork/BluetoothEnablePlugin.h>)
 #import <bluetooth_enable_fork/BluetoothEnablePlugin.h>
 #else
@@ -159,6 +165,7 @@
 @implementation GeneratedPluginRegistrant
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
+  [ArFlutterPlugin registerWithRegistrar:[registry registrarForPlugin:@"ArFlutterPlugin"]];
   [BluetoothEnablePlugin registerWithRegistrar:[registry registrarForPlugin:@"BluetoothEnablePlugin"]];
   [ConnectivityPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"ConnectivityPlusPlugin"]];
   [FPPDeviceInfoPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FPPDeviceInfoPlusPlugin"]];

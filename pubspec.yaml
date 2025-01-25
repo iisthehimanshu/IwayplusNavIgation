@@ -96,7 +96,9 @@ dependencies:
   new_version_plus: ^0.0.12
   provider: ^6.1.2
   image:
-  arcore_flutter_plugin:
+  ar_flutter_plugin_flutterflow: ^0.7.55
+
+
 
 
 

@@ -25,6 +25,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
+  ar_flutter_plugin_flutterflow:
+    dependency: "direct main"
+    description:
+      name: ar_flutter_plugin_flutterflow
+      sha256: "3b33f9da9205b6701641605486e5742e88fb4ecef51984f336c68e78fdc9be89"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.55"
   archive:
     dependency: transitive
     description:
@@ -33,14 +41,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.6.1"
-  arcore_flutter_plugin:
-    dependency: "direct main"
-    description:
-      name: arcore_flutter_plugin
-      sha256: "48307e6e630cd991e5b08efd74a0869504631c828d4dc650d144c267a8b6ebfd"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.0"
   args:
     dependency: transitive
     description:
@@ -345,14 +345,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.5.0"
-  equatable:
-    dependency: transitive
-    description:
-      name: equatable
-      sha256: "567c64b3cb4cf82397aac55f4f0cbd3ca20d77c6c03bedbc4ceaddc08904aef7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.7"
   fake_async:
     dependency: transitive
     description:

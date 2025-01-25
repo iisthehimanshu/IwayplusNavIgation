@@ -9,7 +9,6 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/NAVIGATION/ELEMENTS/PickupLocationPin.dart';
-import 'package:iwaymaps/NAVIGATION/hello_world.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
 import 'package:iwaymaps/NAVIGATION/path.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
@@ -47,6 +46,7 @@ import '../IWAYPLUS/MODELS/FilterInfoModel.dart';
 import '../IWAYPLUS/VenueSelectionScreen.dart';
 import '../IWAYPLUS/localizedData.dart';
 import '../IWAYPLUS/websocket/UserLog.dart';
+import '../ObjectGestures.dart';
 import '../newSearchPage.dart';
 import '../path_snapper.dart';
 import '/IWAYPLUS/API/RatingsaveAPI.dart';
@@ -61,6 +61,7 @@ import 'APIMODELS/outdoormodel.dart';
 import 'BluetoothScanAndroidClass.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
+import 'DebugOptions.dart';
 import 'DebugToggle.dart';
 import 'ELEMENTS/DirectionHeader.dart';
 import 'ELEMENTS/DirectionInstruction.dart';
@@ -13603,7 +13604,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   SizedBox(height: 20,),
                   !isLiveLocalizing? FloatingActionButton(
                     onPressed: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => HelloWorld()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DebugOptions(),
+                      ));
                     },
                     child: Icon(Icons.area_chart_outlined),
                     shape: RoundedRectangleBorder(

@@ -1,9 +1,5 @@
 
 import 'dart:convert';
-
-
-
-import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,10 +39,7 @@ final navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // print('ARCORE IS AVAILABLE?');
-  // print(await ArCoreController.checkArCoreAvailability());
-  // print('\nAR SERVICES INSTALLED?');
-  // print(await ArCoreController.checkIsArCoreInstalled());
+
   await localDBInitialsation();
   if(!kIsWeb){
     mobileInitialization();

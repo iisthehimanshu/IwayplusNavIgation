@@ -7,6 +7,15 @@ import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'package:ar_flutter_plugin_flutterflow/datatypes/config_planedetection.dart';
+import 'package:ar_flutter_plugin_flutterflow/datatypes/node_types.dart';
+import 'package:ar_flutter_plugin_flutterflow/managers/ar_anchor_manager.dart';
+import 'package:ar_flutter_plugin_flutterflow/managers/ar_location_manager.dart';
+import 'package:ar_flutter_plugin_flutterflow/managers/ar_object_manager.dart';
+import 'package:ar_flutter_plugin_flutterflow/managers/ar_session_manager.dart';
+import 'package:ar_flutter_plugin_flutterflow/models/ar_hittest_result.dart';
+import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
+import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/NAVIGATION/ELEMENTS/PickupLocationPin.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
@@ -126,6 +135,7 @@ import 'fetchrouteParams.dart';
 import 'navigationTools.dart';
 import 'package:iwaymaps/NAVIGATION/RippleButton.dart';
 import 'package:iwaymaps/NAVIGATION/BluetoothScanIOSClass.dart';
+import 'package:vector_math/vector_math_64.dart' as vv;
 
 
 void main() {
@@ -440,6 +450,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   @override
   void initState() {
     super.initState();
+
+    _ARanimationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 300),
+    );
+
+    _ARanimation = Tween<double>(begin: 0.0, end: 0.5).animate(_ARanimationController)
+      ..addListener(() {
+        setState(() {
+          arViewHeight = MediaQuery.of(context).size.height * _ARanimation.value;
+        });
+      });
+
     initializeMarkers();
     //add a timer of duration 5sec
     //PolylineTestClass.polylineSet.clear();
@@ -12837,6 +12860,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   @override
   void dispose() {
+    _ARanimationController.dispose(); // Dispose of the animation controller
+    arSessionManager?.dispose();
     disposed = true;
     UserState.geoLat=0.0;
     UserState.geoLng=0.0;
@@ -12998,6 +13023,177 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   late Timer EM_TIMER;
   String EM_LastBeacon = "";
 
+  late AnimationController _ARanimationController;
+  late Animation<double> _ARanimation;
+  double arViewHeight = 0.0; // Initial height for AR View (hidden)
+  bool arisLoading = false;
+  bool isARViewVisible = false; // To track AR view visibility
+  ARSessionManager? arSessionManager;
+  ARObjectManager? arObjectManager;
+  bool _showFeaturePoints = true;
+  bool _showPlanes = true;
+  bool _showWorldOrigin = true;
+  bool _showAnimatedGuide = true;
+  String _planeTexturePath = "Images/triangle.png";
+  bool _handleTaps = true;
+
+  Future<void> _toggleARView() async {
+    isLiveLocalizing = true;
+
+    setState(() {
+      arisLoading = true;
+    });
+
+    if (isARViewVisible) {
+      // Hide AR View
+      await _ARanimationController.forward();
+    } else {
+      // Show AR View
+      await _ARanimationController.reverse();
+    }
+
+    setState(() {
+      arisLoading = false;
+      isLiveLocalizing = false;
+      isARViewVisible = !isARViewVisible;
+    });
+  }
+  bool isObjectAdded = false;
+  String _ARWorldLocation = "";
+  ARLocationManager arLocationMan = ARLocationManager();
+
+  void onARViewCreated(
+      ARSessionManager arSessionManager,
+      ARObjectManager arObjectManager,
+      ARAnchorManager arAnchorManager,
+      ARLocationManager arLocationManager) {
+    this.arSessionManager = arSessionManager;
+    this.arObjectManager = arObjectManager;
+
+
+    arSessionManager.onInitialize(
+      showFeaturePoints: _showFeaturePoints,
+      showPlanes: _showPlanes,
+      customPlaneTexturePath: _planeTexturePath,
+      showWorldOrigin: _showWorldOrigin,
+      showAnimatedGuide: _showAnimatedGuide,
+      handleTaps: _handleTaps,
+    );
+    arLocationMan.startLocationUpdates();
+
+    arObjectManager.onInitialize();
+
+    //
+    // arLocationManager.currentLocation.onData((location) {
+    //   // Check if location data is available
+    //   print("Check if location data is available");
+    //   if (location.latitude != null && location.longitude != null) {
+    //     // Update or add the user's location marker in the AR scene
+    //
+    //     setState(() {
+    //       _ARWorldLocation = "${location.latitude} ${location.longitude} ${location.floor}";
+    //     });
+    //     print("_ARWorldLocation");
+    //     print(_ARWorldLocation);
+    //   } else {
+    //     print("User location is not available.");
+    //   }
+    // });
+
+
+    // Handle plane taps and add object
+    arSessionManager.onPlaneDetected = (plane) async {
+      // Retrieve the current camera pose
+      if (isObjectAdded) {
+        print("Object already added. Cannot add another one.");
+        return; // Prevent adding a new object if one is already placed
+      }
+
+      // Retrieve the current camera pose
+      final cameraPose = await arSessionManager.getCameraPose();
+      if (cameraPose != null) {
+        // Get the current camera position
+        vv.Vector3 cameraPosition = cameraPose.getTranslation();
+        vv.Vector3 forwardDirection = vv.Vector3(-cameraPose.storage[8], -cameraPose.storage[9], -cameraPose.storage[10]);
+
+        // Calculate the position 1 meter ahead of the camera
+        vv.Vector3 targetPosition = cameraPosition + forwardDirection * 1.0;
+
+        // Create an ARNode for the model
+        ARNode objectNode = ARNode(
+          type: NodeType.webGLB,
+          uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb", // Path to your model file
+          position: targetPosition,
+          scale: vv.Vector3(0.1, 0.1, 0.1), // Adjust the scale of the object
+        );
+
+        // Add the object to the scene
+        bool? didAddNode = await arObjectManager.addNode(objectNode);
+        if (didAddNode != null && didAddNode) {
+          // Set the flag to true after adding the object
+          isObjectAdded = true;
+          print("Object added 1 meter ahead of the camera!");
+          print(arLocationMan.currentLocation);
+        } else {
+          print("Failed to add object.");
+        }
+      }
+    };
+    // setState(() {
+    //   _ARWorldLocation = arLocationManager.currentLocation.toString();
+    // });
+
+    // arSessionManager.onPlaneOrPointTap = (List<ARHitTestResult> hitTestResults) {
+    //   if (hitTestResults.isNotEmpty && _handleTaps) {
+    //     final hitTestResult = hitTestResults.first;
+    //     double distance = hitTestResult.distance;  // The distance from the camera to the hit test result
+    //     // addObjectToPlane(hitTestResult);
+    //     print("Distance is ${distance}");
+    //     arSessionManager.getCameraPose().then((cameraPose) async {
+    //       // Calculate the position 3 meters in front of the camera
+    //       if (cameraPose != null) {
+    //         vv.Vector3 cameraPosition = cameraPose!.getTranslation();
+    //         vv.Vector3 newPosition = vv.Vector3(cameraPosition.x, cameraPosition.y, cameraPosition.z - 1.0); // 3 meters in front
+    //
+    //         // Add the cube (or 3D object) to the AR scene at the new position
+    //         ARNode objectNode = ARNode(
+    //           type: NodeType.webGLB,
+    //           uri: "https://github.com/KhronosGroup/glTF-Sample-Models/raw/refs/heads/main/2.0/Duck/glTF-Binary/Duck.glb", // Path to your model file
+    //           position: newPosition,
+    //           scale: vv.Vector3(0.1, 0.1, 0.1), // Adjust the scale of the object
+    //         );
+    //
+    //         // Add the node to the AR scene
+    //         await arObjectManager!.addNode(objectNode);
+    //
+    //       }
+    //
+    //     });
+    //   }
+    // };
+
+  }
+
+  // Function to add object to plane
+  void addObjectToPlane(ARHitTestResult hitTestResult) async {
+    if (arObjectManager != null) {
+      // Create a node to add a 3D model (GLTF format)
+      ARNode objectNode = ARNode(
+        type: NodeType.fileSystemAppFolderGLB,
+        uri: "assets/duck_example.glb", // Path to your model file
+        position: hitTestResult.worldTransform.getTranslation(),
+        scale: vv.Vector3(0.1, 0.1, 0.1), // Adjust the scale of the object
+      );
+
+      // Add the node to the AR scene
+      await arObjectManager!.addNode(objectNode);
+    }
+  }
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -13121,7 +13317,22 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             ),
           ),
           //debug----
-
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: arViewHeight, // Dynamic height controlled by animation
+            child: Container(
+              color: Colors.black, // Background color for AR View
+              child: arisLoading
+                  ? Center(child: CircularProgressIndicator()) // Show loader
+                  : ARView(
+                onARViewCreated: onARViewCreated,
+                planeDetectionConfig: PlaneDetectionConfig.horizontalAndVertical,
+                showPlatformType: true,
+              ),
+            ),
+          ),
 
           DebugToggle.PDRIcon
               ? Positioned(
@@ -13238,7 +13449,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
                   SizedBox(height: 28.0),
                   DebugToggle.Slider ? Text("${user.theta}") : Container(),
-                  //Text(SingletonFunctionController.SC_IL_RSSI_AVERAGE.toString()),
+                  Text(_ARWorldLocation),
 
                   // Text("coord [${user.coordX},${user.coordY}] \n"
                   //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
@@ -13603,13 +13814,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   // )
                   SizedBox(height: 20,),
                   !isLiveLocalizing? FloatingActionButton(
-                    onPressed: (){
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DebugOptions(),
-                      ));
-                    },
+                    // onPressed: (){
+                    //   // Navigator.push(
+                    //   //   context,
+                    //   //   MaterialPageRoute(
+                    //   //     builder: (context) => DebugOptions(),
+                    //   // ));
+                    // },
+                    onPressed: _toggleARView,
+
                     child: Icon(Icons.area_chart_outlined),
                     shape: RoundedRectangleBorder(
                       borderRadius:

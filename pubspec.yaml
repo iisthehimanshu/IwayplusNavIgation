@@ -140,6 +140,8 @@ flutter:
 
   assets:
     - assets/
+    - assets/fan2.glb
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:

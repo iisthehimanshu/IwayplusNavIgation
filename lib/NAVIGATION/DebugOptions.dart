@@ -9,7 +9,7 @@ import 'package:ar_flutter_plugin_flutterflow/models/ar_hittest_result.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:vector_math/vector_math_64.dart';
+import 'package:vector_math/vector_math_64.dart' as vv;
 
 
 class DebugOptions extends StatefulWidget {
@@ -137,7 +137,9 @@ class _DebugOptionsState extends State<DebugOptions> {
     arSessionManager.onPlaneOrPointTap = (List<ARHitTestResult> hitTestResults) {
       if (hitTestResults.isNotEmpty && _handleTaps) {
         final hitTestResult = hitTestResults.first;
+        double distance = hitTestResult.distance;  // The distance from the camera to the hit test result
         addObjectToPlane(hitTestResult);
+        print("Distance is ${distance}");
       }
     };
   }
@@ -147,12 +149,11 @@ class _DebugOptionsState extends State<DebugOptions> {
     if (arObjectManager != null) {
       // Create a node to add a 3D model (GLTF format)
       ARNode objectNode = ARNode(
-        type: NodeType.fileSystemAppFolderGLB,
-        uri: "assets/fan2.glb", // Path to your model file
+        type: NodeType.webGLB,
+        uri: "https://github.com/KhronosGroup/glTF-Sample-Models/raw/refs/heads/main/2.0/Duck/glTF-Binary/Duck.glb", // Path to your model file
         position: hitTestResult.worldTransform.getTranslation(),
-        scale: Vector3(0.1, 0.1, 0.1), // Adjust the scale of the object
+        scale: vv.Vector3(0.1, 0.1, 0.1), // Adjust the scale of the object
       );
-
       // Add the node to the AR scene
       await arObjectManager!.addNode(objectNode);
     }

@@ -438,6 +438,7 @@ class _SignUpState extends State<SignUp> {
                                             child: ExcludeSemantics(
                                               child: TextFormField(
                                                 focusNode: _focusNode1,
+                                                enableInteractiveSelection: false, // Disable text selection
                                                 controller: mailEditingController,
                                                 decoration: InputDecoration(
                                                   hintText: 'Email or mobile number',
@@ -480,6 +481,7 @@ class _SignUpState extends State<SignUp> {
                                               child: TextFormField(
                                                 focusNode: nameFocusNode,
                                                 controller: nameEditingController,
+                                                enableInteractiveSelection: false, // Disable text selection
                                                 decoration: InputDecoration(
                                                   hintText: 'Name',
                                                   hintStyle: TextStyle(
@@ -527,6 +529,7 @@ class _SignUpState extends State<SignUp> {
                                           child: TextField(
                                             focusNode: _focusNode1_1,
                                             controller: passEditingController,
+                                            enableInteractiveSelection: false, // Disable text selection
                                             obscureText: _obscureText,
                                             decoration: InputDecoration(
                                               hintText: 'Password',
@@ -618,6 +621,7 @@ class _SignUpState extends State<SignUp> {
                                           child: TextField(
                                             focusNode: _focusNode1_2,
                                             controller: confirmPassEditingController,
+                                            enableInteractiveSelection: false, // Disable text selection
                                             obscureText: _obscureTextConfirm,
                                             decoration: InputDecoration(
                                               hintText: 'Confirm Password',

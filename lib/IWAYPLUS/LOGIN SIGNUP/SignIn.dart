@@ -270,6 +270,7 @@ class _SignInState extends State<SignIn> {
                                                         autofillHints: [AutofillHints.username],
                                                         focusNode: _focusNode1,
                                                         controller: mailEditingController,
+                                                        enableInteractiveSelection: false, // Disable text selection
                                                         decoration: InputDecoration(
                                                           hintText: 'Email or mobile number',
                                                           hintStyle: TextStyle(
@@ -340,6 +341,7 @@ class _SignInState extends State<SignIn> {
                                                         focusNode: _focusNode1_1,
                                                         controller: passEditingController,
                                                         obscureText: obsecure,
+                                                        enableInteractiveSelection: false, // Disable text selection
                                                         decoration: InputDecoration(
                                                           hintText: 'Password',
                                                           hintStyle: TextStyle(

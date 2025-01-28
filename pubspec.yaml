@@ -98,6 +98,7 @@ dependencies:
   provider: ^6.1.2
   image:
   jailbreak_root_detection: ^1.1.5
+  encrypt: ^5.0.0
 
 
 

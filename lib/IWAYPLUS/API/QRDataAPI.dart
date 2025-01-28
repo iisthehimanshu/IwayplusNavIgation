@@ -15,7 +15,7 @@ class QRDataAPI{
   Future<List<QRDataAPIModel>?> fetchQRData(List<String> id)async{
     print("IDfetchQRData");
     print(id);
-    final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building-qrs" : "https://maps.iwayplus.in/secured/building-qrs";
+    final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building-qrs" : "https://dev.iwayplus.in/secured/building-qrs";
     final Map<String, dynamic> data = {
       "buildingIds": id
     };
@@ -24,7 +24,16 @@ class QRDataAPI{
       body: json.encode(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken
+        'x-access-token': accessToken,
+        'X-Content-Type-Options': 'nosniff', // Prevent MIME sniffing
+        'X-Frame-Options': 'SAMEORIGIN', // Prevent embedding in iframe
+        'X-XSS-Protection': '1; mode=block', // Prevent reflected XSS attacks
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload', // Enforce HTTPS
+        'Content-Security-Policy': "frame-ancestors 'self'", // Limit who can embed the app
+        'Referrer-Policy': 'no-referrer', // Prevent sending referrer information
+        'X-Permitted-Cross-Domain-Policies': 'none',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     );
     if (response.statusCode == 200) {

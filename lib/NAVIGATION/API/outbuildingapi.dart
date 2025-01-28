@@ -21,9 +21,18 @@ class OutBuildingData{
 
     var headers = {
       'Content-Type': 'application/json',
-      'x-access-token':'${accessToken}'
+      'x-access-token':'${accessToken}',
+      'X-Content-Type-Options': 'nosniff', // Prevent MIME sniffing
+      'X-Frame-Options': 'SAMEORIGIN', // Prevent embedding in iframe
+      'X-XSS-Protection': '1; mode=block', // Prevent reflected XSS attacks
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload', // Enforce HTTPS
+      'Content-Security-Policy': "frame-ancestors 'self'", // Limit who can embed the app
+      'Referrer-Policy': 'no-referrer', // Prevent sending referrer information
+      'X-Permitted-Cross-Domain-Policies': 'none',
+      'Pragma': 'no-cache',
+      'Expires': '0',
     };
-    var request = http.Request('POST', Uri.parse(kDebugMode? 'https://dev.iwayplus.in/secured/outdoor-wayfinding/' : 'https://maps.iwayplus.in/secured/outdoor-wayfinding/'));
+    var request = http.Request('POST', Uri.parse(kDebugMode? 'https://dev.iwayplus.in/secured/outdoor-wayfinding/' : 'https://dev.iwayplus.in/secured/outdoor-wayfinding/'));
     request.body = json.encode({
       "campusId": buildingAllApi.outdoorID,
       "source": [longitude1, latitude1],
@@ -45,7 +54,16 @@ class OutBuildingData{
       accessToken = newAccessToken;
       var headers = {
         'Content-Type': 'application/json',
-        'x-access-token':'${accessToken}'
+        'x-access-token':'${accessToken}',
+        'X-Content-Type-Options': 'nosniff', // Prevent MIME sniffing
+        'X-Frame-Options': 'SAMEORIGIN', // Prevent embedding in iframe
+        'X-XSS-Protection': '1; mode=block', // Prevent reflected XSS attacks
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload', // Enforce HTTPS
+        'Content-Security-Policy': "frame-ancestors 'self'", // Limit who can embed the app
+        'Referrer-Policy': 'no-referrer', // Prevent sending referrer information
+        'X-Permitted-Cross-Domain-Policies': 'none',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       };
       var request = http.Request('POST', Uri.parse('https://dev.iwayplus.in/secured/google/routing'));
       request.body = json.encode({

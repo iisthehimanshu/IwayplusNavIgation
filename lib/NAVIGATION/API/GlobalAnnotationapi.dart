@@ -19,13 +19,20 @@ class GlobalAnnotation {
     print("old access token $accessToken");
     print("old refreshToken  $refreshToken");
     //accessToken = signInBox.get("accessToken");
-
-
     final response = await http.get(
       Uri.parse(baseUrl+id),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': newaccesstoken??accessToken
+        'x-access-token': newaccesstoken??accessToken,
+        'X-Content-Type-Options': 'nosniff', // Prevent MIME sniffing
+        'X-Frame-Options': 'SAMEORIGIN', // Prevent embedding in iframe
+        'X-XSS-Protection': '1; mode=block', // Prevent reflected XSS attacks
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload', // Enforce HTTPS
+        'Content-Security-Policy': "frame-ancestors 'self'", // Limit who can embed the app
+        'Referrer-Policy': 'no-referrer', // Prevent sending referrer information
+        'X-Permitted-Cross-Domain-Policies': 'none',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     );
     print("globalannotation data ${response.body}");

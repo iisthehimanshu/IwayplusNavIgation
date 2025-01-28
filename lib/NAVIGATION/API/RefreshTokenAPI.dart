@@ -7,7 +7,7 @@ import '../DATABASE/BOXES/PatchAPIModelBox.dart';
 
 class RefreshTokenAPI {
 
-  static String baseUrl = kDebugMode? "https://dev.iwayplus.in/api/refreshToken?API_KEY=be349f00-b6cb-11ee-b352-d74b1ab1edff" : "https://maps.iwayplus.in/api/refreshToken?API_KEY=be349f00-b6cb-11ee-b352-d74b1ab1edff";
+  static String baseUrl = kDebugMode? "https://dev.iwayplus.in/api/refreshToken?API_KEY=be349f00-b6cb-11ee-b352-d74b1ab1edff" : "https://dev.iwayplus.in/api/refreshToken?API_KEY=be349f00-b6cb-11ee-b352-d74b1ab1edff";
 
   static Future<String> refresh() async {
     var signInBox = Hive.box('SignInDatabase');
@@ -23,6 +23,15 @@ class RefreshTokenAPI {
       Uri.parse(baseUrl), body: json.encode(data),
       headers: {
         'Content-Type': 'application/json',
+        'X-Content-Type-Options': 'nosniff', // Prevent MIME sniffing
+        'X-Frame-Options': 'SAMEORIGIN', // Prevent embedding in iframe
+        'X-XSS-Protection': '1; mode=block', // Prevent reflected XSS attacks
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload', // Enforce HTTPS
+        'Content-Security-Policy': "frame-ancestors 'self'", // Limit who can embed the app
+        'Referrer-Policy': 'no-referrer', // Prevent sending referrer information
+        'X-Permitted-Cross-Domain-Policies': 'none',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     );
     if (response.statusCode == 200) {

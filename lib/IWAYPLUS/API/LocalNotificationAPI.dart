@@ -11,7 +11,7 @@ import '/IWAYPLUS/APIMODELS/LocalNotificationAPIModel.dart';
 import '../DATABASE/BOXES/LocalNotificationAPIDatabaseModelBOX.dart';
 
 class LocalNotificationAPI{
-  final String baseUrl = kDebugMode? 'https://dev.iwayplus.in/secured/get-notifications?page=-1&appId=com.iwayplus.navigation' : 'https://maps.iwayplus.in/secured/get-notifications?page=-1&appId=com.iwayplus.navigation';
+  final String baseUrl = kDebugMode? 'https://dev.iwayplus.in/secured/get-notifications?page=-1&appId=com.iwayplus.navigation' : 'https://dev.iwayplus.in/secured/get-notifications?page=-1&appId=com.iwayplus.navigation';
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
@@ -35,7 +35,16 @@ class LocalNotificationAPI{
       Uri.parse(baseUrl),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken
+        'x-access-token': accessToken,
+        'X-Content-Type-Options': 'nosniff', // Prevent MIME sniffing
+        'X-Frame-Options': 'SAMEORIGIN', // Prevent embedding in iframe
+        'X-XSS-Protection': '1; mode=block', // Prevent reflected XSS attacks
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload', // Enforce HTTPS
+        'Content-Security-Policy': "frame-ancestors 'self'", // Limit who can embed the app
+        'Referrer-Policy': 'no-referrer', // Prevent sending referrer information
+        'X-Permitted-Cross-Domain-Policies': 'none',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     );
     if (response.statusCode == 200) {

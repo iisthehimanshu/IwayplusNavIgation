@@ -11,7 +11,18 @@ void sendErrorToSlack(String error, StackTrace? stackTrace) async {
 
   final response = await http.post(
     Uri.parse(slackWebhookUrl),
-    headers: {'Content-Type': 'application/json'},
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Content-Type-Options': 'nosniff', // Prevent MIME sniffing
+      'X-Frame-Options': 'SAMEORIGIN', // Prevent embedding in iframe
+      'X-XSS-Protection': '1; mode=block', // Prevent reflected XSS attacks
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload', // Enforce HTTPS
+      'Content-Security-Policy': "frame-ancestors 'self'", // Limit who can embed the app
+      'Referrer-Policy': 'no-referrer', // Prevent sending referrer information
+      'X-Permitted-Cross-Domain-Policies': 'none',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
     body: jsonEncode(message),
   );
 

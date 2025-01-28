@@ -5,7 +5,7 @@ import '/IWAYPLUS/APIMODELS/guestloginmodel.dart';
 
 class guesApi {
 
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/auth/guest?API_KEY=be349f00-b6cb-11ee-b352-d74b1ab1edf" : "https://maps.iwayplus.in/auth/guest?API_KEY=be349f00-b6cb-11ee-b352-d74b1ab1edf";
+  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/auth/guest?API_KEY=be349f00-b6cb-11ee-b352-d74b1ab1edf" : "https://dev.iwayplus.in/auth/guest?API_KEY=be349f00-b6cb-11ee-b352-d74b1ab1edf";
 
   Future<guestloginmodel> gutlogin() async {
     print("guest");

@@ -7,7 +7,7 @@ import '/IWAYPLUS/Elements/HelperClass.dart';
 import '/NAVIGATION/API/RefreshTokenAPI.dart';
 
 class DeleteApi {
-  static String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/user/delete" : "https://maps.iwayplus.in/secured/user/delete";
+  static String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/user/delete" : "https://dev.iwayplus.in/secured/user/delete";
   static var signInBox = Hive.box('SignInDatabase');
   static String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
@@ -24,7 +24,16 @@ class DeleteApi {
       Uri.parse(baseUrl), body: json.encode(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken
+        'x-access-token': accessToken,
+        'X-Content-Type-Options': 'nosniff', // Prevent MIME sniffing
+        'X-Frame-Options': 'SAMEORIGIN', // Prevent embedding in iframe
+        'X-XSS-Protection': '1; mode=block', // Prevent reflected XSS attacks
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload', // Enforce HTTPS
+        'Content-Security-Policy': "frame-ancestors 'self'", // Limit who can embed the app
+        'Referrer-Policy': 'no-referrer', // Prevent sending referrer information
+        'X-Permitted-Cross-Domain-Policies': 'none',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     );
 
@@ -44,7 +53,16 @@ class DeleteApi {
         Uri.parse(baseUrl), body: json.encode(data),
         headers: {
           'Content-Type': 'application/json',
-          'x-access-token': accessToken
+          'x-access-token': accessToken,
+          'X-Content-Type-Options': 'nosniff', // Prevent MIME sniffing
+          'X-Frame-Options': 'SAMEORIGIN', // Prevent embedding in iframe
+          'X-XSS-Protection': '1; mode=block', // Prevent reflected XSS attacks
+          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload', // Enforce HTTPS
+          'Content-Security-Policy': "frame-ancestors 'self'", // Limit who can embed the app
+          'Referrer-Policy': 'no-referrer', // Prevent sending referrer information
+          'X-Permitted-Cross-Domain-Policies': 'none',
+          'Pragma': 'no-cache',
+          'Expires': '0',
         },
       );
 

@@ -11,7 +11,7 @@ import 'RefreshTokenAPI.dart';
 
 
 class BuildingAPI {
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building/get/venue" : "https://maps.iwayplus.in/secured/building/get/venue";
+  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building/get/venue" : "https://dev.iwayplus.in/secured/building/get/venue";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
@@ -33,7 +33,16 @@ class BuildingAPI {
       body: json.encode(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken
+        'x-access-token': accessToken,
+        'X-Content-Type-Options': 'nosniff', // Prevent MIME sniffing
+        'X-Frame-Options': 'SAMEORIGIN', // Prevent embedding in iframe
+        'X-XSS-Protection': '1; mode=block', // Prevent reflected XSS attacks
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload', // Enforce HTTPS
+        'Content-Security-Policy': "frame-ancestors 'self'", // Limit who can embed the app
+        'Referrer-Policy': 'no-referrer', // Prevent sending referrer information
+        'X-Permitted-Cross-Domain-Policies': 'none',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     );
     if (response.statusCode == 200) {
@@ -55,7 +64,16 @@ class BuildingAPI {
         body: json.encode(data),
         headers: {
           'Content-Type': 'application/json',
-          'x-access-token': accessToken
+          'x-access-token': accessToken,
+          'X-Content-Type-Options': 'nosniff', // Prevent MIME sniffing
+          'X-Frame-Options': 'SAMEORIGIN', // Prevent embedding in iframe
+          'X-XSS-Protection': '1; mode=block', // Prevent reflected XSS attacks
+          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload', // Enforce HTTPS
+          'Content-Security-Policy': "frame-ancestors 'self'", // Limit who can embed the app
+          'Referrer-Policy': 'no-referrer', // Prevent sending referrer information
+          'X-Permitted-Cross-Domain-Policies': 'none',
+          'Pragma': 'no-cache',
+          'Expires': '0',
         },
       );
       if (response.statusCode == 200) {

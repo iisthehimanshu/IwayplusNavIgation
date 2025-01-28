@@ -943,7 +943,7 @@ class _SignUpState extends State<SignUp> {
                                                 }
                                               } catch (error) {
                                                 Navigator.of(context).pop(); // Dismiss the loading dialog
-                                                print(error);
+                                                print("error $error");
                                                 showDialog(
                                                   context: context,
                                                   builder: (BuildContext context) {

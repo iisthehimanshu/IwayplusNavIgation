@@ -8,7 +8,7 @@ import '/NAVIGATION/APIMODELS/outdoormodel.dart';
 import '../DATABASE/DATABASEMODEL/OutDoorModel.dart';
 
 class outBuilding {
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/outdoor" : "https://maps.iwayplus.in/secured/outdoor";
+  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/outdoor" : "https://dev.iwayplus.in/secured/outdoor";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
 
@@ -32,7 +32,16 @@ class outBuilding {
       Uri.parse(baseUrl), body: json.encode(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken
+        'x-access-token': accessToken,
+        'X-Content-Type-Options': 'nosniff', // Prevent MIME sniffing
+        'X-Frame-Options': 'SAMEORIGIN', // Prevent embedding in iframe
+        'X-XSS-Protection': '1; mode=block', // Prevent reflected XSS attacks
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload', // Enforce HTTPS
+        'Content-Security-Policy': "frame-ancestors 'self'", // Limit who can embed the app
+        'Referrer-Policy': 'no-referrer', // Prevent sending referrer information
+        'X-Permitted-Cross-Domain-Policies': 'none',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     );
 
@@ -60,7 +69,16 @@ class outBuilding {
         Uri.parse(baseUrl), body: json.encode(data),
         headers: {
           'Content-Type': 'application/json',
-          'x-access-token': accessToken
+          'x-access-token': accessToken,
+          'X-Content-Type-Options': 'nosniff', // Prevent MIME sniffing
+          'X-Frame-Options': 'SAMEORIGIN', // Prevent embedding in iframe
+          'X-XSS-Protection': '1; mode=block', // Prevent reflected XSS attacks
+          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload', // Enforce HTTPS
+          'Content-Security-Policy': "frame-ancestors 'self'", // Limit who can embed the app
+          'Referrer-Policy': 'no-referrer', // Prevent sending referrer information
+          'X-Permitted-Cross-Domain-Policies': 'none',
+          'Pragma': 'no-cache',
+          'Expires': '0',
         },
       );
       if (response.statusCode == 200) {

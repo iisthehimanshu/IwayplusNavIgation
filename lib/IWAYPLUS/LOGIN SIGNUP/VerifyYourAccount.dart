@@ -28,8 +28,7 @@ class VerifyYourAccount extends StatefulWidget {
 
 class _VerifyYourAccountState extends State<VerifyYourAccount> {
   String finalSendingEmailORPhone = "";
-
-
+  int attempts = 0;
   FocusNode _focusNode1 = FocusNode();
   FocusNode _focusNode2 = FocusNode();
   FocusNode _focusNode2_1 = FocusNode();
@@ -242,6 +241,30 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                     textAlign: TextAlign.left,
                                   ),
                                 ),
+                                InkWell(
+                                  onTap: (){
+                                    Navigator.pop(context);
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 8.0,left: 16,right: 16),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          "Change Email ?",
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w400,
+                                            decoration: TextDecoration.underline,
+                                            color: Color(0xff24b9b0),
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
 
                                 // Container(
                                 //   margin: EdgeInsets.only(left: 16,top: 8,right: 16),
@@ -282,9 +305,10 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                         child: TextFormField(
                                           focusNode: _focusNode1,
                                           keyboardType: TextInputType.number,
-                                          inputFormatters: <TextInputFormatter>[
-                                            FilteringTextInputFormatter.digitsOnly
-                                          ],
+                                            inputFormatters: <TextInputFormatter>[
+                                              FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                                              LengthLimitingTextInputFormatter(4),   // Limit input to 4 digits
+                                            ],
                                           controller: OTPEditingController,
                                           decoration: InputDecoration(
                                               hintText: 'OTP',
@@ -328,7 +352,7 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                       children: [
                                         Spacer(),
                                         Text(
-                                          timeLeft==0? 'Try Again': '00:${timeLeft.toString()}',
+                                          timeLeft==0? '': '00:${timeLeft.toString()}',
                                           style: const TextStyle(
                                             fontFamily: "Roboto",
                                             fontSize: 16,
@@ -347,16 +371,19 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                         height: 48,
                                         child: ElevatedButton(
                                           style: ElevatedButton.styleFrom(
-                                            foregroundColor: Color(0xff777777), backgroundColor: buttonBGColor,                                          // Text color
+                                            foregroundColor: Color(0xff777777),
+                                            backgroundColor: buttonBGColor,
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(
-                                                  4.0), // Button border radius
+                                              borderRadius: BorderRadius.circular(4.0),
                                             ),
                                             elevation: 0,
                                           ),
-                                          // onPressed: loginclickable ? login : null,
-                                          onPressed: () async {
-                                            if(widget.previousScreen=='ForgetPassword' && OTPEditingController.text.length==4){
+                                          onPressed: attempts > 4
+                                              ? null // Disable button if attempts > 4
+                                              : () async {
+                                            attempts = attempts +1;
+                                            if (widget.previousScreen == 'ForgetPassword' &&
+                                                OTPEditingController.text.length == 4) {
                                               print("sending");
                                               print(finalSendingEmailORPhone);
                                               print(widget.userEmailOrPhone);
@@ -364,28 +391,41 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
-                                                    builder: (context) => CreateNewPassword(otp: (OTPEditingController.text.isNotEmpty)?OTPEditingController.text:'', user: finalSendingEmailORPhone)
+                                                  builder: (context) => CreateNewPassword(
+                                                    otp: (OTPEditingController.text.isNotEmpty)
+                                                        ? OTPEditingController.text
+                                                        : '',
+                                                    user: finalSendingEmailORPhone,
+                                                  ),
                                                 ),
                                               );
-                                            }else if(OTPEditingController.text.isEmpty || OTPEditingController.text.length<4){
+                                            } else if (OTPEditingController.text.isEmpty ||
+                                                OTPEditingController.text.length < 4) {
                                               HelperClass.showToast("Enter 4 Digit OTP");
-                                            }
-                                            else{
+                                            } else {
 
-                                              if(await SignUpAPI().signUP(finalSendingEmailORPhone, widget.userName, widget.userPasword, OTPEditingController.text)){
-                                                Navigator.pushAndRemoveUntil(context,
+                                              if (await SignUpAPI().signUP(
+                                                  finalSendingEmailORPhone,
+                                                  widget.userName,
+                                                  widget.userPasword,
+                                                  OTPEditingController.text)) {
+                                                Navigator.pushAndRemoveUntil(
+                                                  context,
                                                   MaterialPageRoute(
-                                                      builder: (context) => SignIn(emailOrPhoneNumber: widget.userEmailOrPhone,password: widget.userPasword,)
-                                                  ),(route) => false,
+                                                    builder: (context) => SignIn(
+                                                      emailOrPhoneNumber: widget.userEmailOrPhone,
+                                                      password: widget.userPasword,
+                                                    ),
+                                                  ),
+                                                      (route) => false,
                                                 );
-                                              }else{
-
+                                              } else {
+                                                // Handle failed signup logic here
                                               }
                                             }
                                           },
                                           child: Center(
-                                            child:
-                                            Text(
+                                            child: Text(
                                               'Verify OTP',
                                               style: TextStyle(
                                                 fontFamily: 'Roboto',
@@ -395,7 +435,8 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                               ),
                                             ),
                                           ),
-                                        ))
+                                        )
+                                    )
                                 )
                               ],
                             ),

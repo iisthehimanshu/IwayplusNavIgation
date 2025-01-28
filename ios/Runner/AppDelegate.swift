@@ -18,6 +18,9 @@ import flutter_local_notifications
       if #available(iOS 10.0, *) {
         UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
       }
+
+      let window = UIApplication.shared.windows.first
+          window?.isSecureTextEntry = true
           
       let controller = window?.rootViewController as! FlutterViewController
       let channel = FlutterMethodChannel(name: "ble_scanner", binaryMessenger: controller.binaryMessenger)

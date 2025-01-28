@@ -797,6 +797,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  jailbreak_root_detection:
+    dependency: "direct main"
+    description:
+      name: jailbreak_root_detection
+      sha256: ee98f5e69b43c758ee1779204b0926a09f0371eebe1462b876fb6a8bd130cbe5
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.5"
   js:
     dependency: transitive
     description:

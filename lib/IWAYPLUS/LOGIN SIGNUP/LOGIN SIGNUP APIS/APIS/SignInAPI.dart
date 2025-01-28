@@ -87,10 +87,15 @@ class SignInAPI{
     }
   }
   static Future<int> sendOtpForgetPassword(String user) async {
-    var headers = {'Content-Type': 'application/json'};
+    final String xaccesstoken = AppConfig.xaccesstoken;
+
+    var headers = {'Content-Type': 'application/json',
+      'x-access-token':xaccesstoken,
+
+    };
     var request = http.Request(
-        'POST', Uri.parse('https://maps.iwayplus.in/auth/otp/username'));
-    request.body = json.encode({"username": "${user}", "digits":4,});
+        'POST', Uri.parse('${AppConfig.baseUrl}/auth/otp/username'));
+    request.body = json.encode({"username": "${user}", "digits":4,"appId":"com.iwayplus.navigation"});
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();
@@ -100,7 +105,7 @@ class SignInAPI{
       return 1;
     } else {
       print("response.reasonPhrase");
-      print(response.reasonPhrase);
+      print(response);
       return 0;
     }
   }

@@ -313,6 +313,16 @@ class _SignUpState extends State<SignUp> {
     });
   }
 
+  bool strongPassword = false;
+  bool isPasswordStrong(String password){
+    final pattern = RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$');
+    setState(() {
+      strongPassword =  pattern.hasMatch(password);
+    });
+    print("Strong password $strongPassword");
+    return strongPassword;
+  }
+
   @override
   void initstate() {
     super.initState();
@@ -507,6 +517,7 @@ class _SignUpState extends State<SignUp> {
                                     ),
                                   ),
                                 ),
+                                PasswordConditionsWidget(),
                                 Container(
                                   margin: EdgeInsets.only(top: 20, left: 16, right: 16),
                                   height: 58,
@@ -553,6 +564,7 @@ class _SignUpState extends State<SignUp> {
                                               ),
                                             ),
                                             onChanged: (value) {
+                                              isPasswordStrong(passEditingController.text);
                                               passwordFieldListner();
                                               setState(() {
                                                 outlineheaderColorForName = new Color(0xff49454f);
@@ -566,12 +578,12 @@ class _SignUpState extends State<SignUp> {
                                     ),
                                   ),
                                 ),
-                                passEditingController.text.length < 8
+                                strongPassword
                                     ? ExcludeSemantics(
                                   child: Container(
                                     margin: EdgeInsets.only(left: 32, top: 4),
                                     child: Text(
-                                      "8 characters password required.",
+                                      "",
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
                                         fontSize: 12,
@@ -587,12 +599,12 @@ class _SignUpState extends State<SignUp> {
                                   child: Container(
                                     margin: EdgeInsets.only(left: 32, top: 4),
                                     child: Text(
-                                      "8 characters password required.",
+                                      "Password Not Strong Enough",
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
                                         fontSize: 12,
                                         fontWeight: FontWeight.w400,
-                                        color: Colors.green,
+                                        color: Colors.red,
                                         height: 16 / 12,
                                       ),
                                       textAlign: TextAlign.left,
@@ -1392,5 +1404,47 @@ String extractPhoneNumber(String countryCode, String fullPhoneNumber) {
   } else {
     // If the fullPhoneNumber doesn't start with the countryCode, return the original fullPhoneNumber
     return fullPhoneNumber;
+  }
+}
+
+
+class PasswordConditionsWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Your password must contain at least:",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 8),
+          _buildCondition("1 uppercase letter (A-Z)"),
+          _buildCondition("1 lowercase letter (a-z)"),
+          _buildCondition("1 number (0-9)"),
+          _buildCondition("1 special character (@, \$, !, %, *, ?, &)"),
+          SizedBox(height: 8),
+          Text(
+            "Make sure your password is at least 8 characters long.",
+            style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCondition(String condition) {
+    return Row(
+      children: [
+        Icon(Icons.circle, size: 18, color: Colors.black),
+        SizedBox(width: 8),
+        Text(
+          condition,
+          style: TextStyle(fontSize: 14),
+        ),
+      ],
+    );
   }
 }

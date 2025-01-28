@@ -6,9 +6,11 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/IWAYPLUS/BuildingInfoScreen.dart';
+import 'package:iwaymaps/IWAYPLUS/Elements/HelperClass.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import 'package:jailbreak_root_detection/jailbreak_root_detection.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
 import 'package:path_provider/path_provider.dart';
@@ -37,13 +39,20 @@ final navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final isJailBroken = await JailbreakRootDetection.instance.isJailBroken;
   await localDBInitialsation();
-  if(!kIsWeb){
-    mobileInitialization();
-    runApp(const MobileApp());
-  }else{
-    runApp(const WebApp());
+  if (isJailBroken) {
+    HelperClass.showToast("Root/Jailbreak caught");
+    exit(0); // Note: You need `dart:io` for this.
+  } else {
+    if(!kIsWeb){
+      mobileInitialization();
+      runApp(const MobileApp());
+    }else{
+      runApp(const WebApp());
+    }
   }
+
 }
 
 Future<void> localDBInitialsation() async {

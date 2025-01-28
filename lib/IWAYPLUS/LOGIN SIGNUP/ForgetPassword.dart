@@ -104,7 +104,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   }
 
   void emailFieldListner() {
-    if (mailEditingController.text.isNotEmpty) {
+    if (emailIsValid) {
       setState(() {
         buttonBGColor = Color(0xff24b9b0);
         loginclickable = true;
@@ -216,6 +216,13 @@ class _ForgetPasswordState extends State<ForgetPassword> {
     // Regular expression to match the pattern of numeric characters
     RegExp regExp = RegExp(r'^[0-9]+$');
     return regExp.hasMatch(input);
+  }
+
+  bool emailIsValid = false;
+  bool validEmail(String email){
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    emailIsValid = emailRegex.hasMatch(email);
+    return emailIsValid;
   }
 
   @override
@@ -346,6 +353,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                                     //contentPadding: EdgeInsets.symmetric(vertical: 8)
                                                   ),
                                                   onChanged: (value) {
+                                                    validEmail(mailEditingController.text);
                                                     emailFieldListner();
                                                     outlineheaderColorForPass =
                                                     new Color(0xff49454f);
@@ -382,8 +390,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
 
                                           print(mailEditingController.text);
 
-                                          if (mailEditingController
-                                              .text.isNotEmpty) {
+                                          if (emailIsValid) {
                                             if (containsOnlyNumeric(
                                                 mailEditingController.text)) {
                                               await SignInAPI.sendOtpForgetPassword('+91${mailEditingController.text}').then((value) => {
@@ -414,8 +421,6 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                                   mailEditingController
                                                       .text)
                                                   .then((value) => {
-                                                if (value == 1)
-                                                  {
                                                     Navigator.push(
                                                       context,
                                                       MaterialPageRoute(
@@ -431,15 +436,10 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                                       ),
                                                     )
                                                   }
-                                                else
-                                                  {
-                                                    showToast(
-                                                        'you are not a registered user')
-                                                  }
-                                              });
+                                              );
                                             }
                                           } else {
-                                            showToast('enter your details');
+                                            showToast('Enter a Valid Email');
                                           }
 
                                           setState(() {

@@ -90,6 +90,12 @@
 @import google_maps_flutter_ios;
 #endif
 
+#if __has_include(<jailbreak_root_detection/JailbreakRootDetectionPlugin.h>)
+#import <jailbreak_root_detection/JailbreakRootDetectionPlugin.h>
+#else
+@import jailbreak_root_detection;
+#endif
+
 #if __has_include(<package_info_plus/FPPPackageInfoPlusPlugin.h>)
 #import <package_info_plus/FPPPackageInfoPlusPlugin.h>
 #else
@@ -179,6 +185,7 @@
   [FluttertoastPlugin registerWithRegistrar:[registry registrarForPlugin:@"FluttertoastPlugin"]];
   [GeolocatorPlugin registerWithRegistrar:[registry registrarForPlugin:@"GeolocatorPlugin"]];
   [FLTGoogleMapsPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTGoogleMapsPlugin"]];
+  [JailbreakRootDetectionPlugin registerWithRegistrar:[registry registrarForPlugin:@"JailbreakRootDetectionPlugin"]];
   [FPPPackageInfoPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FPPPackageInfoPlusPlugin"]];
   [PathProviderPlugin registerWithRegistrar:[registry registrarForPlugin:@"PathProviderPlugin"]];
   [PermissionHandlerPlugin registerWithRegistrar:[registry registrarForPlugin:@"PermissionHandlerPlugin"]];

@@ -112,6 +112,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
   }
 
   void emailFieldListner() {
+    isPasswordStrong(confirmmailEditingController.text);
     if (mailEditingController.text.isNotEmpty) {
       setState(() {
         buttonBGColor = Color(0xff24b9b0);
@@ -131,6 +132,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
   }
 
   void confirmemailFieldListner() {
+    isPasswordStrong(confirmmailEditingController.text);
     if (mailEditingController.text.isNotEmpty) {
       setState(() {
         buttonBGColor = Color(0xff24b9b0);
@@ -203,6 +205,16 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
           ? passvis = "assets/passnotvis.svg"
           : passvis = "assets/passvis.svg";
     });
+  }
+
+  bool strongPassword = false;
+  bool isPasswordStrong(String password){
+    final pattern = RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$');
+    setState(() {
+      strongPassword =  pattern.hasMatch(password);
+    });
+    print("Strong password $strongPassword");
+    return strongPassword;
   }
 
   @override
@@ -314,6 +326,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                                   focusNode: _focusNode1,
                                                   controller: mailEditingController,
                                                   obscureText: _obscureText, // Flag to show/hide password
+                                                  enableInteractiveSelection: false, // Disable text selection
                                                   decoration: InputDecoration(
                                                     hintText: 'New Password',
                                                     hintStyle: TextStyle(
@@ -336,6 +349,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                                     ),
                                                   ),
                                                   onChanged: (value) {
+                                                    isPasswordStrong(confirmmailEditingController.text);
                                                     emailFieldListner();
                                                     outlineheaderColorForPass = new Color(0xff49454f);
                                                     outlineheaderColorForName = new Color(0xff49454f);
@@ -369,6 +383,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                             child: TextField(
                                               focusNode: _focusNode2,
                                               controller: confirmmailEditingController,
+                                              enableInteractiveSelection: false, // Disable text selection
                                               obscureText: _obscureText2,
                                               decoration: InputDecoration(
                                                 hintText: 'Confirm Password',
@@ -392,6 +407,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                                 ),
                                               ),
                                               onChanged: (value) {
+                                                isPasswordStrong(confirmmailEditingController.text);
                                                 confirmemailFieldListner();
                                                 outlineheaderColorForPass = Color(0xff49454f);
                                                 outlineheaderColorForName = Color(0xff49454f);
@@ -404,11 +420,11 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                   ),
                                 ),
                               ),
-                              confirmmailEditingController.text.length<8?ExcludeSemantics(
+                              strongPassword?ExcludeSemantics(
                                 child: Container(
                                   margin: EdgeInsets.only(left: 32, top: 4),
                                   child: Text(
-                                    "8 characters password required.",
+                                    "",
                                     style: const TextStyle(
                                       fontFamily: "Roboto",
                                       fontSize: 12,

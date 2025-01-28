@@ -11,6 +11,7 @@ import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:jailbreak_root_detection/jailbreak_root_detection.dart';
+import 'package:screen_protector/screen_protector.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
 import 'package:path_provider/path_provider.dart';
@@ -41,6 +42,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final isJailBroken = await JailbreakRootDetection.instance.isJailBroken;
   await localDBInitialsation();
+  await ScreenProtector.preventScreenshotOn();
   if (isJailBroken) {
     HelperClass.showToast("Root/Jailbreak caught");
     exit(0); // Note: You need `dart:io` for this.

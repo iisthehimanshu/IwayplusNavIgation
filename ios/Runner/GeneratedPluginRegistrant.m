@@ -120,6 +120,12 @@
 @import qr_code_scanner;
 #endif
 
+#if __has_include(<screen_protector/ScreenProtectorPlugin.h>)
+#import <screen_protector/ScreenProtectorPlugin.h>
+#else
+@import screen_protector;
+#endif
+
 #if __has_include(<sensors_plus/FPPSensorsPlusPlugin.h>)
 #import <sensors_plus/FPPSensorsPlusPlugin.h>
 #else
@@ -144,10 +150,10 @@
 @import speech_to_text;
 #endif
 
-#if __has_include(<sqflite_darwin/SqflitePlugin.h>)
-#import <sqflite_darwin/SqflitePlugin.h>
+#if __has_include(<sqflite/SqflitePlugin.h>)
+#import <sqflite/SqflitePlugin.h>
 #else
-@import sqflite_darwin;
+@import sqflite;
 #endif
 
 #if __has_include(<url_launcher_ios/URLLauncherPlugin.h>)
@@ -190,6 +196,7 @@
   [PathProviderPlugin registerWithRegistrar:[registry registrarForPlugin:@"PathProviderPlugin"]];
   [PermissionHandlerPlugin registerWithRegistrar:[registry registrarForPlugin:@"PermissionHandlerPlugin"]];
   [FlutterQrPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterQrPlugin"]];
+  [ScreenProtectorPlugin registerWithRegistrar:[registry registrarForPlugin:@"ScreenProtectorPlugin"]];
   [FPPSensorsPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FPPSensorsPlusPlugin"]];
   [FPPSharePlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FPPSharePlusPlugin"]];
   [SharedPreferencesPlugin registerWithRegistrar:[registry registrarForPlugin:@"SharedPreferencesPlugin"]];

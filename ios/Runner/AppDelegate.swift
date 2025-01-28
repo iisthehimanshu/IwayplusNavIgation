@@ -19,14 +19,11 @@ import flutter_local_notifications
         UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
       }
 
-      let window = UIApplication.shared.windows.first
-          window?.isSecureTextEntry = true
-          
       let controller = window?.rootViewController as! FlutterViewController
       let channel = FlutterMethodChannel(name: "ble_scanner", binaryMessenger: controller.binaryMessenger)
       let bleManager = BLEManager()
 
-      
+
       channel.setMethodCallHandler { (call, result) in
           switch call.method {
           case "startScan":

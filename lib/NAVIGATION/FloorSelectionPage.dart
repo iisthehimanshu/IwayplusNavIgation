@@ -61,7 +61,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
     }else{
       setState(() {
         if(int.parse(widget.floors[0])==-1 && int.parse(widget.floors[1])==0){
-          setState(() {
+          setState((){
             tag = 0;
           });
           print("Tag=0");

@@ -2,6 +2,7 @@ import 'package:chips_choice/chips_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fuzzy/fuzzy.dart';
+import 'package:lottie/lottie.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import 'IWAYPLUS/API/buildingAllApi.dart';
@@ -11,6 +12,7 @@ import 'NAVIGATION/APIMODELS/landmark.dart';
 import 'NAVIGATION/ELEMENTS/DestinationPageChipsWidget.dart';
 import 'NAVIGATION/ELEMENTS/SearchpageCategoryResult.dart';
 import 'NAVIGATION/ELEMENTS/SearchpageResults.dart';
+import 'NAVIGATION/navigationTools.dart';
 import 'NAVIGATION/singletonClass.dart';
 
 class NewSearchPage extends StatefulWidget {
@@ -34,7 +36,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
   String searchHintString = "";
   List<SearchpageResults> searchResults = [];
   List<Widget> topSearches=[];
-  int vall = 1;
+  int vall = -1;
   Set<String> optionListItemBuildingName = {};
   List<Widget> searcCategoryhResults = [];
   int lastIndex = -1;
@@ -128,19 +130,27 @@ class _NewsearchpageState extends State<NewSearchPage> {
   void initState() {
     // TODO: implement initState
     fetchandBuild();
-
-
     if(widget.hintText!=""){
       searchHintString=widget.hintText;
     }
-    if (widget.previousFilter != "") {
-      setState(() {
+
+    setState(() {
+      searchHintString = widget.hintText;
+      if (containerBoxColor == Color(0xffA1A1AA)) {
+        containerBoxColor = Color(0xff24B9B0);
+      } else {
+        containerBoxColor = Color(0xffA1A1AA);
+      }
+    });
+    loadLandmarkData();
+
+    if (widget.previousFilter != ""){
+      setState((){
         _controller.text = widget.previousFilter;
         isTyping=false;
         search(_controller.text.toLowerCase());
       });
     }
-    loadLandmarkData();
     super.initState();
   }
 
@@ -165,7 +175,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
           Icon(Icons.search_sharp),
           SizedBox(width: 26,),
           Text(
-            "Top Searches",
+            "Recent Searches",
             style: const TextStyle(
               fontFamily: "Roboto",
               fontSize: 18,
@@ -266,6 +276,8 @@ class _NewsearchpageState extends State<NewSearchPage> {
       HelperClass.showToast("Permission not allowed");
       return;
     }
+    _dynamicText.value = "Speak...";
+    _showVoiceSearchPopup();
     setState(() {
       searchHintString = "";
     });
@@ -278,15 +290,16 @@ class _NewsearchpageState extends State<NewSearchPage> {
     HelperClass.showToast("Speak to search");
     await Future.delayed(Duration(seconds: 5));
     micColor = Colors.black;
+    Navigator.pop(context);
     setState(() {});
   }
 
   void onSpeechResult(result) {
-    setState(() {
+    setState((){
       print("Listening from mic");
-
       setState(() {
         _controller.text = result.recognizedWords;
+        _dynamicText.value = result.recognizedWords;
         search(result.recognizedWords);
         // print(_controller.text);
       });
@@ -313,18 +326,21 @@ class _NewsearchpageState extends State<NewSearchPage> {
       });
     }
   }
-
+  String capitalizeFirstWord(String input) {
+    if (input.isEmpty) return input;
+    return input[0].toUpperCase() + input.substring(1);
+  }
   void search(String searchText) {
     if (searchText.isEmpty) {
       return;
     }
-    setState(() {
+    setState((){
       searchResults.clear();
       searcCategoryhResults.clear();
       optionListItemBuildingName.clear();
     });
-    if (containsSearchText(optionListForUI.toList(), searchText)) {
-      setState(() {
+    if (containsSearchText(optionListForUI.toList(), searchText)){
+      setState((){
         category = true;
       });
       vall = indexOfCaseInsensitive(optionListForUI.toList(), searchText);
@@ -343,7 +359,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
         optionListItemBuildingName.forEach((element) {
           searcCategoryhResults.add(
             SearchpageCategoryResults(
-              name: searchText,
+              name: capitalizeFirstWord(searchText),
               buildingName: element,
               onClicked: onVenueClicked,
             ),
@@ -379,30 +395,155 @@ class _NewsearchpageState extends State<NewSearchPage> {
           if (fuseResult.score <=0.5) {
             final value = landmarkData.landmarksMap!.values
                 .firstWhere((v) => v.name != null && v.element!.subType != "beacon" && normalizeText(v.name!) == fuseResult.item);
-            newResults.add(SearchpageResults(
-              name: value.name!,
-              location: value.buildingID == buildingAllApi.outdoorID
-                  ? "${value.venueName}"
-                  : "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
-              onClicked: onVenueClicked,
-              ID: value.properties!.polyId!,
-              bid: value.buildingID!,
-              floor: value.floor!,
-              coordX: value.coordinateX!,
-              coordY: value.coordinateY!,
-              accessible: value.element!.subType == "restRoom" && value.properties!.washroomType == "Handicapped"
-                  ? "true"
-                  : "false",
-              distance: 0,
-            ));
+            if ((newResults.isEmpty) &&
+                SingletonFunctionController().getlocalizedBeacon() != null){
+              sortAndSeparateByUserLocation(
+                SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,
+                SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,
+                SingletonFunctionController().getlocalizedBeacon()!.floor!,
+                SingletonFunctionController().getlocalizedBeacon()!.buildingID!,
+                value,
+                normalizedSearchText,
+              );
+            }else{
+              newResults.add(SearchpageResults(
+                name: value.name!,
+                location: value.buildingID == buildingAllApi.outdoorID
+                    ? "${value.venueName}"
+                    : "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+                onClicked: onVenueClicked,
+                ID: value.properties!.polyId!,
+                bid: value.buildingID!,
+                floor: value.floor!,
+                coordX: value.coordinateX!,
+                coordY: value.coordinateY!,
+                accessible: value.element!.subType == "restRoom" &&
+                    value.properties!.washroomType == "Handicapped"
+                    ? "true"
+                    : "false",
+                distance: 0,
+              ));
+            }
+            // newResults.add(SearchpageResults(
+            //   name: value.name!,
+            //   location: value.buildingID == buildingAllApi.outdoorID
+            //       ? "${value.venueName}"
+            //       : "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+            //   onClicked: onVenueClicked,
+            //   ID: value.properties!.polyId!,
+            //   bid: value.buildingID!,
+            //   floor: value.floor!,
+            //   coordX: value.coordinateX!,
+            //   coordY: value.coordinateY!,
+            //   accessible: value.element!.subType == "restRoom" && value.properties!.washroomType == "Handicapped"
+            //       ? "true"
+            //       : "false",
+            //   distance: 0,
+            // ));
           }
         });
-        List<SearchpageResults> reversed = newResults.reversed.toList();
-        setState(() {
-          searchResults = reversed.take(25).toList(); // Limit results to 25
-        });
+        // List<SearchpageResults> reversed = newResults.reversed.toList();
+        // setState(() {
+        //   searchResults = reversed.take(25).toList(); // Limit results to 25
+        // });
       }
     }
+  }
+  void sortAndSeparateByUserLocation(int userLat, int userLng, int userFloor, String userBuildingID,Landmarks value,String searchedtext) {
+    print("got inside it");
+    if (value.name!.toLowerCase().contains(searchedtext.toLowerCase()) && value.buildingID==userBuildingID && value.floor==userFloor) {
+      searchResults.add(SearchpageResults(
+        name: value.name!,
+        location: value.buildingID == buildingAllApi.outdoorID ? "${value
+            .venueName}" : "Floor ${value.floor}, ${value.buildingName}, ${value
+            .venueName}",
+        onClicked: onVenueClicked,
+        ID: value.properties!.polyId!,
+        bid: value.buildingID!,
+        floor: value.floor!,
+        coordX: value.doorX??value.coordinateX!,
+        coordY: value.doorY??value.coordinateY!,
+        accessible: value.element!.subType == "restRoom" &&
+            value.properties!.washroomType == "Handicapped" ? "true" : "false",
+        distance: 0,
+      ));
+    }
+    // Step 1: Sort the main list as per previous logic
+    searchResults.sort((a, b){
+      // Building comparison
+      // Distance comparison within the same building and floor
+      double distanceA = tools.calculateDistance([userLat, userLng], [a.coordX!, a.coordY!]);
+      double distanceB = tools.calculateDistance([userLat, userLng], [b.coordX!, b.coordY!]);
+      // Populate the distance field for each element
+      a.distance = (distanceA*0.306).toInt();
+      b.distance = (distanceB*0.306).toInt();
+      return distanceA.compareTo(distanceB);
+    });
+    if(searchResults.length>2){
+      print("searchResults after in desti: ${searchResults[1].name}  ${searchResults[1].coordX} ${searchResults[1].coordY}");
+    }
+    List<SearchpageResults> reversed = searchResults.reversed.toList();
+    setState(() {
+      searchResults = reversed.take(25).toList(); // Limit results to 25
+    });
+
+  }
+
+
+  ValueNotifier<String> _dynamicText = ValueNotifier("Speak now...");
+
+  void _showVoiceSearchPopup(){
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Lottie Animation
+                Lottie.asset(
+                  "assets/voiceSearch.json", // Replace with your Lottie asset path
+                  width: 140.0,
+                  height: 120.0,
+                ),
+                SizedBox(height: 16.0),
+                // Dynamic Text
+                ValueListenableBuilder<String>(
+                    valueListenable:_dynamicText,
+                    builder: (context,value,child){
+                      return Text(
+                        _dynamicText.value,
+                        style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black
+                        ),
+                        textAlign: TextAlign.center,
+                      );
+                    }
+                ),
+                SizedBox(height: 8.0),
+                // Instruction Text
+                Text(
+                  "Speak now to search.",
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.grey,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
 
 
   }
@@ -576,20 +717,17 @@ class _NewsearchpageState extends State<NewSearchPage> {
                       if (HelperClass.SemanticEnabled) {
                         // speak("${optionListForUI[val]} selected");
                       }
-
                       // Reset vall to -1 if input text is not empty and a valid option is selected
                       if (_controller.text.isNotEmpty && vall != -1) {
                         setState(() {
                           vall = -1;
                         });
                       }
-
                       // Set the selected option
                       selectedButton = optionListForUI.toList()[val];
                       setState(() {
                         vall = val;
                       });
-
                       lastval = val;
                       _controller.text = optionListForUI.toList()[val];
                       search(optionListForUI.toList()[val].toLowerCase());

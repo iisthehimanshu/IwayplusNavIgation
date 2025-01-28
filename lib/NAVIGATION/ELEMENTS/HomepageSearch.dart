@@ -40,7 +40,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
 
   //double ratio=0.0;
   String currentSelectedFilter = "";
-  int vall = 0;
+  int vall = -1;
   int lastValueStored = 0;
 
   FlutterTts flutterTts  = FlutterTts();
@@ -103,7 +103,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => NewSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
+                                      builder: (context) => NewSearchPage(hintText: '',voiceInputEnabled: false,))
                               ).then((value){
                                 print("POP22");
                                 widget.onVenueClicked(value,DirectlyStartNavigation: false);
@@ -139,7 +139,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => NewSearchPage(hintText: 'Destination location',voiceInputEnabled: true,))
+                                  builder: (context) => NewSearchPage(hintText: '',voiceInputEnabled: true,))
                           ).then((value){
                             print("POPPP");
                             widget.onVenueClicked(value);
@@ -215,7 +215,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                 label: (i, v) => v,
               ),
               choiceBuilder: (item, i) {
-                return HomepageFilter(svgPath: '', text: options[i], onSelect: (bool selected) {  }, onClicked: widget.onVenueClicked, icon: getIcon(options[i].toLowerCase()),);
+                return HomepageFilter(svgPath: '', text: options[i], onSelect: (bool selected) {  }, onClicked: widget.onVenueClicked, icon: getIcon(options[i]),);
               },
               direction: Axis.horizontal,
             ),

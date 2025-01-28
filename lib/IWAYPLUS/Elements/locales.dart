@@ -58,9 +58,6 @@ mixin LocaleData {
   static const String ttssharpright='ttsSharpRight';
   static const String ttssharpleft='ttsSharpLeft';
   static const String ttsuturn='ttsUTurn';
-
-
-
   static const String uturn='U Turn';
   static const String sharpleft='Sharp Left';
   static const String left='Left';
@@ -68,16 +65,13 @@ mixin LocaleData {
   static const String slightright='Slight Right';
   static const String slightleft='Slight Left';
   static const String sharpright='Sharp Right';
-
   static const String tsright='tsRight';
   static const String tsuturn='tsU Turn';
   static const String tssharpleft='tsSharp Left';
   static const String tsleft='tsLeft';
-
   static const String tsslightright='tsSlight Right';
   static const String tsslightleft='tsSlight Left';
   static const String tssharpright='tsSharp Right';
-
   static const String hright='hRight';
   static const String hleft='hLeft';
   static const String gostraight='Go Straight';

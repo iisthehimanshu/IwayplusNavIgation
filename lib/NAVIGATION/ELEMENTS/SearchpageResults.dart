@@ -103,23 +103,32 @@ class _SearchpageResultsState extends State<SearchpageResults> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        margin: EdgeInsets.only(top: 12, left: 18),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width-100, // Adjust width if needed
-                          ),
-                          child: Text(
-                            widget.name,
-                            style: const TextStyle(
-                              fontFamily: "Roboto",
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xff000000),
+                      Row(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(top: 12, left: 18),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: MediaQuery.of(context).size.width-100, // Adjust width if needed
+                              ),
+                              child: Text(
+                                widget.name,
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xff000000),
+                                ),
+                                maxLines: null,
+                              ),
                             ),
-                            maxLines: null,
                           ),
-                        ),
+
+                          widget.accessible == "true"?Container(
+                            padding: EdgeInsets.only(left: 33,top: 10),
+                            child: Icon(Icons.accessible,color: Colors.black,size: 22,),
+                          ):Container()
+                        ],
                       ),
                       Container(
                         margin: EdgeInsets.only(top: 3, bottom: 14, left: 18),
@@ -137,11 +146,7 @@ class _SearchpageResultsState extends State<SearchpageResults> {
                       ),
                     ],
                   ),
-                  Spacer(),
-                  widget.accessible == "true"? Container(
-                    margin: EdgeInsets.only(right: 15),
-                    child: Icon(Icons.accessible,color: Colors.black,),
-                  ) : Container()
+
                 ],
               ),
             ),

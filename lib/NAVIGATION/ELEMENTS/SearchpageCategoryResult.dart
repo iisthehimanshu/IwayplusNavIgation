@@ -30,7 +30,6 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
     super.initState();
     fetchData();
   }
-
   void fetchData() async {
     await fetchlist();
     //await calculateFloor();
@@ -41,7 +40,7 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
     sortedList.sort();
     sortedListString.clear();
     sortedList.forEach((element) {
-      sortedListString.add(element.toString());
+        sortedListString.add(element.toString());
     });
     print("sortedListString");
     print(sortedListString);
@@ -55,7 +54,7 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
             //floors.sort();
             print("floors");
             print(floors);
-          } else {
+          }else{
             return;
           }
         });

@@ -14,6 +14,7 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/IWAYPLUS/API/buildingAllApi.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
+import 'package:lottie/lottie.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -222,6 +223,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       HelperClass.showToast("Permission not allowed");
       return;
     }
+    _showVoiceSearchPopup();
     setState(() {
       searchHintString = "";
     });
@@ -243,11 +245,11 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
       setState(() {
         _controller.text = result.recognizedWords;
+        _dynamicText.value = result.recognizedWords;
         search(result.recognizedWords);
         // print(_controller.text);
       });
       wordsSpoken = "${result.recognizedWords}";
-
       // if (result.recognizedWords == null) {
       //   print("result.recognizedWords");
       //
@@ -467,7 +469,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               );
               final result = fuse.search(normalizedSearchText);
               result.forEach((fuseResult) {
-                if (fuseResult.score < 0.5) {
+                if (fuseResult.score < 0.5){
                   if((searchResults.isNotEmpty || wantToFilter.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
                     sortAndSeparateByUserLocation(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,SingletonFunctionController().getlocalizedBeacon()!.floor!,SingletonFunctionController().getlocalizedBeacon()!.buildingID!,value,normalizedSearchText);
                   }else{
@@ -973,6 +975,64 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         ),
       ),
     );
+  }
+
+  ValueNotifier<String> _dynamicText = ValueNotifier("Speak now...");
+
+  void _showVoiceSearchPopup(){
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Lottie Animation
+                Lottie.asset(
+                  "assets/voiceSearch.json", // Replace with your Lottie asset path
+                  width: 140.0,
+                  height: 120.0,
+                ),
+                SizedBox(height: 16.0),
+                // Dynamic Text
+                ValueListenableBuilder<String>(
+                    valueListenable:_dynamicText,
+                    builder: (context,value,child){
+                      return Text(
+                        _dynamicText.value,
+                        style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black
+                        ),
+                        textAlign: TextAlign.center,
+                      );
+                    }
+                ),
+                SizedBox(height: 8.0),
+                // Instruction Text
+                Text(
+                  "Speak now to search.",
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.grey,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+
   }
 
 

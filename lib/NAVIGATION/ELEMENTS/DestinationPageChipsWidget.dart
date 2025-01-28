@@ -93,23 +93,23 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
                   ),
                 ),
               ),
-              widget.selected? Semantics(
-                excludeSemantics: true,
-                child: InkWell(
-                  onTap: (){
-                    setState(() {
-                      widget.selected=!widget.selected;
-                      widget.onTap("");
-                    });
-                  },
-                  child: Container(
-                    margin: EdgeInsets.only(left: 4),
-                    child: Semantics(
-                        label: "Unselect ${widget.text}",
-                        child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,)),
-                  ),
-                ),
-              ) : Container()
+              // widget.selected? Semantics(
+              //   excludeSemantics: true,
+              //   child: InkWell(
+              //     onTap: (){
+              //       setState(() {
+              //         widget.selected=!widget.selected;
+              //         widget.onTap("");
+              //       });
+              //     },
+              //     child: Container(
+              //       margin: EdgeInsets.only(left: 4),
+              //       child: Semantics(
+              //           label: "Unselect ${widget.text}",
+              //           child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,)),
+              //     ),
+              //   ),
+              // ) : Container()
 
 
               // Icon displayed when active is true

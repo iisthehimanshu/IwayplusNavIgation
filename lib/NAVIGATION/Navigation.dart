@@ -405,7 +405,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           70,
           _googleMapController);
 
-      updatedMarkers.forEach((currentMarker) {
+      updatedMarkers.forEach((currentMarker){
         if (currentMarker.markerId.toString().contains(closestBuildingId)) {
           currentMarker.visible = true;
         } else {
@@ -3182,6 +3182,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       Building.apibeaconmap[nearestBeacon]!.buildingID!;
       buildingAllApi.selectedBuildingID =
       Building.apibeaconmap[nearestBeacon]!.buildingID!;
+        SingletonFunctionController.currentBeacon = nearestBeacon;
+
     }
     paintUser(nearestBeacon,null,null, speakTTS: speakTTS, providePinSelection: true);
     Future.delayed(Duration(milliseconds: 1500)).then((value) => {
@@ -3692,6 +3694,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   position: Value,
                   icon: await bitmapDescriptorFromTextAndImageForPatchTransition(
                       showBuildingName??"", 'assets/cleanenergy.png',imageSize: const Size(100, 100)),
+                  onTap: (){
+                    _googleMapController.animateCamera(
+                        CameraUpdate.zoomIn()
+                    );
+                  }
                 ),
               );
             }
@@ -3699,6 +3706,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
         }
       });
+
     }
   }
 
@@ -3955,9 +3963,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     for (var e in polygonPoints) {
       points.add(geo.LatLng(e.latitude, e.longitude));
     }
-
     Uint8List baseIcon = await getImagesFromMarker(assetPath, 140);
-
     // Initialize a new animation controller
     _controller12 = AnimationController(
       vsync: this,
@@ -4922,7 +4928,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,'assets/entry.png',
+                            addselectedRoomMarker(coordinates,'',
                                 color: Colors.greenAccent);
                           }
                         });
@@ -4983,7 +4989,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,'assets/MapMaleWashroom.png',
+                            addselectedRoomMarker(coordinates,'',
                                 color: Colors.white);
                           }
                         });
@@ -5044,8 +5050,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,'assets/MapFemaleWashroom.png',
-                                color: Colors.white);
+                             addselectedRoomMarker(coordinates,'');
+                            //     color: Colors.white);
                           }
                         });
                       }));
@@ -5364,7 +5370,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     title: landmarks[i].name,
                     // snippet: '${landmarks[i].properties!.polyId}',
                     // Replace with additional information
-                    onTap: () {})));
+                    onTap: () {
+                      print("tapped here");
+
+                    })));
           }else if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType == "Point of Interest" &&
               landmarks[i].coordinateX != null &&
@@ -5386,8 +5395,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 landmarks[i].coordinateY!,
                 SingletonFunctionController.building
                     .patchData[bid ?? buildingAllApi.getStoredString()]);
-
-
             Markers.add(Marker(
                 markerId: MarkerId(
                     "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
@@ -5436,7 +5443,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     title: landmarks[i].name,
                     // snippet: '${landmarks[i].properties!.polyId}',
                     // Replace with additional information
-                    onTap: () {})));
+                    onTap: () {
+                      print("tapped herer");
+
+                    })));
           }else if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType == "Point of Interest" &&
               landmarks[i].coordinateX != null &&
@@ -5499,8 +5509,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 landmarks[i].coordinateY!,
                 SingletonFunctionController.building
                     .patchData[bid ?? buildingAllApi.getStoredString()]);
-
-
             Markers.add(Marker(
                 markerId: MarkerId(
                     "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
@@ -5535,14 +5543,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               await getImagesFromMarker('assets/Consultation Room.png', 85);
               textMarker = BitmapDescriptor.fromBytes(iconMarker);
             }
-
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!,
                 landmarks[i].coordinateY!,
                 SingletonFunctionController.building
                     .patchData[bid ?? buildingAllApi.getStoredString()]);
-
-
             Markers.add(Marker(
                 markerId: MarkerId(
                     "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
@@ -10104,7 +10109,9 @@ bool _isPlaying=false;
                           PathState.sourcePolyID,
                           PathState.destinationPolyID,
                           "com.iwayplus.accessibleashoka");
-                      if (_feedback.isNotEmpty) {}
+                      if (_feedback.isNotEmpty) {
+
+                      }
                       showFeedback = false;
                       _feedbackController.hide();
 
@@ -13129,6 +13136,8 @@ bool _isPlaying=false;
   late Timer EM_TIMER;
   String EM_LastBeacon = "";
 
+  bool isZoomOut=true;
+
 
   @override
   Widget build(BuildContext context) {
@@ -13196,15 +13205,19 @@ bool _isPlaying=false;
                   mapState.cameraposition = cameraPosition; // User has started panning
                   // Check zoom level and decide rendering strategy
                   if (cameraPosition.zoom > 16.8) {
+                    setState(() {
+                      isZoomOut=true;
+                    });
                     focusBuildingChecker(cameraPosition);
-                  } else if (cameraPosition.zoom > 15.5) {
+                  } else if (cameraPosition.zoom > 15.5){
                     renderCampusPatchTransition(
                       buildingAllApi.allBuildingID.keys.toList(),
                       outdoorID: buildingAllApi.outdoorID,
                     );
-                  } else {
+                  }else{
+                    print("this is workingg");
                     setState(() {
-                      isSemanticEnabled=true;
+                      isZoomOut=false;
                     });
                     renderCampusPatchTransition([buildingAllApi.outdoorID]);
                   }
@@ -13409,10 +13422,10 @@ bool _isPlaying=false;
                         });
                       })
                       : Container(),
-                 !isLiveLocalizing?  !isSemanticEnabled && !PinLandmarkPannel.isPanelOpened()
+                 !isLiveLocalizing?!isSemanticEnabled && !PinLandmarkPannel.isPanelOpened()
                       ? Semantics(
                     label: "Change floor",
-                    child: SpeedDial(
+                    child:(isZoomOut)?SpeedDial(
                       child: Text(
                         SingletonFunctionController.building.floor == 0
                             ? 'G'
@@ -13433,17 +13446,12 @@ bool _isPlaying=false;
                             [0])
                             .length,
                             (int i) {
-                          //
                           List<int> floorList = Building
                               .numberOfFloorsDelhi[
                           buildingAllApi.getStoredString()] ??
                               [0];
                           List<int> revfloorList = floorList;
                           revfloorList.sort();
-                          // SingletonFunctionController.building.numberOfFloors[buildingAllApi
-                          //     .getStoredString()];
-                          //
-                          //
                           return SpeedDialChild(
                             child: Semantics(
                               label: "${revfloorList[i]}",
@@ -13489,16 +13497,12 @@ bool _isPlaying=false;
                                   _isBuildingPannelOpen=true;
                                 });
                               }
-
                               cachedPolygon.clear();
                               circles.clear();
-
                               _markers.clear();
                               _markerLocationsMap.clear();
                               _markerLocationsMapLanName.clear();
-
                               currentToggleFloor = revfloorList[i];
-
                               SingletonFunctionController
                                   .building.floor[
                               buildingAllApi
@@ -13532,7 +13536,7 @@ bool _isPlaying=false;
                           );
                         },
                       ),
-                    ),
+                    ):Container(),
                   )
                       : nofloorColumn() : Container(),
                   SizedBox(height: 28.0), // Adjust the height as needed

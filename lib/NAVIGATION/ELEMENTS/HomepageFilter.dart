@@ -25,7 +25,6 @@ class HomepageFilter extends StatefulWidget {
   @override
   _HomepageFilterState createState() => _HomepageFilterState();
 }
-
 class _HomepageFilterState extends State<HomepageFilter> {
   @override
   Widget build(BuildContext context) {
@@ -50,7 +49,7 @@ class _HomepageFilterState extends State<HomepageFilter> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => NewSearchPage(previousFilter: widget.text.toLowerCase(),voiceInputEnabled: false,))
+                  builder: (context) => NewSearchPage(previousFilter: widget.text,voiceInputEnabled: false,))
           ).then((value){
             widget.onClicked(value);
           });

@@ -16,6 +16,7 @@ import 'package:iwaymaps/NAVIGATION/realWorldModel.dart';
 import 'package:iwaymaps/NAVIGATION/routeOption.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 import 'package:iwaymaps/NAVIGATION/waypoint.dart';
+import 'package:vibration/vibration.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:collection/collection.dart';
@@ -3260,11 +3261,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   Future<void> realTimeReLocalizeUser(HashMap<String, beacon> apibeaconmap) async {
 
-    print("apibeaconmap");
-    print(apibeaconmap);
-    print("_exploreModeMarker.length");
-    print(_exploreModeMarker.length);
-
     sumMap.clear();
     setState(() {
       sumMap = SingletonFunctionController.btadapter.calculateAverage();
@@ -3301,25 +3297,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       Map<String, double> sortedsumMap = sortMapByValue(sumMap);
       firstValue = sortedsumMap.entries.first.key;
       final Uint8List iconMarker = await getImagesFromMarker('assets/EM_CurrentLocationMarker.png', 85);
-
-      print("firstValue----");
-      print(sortedsumMap);
-      print(firstValue);
-      print(sortedsumMap.entries.first.value);
-
-
-
       if (lastBeaconValue != firstValue && sortedsumMap.entries.first.value >= 0.4) {
         SingletonFunctionController.btadapter.stopScanning();
         _exploreModeMarker.clear();
 
-
-
         await SingletonFunctionController.building.landmarkdata!.then((value) {
           getallnearestInfo = tools.localizefindAllNearbyLandmark(apibeaconmap[firstValue]!, value.landmarksMap!);
-          print("getallnearestInfo.length");
-          print(getallnearestInfo.length);
-          print(_exploreModeMarker.length);
           getallnearestInfo.forEach((landmark) {
             List<double> value = [];
             if(landmark.coordinateX != null) {
@@ -3334,73 +3317,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 onTap: () {},
               ),
             );
-            // _controller12 = AnimationController(
-            //   vsync: this,
-            //   duration: Duration(milliseconds: 900),
-            // );
-            //
-            // _sizeAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
-            //   CurvedAnimation(parent: _controller12!, curve: Curves.easeInOut),
-            // );
-            //
-            // void updateMarkerSize() async {
-            //   double scale = _sizeAnimation?.value ?? 1.0;
-            //   Uint8List resizedIcon = await getImagesFromMarker('assets/EM_CurrentLocationMarker.png', (85 * scale).toInt());
-            //
-            //   setState(() {
-            //     _exploreModeMarker.add(
-            //       Marker(
-            //         markerId: MarkerId("${landmark.name}${value[0]}, ${value[1]}"),
-            //         position: LatLng(value[0], value[1]),
-            //         icon: BitmapDescriptor.fromBytes(resizedIcon),
-            //         onTap: () {},
-            //       ),
-            //     );
-            //   });
-            // }
-            //
-            // // Start the animation
-            // _controller12?.addListener(updateMarkerSize);
-            // _controller12?.repeat(reverse: true);
-            //
-            // // Stop animation after 5 seconds
-            //
-            // print("_exploreModeMarker.length");
-            // print(_exploreModeMarker.length);
-
-            // _exploreModeMarker.add(Marker(
-            //   markerId: MarkerId("${value[0]}, ${value[1]}"),
-            //   position: LatLng(value[0], value[1]),
-            //   icon: BitmapDescriptor.fromBytes(iconMarker),
-            // ));
             setState(() {});
           });
-
-          // Timer(Duration(seconds: 5), () {
-          //   _controller12?.stop();
-          //   _controller12?.dispose();
-          //   _controller12 = null;
-          //   _exploreModeMarker.clear();
-          //
-          //
-          //   getallnearestInfo.forEach((landmark) {
-          //     List<double> value = [];
-          //     if(landmark.coordinateX != null) {
-          //       value = tools.localtoglobal(landmark.coordinateX!, landmark.coordinateY!, SingletonFunctionController.building.patchData[landmark.sId ?? buildingAllApi.getStoredString()]);
-          //     }
-          //
-          //     setState(() {
-          //       _exploreModeMarker.add(
-          //         Marker(
-          //           markerId: MarkerId("${landmark.name}${value[0]}, ${value[1]}"),
-          //           position: LatLng(value[0], value[1]),
-          //           icon: BitmapDescriptor.fromBytes(iconMarker),
-          //           onTap: () {},
-          //         ),
-          //       );
-          //     });
-          //   });
-          // });
         });
 
         List<int> tv = tools.eightcelltransition(user.theta);
@@ -11496,6 +11414,29 @@ bool _isPlaying=false;
 
   late StreamSubscription<MagnetometerEvent> magnetometerSubscription;
 
+  void identifyFrontLandmark(){
+    List<int> transitionValue = tools.eightcelltransition(user.theta);
+    List<int> newUserCord = [
+      user.coordX + transitionValue[0],
+      user.coordY + transitionValue[1]
+    ];
+    for (var landmark in getallnearestInfo) {
+      double value = tools.calculateAngle2(
+          [user.coordX, user.coordY],
+          newUserCord,
+          [
+            landmark.coordinateX!,
+            landmark.coordinateY!
+          ]);
+      if (value < 45) {
+        value = value + 45;
+      }
+      if ((value >= 315 && value <= 360) || (value >= 0 && value <= 45)) {
+        Vibration.vibrate();
+        speak("${landmark.name} is on your front", _currentLocale);
+      }
+    }
+  }
 
   Widget ExploreModePannel() {
     List<Widget> Exwidgets = [];
@@ -11543,6 +11484,9 @@ bool _isPlaying=false;
                     ),
                     IconButton(
                         onPressed: () {
+                          if (exploremodeLandmarkTimer != null && exploremodeLandmarkTimer!.isActive) {
+                            exploremodeLandmarkTimer!.cancel();
+                          }
                           isLiveLocalizing = false;
                           HelperClass.showToast("Explore mode is disabled");
                           _exploreModeMarker.clear();
@@ -11561,140 +11505,6 @@ bool _isPlaying=false;
                 Column(
                   children: Exwidgets,
                 ),
-                // Spacer(),
-                // Center(
-                //   child: Container(
-                //     width: 60,
-                //     height: 60,
-                //     margin: EdgeInsets.only(bottom: 20,top: 5),
-                //     color: Colors.white,
-                //     child: Center(
-                //       child: GestureDetector(
-                //         onTapDown: (_) => EM_startAnimation(),
-                //         onTapUp: (_) => EM_stopAnimation(),
-                //         onTapCancel: () => EM_stopAnimation(),
-                //         child: Stack(
-                //           alignment: Alignment.center,
-                //           children: [
-                //             // OverflowBox to allow ripple animations to go beyond screen bounds
-                //             OverflowBox(
-                //               maxWidth: double.infinity,
-                //               maxHeight: double.infinity,
-                //               child: Stack(
-                //                 alignment: Alignment.center,
-                //                 children: [
-                //                   ..._animations.map((animation) => AnimatedBuilder(
-                //                     animation: animation,
-                //                     builder: (context, child) {
-                //                       return Container(
-                //                         width: 50 * (1 + animation.value * screenDiagonal / 25),
-                //                         height: 50 * (1 + animation.value * screenDiagonal / 25),
-                //                         decoration: BoxDecoration(
-                //                           shape: BoxShape.circle,
-                //                           gradient: LinearGradient(
-                //                             colors: [
-                //                               Colors.white.withOpacity(0.2 * (1 - animation.value)),
-                //                               Colors.teal.withOpacity(0.2 * (1 - animation.value)),
-                //                               Colors.white.withOpacity(0.2 * (1 - animation.value)),
-                //                             ],
-                //                           ),
-                //                         ),
-                //                       );
-                //                     },
-                //                   )),
-                //                 ],
-                //               ),
-                //             ),
-                //             Container(
-                //               width: 70,
-                //               height: 70,
-                //               decoration: BoxDecoration(
-                //                 shape: BoxShape.circle,
-                //                 // gradient: const LinearGradient(
-                //                 //   colors: [
-                //                 //     Color(0xFF3B82F6),
-                //                 //     Color(0xFF8B5CF6),
-                //                 //     Color(0xFFEC4899),
-                //                 //   ],
-                //                 // ),
-                //                 boxShadow: [
-                //                   BoxShadow(
-                //                     color: Colors.black.withOpacity(0.1),
-                //                     blurRadius: 10,
-                //                     offset: const Offset(0, 4),
-                //                   ),
-                //                 ],
-                //               ),
-                //               child: ElevatedButton(
-                //                 onPressed: () {
-                //
-                //                   magnetometerSubscription = magnetometerEvents.listen((MagnetometerEvent event) {
-                //                     // Calculate angle using atan2 for rotation
-                //                     double angle = atan2(event.y, event.x);
-                //
-                //                     List<int> tv = tools.eightcelltransition(angle);
-                //
-                //                     if(firstValue != "" ) {
-                //                       List<String> finalDirections = calcDirectionsExploreMode([
-                //                             SingletonFunctionController
-                //                                 .apibeaconmap[firstValue]!
-                //                                 .coordinateX!,
-                //                             SingletonFunctionController
-                //                                 .apibeaconmap[firstValue]!
-                //                                 .coordinateY!
-                //                           ], [
-                //                         SingletonFunctionController
-                //                             .apibeaconmap[firstValue]!
-                //                             .coordinateX! + tv[0],
-                //                         SingletonFunctionController
-                //                             .apibeaconmap[firstValue]!
-                //                             .coordinateY! + tv[1]
-                //                       ], getallnearestInfo);
-                //                       print("finalDirections");
-                //                       print(finalDirections);
-                //
-                //                       print(Exwidgets.length);
-                //                       setState(() {
-                //                         Exwidgets.clear();
-                //                         print(Exwidgets.length);
-                //                       });
-                //                       // for (int i = 0; i < getallnearestInfo.length; i++) {
-                //                       //   if(finalDirections[i] == "Front") {
-                //                       //     Exwidgets.add(ExploreModeWidget(getallnearestInfo[i], finalDirections[i], facing: true,));
-                //                       //   }else{
-                //                       //     Exwidgets.add(ExploreModeWidget(
-                //                       //         getallnearestInfo[i],
-                //                       //         finalDirections[i]));
-                //                       //   }
-                //                       // }
-                //                       // setState(() {
-                //                       //
-                //                       // });
-                //                     }
-                //                   });
-                //                 },
-                //                 onFocusChange: (_){
-                //                   magnetometerSubscription.cancel();
-                //
-                //                 },
-                //                 style: ElevatedButton.styleFrom(
-                //                   padding: const EdgeInsets.only(bottom: 12,left: 5,right: 5,top: 5),
-                //                   backgroundColor: Colors.teal,
-                //                   shadowColor: Colors.tealAccent,
-                //                   shape: const CircleBorder(),
-                //                 ),
-                //                 child: Image.asset('assets/real-time-tracking.png',color: Colors.white,),
-                //               ),
-                //             ),
-                //           ],
-                //         ),
-                //       ),
-                //     ),
-                //   ),
-                // )
-
-
-
               ],
             ),
           ),
@@ -12479,6 +12289,9 @@ bool _isPlaying=false;
   //   }
   //
   // }
+
+  Timer? exploremodeLandmarkTimer;
+
   String closestBuildingId = "";
   String newBuildingID = "";
   void focusBuildingChecker(CameraPosition position) {
@@ -13187,11 +13000,16 @@ bool _isPlaying=false;
                           onPressed: () async {
 
                             if (user.initialallyLocalised) {
+                              Vibration.vibrate();
+                              FlutterBeep.beep();
                               setState(() {
                                 if (isLiveLocalizing) {
                                   isLiveLocalizing = false;
                                   HelperClass.showToast(
                                       "Explore mode is disabled");
+                                  if (exploremodeLandmarkTimer != null && exploremodeLandmarkTimer!.isActive) {
+                                    exploremodeLandmarkTimer!.cancel();
+                                  }
                                   _exploreModeTimer!.cancel();
                                   _isExploreModePannelOpen = false;
                                   _isBuildingPannelOpen = true;
@@ -13200,6 +13018,7 @@ bool _isPlaying=false;
                                   speak(
                                       "${LocaleData.exploremodenabled.getString(context)}",
                                       _currentLocale);
+                                  exploremodeLandmarkTimer = Timer.periodic(Duration(seconds: 2), (Timer t) => identifyFrontLandmark());
                                   isLiveLocalizing = true;
                                   HelperClass.showToast(
                                       "Explore mode enabled");

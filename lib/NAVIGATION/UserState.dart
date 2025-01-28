@@ -257,12 +257,10 @@ class UserState {
               tools.localtoglobal(nextX, nextY, building!.patchData[bid]));
         }
       }
-
       //lift check
       if (isLiftCheck() && floor != pathobj.destinationFloor) {
         announceLiftUsage(context);
       }
-
       //nearby Landmarks
       if (0 < pathobj.index &&
           pathobj.index < cellPath.length - 1 &&
@@ -274,19 +272,17 @@ class UserState {
     } else {
       proceedWithoutNavigation();
     }
-
     if (calculateOffPathDistance() > 0) {
       offPathDistance.add(calculateOffPathDistance());
     }
   }
-
   void userLogData() {
     wsocket.message["userPosition"]["X"] = coordX;
     wsocket.message["userPosition"]["Y"] = coordY;
     wsocket.message["userPosition"]["floor"] = floor;
   }
 
-  bool shouldTerminateNavigation() {
+  bool shouldTerminateNavigation(){
     List<Cell> turnPoints = tools.getCellTurnpoints(cellPath);
     bool isSameFloorAndBuilding =
         floor == pathobj.destinationFloor && bid == pathobj.destinationBid;
@@ -295,13 +291,16 @@ class UserState {
         [turnPoints.last.x, turnPoints.last.y],
         [pathobj.destinationX, pathobj.destinationY]) <
         10;
-
     bool isAtLastTurnPoint =
         showcoordX == turnPoints.last.x && showcoordY == turnPoints.last.y;
-
     bool isNearDestination = tools.calculateDistance([showcoordX, showcoordY],
         [pathobj.destinationX, pathobj.destinationY]) <
         6;
+
+    print("firstcondition ${isSameFloorAndBuilding}");
+    print("second condition ${isNearLastTurnPoint}");
+    print("third condititon ${isAtLastTurnPoint}");
+    print("fourth condition ${isNearDestination}");
 
     return (isSameFloorAndBuilding &&
         ((isNearLastTurnPoint && isAtLastTurnPoint) || isNearDestination));

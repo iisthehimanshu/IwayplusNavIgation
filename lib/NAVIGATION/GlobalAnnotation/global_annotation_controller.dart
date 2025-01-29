@@ -14,6 +14,7 @@ class GlobalAnnotationController {
   GlobalAnnotationController({required this.data, required this.polygonTap, required this.apiController});
 
   List<way.PathModel>? wrapWayPoint() {
+    print("wrapWayPoint");
     PathNetwork? pathNetwork = data.pathNetwork;
     if(pathNetwork == null){
       return null;
@@ -22,6 +23,7 @@ class GlobalAnnotationController {
     JSONPathNetwork["floor"] = 0;
     JSONPathNetwork["building_ID"] = data.mappingElements?.first.buildingID;
     way.PathModel wayPointList = way.PathModel.fromJson(JSONPathNetwork as Map<dynamic, dynamic>);
+    print("wayPointList returned is $wayPointList");
     return [wayPointList];
   }
 

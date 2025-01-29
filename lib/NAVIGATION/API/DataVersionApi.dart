@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../../IWAYPLUS/Elements/HelperClass.dart';
 import '../DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import '../DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
+import '../config.dart';
 import '/NAVIGATION/APIMODELS/DataVersion.dart';
 
 import '../VersioInfo.dart';
@@ -12,7 +13,7 @@ import 'RefreshTokenAPI.dart';
 
 
 class DataVersionApi {
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/data-version" : "https://maps.iwayplus.in/secured/data-version";
+  final String baseUrl = "${AppConfig.baseUrl}/secured/data-version";
   static var signInBox = Hive.box('SignInDatabase');
   var versionBox = Hive.box('VersionData');
   String accessToken = signInBox.get("accessToken");

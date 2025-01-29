@@ -4,10 +4,11 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
 import '../DATABASE/BOXES/PatchAPIModelBox.dart';
+import '../config.dart';
 
 class RefreshTokenAPI {
 
-  static String baseUrl = kDebugMode? "https://dev.iwayplus.in/api/refreshToken?API_KEY=be349f00-b6cb-11ee-b352-d74b1ab1edff" : "https://maps.iwayplus.in/api/refreshToken?API_KEY=be349f00-b6cb-11ee-b352-d74b1ab1edff";
+  static String baseUrl = "${AppConfig.baseUrl}/api/refreshToken?API_KEY=be349f00-b6cb-11ee-b352-d74b1ab1edff";
 
   static Future<String> refresh() async {
     var signInBox = Hive.box('SignInDatabase');

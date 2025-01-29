@@ -2274,43 +2274,44 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           userSetLocation.doorY!.toInt(),
           SingletonFunctionController.building.patchData[user.bid]
       );
+      try{
+        List<double> uvalue = tools.localtoglobal(
+            SingletonFunctionController.apibeaconmap[lastBeaconValue]!.coordinateX!.toInt(),
+            SingletonFunctionController.apibeaconmap[lastBeaconValue]!.coordinateY!.toInt(),
+            SingletonFunctionController.building.patchData[user.bid]
+        );
 
-      List<double> uvalue = tools.localtoglobal(
-          SingletonFunctionController.apibeaconmap[lastBeaconValue]!.coordinateX!.toInt(),
-          SingletonFunctionController.apibeaconmap[lastBeaconValue]!.coordinateY!.toInt(),
-          SingletonFunctionController.building.patchData[user.bid]
-      );
+        LatLng currentMarkerPosition = LatLng(lvalue[0], lvalue[1]);
+        LatLng newMarkerPosition = LatLng(uvalue[0], uvalue[1]);
 
-
-      LatLng currentMarkerPosition = LatLng(lvalue[0], lvalue[1]);
-      LatLng newMarkerPosition = LatLng(uvalue[0], uvalue[1]);
-
-      _markerAnimation = LatLngTween(
-        begin: currentMarkerPosition,
-        end: newMarkerPosition,
-      ).animate(CurvedAnimation(
-        parent: _animationController!,
-        curve: Curves.easeInOut,
-      ));
-      // Start the animation
-      _animationController!.forward(from: 0);
-      _animationController!.addListener(() {
-        setState(() {
-          // Update marker position as animation progresses
-          markers[user.bid]?[0] = customMarker.move(
-            _markerAnimation!.value,
-            markers[user.bid]![0],
-          );
+        _markerAnimation = LatLngTween(
+          begin: currentMarkerPosition,
+          end: newMarkerPosition,
+        ).animate(CurvedAnimation(
+          parent: _animationController!,
+          curve: Curves.easeInOut,
+        ));
+        // Start the animation
+        _animationController!.forward(from: 0);
+        _animationController!.addListener(() {
+          setState(() {
+            // Update marker position as animation progresses
+            markers[user.bid]?[0] = customMarker.move(
+              _markerAnimation!.value,
+              markers[user.bid]![0],
+            );
+          });
         });
-      });
+      }finally{
+        mapState.zoom = 22.0;
+        _googleMapController.animateCamera(
+          CameraUpdate.newLatLngZoom(
+            LatLng(lvalue[0], lvalue[1]),
+            22, // Specify your custom zoom level here
+          ),
+        );
+      }
 
-      mapState.zoom = 22.0;
-      _googleMapController.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          LatLng(lvalue[0], lvalue[1]),
-          22, // Specify your custom zoom level here
-        ),
-      );
     }
     Future.delayed(Duration(milliseconds: 5000)).then((value){
       if(isCalibrationNeeded(magneticValues) && UserState.lowCompassAccuracy==false){
@@ -4473,7 +4474,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   int currentToggleFloor =0;
 
-  void polygonTap(List<LatLng> coordinates, String id){
+  Future<void> polygonTap(List<LatLng> coordinates, String id) async {
+    land? singletonData = await SingletonFunctionController.building.landmarkdata;
+    if(singletonData!.landmarksMap![id] == null){
+      return;
+    }
     _googleMapController.animateCamera(
       CameraUpdate.newLatLngZoom(
         tools.calculateRoomCenterinLatLng(coordinates),
@@ -6585,7 +6590,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                         ),
                       ),
                       onPressed: () async {
-                        moveCameraSmoothly(controller: _googleMapController, targetPosition: CameraPosition(target: LatLng(user.lat,user.lng),zoom: 22), currTarget: tools.calculateRoomCenterinLatLng(tappedPolygonCoordinates));
+                        if(tappedPolygonCoordinates.isNotEmpty){
+                          moveCameraSmoothly(controller: _googleMapController, targetPosition: CameraPosition(target: LatLng(user.lat,user.lng),zoom: 22), currTarget: tools.calculateRoomCenterinLatLng(tappedPolygonCoordinates));
+                        }
                         _polygon.clear();
                         cachedPolygon.clear();
                         // circles.clear();
@@ -7589,11 +7596,11 @@ int currentCols=0;
     direction? liftDirection;
     List<int> path = [];
 
-    try {
+    // try {
       Map<String, List<dynamic>> adjList = {};
 
-      PathModel model = Building.waypoint[bid]!
-          .firstWhere((element) => element.floor == floor);
+      PathModel model = Building.waypoint[bid]!.firstWhere((element) => element.floor == floor);
+      print("model.pathNetwork $bid $model ${model.pathNetwork}");
       adjList = model.pathNetwork??{};
 
       path = await findShortestPath(
@@ -7602,31 +7609,34 @@ int currentCols=0;
           sourceY,
           destinationX,
           destinationY,
-          SingletonFunctionController.building.nonWalkable[bid]![floor]!,
+          SingletonFunctionController.building.nonWalkable[bid]?[floor],
           numCols,
           numRows,
           isoutdoorPath: bid == buildingAllApi.outdoorID);
       print("path from waypoint for bid $bid $path");
-    } catch (e) {
-      print("error in path finding $e");
-      if (bid != buildingAllApi.outdoorID) {
-        path = await findPath(
-          numRows,
-          numCols,
-          SingletonFunctionController.building.nonWalkable[bid]![floor]!,
-          sourceIndex,
-          destinationIndex,
-        );
-        path = getFinalOptimizedPath(
-            path,
-            SingletonFunctionController.building.nonWalkable[bid]![floor]!,
-            numCols,
-            sourceX,
-            sourceY,
-            destinationX,
-            destinationY);
-      }
-    }
+      path.forEach((index){
+        print([index % numCols, index ~/ numCols]);
+      });
+    // } catch (e) {
+    //   print("error in path finding $e");
+    //   if (bid != buildingAllApi.outdoorID) {
+    //     path = await findPath(
+    //       numRows,
+    //       numCols,
+    //       SingletonFunctionController.building.nonWalkable[bid]![floor]!,
+    //       sourceIndex,
+    //       destinationIndex,
+    //     );
+    //     path = getFinalOptimizedPath(
+    //         path,
+    //         SingletonFunctionController.building.nonWalkable[bid]![floor]!,
+    //         numCols,
+    //         sourceX,
+    //         sourceY,
+    //         destinationX,
+    //         destinationY);
+    //   }
+    // }
     if (path.isEmpty) {
       wsocket.message["path"]["didPathForm"] = false;
     } else {
@@ -7701,18 +7711,11 @@ int currentCols=0;
 
       List<LatLng> coordinates = [];
       if (PathState.sourceBid == bid && floor == PathState.sourceFloor) {
-         setCameraPositionusingCoords(
-             [LatLng(svalue[0], svalue[1]), LatLng(dvalue[0], dvalue[1])]);
-        for (int i = 0; i<path.length-2;i++) {
-          int node = path[i];
-          int node1=path[i+2];
-          int row1 = (node1 % numCols); //divide by floor length
-          int col1 = (node1 ~/ numCols);
+        for (var node in path) {
           int row = (node % numCols); //divide by floor length
           int col = (node ~/ numCols); //divide by floor length
           List<double> value = tools.localtoglobal(
               row, col, SingletonFunctionController.building.patchData[bid]);
-           List<double> value1 = tools.localtoglobal(row1, col1, SingletonFunctionController.building.patchData[bid]);
           coordinates.add(LatLng(value[0], value[1]));
           if (singleroute[bid] == null) {
             singleroute.putIfAbsent(bid, () => Map());
@@ -7727,13 +7730,13 @@ int currentCols=0;
               color: oldPolyline.color,
               width: oldPolyline.width,
             );
-            setState((){
+            setState(() {
               // Remove the old polyline and add the updated polyline
               singleroute[bid]![floor]!.remove(oldPolyline);
               singleroute[bid]![floor]!.add(updatedPolyline);
             });
-          }else{
-            setState((){
+          } else {
+            setState(() {
               singleroute[bid]!.putIfAbsent(floor, () => Set());
               singleroute[bid]![floor]?.add(gmap.Polyline(
                 polylineId: PolylineId("$bid"),
@@ -7743,28 +7746,22 @@ int currentCols=0;
               ));
             });
           }
-         // alignMapToPath([value[0],value[1]], [value1[0],value1[1]]);
-          await Future.delayed(Duration(microseconds:1500));
-          coordinates.add(LatLng(value[0], value[1]));
+          await Future.delayed(Duration(microseconds: 1500));
         }
-        setState(() {
-          pathList=path;
-          currentCols=numCols;
-          currentBid=bid;
-          currentFloor=floor;
-        });
       } else {
-        coordinates=[];
-        if (singleroute[bid] == null){
+        if (singleroute[bid] == null) {
           singleroute.putIfAbsent(bid, () => Map());
         }
         for (var node in path) {
           int row = (node % numCols); //divide by floor length
           int col = (node ~/ numCols); //divide by floor length
+
           List<double> value = tools.localtoglobal(
               row, col, SingletonFunctionController.building.patchData[bid]);
+
           coordinates.add(LatLng(value[0], value[1]));
         }
+
         setState(() {
           singleroute[bid]!.putIfAbsent(floor, () => Set());
           singleroute[bid]![floor]?.add(gmap.Polyline(
@@ -7775,6 +7772,7 @@ int currentCols=0;
           ));
         });
       }
+
       final Uint8List tealtorch =
       await getImagesFromMarker('assets/tealtorch.png', 35);
 

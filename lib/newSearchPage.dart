@@ -215,9 +215,6 @@ class _NewsearchpageState extends State<NewSearchPage> {
         //optionListForUI.addAll(fetchCategories(value));
       });
     });
-
-
-
   }
 
   List<String> fetchCategories(land value){

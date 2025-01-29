@@ -256,7 +256,8 @@ List<int> mergeLists(List<int> l1, List<int> l2, List<int> l3) {
 }
 
 
-Future<List<int>> findShortestPath (Map<String, dynamic> graph, int sourceX, int sourceY, int destinationX, int destinationY, List<int> nonWalkableCells, int col, int row, {bool isoutdoorPath = false})async{
+Future<List<int>> findShortestPath (Map<String, dynamic> graph, int sourceX, int sourceY, int destinationX, int destinationY, List<int>? nonWalkableCells, int col, int row, {bool isoutdoorPath = false})async{
+  nonWalkableCells ??= [];
   List<String> states = findNearestAndSecondNearestVertices(graph, [sourceX,sourceY], [destinationX,destinationY]);
   String start1 = states[0];
   String start2 = states[1];

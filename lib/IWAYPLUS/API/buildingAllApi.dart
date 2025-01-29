@@ -6,17 +6,17 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../../NAVIGATION/API/RefreshTokenAPI.dart';
 import '../../NAVIGATION/APIMODELS/outdoormodel.dart';
+import '../../NAVIGATION/config.dart';
 import '/NAVIGATION/APIMODELS/beaconData.dart';
 import '/IWAYPLUS/APIMODELS/buildingAll.dart';
 import '/NAVIGATION/APIMODELS/polylinedata.dart';
 import '/NAVIGATION/APIMODELS/landmark.dart';
 import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import '../DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
-import 'guestloginapi.dart';
 
 
 class buildingAllApi {
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building/all" : "https://maps.iwayplus.in/secured/building/all";
+  final String baseUrl = "${AppConfig.baseUrl}/secured/building/all";
   static var signInBox = Hive.box('SignInDatabase');
   var versionBox = Hive.box('VersionData');
   String accessToken = signInBox.get("accessToken");

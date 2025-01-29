@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../../IWAYPLUS/API/buildingAllApi.dart';
+import '../config.dart';
 import '/NAVIGATION/APIMODELS/patchDataModel.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'package:iwaymaps/NAVIGATION/Navigation.dart';
@@ -18,7 +19,7 @@ import 'RefreshTokenAPI.dart';
 class patchAPI {
 
   String token = "";
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/patch/get" : "https://maps.iwayplus.in/secured/patch/get";
+  final String baseUrl = "${AppConfig.baseUrl}/secured/patch/get";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");

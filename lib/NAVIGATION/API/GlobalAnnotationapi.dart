@@ -4,22 +4,19 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../../IWAYPLUS/Elements/HelperClass.dart';
 import '../APIMODELS/GlobalAnnotationModel.dart';
+import '../config.dart';
 import 'RefreshTokenAPI.dart';
 
 
 class GlobalAnnotation {
 
-  String baseUrl = "https://dev.iwayplus.in/secured/get-global-annotation/";
+  String baseUrl = "${AppConfig.baseUrl}/secured/get-global-annotation/";
   String token = "";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
 
   Future<GlobalModel> fetchGlobalAnnotationData(id, {String? newaccesstoken}) async {
-    print("old access token $accessToken");
-    print("old refreshToken  $refreshToken");
-    //accessToken = signInBox.get("accessToken");
-
 
     final response = await http.get(
       Uri.parse(baseUrl+id),

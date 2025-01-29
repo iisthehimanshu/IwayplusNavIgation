@@ -8,11 +8,12 @@ import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/PolyLineAPIModel.dart
 import '../../IWAYPLUS/API/buildingAllApi.dart';
 import '../../IWAYPLUS/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import '../../IWAYPLUS/Elements/HelperClass.dart';
+import '../config.dart';
 import '/NAVIGATION/APIMODELS/polylinedata.dart';
 import '../VersioInfo.dart';
 
 class PolyLineApi {
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/polyline" : "https://maps.iwayplus.in/secured/polyline";
+  final String baseUrl ="${AppConfig.baseUrl}/secured/polyline";
   String buildingID="";
   final BuildingAllBox = BuildingAllAPIModelBOX.getData();
   static var signInBox = Hive.box('SignInDatabase');
@@ -29,6 +30,7 @@ class PolyLineApi {
   }
   String getDecryptedData(String encryptedData){
     Map<String, dynamic> encryptedResponseBody = json.decode(encryptedData);
+    print("encryptedResponseBody $encryptedResponseBody");
     String newResponse=encryptDecrypt(encryptedResponseBody['encryptedData'], "xX7/kWYt6cjSDMwB4wJPOBI+/AwC+Lfbd610sWfwywU=");
     //print("new response ${newResponse}");
     Map<String,dynamic> originalList = jsonDecode(newResponse);
@@ -79,7 +81,7 @@ class PolyLineApi {
         String finalResponse=getDecryptedData(response.body);
         Map<String, dynamic> responseBody = json.decode(finalResponse);
         final polyLineData = PolyLineAPIModel(responseBody: responseBody);
-        print("POLYLINE API DATA FROM API");
+        print("POLYLINE API DATA FROM API for id $id");
         PolyLineBox.put(polylinedata.fromJson(responseBody).polyline!.buildingID,polyLineData);
         polyLineData.save();
         return polylinedata.fromJson(responseBody);

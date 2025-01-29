@@ -5,7 +5,6 @@ class AppConfig {
     if (kDebugMode) {
       return 'https://dev.iwayplus.in';
     } else {
-
       return 'https://dev.iwayplus.in';
     }
   }

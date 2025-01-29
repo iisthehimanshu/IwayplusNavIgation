@@ -315,7 +315,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       );
     }
 
-    final String apiUrl = 'https://maps.iwayplus.in/secured/change-password';
+    final String apiUrl = 'https://dev.iwayplus.in/secured/change-password';
     final Map<String, String> headers = {
       'Content-Type': 'application/json',
       'x-access-token': '$accessToken',

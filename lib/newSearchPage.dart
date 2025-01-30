@@ -392,18 +392,14 @@ class _NewsearchpageState extends State<NewSearchPage> {
         print("result11-${result}");
         result.forEach((fuseResult){
           if (fuseResult.score <=0.5){
-            final value = landmarkData.landmarksMap!.values
-                .firstWhere((v) => v.name != null && v.element!.subType != "beacon" && normalizeText(v.name!) == fuseResult.item);
+            final value = landmarkData.landmarksMap!.values.firstWhere((v) => v.name != null && v.element!.subType != "beacon" && normalizeText(v.name!) == fuseResult.item);
             if ((searchResults.isNotEmpty) &&
                 SingletonFunctionController().getlocalizedBeacon()!= null){
               sortAndSeparateByUserLocation(
                 SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,
                 SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,
                 SingletonFunctionController().getlocalizedBeacon()!.floor!,
-                SingletonFunctionController().getlocalizedBeacon()!.buildingID!,
-                value,
-                normalizedSearchText,
-              );
+                SingletonFunctionController().getlocalizedBeacon()!.buildingID!,value,normalizedSearchText);
             }else{
               searchResults.add(SearchpageResults(
                 name: value.name!,

@@ -54,12 +54,12 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
     await flutterTts.speak(msg);
   }
   @override
-  void initState() {
+  void initState(){
     super.initState();
     if(widget.floors.isEmpty){
       widget.floors.add("");
     }else{
-      setState(() {
+      setState((){
         if(int.parse(widget.floors[0])==-1 && int.parse(widget.floors[1])==0){
           setState((){
             tag = 0;
@@ -74,6 +74,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
         }
       });
     }
+    floorList=widget.floors;
     optionListForUI.add(widget.filterName);
     print("Floorselection");
     print(widget.floors);
@@ -87,8 +88,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
     });
     fetchandBuild();
   }
-
-
   void fetchandBuild()async{
     await fetchlist();
     if(widget.filterName.isNotEmpty && widget.filterBuildingName.isNotEmpty){
@@ -106,7 +105,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   bool category = false;
   Set<String> cardSet = Set();
   // HashMap<String,Landmarks> cardSet = HashMap();
-  List<String> optionList = [
+  List<String> optionList=[
     'washroom', 'entry',
     'reception', 'lift',
   ];
@@ -169,14 +168,11 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
     print("optionListItemBuildingName");
     print(optionListItemBuildingName);
   }
-
-  void sortResultsByDistance(int userLat, int userLng) {
+  void sortResultsByDistance(int userLat, int userLng){
     print("searchResults before: ${searchResults[0].name}");
     print("coordinates : $userLat, $userLng");
-
-
     // Sort by distance after ensuring the list is already sorted by floor and building
-    searchResults.sort((a, b) {
+    searchResults.sort((a, b){
       // Convert coordinates of elements (a and b) to global coordinates
       // Calculate the distances between the user's location and the elements (a and b)
       print("coordinates a ${a.coordX},${a.coordY}");
@@ -187,13 +183,8 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
       // Sort by distance in increasing order
       return distanceA.compareTo(distanceB);
     });
-
     print("searchResults after in floor: ${searchResults[0].name}  ${searchResults[0].coordX} ${searchResults[0].coordY}");
   }
-
-
-
-
   void onVenueClicked(String name, String location, String ID, String bid){
     Navigator.pop(context,[name,location,ID,bid]);
   }
@@ -216,20 +207,11 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   int vall2 = 0;
   int tag=0;
   int lastPosition = 0;
-
-
-
+List<String> floorList=[];
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-
-    // if(speetchText.isNotListening){
-    //   micColor = Colors.black;
-    //   print("Not listening");
-    // }else{
-    //   micColor = Color(0xff24B9B0);
-    // }
     return SafeArea(
       child: Scaffold(
         body: Container(
@@ -320,7 +302,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                       value: (i, v) => i,
                       label: (i, v) => v,
                     ),
-                    choiceBuilder: (item, i) {
+                    choiceBuilder:(item, i){
                       return DestinationPageChipsWidgetForFloorSelectionPage(svgPath: '',
                         text: optionListForUI[i],
                         onSelect: (bool selected) {},selected: true,);
@@ -332,52 +314,66 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
               Semantics(
                 header: true,
                 label: "Available Floors for Facility Viewing",
-                child: Container(
-                  width: screenWidth,
-                  margin: EdgeInsets.only(bottom: 10),
-                  child: ChipsChoice<int>.single(
-                    value: tag,
-                    onChanged: (val){
-                      setState(() => tag = val);
-                      // if(HelperClass.SemanticEnabled) {
-                      //   speak("Floor ${widget.floors[val]} selected");
-                      // }
-                      // print("wilsonchecker");
-                      // print(val);
-                      print("Floor check");
-                      print(val);
-                      checkfloors.clear();
-                      checkfloors.add(int.parse(widget.floors[val]));
-                      print(checkfloors);
-                      search(widget.filterName, widget.filterBuildingName, checkfloors);
-                      print(searchResults);
-                    },
-                    choiceItems: C2Choice.listFrom<int, String>(
-                      source: widget.floors,
-                      value: (i, v) => i,
-                      label: (i, v) => v,
+                child: Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors:[
+                          Colors.black.withOpacity(0.1), // Darker at top
+                          Colors.transparent, // Fades out
+                        ],
+                      ),
                     ),
-                    choiceBuilder: (item, i) {
-                      return FloorWidgetForFloorSelectionPage(
-                        // onSelect: (setVal) {
-                        //   floors.clear();
-                        //   floors.add(i);
-                        //   setState(() {
-                        //     search(widget.filterName, widget.filterBuildingName, floors);
-                        //     selVal = !selVal;
-                        //   });
-                        //
-                        //   print("selVal");
-                        //   print(selVal);
-                        //
-                        // },
-                        onSelect: item.select!,selected: item.selected,
-                        floorNo: widget.floors[i].toString(),
-                        // selected: selVal,
-
-                      );
-                    },
-                    direction: Axis.horizontal,
+                    width: screenWidth,
+                    child: ChipsChoice<int>.single(
+                      value: tag,
+                      onChanged: (val){
+                        setState(() => tag = val);
+                        print("Floor check");
+                        print(val);
+                        checkfloors.clear();
+                        checkfloors.add(int.parse(widget.floors[val]));
+                        print(checkfloors);
+                        search(widget.filterName, widget.filterBuildingName, checkfloors);
+                        print(searchResults);
+                      },
+                      choiceItems: C2Choice.listFrom<int, String>(
+                        source:widget.floors,
+                        value: (i, v) => i,
+                        label: (i, v) => v,
+                      ),
+                      choiceBuilder:(item, i){
+                        // if(int.parse(widget.floors[i])<0){
+                        //   floorList[i]="B${widget.floors[i]}";
+                        // }else{
+                        //   floorList[i]="F${widget.floors[i]}";
+                        // }
+                        print("floorlisttt ${floorList}");
+                        return FloorWidgetForFloorSelectionPage(
+                          // onSelect: (setVal) {
+                          //   floors.clear();
+                          //   floors.add(i);
+                          //   setState(() {
+                          //     search(widget.filterName, widget.filterBuildingName, floors);
+                          //     selVal = !selVal;
+                          //   });
+                          //
+                          //   print("selVal");
+                          //   print(selVal);
+                          //
+                          // },
+                          onSelect: item.select!,selected: item.selected,
+                          floorNo: floorList[i].toString(),
+                          // selected: selVal,
+                        );
+                      },
+                      direction: Axis.horizontal,
+                    ),
                   ),
                 ),
               ),
@@ -450,7 +446,7 @@ class _DestinationPageChipsWidgetForFloorSelectionPageState extends State<Destin
         excludeSemantics: true,
         child: InkWell(
           borderRadius: BorderRadius.all(Radius.circular(10.0)), // Updated borderRadius
-          onTap: () {
+          onTap:(){
             Navigator.pop(context);
           },
           child: Row(
@@ -474,12 +470,6 @@ class _DestinationPageChipsWidgetForFloorSelectionPageState extends State<Destin
                   textAlign: TextAlign.center,
                 ),
               ),
-              Container(
-                margin: EdgeInsets.only(left: 4),
-                child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,),
-              )
-
-
               // Icon displayed when active is true
             ],
           ),
@@ -488,9 +478,8 @@ class _DestinationPageChipsWidgetForFloorSelectionPageState extends State<Destin
     );
   }
 }
-
 class FloorWidgetForFloorSelectionPage extends StatefulWidget {
-  final String floorNo;
+  String floorNo;
   bool selected;
   final Function(bool selected) onSelect;
 
@@ -507,6 +496,8 @@ class FloorWidgetForFloorSelectionPage extends StatefulWidget {
 class _FloorWidgetForFloorSelectionPageState extends State<FloorWidgetForFloorSelectionPage> {
   @override
   Widget build(BuildContext context) {
+      widget.floorNo="F${widget.floorNo}";
+
     return AnimatedContainer(
       width: 50,
       margin: const EdgeInsets.symmetric(horizontal: 2),

@@ -17,6 +17,11 @@ import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
 import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
 import 'package:iwaymaps/NAVIGATION/API/RefreshTokenAPI.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/WayPointModelBOX.dart';
+import 'package:iwaymaps/NAVIGATION/ARNavigation/DebugOptions.dart';
+import '../NAVIGATION/ARNavigation/DisplayView.dart';
+import '../NAVIGATION/ARNavigation/DistanceRendering.dart';
+import '../NAVIGATION/ARNavigation/ObjectGestures.dart';
+import '../NAVIGATION/ARNavigation/UserPositionScreen.dart';
 import '../NAVIGATION/BluetoothScanAndroid.dart';
 import '/IWAYPLUS/Elements/HelperClass.dart';
 import '/IWAYPLUS/Elements/UserCredential.dart';
@@ -392,6 +397,20 @@ if(userLoc!=null){
 
           actions: [
             IconButton(
+              icon: Icon(Icons.area_chart_outlined),
+              color: Color(0xff18181b),
+              onPressed: () {
+                // PushNotifications.showSimpleNotification(body: "",payload: "",title: "Title");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DebugOptions(),
+                  ),
+                );
+              },
+            ),
+
+            IconButton(
               icon: Icon(Icons.notifications_none_outlined),
               color: Color(0xff18181b),
               onPressed: () {
@@ -399,7 +418,7 @@ if(userLoc!=null){
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => BluetoothScanAndroid(),
+                    builder: (context) => DisplayARObjects(),
                   ),
                 );
               },

@@ -70,7 +70,7 @@ import 'APIMODELS/outdoormodel.dart';
 import 'BluetoothScanAndroidClass.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
-import 'DebugOptions.dart';
+import 'ARNavigation/DebugOptions.dart';
 import 'DebugToggle.dart';
 import 'ELEMENTS/DirectionHeader.dart';
 import 'ELEMENTS/DirectionInstruction.dart';
@@ -13083,24 +13083,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     arObjectManager.onInitialize();
 
-    //
-    // arLocationManager.currentLocation.onData((location) {
-    //   // Check if location data is available
-    //   print("Check if location data is available");
-    //   if (location.latitude != null && location.longitude != null) {
-    //     // Update or add the user's location marker in the AR scene
-    //
-    //     setState(() {
-    //       _ARWorldLocation = "${location.latitude} ${location.longitude} ${location.floor}";
-    //     });
-    //     print("_ARWorldLocation");
-    //     print(_ARWorldLocation);
-    //   } else {
-    //     print("User location is not available.");
-    //   }
-    // });
-
-
     // Handle plane taps and add object
     arSessionManager.onPlaneDetected = (plane) async {
       // Retrieve the current camera pose
@@ -13125,6 +13107,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb", // Path to your model file
           position: targetPosition,
           scale: vv.Vector3(0.1, 0.1, 0.1), // Adjust the scale of the object
+          rotation: vv.Vector4(0.0, 1.0, 0.0, 0.0), // Rotate the object (w, x, y, z)
         );
 
         // Add the object to the scene
@@ -13814,14 +13797,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   // )
                   SizedBox(height: 20,),
                   !isLiveLocalizing? FloatingActionButton(
-                    // onPressed: (){
-                    //   // Navigator.push(
-                    //   //   context,
-                    //   //   MaterialPageRoute(
-                    //   //     builder: (context) => DebugOptions(),
-                    //   // ));
-                    // },
-                    onPressed: _toggleARView,
+                    onPressed: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DebugOptions(),
+                      ));
+                    },
 
                     child: Icon(Icons.area_chart_outlined),
                     shape: RoundedRectangleBorder(

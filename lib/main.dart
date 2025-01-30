@@ -147,7 +147,9 @@ class _MobileAppState extends State<MobileApp> {
   var locBox=Hive.box('LocationPermission');
   Future<void> requestLocationPermission() async {
     final status = await Permission.location.request();
+    final cameraStatus = await Permission.camera.request();
     print(status);
+    print("cameraStatus ${cameraStatus}");
 
     await locBox.put('location', (status.isGranted)?true:false);
     if (status.isGranted) {

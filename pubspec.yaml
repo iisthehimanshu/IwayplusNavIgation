@@ -97,6 +97,8 @@ dependencies:
   provider: ^6.1.2
   image:
   ar_flutter_plugin_flutterflow: ^0.7.55
+  vector_math: ^2.1.0
+
 
 
 

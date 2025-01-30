@@ -220,7 +220,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         //
       }
 
-      //print("angleeeeee $angle")  ;
       setState(() {
         widget.direction = tools.angleToClocks(angle, widget.context) == "None"
             ? "Straight"

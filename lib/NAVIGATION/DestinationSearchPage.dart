@@ -468,7 +468,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                 ),
               );
               final result = fuse.search(normalizedSearchText);
-              result.forEach((fuseResult) {
+              result.forEach((fuseResult){
                 if (fuseResult.score < 0.5){
                   if((searchResults.isNotEmpty || wantToFilter.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
                     sortAndSeparateByUserLocation(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,SingletonFunctionController().getlocalizedBeacon()!.floor!,SingletonFunctionController().getlocalizedBeacon()!.buildingID!,value,normalizedSearchText);

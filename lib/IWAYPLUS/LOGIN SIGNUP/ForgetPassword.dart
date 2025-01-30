@@ -383,7 +383,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                           print(mailEditingController.text);
 
                                           if (mailEditingController
-                                              .text.isNotEmpty) {
+                                              .text.isNotEmpty){
                                             if (containsOnlyNumeric(
                                                 mailEditingController.text)) {
                                               await SignInAPI.sendOtpForgetPassword('+91${mailEditingController.text}').then((value) => {

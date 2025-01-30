@@ -12472,7 +12472,6 @@ bool _isPlaying=false;
       polylines[buildingAllApi.getStoredString()] = updatedpolyline;
     });
   }
-
   void clearFocusTurnArrow() {
     setState(() {
       focusturnArrow.clear();
@@ -12491,7 +12490,6 @@ bool _isPlaying=false;
         [user.showcoordX + tv[0], user.showcoordY + tv[1]],
         [PathState.destinationX, PathState.destinationY]);
     String direction = tools.angleToClocks4(angle, context);
-
     finalDestinationDirection=direction;
     //isSemanticEnabled? showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname)): ();
     flutterTts.pause().then((value) {
@@ -13773,7 +13771,6 @@ bool _isPlaying=false;
           SafeArea(
             child: Stack(
               children:[
-
                 Positioned(
                   top:25,
                   left: 30,

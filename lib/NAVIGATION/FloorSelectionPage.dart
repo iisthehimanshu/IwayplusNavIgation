@@ -294,18 +294,15 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                                         containerBoxColor = Color(0xffA1A1AA);
                                       }
                                       print("Final Set");
-
                                     },
                                   )),
                             ),
                           ),
                         ),
-
                       ],
                     )
                 ),
               ),
-
               Semantics(
                 label: "Selected Facilities and Buildings for Floor View",
                 header: true,

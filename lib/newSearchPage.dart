@@ -389,14 +389,13 @@ class _NewsearchpageState extends State<NewSearchPage> {
         // Search using Fuzzy and build results
         final result = fuse.search(normalizedSearchText);
         result.sort((a, b) => b.score.compareTo(a.score));
-        List<SearchpageResults> newResults = [];
         print("result11-${result}");
-        result.forEach((fuseResult) {
-          if (fuseResult.score <=0.5) {
+        result.forEach((fuseResult){
+          if (fuseResult.score <=0.5){
             final value = landmarkData.landmarksMap!.values
                 .firstWhere((v) => v.name != null && v.element!.subType != "beacon" && normalizeText(v.name!) == fuseResult.item);
-            if ((newResults.isEmpty) &&
-                SingletonFunctionController().getlocalizedBeacon() != null){
+            if ((searchResults.isNotEmpty) &&
+                SingletonFunctionController().getlocalizedBeacon()!= null){
               sortAndSeparateByUserLocation(
                 SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,
                 SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,
@@ -406,7 +405,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
                 normalizedSearchText,
               );
             }else{
-              newResults.add(SearchpageResults(
+              searchResults.add(SearchpageResults(
                 name: value.name!,
                 location: value.buildingID == buildingAllApi.outdoorID
                     ? "${value.venueName}"
@@ -449,46 +448,56 @@ class _NewsearchpageState extends State<NewSearchPage> {
       }
     }
   }
-  void sortAndSeparateByUserLocation(int userLat, int userLng, int userFloor, String userBuildingID,Landmarks value,String searchedtext) {
+  void sortAndSeparateByUserLocation(
+      int userLat, int userLng, int userFloor, String userBuildingID,
+      Landmarks value, String searchedtext) {
+
     print("got inside it");
-    if (value.name!.toLowerCase().contains(searchedtext.toLowerCase()) && value.buildingID==userBuildingID && value.floor==userFloor) {
+
+    Set<String> uniqueIds = searchResults.map((e) => e.ID).toSet(); // Track unique IDs
+
+    if (value.name!.toLowerCase().contains(searchedtext.toLowerCase()) &&
+        value.buildingID == userBuildingID &&
+        value.floor == userFloor &&
+        !uniqueIds.contains(value.properties!.polyId!)) { // Ensure uniqueness
+
       searchResults.add(SearchpageResults(
         name: value.name!,
-        location: value.buildingID == buildingAllApi.outdoorID ? "${value
-            .venueName}" : "Floor ${value.floor}, ${value.buildingName}, ${value
-            .venueName}",
+        location: value.buildingID == buildingAllApi.outdoorID
+            ? "${value.venueName}"
+            : "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
         onClicked: onVenueClicked,
         ID: value.properties!.polyId!,
         bid: value.buildingID!,
         floor: value.floor!,
-        coordX: value.doorX??value.coordinateX!,
-        coordY: value.doorY??value.coordinateY!,
+        coordX: value.doorX ?? value.coordinateX!,
+        coordY: value.doorY ?? value.coordinateY!,
         accessible: value.element!.subType == "restRoom" &&
-            value.properties!.washroomType == "Handicapped" ? "true" : "false",
+            value.properties!.washroomType == "Handicapped"
+            ? "true"
+            : "false",
         distance: 0,
       ));
     }
+
     // Step 1: Sort the main list as per previous logic
-    searchResults.sort((a, b){
-      // Building comparison
-      // Distance comparison within the same building and floor
-      double distanceA = tools.calculateDistance([userLat, userLng], [a.coordX!, a.coordY!]);
-      double distanceB = tools.calculateDistance([userLat, userLng], [b.coordX!, b.coordY!]);
+    searchResults.sort((a, b) {
+      double distanceA =
+      tools.calculateDistance([userLat, userLng], [a.coordX!, a.coordY!]);
+      double distanceB =
+      tools.calculateDistance([userLat, userLng], [b.coordX!, b.coordY!]);
+
       // Populate the distance field for each element
-      a.distance = (distanceA*0.306).toInt();
-      b.distance = (distanceB*0.306).toInt();
+      a.distance = (distanceA * 0.306).toInt();
+      b.distance = (distanceB * 0.306).toInt();
+
       return distanceA.compareTo(distanceB);
     });
-    if(searchResults.length>2){
+
+    if (searchResults.length > 2) {
       print("searchResults after in desti: ${searchResults[1].name}  ${searchResults[1].coordX} ${searchResults[1].coordY}");
     }
-    List<SearchpageResults> reversed = searchResults.reversed.toList();
-    setState(() {
-      searchResults = reversed.take(25).toList(); // Limit results to 25
-    });
-
   }
-
 
   ValueNotifier<String> _dynamicText = ValueNotifier("Speak now...");
 

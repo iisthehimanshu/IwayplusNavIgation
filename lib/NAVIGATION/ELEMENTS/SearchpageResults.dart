@@ -52,7 +52,7 @@ class _SearchpageResultsState extends State<SearchpageResults> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     return InkWell(
-      onTap: () {
+      onTap:(){
         widget.onClicked(widget.name, widget.location, widget.ID, widget.bid);
       },
       child: Container(

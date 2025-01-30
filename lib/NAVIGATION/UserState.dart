@@ -257,7 +257,6 @@ class UserState {
               tools.localtoglobal(nextX, nextY, building!.patchData[bid]));
         }
       }
-
       //lift check
       if (isLiftCheck() && floor != pathobj.destinationFloor) {
         announceLiftUsage(context);

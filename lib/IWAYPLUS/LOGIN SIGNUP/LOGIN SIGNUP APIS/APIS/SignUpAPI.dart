@@ -6,7 +6,7 @@ import '../../../../NAVIGATION/config.dart';
 import '/IWAYPLUS/Elements/HelperClass.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 class SignUpAPI{
-  final String baseUrl = "https://maps.iwayplus.in/auth/signup";
+  final String baseUrl = "https://dev.iwayplus.in/auth/signup";
   final jsonEncoder = JsonEncoder();
   String encryptDecrypt(String input, String key){
     StringBuffer result = StringBuffer();
@@ -26,7 +26,6 @@ class SignUpAPI{
       "otp": OTP,
       "appId":"com.iwayplus.navigation"
     };
-
     var finalData=jsonEncoder.convert(data);
     final encryptedData = encryptDecrypt(finalData,'X7/kWYt6cjSDMwB4wJPOBI+/AwC+Lfbd610sWfwywU=');
     final response = await http.post(

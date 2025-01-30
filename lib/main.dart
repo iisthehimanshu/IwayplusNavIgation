@@ -16,8 +16,6 @@ import '/IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
-
 import '/NAVIGATION/DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import '/NAVIGATION/DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
 import '/NAVIGATION/DATABASE/DATABASEMODEL/OutDoorModel.dart';
@@ -98,7 +96,6 @@ Future<void> localDBInitialsation() async {
 
 Future<void> mobileInitialization () async {
   WidgetsFlutterBinding.ensureInitialized();
-  WakelockPlus.enable();
 
   // PushNotifications.init();
   PushNotifications.localNotiInit();

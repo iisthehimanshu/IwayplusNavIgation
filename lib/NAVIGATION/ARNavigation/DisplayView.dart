@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:ar_flutter_plugin_flutterflow/ar_flutter_plugin.dart';
 import 'package:vector_math/vector_math_64.dart' as vv;
 
+import 'ARTools.dart';
+
 
 
 class DisplayARObjects extends StatefulWidget {
@@ -130,38 +132,72 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
   void addDirectionalObjects() async {
     List<int> directionLengthList = [5, 8, 20, 8];
     List<String> directionList = ["front", "left", "left", "left"];
+    double fixedCoordinatedY = -1;
 
-    vv.Vector3 currentPosition = vv.Vector3(0, 0, 0); // Start at (0, -0.5, 0)
+
+
+    vv.Vector3 currentPosition = vv.Vector3(0, fixedCoordinatedY, 0); // Start at (0, -0.5, 0)
     vv.Vector3 currentDirection = vv.Vector3(0, 0, -1); // Initially facing forward
     var newNode = ARNode(
       type: NodeType.webGLB,
-      uri: "https://github.com/Wilson-Daniel/3DModels/raw/refs/heads/main/earth.glb",
+      uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
       position: currentPosition,
       scale: vv.Vector3(0.5, 0.5, 0.5),
+      rotation: ARTools.getObjectRotation("front"),
+
     );
     await arObjectManager.addNode(newNode);
 
+    var newNode1 = ARNode(
+      type: NodeType.webGLB,
+      uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+        //                x,   y,                 z
+      position: vv.Vector3(0, fixedCoordinatedY, -5),
+      scale: vv.Vector3(0.5, 0.5, 0.5),
+      rotation: ARTools.getObjectRotation("left") // left
+    );
+    await arObjectManager.addNode(newNode1);
 
-    for (int i = 0; i < directionList.length; i++) {
-      // Move in current direction
-      currentPosition += currentDirection * directionLengthList[i].toDouble();
+    var newNode2 = ARNode(
+      type: NodeType.webGLB,
+      uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+      position: vv.Vector3(-7, fixedCoordinatedY, -5),
+      scale: vv.Vector3(0.5, 0.5, 0.5),
+        rotation: vv.Vector4(0.0, 1.0, 0.0, -1.5708) // left
 
-      // Add the model at the calculated position
-      var newNode = ARNode(
-        type: NodeType.webGLB,
-        uri: "https://github.com/Wilson-Daniel/3DModels/raw/refs/heads/main/earth.glb",
-        position: currentPosition,
-        scale: vv.Vector3(0.5, 0.5, 0.5),
-      );
-      await arObjectManager.addNode(newNode);
+    );
+    await arObjectManager.addNode(newNode2);
 
-      // Rotate the direction vector based on "left" or "right" (90-degree turns)
-      if (directionList[i] == "left") {
-        currentDirection = vv.Vector3(currentDirection.z, 0, -currentDirection.x); // Rotate 90° left
-      } else if (directionList[i] == "right") {
-        currentDirection = vv.Vector3(-currentDirection.z, 0, currentDirection.x); // Rotate 90° right
-      }
-    }
+    var newNode3 = ARNode(
+      type: NodeType.webGLB,
+      uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+      position: vv.Vector3(-7, fixedCoordinatedY, 15),
+      scale: vv.Vector3(0.5, 0.5, 0.5),
+        rotation: vv.Vector4(0.0, 1.0, 0.0, 0.0) // left
+    );
+    await arObjectManager.addNode(newNode3);
+
+
+    // for (int i = 0; i < directionList.length; i++) {
+    //   // Move in current direction
+    //   currentPosition += currentDirection * directionLengthList[i].toDouble();
+    //
+    //   // Add the model at the calculated position
+    //   var newNode = ARNode(
+    //     type: NodeType.webGLB,
+    //     uri: "https://github.com/Wilson-Daniel/3DModels/raw/refs/heads/main/earth.glb",
+    //     position: currentPosition,
+    //     scale: vv.Vector3(0.5, 0.5, 0.5),
+    //   );
+    //   await arObjectManager.addNode(newNode);
+    //
+    //   // Rotate the direction vector based on "left" or "right" (90-degree turns)
+    //   if (directionList[i] == "left") {
+    //     currentDirection = vv.Vector3(currentDirection.z, 0, -currentDirection.x); // Rotate 90° left
+    //   } else if (directionList[i] == "right") {
+    //     currentDirection = vv.Vector3(-currentDirection.z, 0, currentDirection.x); // Rotate 90° right
+    //   }
+    // }
   }
 
   void addFloatingObject() async {

@@ -3028,7 +3028,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         isBlueToothLoading = false;
       });
     }
-
+    SingletonFunctionController.building.buildingsLoaded = true;
   }
 
   var versionBox = Hive.box('VersionData');
@@ -13241,10 +13241,8 @@ bool _isPlaying=false;
           //   backgroundColor: Colors
           //       .white, // Set the background color of the FAB
           // ),
-          (!SingletonFunctionController.building.destinationQr &&
-              !user.initialallyLocalised &&
-              !SingletonFunctionController.building.qrOpened && !PinLandmarkPannel.isPanelOpened())
-              ? Container(
+          (SingletonFunctionController.building.buildingsLoaded || SingletonFunctionController.building.destinationQr || user.initialallyLocalised || SingletonFunctionController.building.qrOpened || PinLandmarkPannel.isPanelOpened())
+              ?Container(): Container(
             height: screenHeight,
             width: screenWidth,
             color: Colors.white.withOpacity(0.8),
@@ -13266,8 +13264,7 @@ bool _isPlaying=false;
                 )
               ],
             ),
-          )
-              : Container(),
+          ),
           ExcludeSemantics(child: Visibility(visible:nearbyLandmarks.isNotEmpty,child: Center(child: PickupLocationPin())))
         ],
       ),

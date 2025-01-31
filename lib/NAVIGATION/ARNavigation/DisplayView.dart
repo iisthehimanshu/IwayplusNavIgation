@@ -151,7 +151,6 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
     var newNode1 = ARNode(
       type: NodeType.webGLB,
       uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
-        //                x,   y,                 z
       position: vv.Vector3(0, fixedCoordinatedY, -5),
       scale: vv.Vector3(0.5, 0.5, 0.5),
       rotation: ARTools.getObjectRotation("left") // left

@@ -473,7 +473,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     )..repeat(reverse: true);
 
     _animationController = AnimationController(
-      duration: Duration(milliseconds: 2000), // Adjust for smoother animation
+      duration: Duration(milliseconds: 800), // Adjust for smoother animation
       vsync: this,
     );
 
@@ -3951,6 +3951,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       };
     });
   }
+
 
   LatLng calculateRoomCenter(List<LatLng> polygonPoints) {
     double lat = 0.0;
@@ -12002,7 +12003,9 @@ bool _isPlaying=false;
       createMarkers(snapshot!, floor);
     }
 
-    await Future.delayed(const Duration(milliseconds: 2000));
+    if(widget.directLandID.length > 2) {
+      await Future.delayed(const Duration(milliseconds: 2000));
+    }
     polygonTap(null,ID);
   }
 

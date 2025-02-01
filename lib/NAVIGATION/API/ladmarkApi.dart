@@ -13,7 +13,7 @@ import 'package:hive/hive.dart';
 
 
 class landmarkApi {
-  final String baseUrl = "${AppConfig.baseUrl}/secured/landmarks-demo";
+  final String baseUrl = "${AppConfig.baseUrl}/secured/landmarks";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");

@@ -2397,7 +2397,7 @@ class tools {
     double? minAngle;
 
     for (Landmarks point in points) {
-      if(point.name != null && point.element!.subType == "main entry" && point.buildingID == s.buildingID && point.name!.toLowerCase().contains("accessible") == wheelChair){
+      if(point.name != null && point.element!.subType == "main entry" && point.buildingID == s.buildingID && point.name!.toLowerCase().contains("accessible") == wheelChair && points.any((e)=>e.buildingID == buildingAllApi.outdoorID && e.name == point.name)){
         // Create the source-to-point vector
         List<double> pointVector = [
           double.parse(point.properties!.latitude!) - double.parse(s.properties!.latitude!),

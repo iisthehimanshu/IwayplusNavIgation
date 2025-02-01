@@ -126,6 +126,22 @@ class buildingAllApi {
       throw Exception('Failed to load data');
     }
   }
+
+  static void findBuildings(List<buildingAll> allBuildings){
+    List<buildingAll> buildings = [];
+    for (var building in allBuildings) {
+      if(building.venueName == selectedVenue){
+        buildings.add(building);
+      }
+    }
+    for (var element in buildings) {
+      g.LatLng kk = g.LatLng(element.coordinates![0], element.coordinates![1]);
+      allBuildingID[element.sId!] = kk;
+    }
+    selectedID = allBuildingID.keys.first;
+    selectedBuildingID = allBuildingID.keys.first;
+  }
+
   // Method to set the stored string
   static Future<void> setStoredString(String value) async {
     selectedID = value;

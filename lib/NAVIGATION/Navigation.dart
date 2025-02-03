@@ -11991,15 +11991,9 @@ bool _isPlaying=false;
       ),
     );
 
-    if (SingletonFunctionController
-        .building.floor[snapshot!.landmarksMap![ID]!.buildingID] !=
-        floor) {
-      SingletonFunctionController
-          .building.floor[snapshot!.landmarksMap![ID]!.buildingID!] = floor;
-      createRooms(
-          SingletonFunctionController.building
-              .polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID]!,
-          floor);
+    if (snapshot!.landmarksMap![ID]!.buildingID != buildingAllApi.outdoorID && SingletonFunctionController.building.floor[snapshot!.landmarksMap![ID]!.buildingID] != floor) {
+      SingletonFunctionController.building.floor[snapshot!.landmarksMap![ID]!.buildingID!] = floor;
+      createRooms(SingletonFunctionController.building.polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID]!, floor);
       createMarkers(snapshot!, floor);
     }
 

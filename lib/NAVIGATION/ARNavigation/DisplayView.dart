@@ -63,7 +63,7 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
                   padding: EdgeInsets.all(10),
                   color: Colors.black54,
                   child: Text(
-                    totalDistanceMovedstring,
+                    totalDistanceMoved.toStringAsFixed(2),
                     style: TextStyle(color: Colors.white, fontSize: 14),
                   ),
                 ),
@@ -90,7 +90,7 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
     arSessionManager.onInitialize(
       showFeaturePoints: false,
       showPlanes: false,
-      showWorldOrigin: false, // Optional: Useful for debugging
+      showWorldOrigin: false,
     );
 
     arSessionManager.getCameraPose().then((pose) {
@@ -111,17 +111,22 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
     print("trackUserMovement");
     Timer.periodic(Duration(milliseconds: 500), (timer) async {
       var pose = await arSessionManager.getCameraPose();
+      print("pose");
+      print(pose);
 
       if (pose != null && initialPosition != null) {
         // Update current position
-        currentPosition = vv.Vector3(pose.row3.x, pose.row3.y, pose.row3.z);
+        currentPosition = vv.Vector3(pose.forward.x, pose.row3.y, pose.row3.z);
 
         // Calculate distance from origin
         double distance = (currentPosition - initialPosition!).length;
 
         // Update total distance moved
-        totalDistanceMoved = distance;
-        totalDistanceMovedstring = currentPosition.toString();
+        setState(() {
+          totalDistanceMoved = distance;
+          totalDistanceMovedstring = currentPosition.toString(); // Update the camera pose display
+          _cameraPoseText = "Current Position: $currentPosition\nDistance Moved: ${totalDistanceMoved.toStringAsFixed(2)} meters";
+        });
 
         print("Current Position: $currentPosition");
         print("Distance Moved from Origin: ${totalDistanceMoved.toStringAsFixed(2)} meters");

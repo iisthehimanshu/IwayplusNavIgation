@@ -18,6 +18,8 @@ import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
 import 'package:iwaymaps/NAVIGATION/API/RefreshTokenAPI.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/WayPointModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/ARNavigation/DebugOptions.dart';
+import '../NAVIGATION/ARNavigation/CombinedScreen.dart';
+import '../NAVIGATION/ARNavigation/CustomSizeRectangle.dart';
 import '../NAVIGATION/ARNavigation/DisplayView.dart';
 import '../NAVIGATION/ARNavigation/DistanceRendering.dart';
 import '../NAVIGATION/ARNavigation/ObjectGestures.dart';
@@ -404,7 +406,7 @@ if(userLoc!=null){
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => DebugOptions(),
+                    builder: (context) => ARDepthScreen(),
                   ),
                 );
               },

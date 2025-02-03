@@ -17,6 +17,7 @@ import 'package:ar_flutter_plugin_flutterflow/models/ar_hittest_result.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
 import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/NAVIGATION/ARNavigation/CombinedScreen.dart';
 import 'package:iwaymaps/NAVIGATION/ELEMENTS/PickupLocationPin.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
 import 'package:iwaymaps/NAVIGATION/path.dart';
@@ -13801,7 +13802,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DebugOptions(),
+                          builder: (context) => CombinedScreen(),
                       ));
                     },
 

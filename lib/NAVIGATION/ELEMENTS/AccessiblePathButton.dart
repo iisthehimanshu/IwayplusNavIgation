@@ -9,6 +9,7 @@ class AccessiblePathButton extends StatefulWidget {
   final String accessibleBy;
   final Function calculateroute;
   final pathState PathState;
+  final bool isDataExist;
 
   AccessiblePathButton({
     required this.label,
@@ -16,6 +17,7 @@ class AccessiblePathButton extends StatefulWidget {
     required this.accessibleBy,
     required this.PathState,
     required this.calculateroute,
+    required this.isDataExist,
   });
 
   @override
@@ -44,7 +46,9 @@ class _AccessiblePathButtonState extends State<AccessiblePathButton> {
             } catch (e) {}
           });
         },
-        child: Container(
+        child:
+        (widget.isDataExist)?
+        Container(
           width: 138,
           margin: EdgeInsets.only(left: 8),
           decoration: BoxDecoration(
@@ -102,7 +106,7 @@ class _AccessiblePathButtonState extends State<AccessiblePathButton> {
               ),
             ],
           ),
-        ),
+        ):SizedBox.shrink(),
       ),
     );
   }

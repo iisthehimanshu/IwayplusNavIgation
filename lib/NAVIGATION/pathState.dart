@@ -20,6 +20,7 @@ class pathState {
   double destinationLng = 0.0;
   int sourceFloor = 0;
   int destinationFloor = 0;
+  List<bool> getConnectionStatus=[];
   String accessiblePath = "Lifts";
   List<List<double>> realWorldCoordinates = [];
   Map<int, List<int>> path = {};

@@ -12,6 +12,7 @@ import 'package:iwaymaps/NAVIGATION/ELEMENTS/PickupLocationPin.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
 import 'package:iwaymaps/NAVIGATION/path.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
+import 'package:iwaymaps/NAVIGATION/playepreviewState.dart';
 import 'package:iwaymaps/NAVIGATION/realWorldModel.dart';
 import 'package:iwaymaps/NAVIGATION/routeOption.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
@@ -120,17 +121,11 @@ import 'APIMODELS/landmark.dart' as la;
 import 'dart:ui' as ui;
 import 'package:geodesy/geodesy.dart' as geo;
 import 'package:lottie/lottie.dart' as lott;
-
 import 'fetchrouteParams.dart';
 import 'navigationTools.dart';
-
 import 'navigation_api_controller.dart';
-
 import 'package:iwaymaps/NAVIGATION/RippleButton.dart';
 import 'package:iwaymaps/NAVIGATION/BluetoothScanIOSClass.dart';
-
-
-
 void main() {
   runApp(MyApp());
 }
@@ -462,10 +457,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     _messageTimer = Timer.periodic(Duration(seconds: 5), (timer) {
       wsocket.sendmessg();
-
     });
     listenToMagnetometer();
-
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
@@ -616,11 +609,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       }
     }
   }
-
   Future<void> zoomWhileWait(
       Map<String, LatLng> allBuildingID, GoogleMapController controller) async {
     print("allbuilding id ${allBuildingID}");
-
     if (allBuildingID.length > 1) {
       while (!SingletonFunctionController.building.destinationQr &&
           !user.initialallyLocalised &&
@@ -1185,7 +1176,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   //   });
   // }
   Animation<LatLng>? _markerAnimation;
-
   void renderHere() async {
     double screenHeight = MediaQuery.of(context).size.height;
     double pixelRatio = MediaQuery.of(context).devicePixelRatio;
@@ -1199,7 +1189,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
       LatLng currentMarkerPosition = markers[user.bid]![0].position;
       LatLng newMarkerPosition = LatLng(lvalue[0], lvalue[1]);
-
       // Define a smooth transition animation
       _markerAnimation = LatLngTween(
         begin: currentMarkerPosition,
@@ -3935,8 +3924,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       await Future.delayed(duration ~/ steps);
     }
   }
-
-
   Future<void> addselectedRoomMarker(
       List<LatLng> polygonPoints,String assetPath ,{
         Color? color,
@@ -3973,35 +3960,34 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     _sizeAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
       CurvedAnimation(parent: _controller12!, curve: Curves.easeInOut),
     );
-
     void updateMarkerSize() async {
       double scale = _sizeAnimation?.value ?? 1.0;
       Uint8List resizedIcon =
       await getImagesFromMarker(assetPath, (140 * scale).toInt());
 
+      String mapKey = buildingAllApi.getStoredString();
+
+      // Ensure selectedroomMarker map entry exists
+      selectedroomMarker.putIfAbsent(mapKey, () => {});
+
       setState(() {
-        if (selectedroomMarker.containsKey(buildingAllApi.getStoredString())) {
-          selectedroomMarker[buildingAllApi.getStoredString()]?.add(
-            Marker(
-              markerId: MarkerId('selectedRoomMarker'),
-              position: calculateRoomCenter(polygonPoints),
-              icon: BitmapDescriptor.fromBytes(resizedIcon),
-              onTap: () {},
-            ),
-          );
-        } else {
-          selectedroomMarker[buildingAllApi.getStoredString()] = Set<Marker>();
-          selectedroomMarker[buildingAllApi.getStoredString()]?.add(
-            Marker(
-              markerId: MarkerId('selectedRoomMarker'),
-              position: calculateRoomCenter(polygonPoints),
-              icon: BitmapDescriptor.fromBytes(resizedIcon),
-              onTap: () {},
-            ),
-          );
-        }
+        // Remove the previous marker
+        selectedroomMarker[mapKey]?.removeWhere(
+                (marker) => marker.markerId.value == 'selectedRoomMarker');
+
+        // Add the new marker with updated icon
+        selectedroomMarker[mapKey]?.add(
+          Marker(
+            markerId: MarkerId('selectedRoomMarker'),
+            position: calculateRoomCenter(polygonPoints),
+            icon: BitmapDescriptor.fromBytes(resizedIcon),
+            onTap: () {},
+          ),
+        );
       });
     }
+
+
 
     // Start the animation
     _controller12?.addListener(updateMarkerSize);
@@ -6865,7 +6851,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         for (var stair2 in landmark2.stairs!) {
           if (stair1.name == stair2.name) {
             // Create a new Lifts object with x and y values from both input lists
-
             commonLifts.add(CommonConnection(
                 name: stair1.name,
                 x1: stair1.x,
@@ -6883,7 +6868,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         for (var ramp2 in landmark2.ramps!) {
           if (ramp1.name == ramp2.name) {
             // Create a new Lifts object with x and y values from both input lists
-
             commonLifts.add(CommonConnection(
                 name: ramp1.name,
                 x1: ramp1.x,
@@ -7180,13 +7164,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           mapState.interaction = !mapState.interaction;
         }
         mapState.zoom = 21;
-      } else if (PathState.sourceFloor != PathState.destinationFloor) {
+      } else if (PathState.sourceFloor != PathState.destinationFloor){
+        PathState.getConnectionStatus = HelperClass.getCommonConnectionsStatus(landmarksMap[PathState.sourcePolyID]!, landmarksMap[PathState.destinationPolyID]!);
+        print("conection status:::${PathState.getConnectionStatus}");
         print("accccccc $accessibleby");
         List<CommonConnection> commonlifts = findCommonLifts(
             landmarksMap[PathState.sourcePolyID]!,
             landmarksMap[PathState.destinationPolyID]!,
             accessibleby??"Lifts");
-        if (commonlifts.isEmpty) {
+        if (commonlifts.isEmpty){
           setState(() {
             PathState.noPathFound = true;
             _isLandmarkPanelOpen = false;
@@ -7662,6 +7648,11 @@ List<int> pathList=[];
 int currentFloor=0;
 String currentBid="";
 int currentCols=0;
+
+  List<int> pathList1=[];
+  int currentFloor1=0;
+  String currentBid1="";
+  int currentCols1=0;
   Future<Map<String, dynamic>> fetchroute(
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
       {String? bid = null,
@@ -7752,9 +7743,9 @@ int currentCols=0;
 
     List<double> svalue = [];
     List<double> dvalue = [];
-    if (path.isNotEmpty) {
-      if (SingletonFunctionController.building.floor[bid] != floor) {
-        setState(() {
+    if (path.isNotEmpty){
+      if (SingletonFunctionController.building.floor[bid] != floor){
+        setState((){
           SingletonFunctionController.building.floor[bid] = floor;
         });
       }
@@ -7793,9 +7784,8 @@ int currentCols=0;
       //         [LatLng(svalue[0],svalue[1]), LatLng(dvalue[0],dvalue[1])]);
       //   }
       // }
-
       List<LatLng> coordinates = [];
-      if (PathState.sourceBid == bid && floor == PathState.sourceFloor) {
+      if (PathState.sourceBid == bid && floor == PathState.sourceFloor){
          setCameraPositionusingCoords(
              [LatLng(svalue[0], svalue[1]), LatLng(dvalue[0], dvalue[1])]);
         for (int i = 0; i<path.length-2;i++) {
@@ -7809,10 +7799,10 @@ int currentCols=0;
               row, col, SingletonFunctionController.building.patchData[bid]);
            List<double> value1 = tools.localtoglobal(row1, col1, SingletonFunctionController.building.patchData[bid]);
           coordinates.add(LatLng(value[0], value[1]));
-          if (singleroute[bid] == null) {
+          if (singleroute[bid] == null){
             singleroute.putIfAbsent(bid, () => Map());
           }
-          if (singleroute[bid]![floor] != null) {
+          if (singleroute[bid]![floor] != null){
             gmap.Polyline oldPolyline = singleroute[bid]![floor]!.firstWhere(
                   (polyline) => polyline.polylineId.value == bid,
             );
@@ -7842,13 +7832,33 @@ int currentCols=0;
           await Future.delayed(Duration(microseconds:1500));
           coordinates.add(LatLng(value[0], value[1]));
         }
-        setState(() {
+        setState((){
           pathList=path;
           currentCols=numCols;
           currentBid=bid;
           currentFloor=floor;
         });
-      } else {
+         if (currentNavigationState == null) {
+           // Initialize it with default values
+           currentNavigationState = PlayePreviewState(
+             buildingId: bid,
+             pathByFloor: {PathState.sourceFloor: path},
+             colsByFloor: {PathState.sourceFloor: numCols},
+             polylineIdsByFloor: {},
+             currentFloor: floor,
+           );
+         }else{
+           // If it already exists, update the values
+           currentNavigationState = currentNavigationState!.copyWith(
+             buildingId: bid,
+             pathByFloor: {...currentNavigationState!.pathByFloor, PathState.sourceFloor: path},
+             colsByFloor: {...currentNavigationState!.colsByFloor, PathState.sourceFloor: numCols},
+             polylineIdsByFloor: {},
+             currentFloor: floor,
+           );
+         }
+      }
+      else {
         coordinates=[];
         if (singleroute[bid] == null){
           singleroute.putIfAbsent(bid, () => Map());
@@ -7860,7 +7870,7 @@ int currentCols=0;
               row, col, SingletonFunctionController.building.patchData[bid]);
           coordinates.add(LatLng(value[0], value[1]));
         }
-        setState(() {
+        setState((){
           singleroute[bid]!.putIfAbsent(floor, () => Set());
           singleroute[bid]![floor]?.add(gmap.Polyline(
             polylineId: PolylineId("$bid"),
@@ -7869,10 +7879,34 @@ int currentCols=0;
             width: 8,
           ));
         });
+        setState((){
+          pathList1=path;
+          currentCols1=numCols;
+          currentBid1=bid;
+          currentFloor1=floor;
+        });
+        if (currentNavigationState == null){
+          // Initialize it with default values
+          currentNavigationState = PlayePreviewState(
+            buildingId: bid,
+            pathByFloor: {PathState.destinationFloor: path},
+            colsByFloor: {PathState.destinationFloor: numCols},
+            polylineIdsByFloor: {},
+            currentFloor: floor,
+          );
+        } else {
+          // If it already exists, update the values
+          currentNavigationState = currentNavigationState!.copyWith(
+            buildingId: bid,
+            pathByFloor: {...currentNavigationState!.pathByFloor, PathState.destinationFloor: path},
+            colsByFloor: {...currentNavigationState!.colsByFloor, PathState.destinationFloor: numCols},
+            polylineIdsByFloor: {},
+            currentFloor: floor,
+          );
+        }
       }
       final Uint8List tealtorch =
       await getImagesFromMarker('assets/tealtorch.png', 35);
-
       if (liftName != null) {
         print("object ${PathState.accessiblePath}");
         liftDirection = direction(
@@ -7884,8 +7918,7 @@ int currentCols=0;
             null,
             null,
             Cellpath.first.floor,
-            Cellpath.first.bid ?? "");
-
+            Cellpath.first.bid ?? "",liftDestinationFloor: nextFloor);
         try{innerMarker.add(Marker(
           markerId: MarkerId("lift${bid}"),
           position: sourceX == PathState.sourceX
@@ -7895,14 +7928,13 @@ int currentCols=0;
               text:
               "To Floor ${nextFloor ?? floor}",
               dirIcon:(PathState.accessiblePath=='Lifts')?
-
               Icons.elevator_outlined:(PathState.accessiblePath=='Stairs')?Icons.escalator:(PathState.accessiblePath=='Ramps')?Icons.accessible:Icons.escalator_warning)
               .toBitmapDescriptor(
               logicalSize: const Size(150, 150),
               imageSize: const Size(300, 400)),
           anchor: Offset(0.0, 1.0),
-          onTap: () {
-            if (!user.isnavigating) {
+          onTap:(){
+            if (!user.isnavigating){
               _polygon.clear();
               cachedPolygon.clear();
               circles.clear();
@@ -7927,11 +7959,10 @@ int currentCols=0;
             }
           },
         ));}catch(e){
-
         }
       }
       setState(() {
-        if (renderDestination && liftName == null) {
+        if (renderDestination) {
           innerMarker.add(
             Marker(
               markerId: MarkerId('destination${bid}'),
@@ -7955,6 +7986,9 @@ int currentCols=0;
         pathMarkers[bid]![floor] = innerMarker;
       });
     }
+    if(PathState.sourceBid!=PathState.destinationBid && bid!=buildingAllApi.outdoorID){
+      NavigationStates.add(currentNavigationState!);
+    }
     print("returning dvalue for $bid $svalue and $dvalue");
     return {
       "path": path,
@@ -7965,6 +7999,10 @@ int currentCols=0;
       "lift": liftDirection
     };
   }
+
+  List<PlayePreviewState> NavigationStates=[];
+  PlayePreviewState? currentNavigationState;
+  Map<String, PlayePreviewState> navigationStates = {};
   void showRouteSelector(BuildContext context,String acc) {
     showDialog(
       context: context,
@@ -8191,101 +8229,164 @@ int currentCols=0;
   void addDirectionsWidget(){}
 bool _isPlaying=false;
   bool _isCancelled = false;
-  Future<void> callPreviewAnimation() async {
-    // If already playing, return immediately
-    if (_isPlaying) return Future.value();
-    // Set the flag to true to indicate the function is running
+  Map<int, List<String>> previewPolylineIdsByFloor = {}; // Store polyline IDs
+  bool _stopAnimation = false; // Flag to stop animation externally
+
+  Future<void> callPreviewAnimation({String? newBuildingId, int? newFloor}) async {
+    if (_isPlaying) return;
     _isPlaying = true;
     _isCancelled = false;
+    _stopAnimation = false;
     try {
-      print("singleRoute $singleroute");
-      List<LatLng> currentCoordinates = [];
-      Set<Marker> innerMarker = Set();
-      await SingletonFunctionController.building.landmarkdata!.then((value) async {
-        List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(user.cellPath, value.landmarksMap!, 5);
-        List<int> turnPoints = tools.getTurnpoints(pathList, currentCols);
+      // 🔹 Check if multiple buildings exist in the list
+      if (navigationStates.length > 1) {
+        print("🚀 Multi-building navigation detected! Processing multiple paths...");
 
-        for (int i = 0; i < pathList.length - 2; i++) {
-          // Check for cancellation before proceeding
-          if (_isCancelled) {
-            print("callPreviewAnimation cancelled.");
-            return;
-          }
-          int node = pathList[i];
-          int node1 = pathList[i + 2];
-          int row1 = (node1 % currentCols); // divide by floor length
-          int col1 = (node1 ~/ currentCols);
-          int row = (node % currentCols); // divide by floor length
-          int col = (node ~/ currentCols);
-
-          List<double> value = tools.localtoglobal(row, col, SingletonFunctionController.building.patchData[currentBid]);
-          List<double> value1 = tools.localtoglobal(row1, col1, SingletonFunctionController.building.patchData[currentBid]);
-          currentCoordinates.add(LatLng(value[0], value[1]));
-
-          if (singleroute[currentBid] == null) {
-            singleroute.putIfAbsent(currentBid, () => Map());
-          }
-
-          if (singleroute[currentBid]![currentFloor] != null) {
-            gmap.Polyline oldPolyline = singleroute[currentBid]![currentFloor]!.firstWhere(
-                  (polyline) => polyline.polylineId.value == currentBid,
-            );
-            gmap.Polyline updatedPolyline = gmap.Polyline(
-              polylineId: oldPolyline.polylineId,
-              points: currentCoordinates,
-              color: oldPolyline.color,
-              width: oldPolyline.width,
-            );
-            setState((){
-              if (i < nearbyLandmarks.length - 1) {
-                // Add additional marker logic here if needed
-              }
-              // Remove the old polyline and add the updated polyline
-              singleroute[currentBid]![currentFloor]!.remove(oldPolyline);
-              singleroute[currentBid]![currentFloor]!.add(updatedPolyline);
-            });
-          }else{
-            setState(() {
-              singleroute[currentBid]!.putIfAbsent(currentFloor, () => Set());
-              singleroute[currentBid]![currentFloor]?.add(gmap.Polyline(
-                polylineId: PolylineId("$currentBid"),
-                points: currentCoordinates,
-                color: Colors.blueAccent,
-                width: 8,
-              ));
-            });
-          }
-
-          if (turnPoints.contains(node)) {
-            print("rendering path");
-            await alignMapToPath([value[0], value[1]], [value1[0], value1[1]], isTurn: true);
-          } else {
-            await alignMapToPath([value[0], value[1]], [value1[0], value1[1]]);
-          }
-
-          // Check for cancellation during delay
-          await Future.delayed(Duration(microseconds: 2500));
-          if (_isCancelled) {
-            print("callPreviewAnimation cancelled during delay.");
-            return;
-          }
-          currentCoordinates.add(LatLng(value[0], value[1]));
+        for (PlayePreviewState state in NavigationStates) {
+          if (_isCancelled || _stopAnimation) break; // Stop if needed
+          await _processBuildingPath(state.buildingId, state.currentFloor);
         }
-      });
-      PathState.innerMarker[currentFloor] = innerMarker;
-      pathMarkers.putIfAbsent(currentBid, () => Map());
-      pathMarkers[currentBid]![currentFloor] = innerMarker;
+      } else {
+        // 🔹 Handle single building case
+        if (newBuildingId != null) {
+          currentNavigationState = NavigationStates.firstWhere(
+                (state) => state.buildingId == newBuildingId,
+          );
+        }
+        if (currentNavigationState == null) {
+          print("❌ No valid navigation state available.");
+          return;
+        }
+        if (newFloor != null) {
+          currentNavigationState = currentNavigationState!.copyWith(currentFloor: newFloor);
+        }
+
+        await _processBuildingPath(currentNavigationState!.buildingId, currentNavigationState!.currentFloor);
+      }
     } catch (e) {
-      print("Error in callPreviewAnimation: $e");
+      print("❌ Error in callPreviewAnimation: $e");
     } finally {
-      // Reset the flag to false when function execution completes
       _isPlaying = false;
     }
   }
+  Future<void> _processBuildingPath(String buildingId, int floorId) async {
+    List<int> pathList = NavigationStates.firstWhere((state) => state.buildingId == buildingId).pathByFloor[floorId] ?? [];
+    int currentCols = NavigationStates.firstWhere((state) => state.buildingId == buildingId).colsByFloor[floorId] ?? 0;
 
-  
+    print("📍 Navigating in Building: $buildingId | Floor: $floorId");
+
+    // Check if polyline exists
+    gmap.Polyline? existingPolyline;
+    if (singleroute[buildingId]?[floorId] != null) {
+      existingPolyline = singleroute[buildingId]![floorId]!.firstWhere(
+            (polyline) => polyline.polylineId.value == buildingId,
+        orElse: () => gmap.Polyline(polylineId: PolylineId("")),
+      );
+    }
+
+    if (existingPolyline == null || existingPolyline.polylineId.value.isEmpty) {
+      print("❌ No existing polyline found.");
+      return;
+    }
+
+    List<LatLng> currentCoordinates = [];
+    List<int> turnPoints = tools.getTurnpoints(pathList, currentCols);
+
+    for (int i = 0; i < pathList.length - 2; i++) {
+      if (_isCancelled || _stopAnimation) {
+        print("🔴 Animation stopped manually.");
+        stopAndRemovePreviewPolylines();
+        return;
+      }
+
+      int node = pathList[i];
+      int node1 = pathList[i + 2];
+      int row1 = (node1 % currentCols);
+      int col1 = (node1 ~/ currentCols);
+      int row = (node % currentCols);
+      int col = (node ~/ currentCols);
+
+      List<double> value = tools.localtoglobal(row, col, SingletonFunctionController.building.patchData[buildingId]);
+      List<double> value1 = tools.localtoglobal(row1, col1, SingletonFunctionController.building.patchData[buildingId]);
+
+      currentCoordinates.add(LatLng(value[0], value[1]));
+
+      // Generate polyline ID
+      String polylineId = "preview_${floorId}_$i";
+      gmap.Polyline newPolyline = gmap.Polyline(
+        polylineId: PolylineId(polylineId),
+        points: List.from(currentCoordinates),
+        color: Colors.green,
+        width: 8,
+      );
+
+      setState(() {
+        singleroute[buildingId]![floorId]!.add(newPolyline);
+
+        PlayePreviewState? state = NavigationStates!.firstWhere((s) => s.buildingId == buildingId);
+        if (state != null) {
+          if (!state.polylineIdsByFloor.containsKey(floorId)) {
+            state.polylineIdsByFloor[floorId] = [];
+          }
+          state.polylineIdsByFloor[floorId]!.add(polylineId);
+        }
+      });
+
+      if (turnPoints.contains(node)) {
+        await alignMapToPath([value[0], value[1]], [value1[0], value1[1]], isTurn: true);
+      } else {
+        await alignMapToPath([value[0], value[1]], [value1[0], value1[1]]);
+      }
+
+      await Future.delayed(turnPoints.contains(node)
+          ? Duration(milliseconds: 750)
+          : Duration(microseconds: 2500));
+
+      if (_isCancelled || _stopAnimation) {
+        print("🔴 Animation stopped manually during delay.");
+        stopAndRemovePreviewPolylines();
+        return;
+      }
+    }
+  }
+
+
+  void removePreviewPolylines(){
+    setState((){
+      currentNavigationState!.polylineIdsByFloor.forEach((floor, polylineIds){
+        if (singleroute[currentBid]?[floor] != null){
+          singleroute[currentBid]![floor]!.removeWhere((polyline) => polylineIds.contains(polyline.polylineId.value),);
+        }
+      });
+      currentNavigationState!.polylineIdsByFloor.clear(); // Clear stored polyline IDs
+    });
+    print("Preview polylines removed from all floors");
+  }
+  void stopAndRemovePreviewPolylines(){
+    if (!_isPlaying) return; // If not playing, do nothing
+    setState(() {
+      _stopAnimation = true; // Stop animation
+      currentNavigationState!.polylineIdsByFloor.forEach((floor, polylineIds) {
+        if (singleroute[currentBid]?[floor] != null) {
+          singleroute[currentBid]![floor]!.removeWhere(
+                (polyline) => polylineIds.contains(polyline.polylineId.value),
+          );
+        }
+      });
+
+      currentNavigationState!.polylineIdsByFloor.clear(); // Clear stored polyline IDs
+    });
+
+    print("Animation stopped & preview polylines removed.");
+  }
+
+
+
+
+
   final FocusNode _directionFocus=FocusNode();
   final FocusNode _startbuttonFocus=FocusNode();
+  bool showTransition=false;
 
   PanelController _routeDetailPannelController = new PanelController();
   bool startingNavigation = false;
@@ -8598,19 +8699,19 @@ bool _isPlaying=false;
                     excludeSemantics: true,
                     child: Container(
                       margin: EdgeInsets.only(top: 8, left: 0),
-                      child: SingleChildScrollView(
+                      child:(PathState.getConnectionStatus.isNotEmpty)?
+                      SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            AccessiblePathButton(label: "Stairs", icon: Icons.escalator, accessibleBy: "Stairs", PathState: PathState, calculateroute: calculateroute),
-                            AccessiblePathButton(label: "Lift", icon: Icons.elevator, accessibleBy: "Lifts", PathState: PathState, calculateroute: calculateroute),
-                            AccessiblePathButton(label: "Escalator", icon: Icons.escalator_warning, accessibleBy: "Escalators", PathState: PathState, calculateroute: calculateroute),
-                            AccessiblePathButton(label: "Ramp", icon: Icons.accessible, accessibleBy: "Ramps", PathState: PathState, calculateroute: calculateroute),
-
+                            AccessiblePathButton(label: "Stairs", icon: Icons.escalator, accessibleBy: "Stairs", PathState: PathState, calculateroute: calculateroute,isDataExist:PathState.getConnectionStatus[1]),
+                            AccessiblePathButton(label: "Lift", icon: Icons.elevator, accessibleBy: "Lifts", PathState: PathState, calculateroute: calculateroute,isDataExist:PathState.getConnectionStatus[0]),
+                            AccessiblePathButton(label: "Escalator", icon: Icons.escalator_warning, accessibleBy: "Escalators", PathState: PathState, calculateroute: calculateroute,isDataExist:PathState.getConnectionStatus[3]),
+                            AccessiblePathButton(label: "Ramp", icon: Icons.accessible, accessibleBy: "Ramps", PathState: PathState, calculateroute: calculateroute,isDataExist:PathState.getConnectionStatus[2]),
                           ],
                         ),
-                      ),
+                      ):Container(),
                     ),
                   )
                       : Container(),
@@ -8700,8 +8801,7 @@ bool _isPlaying=false;
                                 ),
                               ),
                               Semantics(
-                                label: time.toInt()==0? "Travel time": "Travel time ${time.toInt()} min",
-
+                                label: time.toInt()==0? "Travel time":"Travel time ${time.toInt()} min",
                                 child: Container(
                                   padding: EdgeInsets.only(left: 17, top: 12),
                                   child: Column(
@@ -8709,7 +8809,7 @@ bool _isPlaying=false;
                                     CrossAxisAlignment.start,
                                     mainAxisAlignment:
                                     MainAxisAlignment.start,
-                                    children: [
+                                    children:[
                                       Row(
                                         mainAxisAlignment:
                                         MainAxisAlignment.start,
@@ -8747,15 +8847,87 @@ bool _isPlaying=false;
                                             child: IconButton(
                                                 onPressed:(){
                                                   setState((){
-                                                    singleroute.clear();
-                                                    pathCovered.clear();
+                                                    // singleroute.clear();
+                                                    // pathCovered.clear();
                                                     startingNavigation=false;
                                                   });
+                                                  print("current navigation state values");
+
+                                                  print(currentNavigationState!.buildingId);
+                                                  print(currentNavigationState!.pathByFloor);
+
+                                                  if(currentNavigationState!.polylineIdsByFloor.isNotEmpty && !_isPlaying){
+                                                    removePreviewPolylines();
+                                                  }
                                                   //currently using for play preview animation
-                                                  callPreviewAnimation().then((value){
+                                                callPreviewAnimation().then((value){
                                                     setState((){
                                                       startingNavigation=true;
                                                     });
+                                                    if(PathState.sourceFloor!=PathState.destinationFloor || PathState.sourceBid!=PathState.destinationBid){
+                                                      if(_isPlaying==false){
+                                                        setState((){
+                                                          showTransition=true;
+                                                        });
+                                                        Future.delayed(Duration(seconds:3)).then((value){});
+                                                        Future.delayed(Duration(seconds: 3)).then((value){
+                                                          setState((){
+                                                            showTransition=false;
+                                                            _polygon.clear();
+                                                            _polygon.add(Polygon(
+                                                              polygonId: PolygonId("$matchPolygonPoints"),
+                                                              points: matchPolygonPoints,
+                                                              fillColor: Colors.lightBlueAccent.withOpacity(0.4),
+                                                              strokeColor:Colors.blue,
+                                                              strokeWidth: 2,
+                                                            ));
+                                                            cachedPolygon.clear();
+                                                            circles.clear();
+                                                            _markers.clear();
+                                                            _markerLocationsMap.clear();
+                                                            _markerLocationsMapLanName.clear();
+                                                            currentToggleFloor = PathState.destinationFloor;
+                                                          });
+                                                          SingletonFunctionController
+                                                              .building.floor[
+                                                          buildingAllApi
+                                                              .getStoredString()] =
+                                                              PathState.destinationFloor;
+                                                          createRooms(
+                                                            SingletonFunctionController
+                                                                .building.polylinedatamap[
+                                                            buildingAllApi.getStoredString()]!,
+                                                            SingletonFunctionController
+                                                                .building.floor[
+                                                            buildingAllApi.getStoredString()]!,
+                                                          );
+                                                          // setState((){
+                                                          //   pathList=pathList1;
+                                                          //   currentCols=currentCols1;
+                                                          //   currentBid=currentBid1;
+                                                          //   currentFloor=currentFloor1;
+                                                          // });
+                                                          callPreviewAnimation(newBuildingId: PathState.destinationBid,newFloor: PathState.destinationFloor).then((value){
+                                                            Future.delayed(Duration(seconds:3)).then((value){
+                                                              SingletonFunctionController
+                                                                  .building.floor[
+                                                              buildingAllApi
+                                                                  .getStoredString()] =
+                                                                  PathState.sourceFloor;
+                                                              createRooms(
+                                                                SingletonFunctionController
+                                                                    .building.polylinedatamap[
+                                                                buildingAllApi.getStoredString()]!,
+                                                                SingletonFunctionController
+                                                                    .building.floor[
+                                                                buildingAllApi.getStoredString()]!,
+                                                              );
+                                                            });
+
+                                                          });
+                                                        });
+                                                      }
+                                                    }
                                                   });
                                                   // String msg=(pathState().sourceFloor!=pathState().destinationFloor)?tools.generateNarration(UserState.mapPathGuide,isMultiFloor: true):tools.generateNarration(UserState.mapPathGuide,isMultiFloor: false);
                                                   // print("narration ${msg}");
@@ -8822,6 +8994,7 @@ bool _isPlaying=false;
                                               child: IconButton(
                                                   onPressed:(){
                                                     showMarkers();
+                                                    stopAndRemovePreviewPolylines();
                                                     setState((){
                                                       _isBuildingPannelOpen =
                                                       true;
@@ -8913,7 +9086,7 @@ bool _isPlaying=false;
                                         ),
                                         Container(
                                             margin:EdgeInsets.only(left:5),
-                                            child: SvgPicture.asset('assets/routeDetailPannel_LisftIcon.svg',color: Colors.black,)),
+                                            child: SvgPicture.asset('assets/routeDetailPannel_LisftIcon.svg',color: Color(0xffFB6B00),)),
                                         Container(
                                             margin:EdgeInsets.only(left:3),
                                             child: Icon(Icons.keyboard_arrow_right_outlined)
@@ -9514,6 +9687,7 @@ bool _isPlaying=false;
 
 
                           if(startingNavigation){
+                            removePreviewPolylines();
                             tools.setBuildingAngle(
                                 SingletonFunctionController
                                     .building
@@ -10743,7 +10917,6 @@ bool _isPlaying=false;
   late land landmarkData = new land();
   List<Landmarks> LandmarkItems = [];
   List<Landmarks> filteredItems = [];
-
   void fetchlist() async {
     // await landmarkApi().fetchLandmarkData().then((value){
     //   landmarkData = value;
@@ -10751,7 +10924,6 @@ bool _isPlaying=false;
     // });
     //LandmarkItems = landmarkData.landmarks!;
   }
-
   void filterItems() {
     if (optionsTags == null && floorOptionsTags != null) {
       setState(() {
@@ -12182,9 +12354,8 @@ bool _isPlaying=false;
     double screenHeight = MediaQuery.of(context).size.height;
     //fetchlist();
     //filterItems();
-
     return Visibility(
-        visible: _isBuildingPannelOpen && !user.isnavigating,
+        visible: _isBuildingPannelOpen && !user.isnavigating && _isRoutePanelOpen,
         child: Semantics(
           label: "You are near ${user.locationName}, ${LocaleData.floor.getString(context)} ${user.floor}",
           excludeSemantics: true,
@@ -13929,7 +14100,22 @@ bool _isPlaying=false;
             ),
           )
               : Container(),
-          ExcludeSemantics(child: Visibility(visible:nearbyLandmarks.isNotEmpty,child: Center(child: PickupLocationPin())))
+          ExcludeSemantics(child: Visibility(visible:nearbyLandmarks.isNotEmpty,child: Center(child: PickupLocationPin()))),
+          (showTransition)?Container(
+              height: screenHeight,
+              width: screenWidth,
+              color: Colors.white,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  lott.Lottie.asset(
+                    'assets/liftAnimation.json',
+                    height: 400,
+                    width: 400// Path to your Lottie animation
+                  ),
+                ],
+              )
+          ):Container()
         ],
       ),
     );

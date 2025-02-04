@@ -11,6 +11,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:url_launcher/url_launcher.dart';
+import '../../NAVIGATION/APIMODELS/landmark.dart';
 import '../API/buildingAllApi.dart';
 import '/IWAYPLUS/APIMODELS/buildingAll.dart';
 import '../MODELS/VenueModel.dart';
@@ -203,6 +204,21 @@ class HelperClass{
     });
 
   }
+
+
+  static List<bool> getCommonConnectionsStatus(Landmarks landmark1, Landmarks landmark2) {
+    return [
+      landmark1.lifts!.any((lift1) =>
+          landmark2.lifts!.any((lift2) => lift1.name == lift2.name)), // Lifts
+      landmark1.stairs!.any((stair1) =>
+          landmark2.stairs!.any((stair2) => stair1.name == stair2.name)), // Stairs
+      landmark1.ramps!.any((ramp1) =>
+          landmark2.ramps!.any((ramp2) => ramp1.name == ramp2.name)), // Ramps
+      landmark1.escalators!.any((escalator1) =>
+          landmark2.escalators!.any((escalator2) => escalator1.name == escalator2.name)) // Escalators
+    ];
+  }
+
 
   static Future<int> getGeoFenced(String venueName,Position userPos)async{
   await buildingApicall();

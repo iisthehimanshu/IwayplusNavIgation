@@ -2969,17 +2969,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
         controller.wrapPatch();
 
-        List<Landmarks>? landmarks = await controller.wrapLandmarks();
-        if(landmarks != null && landmarks.isNotEmpty){
-          var otherLandmarkdata = await SingletonFunctionController.building.landmarkdata;
-          otherLandmarkdata?.mergeLandmarks(landmarks);
-          SingletonFunctionController.building.landmarkdata = Future.value(otherLandmarkdata);
-        }
+        //closing for a while
+        // List<Landmarks>? landmarks = await controller.wrapLandmarks();
+        // if(landmarks != null && landmarks.isNotEmpty){
+        //   var otherLandmarkdata = await SingletonFunctionController.building.landmarkdata;
+        //   otherLandmarkdata?.mergeLandmarks(landmarks);
+        //   SingletonFunctionController.building.landmarkdata = Future.value(otherLandmarkdata);
+        // }
 
-        List<PathModel>? waypoints = controller.wrapWayPoint();
-        if(waypoints != null){
-          Building.waypoint[buildingAllApi.outdoorID] = waypoints;
-        }
+        // List<PathModel>? waypoints = controller.wrapWayPoint();
+        // if(waypoints != null){
+        //   Building.waypoint[buildingAllApi.outdoorID] = waypoints;
+        // }
 
         Set<Polygon>? campusRender = await controller.renderCampus();
         if(campusRender != null){

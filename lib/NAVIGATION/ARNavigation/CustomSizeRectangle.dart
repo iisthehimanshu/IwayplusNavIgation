@@ -30,6 +30,7 @@ class _ARDepthScreenState extends State<ARDepthScreen> {
       showPlanes: false,
       showWorldOrigin: false, // Optional: Useful for debugging
     );
+
     try {
       final cameraPose = await arSessionManager.getCameraPose();
       if (cameraPose == null) {

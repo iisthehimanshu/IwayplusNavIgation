@@ -412,19 +412,19 @@ if(userLoc!=null){
               },
             ),
 
-            IconButton(
-              icon: Icon(Icons.notifications_none_outlined),
-              color: Color(0xff18181b),
-              onPressed: () {
-                // PushNotifications.showSimpleNotification(body: "",payload: "",title: "Title");
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DisplayARObjects(),
-                  ),
-                );
-              },
-            ),
+            // IconButton(
+            //   icon: Icon(Icons.notifications_none_outlined),
+            //   color: Color(0xff18181b),
+            //   onPressed: () {
+            //     // PushNotifications.showSimpleNotification(body: "",payload: "",title: "Title");
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => CombinedScreen(),
+            //       ),
+            //     );
+            //   },
+            // ),
             Container(
                 margin: EdgeInsets.only(right: 20),
                 // decoration: BoxDecoration(

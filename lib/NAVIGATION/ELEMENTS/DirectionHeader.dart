@@ -1445,6 +1445,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   children: [
                     //Text("Beacon ${highestKey} - ${highestAverage}"),
                     Text(debuglNearestbeacon),
+                    Text(sumMapAvg.toString()),
                     // Text(sumMap.entries.map((entry) => '${entry.key}: ${entry.value.join(", ")}').join("\n")),
                     // //Text(displayString),
                     // Text("-------"),

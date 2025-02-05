@@ -135,11 +135,10 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
   }
 
   void addDirectionalObjects() async {
+    print("runnedaddDirectionalObjects");
     List<int> directionLengthList = [5, 8, 20, 8];
     List<String> directionList = ["front", "left", "left", "left"];
     double fixedCoordinatedY = -1;
-
-
 
     vv.Vector3 currentPosition = vv.Vector3(0, fixedCoordinatedY, 0); // Start at (0, -0.5, 0)
     vv.Vector3 currentDirection = vv.Vector3(0, 0, -1); // Initially facing forward

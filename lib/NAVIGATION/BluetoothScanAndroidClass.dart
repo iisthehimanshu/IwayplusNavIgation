@@ -34,6 +34,8 @@ class BluetoothScanAndroidClass{
   String EM_NEAREST_BEACON = "";
   beacon EM_NEAREST_BEACON_VALUE = beacon();
   static Map<String, List<int>> EM_RSSI_VALUES = {};
+  Map<String, int> lastSeenTimestamps = {};
+
 
 
 
@@ -234,13 +236,50 @@ class BluetoothScanAndroidClass{
 
   }
 
+  late Timer _cleanupTimer;
+  void startCleanupTimer(){
+    _cleanupTimer = Timer.periodic(Duration(milliseconds: 2000), (timer) {
+      startCleanUp();
+    });
+  }
+
+  void startCleanUp(){
+    print("cleaning");
+    var currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+
+    lastSeenTimestamps.forEach((key,value){
+      if(currentTimestamp - value >=2000){
+        print("if2000");
+        print(rssiValues);
+
+        if (rssiValues.isNotEmpty) {
+          if(rssiValues.keys.contains(key)){
+            rssiValues[key]?.removeAt(0);
+            print(rssiValues);
+          }
+        }else{
+          // print("rssiValuesEmptyhy");
+        }
+
+        if (rssiWeight.isNotEmpty) {
+          rssiWeight.keys.contains((key){
+            rssiWeight[key]?.removeAt(0);
+            print(rssiWeight);
+          });
+        }
+      }else{
+        print("else2000");
+      }
+    });
+
+  }
 
 
   void listenToScanUpdates(HashMap<String, beacon> apibeaconmap) {
     startScan();
+    startCleanupTimer();
     print("listenToScanUpdates");
 
-    Map<String, List<int>> rssiValues = {};
     String deviceMacId = "";
     // Start listening to the stream continuously
     _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
@@ -249,6 +288,10 @@ class BluetoothScanAndroidClass{
         deviceMacId = deviceDetails.DeviceAddress;
         print("iffffff");
         print(deviceDetails.DeviceName);
+
+        var timestamp = DateTime.now().millisecondsSinceEpoch;
+        lastSeenTimestamps[deviceDetails.DeviceAddress] = timestamp;
+
         deviceNames[deviceDetails.DeviceAddress] = deviceDetails.DeviceName;
 
         rssiValues.putIfAbsent(deviceDetails.DeviceAddress, () => []);
@@ -257,7 +300,7 @@ class BluetoothScanAndroidClass{
 
         rssiValues[deviceDetails.DeviceAddress]!.add(int.parse(deviceDetails.DeviceRssi));
         print("deviceDetails.DeviceRssi");
-        print(deviceDetails.DeviceRssi);
+        print("rssiValues${rssiValues}");
 
         rssiWeight[deviceDetails.DeviceAddress]!.add(getWeight(getBinNumber(int.parse(deviceDetails.DeviceRssi).abs())));
 
@@ -288,33 +331,34 @@ class BluetoothScanAndroidClass{
       print('Error receiving device updates: $error');
     });
 
-    if(isScanning) {
-      Timer.periodic(Duration(seconds: 2), (timer) {
-        if (rssiValues.isNotEmpty) {
-          rssiValues.forEach((key, value) {
-            if (deviceMacId != key) {
-              if (value.isNotEmpty) value.removeAt(0);
-            }
-          });
-        }
-
-        if (rssiWeight.isNotEmpty) {
-          rssiWeight.forEach((key, value) {
-            if (deviceMacId != key) {
-              if (value.isNotEmpty) value.removeAt(0);
-            }
-          });
-        }
-        // Calculate average RSSI values
-        Map<String, double> sumMap = calculateAverage();
-        // Sort the map by value (e.g., strongest signal first)
-        Map<String, double> sortedSumMap = sortMapByValue(sumMap);
-        sumMapCallBack = sortedSumMap;
-        print("SortedSumMap: $sortedSumMap");
-
-      });
-
-    }
+    // if(isScanning) {
+    //   Timer.periodic(Duration(seconds: 2), (timer) {
+    //     if (rssiValues.isNotEmpty) {
+    //       rssiValues.forEach((key, value) {
+    //         if (deviceMacId != key) {
+    //           if (value.isNotEmpty) value.removeAt(0);
+    //         }
+    //       });
+    //     }
+    //
+    //     if (rssiWeight.isNotEmpty) {
+    //       rssiWeight.forEach((key, value) {
+    //         if (deviceMacId != key) {
+    //           if (value.isNotEmpty) value.removeAt(0);
+    //         }
+    //       });
+    //     }
+    //     // Calculate average RSSI values
+    //
+    //
+    //   });
+    //
+    // }
+    Map<String, double> sumMap = calculateAverage();
+    // Sort the map by value (e.g., strongest signal first)
+    Map<String, double> sortedSumMap = sortMapByValue(sumMap);
+    sumMapCallBack = sortedSumMap;
+    print("SortedSumMap: $sortedSumMap");
 
   }
 

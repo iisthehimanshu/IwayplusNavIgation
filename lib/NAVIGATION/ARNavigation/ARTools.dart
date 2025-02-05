@@ -6,7 +6,7 @@ class ARTools{
       case "front":
         return Vector4(0.0, 1.0, 0.0, 1.5708);
       case "back":
-        return Vector4(0.0, 1.0, 0.0, -1.5708);
+        return Vector4(0.0, 1.0, 0.0, -3.14159);
       case "left":
         return Vector4(0.0, 1.0, 0.0, 3.14159);
       case "right":

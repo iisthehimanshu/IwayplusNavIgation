@@ -102,15 +102,15 @@ class _CombinedScreenState extends State<CombinedScreen> {
           });
 
           vv.Matrix3 rotationMatrix = pose.getRotation();
-          vv.Vector3 eulerAngles = matrixToEuler(rotationMatrix);
+          vv.Vector3 eulerAngles = ARTools.matrixToEuler(rotationMatrix);
 
           double yawDegrees = vv.degrees(eulerAngles.z); // Convert radians to degrees
           print("Heading Direction (Yaw): $yawDegrees°");
-          double distance = 0.0; // Distance to place the object in meters
+          double distance = 0.0;
           double headingRadians = eulerAngles.z;
 
-          double offsetX = distance * cos(headingRadians);
-          double offsetZ = distance * sin(headingRadians);
+          double offsetX = distance * cos(headingRadians); // affects X movement
+          double offsetZ = distance * sin(headingRadians); // affects Z movement
           vv.Vector3 cameraPosition2 = getTranslation(pose);
 
 
@@ -201,26 +201,7 @@ class _CombinedScreenState extends State<CombinedScreen> {
     });
   }
 
-  vv.Vector3 matrixToEuler(vv.Matrix3 rotationMatrix) {
-    double sy = sqrt(rotationMatrix.entry(0, 0) * rotationMatrix.entry(0, 0) +
-        rotationMatrix.entry(1, 0) * rotationMatrix.entry(1, 0));
 
-    bool singular = sy < 1e-6;
-
-    double x, y, z;
-
-    if (!singular) {
-      x = atan2(rotationMatrix.entry(2, 1), rotationMatrix.entry(2, 2)); // Roll
-      y = atan2(-rotationMatrix.entry(2, 0), sy); // Pitch
-      z = atan2(rotationMatrix.entry(1, 0), rotationMatrix.entry(0, 0)); // Yaw (Heading)
-    } else {
-      x = atan2(-rotationMatrix.entry(1, 2), rotationMatrix.entry(1, 1));
-      y = atan2(-rotationMatrix.entry(2, 0), sy);
-      z = 0; // Yaw is 0 in singular case
-    }
-
-    return vv.Vector3(vv.radians(x), vv.radians(y), vv.radians(z));
-  }
 
   void _showNavigationOverlay() {
     _overlayEntry = OverlayEntry(

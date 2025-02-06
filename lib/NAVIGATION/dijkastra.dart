@@ -39,9 +39,10 @@ Future<List<List<int>>> dijkstra(Map<String, dynamic> graph, String start, Strin
         path.add(currentNode.split(',').map(int.parse).toList());
         currentNode = previous[currentNode]!;
       }
+      print("currentNode $currentNode");
       path.add(currentNode.split(',').map(int.parse).toList()); // Add the start node
       // if(isoutdoorPath){
-        //return path.reversed.toList();
+      //return path.reversed.toList();
       // }
       if(isoutdoorPath){
         return path.reversed.toList();
@@ -116,6 +117,8 @@ List<String> findNearestAndSecondNearestVertices(
   double secondMinDistToCoord1 = double.infinity;
   double minDistToCoord2 = double.infinity;
   double secondMinDistToCoord2 = double.infinity;
+
+  print("source and destination points are $coord1 and $coord2");
 
   // Iterate through each vertex in the pathNetwork
   pathNetwork.forEach((vertex, neighbors) {
@@ -254,7 +257,8 @@ List<int> mergeLists(List<int> l1, List<int> l2, List<int> l3) {
 }
 
 
-Future<List<int>> findShortestPath (Map<String, dynamic> graph, int sourceX, int sourceY, int destinationX, int destinationY, List<int> nonWalkableCells, int col, int row, {bool isoutdoorPath = false})async{
+Future<List<int>> findShortestPath (Map<String, dynamic> graph, int sourceX, int sourceY, int destinationX, int destinationY, List<int>? nonWalkableCells, int col, int row, {bool isoutdoorPath = false})async{
+  nonWalkableCells ??= [];
   List<String> states = findNearestAndSecondNearestVertices(graph, [sourceX,sourceY], [destinationX,destinationY]);
   String start1 = states[0];
   String start2 = states[1];
@@ -269,18 +273,24 @@ Future<List<int>> findShortestPath (Map<String, dynamic> graph, int sourceX, int
 
   List<List<int>> temppath =[];
 
-  if(tools.calculateDistance(start1.split(',').map(int.parse).toList(), start2.split(',').map(int.parse).toList()) <=10){
-    if(temppath1.length>temppath2.length){
-      print("returning 1 $temppath2");
-      temppath = temppath2;
-    }else{
-      print("returning 2");
+  if (temppath1.isEmpty || temppath2.isEmpty) {
+    temppath = temppath1.isEmpty ? temppath2 : temppath1;
+  } else {
+    final start1Coords = start1.split(',').map(int.parse).toList();
+    final start2Coords = start2.split(',').map(int.parse).toList();
+    final distance = tools.calculateDistance(start1Coords, start2Coords);
+
+    if (distance <= 10) {
+      temppath = (temppath1.length > temppath2.length) ? temppath2 : temppath1;
+      print("returning ${temppath == temppath2 ? '1 $temppath2' : '2'}");
+    } else {
+      print("returning 3");
       temppath = temppath1;
     }
-  }else{
-    print("returning 3");
-    temppath = temppath1;
   }
+
+
+
 
 
   if(tools.calculateDistance(temppath.first, [sourceX,sourceY])==1){

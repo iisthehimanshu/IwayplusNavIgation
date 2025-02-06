@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iwaymaps/NAVIGATION/API/ladmarkApi.dart';
 import 'package:iwaymaps/NAVIGATION/ELEMENTS/SearchpageRecents.dart';
+import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../IWAYPLUS/API/buildingAllApi.dart';
@@ -95,13 +96,22 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
     ));
   }
 
-  Future<void> fetchlist()async{
-    buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
-      await landmarkApi().fetchLandmarkData(id: key).then((value){
+  Future<void> fetchlist() async {
+    land? singletonData = await SingletonFunctionController.building.landmarkdata;
+
+    if(singletonData != null){
+      landmarkData = singletonData;
+      return;
+    }
+
+    buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
+      await landmarkApi().fetchLandmarkData(id: key).then((value) {
         landmarkData.mergeLandmarks(value.landmarks);
+        //optionListForUI.addAll(fetchCategories(value));
       });
     });
   }
+
 
   void swap(){
     String temp = widget.SourceID;

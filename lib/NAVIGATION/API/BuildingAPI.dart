@@ -6,12 +6,13 @@ import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/BuildingAPIModelBox.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import '../../IWAYPLUS/API/buildingAllApi.dart';
 import '../../IWAYPLUS/Elements/HelperClass.dart';
+import '../config.dart';
 import '/NAVIGATION/APIMODELS/Building.dart';
 import 'RefreshTokenAPI.dart';
 
 
 class BuildingAPI {
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building/get/venue" : "https://maps.iwayplus.in/secured/building/get/venue";
+  final String baseUrl = "${AppConfig.baseUrl}/secured/building/get/venue";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");

@@ -1,12 +1,12 @@
 class PathModel {
-  final String id;
-  final String buildingID;
-  final int floor;
-  final Map<String, List<dynamic>> pathNetwork;
-  final Map<String, List<dynamic>> pathNetworkGlobal;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final int v;
+  final String? id;
+  final String? buildingID;
+  final int? floor;
+  final Map<String, List<dynamic>>? pathNetwork;
+  final Map<String, List<dynamic>>? pathNetworkGlobal;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final int? v;
 
   PathModel({
     required this.id,
@@ -20,6 +20,7 @@ class PathModel {
   });
 
   factory PathModel.fromJson(Map<dynamic, dynamic> json) {
+
     return PathModel(
       id: json['_id'],
       buildingID: json['building_ID'],
@@ -29,8 +30,8 @@ class PathModel {
               (key, value) => MapEntry(key, List<String>.from(value)),
         ),
       ),
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: json['createdAt'] != null?DateTime.parse(json['createdAt']):json['createdAt'],
+      updatedAt: json['updatedAt'] != null?DateTime.parse(json['updatedAt']):json['updatedAt'],
       v: json['__v'],
       pathNetworkGlobal: Map<String, List<dynamic>>.from(
         json['pathNetworkGlobal']??{}.map(

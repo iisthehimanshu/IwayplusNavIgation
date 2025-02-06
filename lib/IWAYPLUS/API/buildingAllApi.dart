@@ -5,20 +5,22 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../../NAVIGATION/API/RefreshTokenAPI.dart';
+import '../../NAVIGATION/APIMODELS/outdoormodel.dart';
+import '../../NAVIGATION/config.dart';
 import '/NAVIGATION/APIMODELS/beaconData.dart';
 import '/IWAYPLUS/APIMODELS/buildingAll.dart';
 import '/NAVIGATION/APIMODELS/polylinedata.dart';
 import '/NAVIGATION/APIMODELS/landmark.dart';
 import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import '../DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
-import 'guestloginapi.dart';
 
 
 class buildingAllApi {
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building/all" : "https://maps.iwayplus.in/secured/building/all";
+  final String baseUrl = "${AppConfig.baseUrl}/secured/building/all";
   static var signInBox = Hive.box('SignInDatabase');
   var versionBox = Hive.box('VersionData');
   String accessToken = signInBox.get("accessToken");
+  static outdoormodel? outBuildingData = null;
   static String selectedID="";
   static String selectedBuildingID="";
   static String selectedVenue="";
@@ -124,6 +126,22 @@ class buildingAllApi {
       throw Exception('Failed to load data');
     }
   }
+
+  static void findBuildings(List<buildingAll> allBuildings){
+    List<buildingAll> buildings = [];
+    for (var building in allBuildings) {
+      if(building.venueName == selectedVenue){
+        buildings.add(building);
+      }
+    }
+    for (var element in buildings) {
+      g.LatLng kk = g.LatLng(element.coordinates![0], element.coordinates![1]);
+      allBuildingID[element.sId!] = kk;
+    }
+    selectedID = allBuildingID.keys.first;
+    selectedBuildingID = allBuildingID.keys.first;
+  }
+
   // Method to set the stored string
   static Future<void> setStoredString(String value) async {
     selectedID = value;

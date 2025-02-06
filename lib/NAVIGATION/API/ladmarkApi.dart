@@ -5,6 +5,7 @@ import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/LandMarkApiModelBox.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import '../../IWAYPLUS/API/buildingAllApi.dart';
 import '../../IWAYPLUS/Elements/HelperClass.dart';
+import '../config.dart';
 import '/NAVIGATION/APIMODELS/landmark.dart';
 import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';
@@ -12,7 +13,7 @@ import 'package:hive/hive.dart';
 
 
 class landmarkApi {
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/landmarks-demo" : "https://maps.iwayplus.in/secured/landmarks";
+  final String baseUrl = "${AppConfig.baseUrl}/secured/landmarks";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
@@ -40,7 +41,7 @@ String getDecryptedData(String encryptedData){
     accessToken = signInBox.get("accessToken");
     final LandMarkBox = LandMarkApiModelBox.getData();
     print("version check${VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id)}");
-    print("version check${id}");
+    print("landmark version check${id}");
     if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingLandmarkDataVersionUpdate[id??buildingAllApi.getStoredString()]! == false){
       print("LANDMARK DATA FORM DATABASE ");
       print(id??buildingAllApi.getStoredString());

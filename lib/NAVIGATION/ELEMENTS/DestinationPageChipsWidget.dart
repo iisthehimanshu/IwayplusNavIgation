@@ -68,7 +68,6 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
                 widget.onTap("");
               });
             }
-
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

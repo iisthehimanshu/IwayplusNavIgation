@@ -57,6 +57,7 @@ class UserState {
   static String lngCode = 'en';
   static int cols = 0;
   static int rows = 0;
+  static List<Map<String, dynamic>> mapPathGuide=[];
   static Map<String, Map<int, List<int>>> nonWalkable = {};
   static Function reroute = () {};
   static Function closeNavigation = () {};
@@ -156,14 +157,16 @@ class UserState {
   void handleGPS(){
     print("handleGPS invoked");
     snapper.snappedCellStream.listen((snapped) {
-      double d = tools.calculateAerialDist(snapped.position!.latitude, snapped.position!.longitude, lat, lng);
-      print("distance calc is $d");
-      if(snapped.imaginedIndex != null && d>snapped.position!.accuracy){
-        path.insert(snapped.imaginedIndex!, (snapped.y*snapped.numCols)+snapped.x);
-        cellPath.insert(snapped.imaginedIndex!, snapped);
-        moveToPointOnPath(snapped.imaginedIndex!);
-        renderHere();
-        //addDebugMarkers(geo.LatLng(snapped.lat,snapped.lng));
+      if(isnavigating){
+        double d = tools.calculateAerialDist(snapped.position!.latitude, snapped.position!.longitude, lat, lng);
+        print("distance calc is $d");
+        if(snapped.imaginedIndex != null && d>snapped.position!.accuracy){
+          path.insert(snapped.imaginedIndex!, (snapped.y*snapped.numCols)+snapped.x);
+          cellPath.insert(snapped.imaginedIndex!, snapped);
+          moveToPointOnPath(snapped.imaginedIndex!);
+          renderHere();
+          //addDebugMarkers(geo.LatLng(snapped.lat,snapped.lng));
+        }
       }
     });
   }

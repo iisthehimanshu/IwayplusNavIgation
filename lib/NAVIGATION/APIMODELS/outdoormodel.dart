@@ -23,6 +23,7 @@ class Data {
   String? sId;
   String? campusId;
   List<String>? buildingIds;
+  bool? globalAnnotation;
   String? createdAt;
   String? updatedAt;
   int? iV;
@@ -33,6 +34,7 @@ class Data {
       {this.sId,
         this.campusId,
         this.buildingIds,
+        this.globalAnnotation,
         this.createdAt,
         this.updatedAt,
         this.iV,
@@ -43,6 +45,7 @@ class Data {
     sId = json['_id'];
     campusId = json['campusId'];
     buildingIds = json['buildingIds'].cast<String>();
+    globalAnnotation = json['globalAnnotation'] ?? false;
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
@@ -55,6 +58,7 @@ class Data {
     data['_id'] = this.sId;
     data['campusId'] = this.campusId;
     data['buildingIds'] = this.buildingIds;
+    data['globalAnnotation'] = this.globalAnnotation;
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;

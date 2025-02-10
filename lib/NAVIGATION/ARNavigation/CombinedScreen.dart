@@ -10,6 +10,7 @@ import 'package:ar_flutter_plugin_flutterflow/managers/ar_session_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
 import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 import 'package:iwaymaps/IWAYPLUS/Elements/HelperClass.dart';
 import 'package:vector_math/vector_math_64.dart' as vv;
 
@@ -38,6 +39,8 @@ class _CombinedScreenState extends State<CombinedScreen> {
   vv.Vector3? initialPosition;
   vv.Vector3 currentPosition = vv.Vector3.zero();
 
+  double yMinusFactor = 1;
+
   double height = 200;
   Timer? alignmentTimer; // Timer reference
   bool isAligned = false;
@@ -45,12 +48,47 @@ class _CombinedScreenState extends State<CombinedScreen> {
   List<int> directionLengthList = [5,8,20,8];
   List<String> directionList = ["front","left","left","left"];
 
+  late StreamSubscription<CompassEvent> compassSubscription;
+
+  late int userPathAngle;
+  double startingAngle = 0.0;
+  bool startingAngleDone = false;
+  bool alignedDone = false;
+  late double angleFactor;
+
 
   @override
   void initState() {
     super.initState();
-
+    handleCompassEvents();
+    doInitialAsyncTasks();
   }
+
+  void doInitialAsyncTasks()async{
+    await calculateUserPathAngle();
+    startAlignmentCheck();
+  }
+
+  void handleCompassEvents(){
+    compassSubscription = FlutterCompass.events!.listen((event) {
+      double? compassHeading = event.heading!;
+      widget.user.theta = compassHeading<0?compassHeading+360:compassHeading;
+      if(!startingAngleDone){
+        startingAngle = compassHeading<0?compassHeading+360:compassHeading;
+        startingAngleDone = true;
+        setState(() {});
+      }
+      if(alignedDone){
+        print("alignedDOne ${startingAngle-compassHeading<0?compassHeading+360:compassHeading}");
+        angleFactor = startingAngle-compassHeading<0?compassHeading+360:compassHeading;
+        setState(() {});
+      }
+      print("currentAngle ${widget.user.theta} ${userPathAngle+5} ${userPathAngle-5}");
+    },onError: (error) {
+      print("Compass Error ${error}");
+    });
+  }
+
   late vv.Vector3 forwardd;
   late vv.Vector3 startdirection;
   late double x ;
@@ -60,12 +98,7 @@ class _CombinedScreenState extends State<CombinedScreen> {
   vv.Vector3? cameraPosition;
   vv.Quaternion? cameraRotation;
 
-  vv.Vector3 getTranslation(Matrix4 matrix) {
-    return vv.Vector3(matrix.entry(0, 3), matrix.entry(1, 3), matrix.entry(2, 3));
-  }
-
-  Future<void> startAlignmentCheck() async {
-
+  Future<void> calculateUserPathAngle() async {
     int col = widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!;
 
     List<int> a = [widget.user.showcoordX, widget.user.showcoordY];
@@ -78,87 +111,119 @@ class _CombinedScreenState extends State<CombinedScreen> {
     int node = widget.user.path[index + 1];
     List<int> c = [node % col, node ~/ col];
 
-    int val = tools.calculateAngleSecond(a, b, c).toInt();
-    var pose = await arSessionManager.getCameraPose();
+    userPathAngle = tools.calculateAngleSecond(a, b, c).toInt();
+    //HelperClass.showToast("calculateUserPathAngleComputed ${userPathAngle}");
+    print("calculateUserPathAngleComputed ${userPathAngle}");
+    return;
+  }
 
-    // If already running, do nothing
+
+
+  Future<void> startAlignmentCheck() async {
+    HelperClass.showToast("startAlignmentCheckStarted");
+
     if (alignmentTimer != null && alignmentTimer!.isActive) return;
 
     alignmentTimer = Timer.periodic(Duration(milliseconds: 500), (timer) async {
- 
-      print("Checking alignment...");
+      calculateUserPathAngle();
+      print("Checking $userPathAngle alignment... ");
 
-      if ((widget.user.theta.abs())>val-5 && (widget.user.theta.abs()<val+5)) {
+      if(!alignedDone) {
+        if (userPathAngle <= 5 && userPathAngle >= -5) {
+          HelperClass.showToast("user aligned $userPathAngle");
+          alignedDone = true;
+          setState(() {});
 
-        var pose = await arSessionManager.getCameraPose();
-        if (pose != null) {
+          var pose = await arSessionManager.getCameraPose();
+          if (pose != null) {
+            setState(() {
+              cameraPosition = pose.forward;
+            });
 
-          print("pose.matrixEulerAngles");
-          print("${pose.matrixEulerAngles}");
-          print("${pose.getRotation()}");
-          print("${pose.getRotation().getRow(0)}");
-          setState(() {
-            cameraPosition = pose.forward;
-          });
+            vv.Matrix3 rotationMatrix = pose.getRotation();
+            vv.Vector3 eulerAngles = ARTools.matrixToEuler(rotationMatrix);
 
-          vv.Matrix3 rotationMatrix = pose.getRotation();
-          vv.Vector3 eulerAngles = ARTools.matrixToEuler(rotationMatrix);
+            double yawDegrees = vv.degrees(
+                eulerAngles.z); // Convert radians to degrees
+            print("Heading Direction (Yaw): $userPathAngle");
+            double distance = 1;
+            double headingRadians = eulerAngles.z;
+            double headingRadiansx = eulerAngles.x;
+            print("gotheddingRadian");
+            print(headingRadians);
+            print(headingRadiansx);
 
-          double yawDegrees = vv.degrees(eulerAngles.z); // Convert radians to degrees
-          print("Heading Direction (Yaw): $yawDegrees°");
-          double distance = 0.0;
-          double headingRadians = eulerAngles.z;
-
-          double offsetX = distance * cos(headingRadians); // affects X movement
-          double offsetZ = distance * sin(headingRadians); // affects Z movement
-          vv.Vector3 cameraPosition2 = getTranslation(pose);
-
-
-          vv.Vector3 objectPosition = vv.Vector3(cameraPosition2.x + offsetX,
-              cameraPosition2.y,
-              cameraPosition2.z + offsetZ);
+            double offsetX = distance * cos(angleFactor); // affects X movement
+            double offsetZ = distance * sin(angleFactor); // affects Z movement
 
 
+            vv.Vector3 cameraPosition2 = ARTools.getTranslation(pose);
 
 
-          // var newNode = ARNode(
-          //   type: NodeType.webGLB,
-          //   uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
-          //   position: cameraPosition,
-          //   scale: vv.Vector3(0.2, 0.2, 0.2),
-          //   rotation: ARTools.getObjectRotation("front"),
-          // );
-          // await arObjectManager.addNode(newNode);
+            vv.Vector3 objectPosition = vv.Vector3(cameraPosition2.x + offsetX,
+                cameraPosition2.y - yMinusFactor,
+                cameraPosition2.z + offsetZ);
 
 
-          var newNodeagain = ARNode(
-            type: NodeType.webGLB,
-            uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
-            position: objectPosition,
-            scale: vv.Vector3(0.2, 0.2, 0.2),
-            rotation: ARTools.getObjectRotation("right"),
-          );
-          await arObjectManager.addNode(newNodeagain);
+            // var newNode = ARNode(
+            //   type: NodeType.webGLB,
+            //   uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+            //   position: cameraPosition,
+            //   scale: vv.Vector3(0.2, 0.2, 0.2),
+            //   rotation: ARTools.getObjectRotation("front"),
+            // );
+            // await arObjectManager.addNode(newNode);
 
-          double newoffsetX = 5 * cos(headingRadians);
-          double newoffsetZ = 5 * sin(headingRadians);
 
-          vv.Vector3 newPosition = vv.Vector3(cameraPosition2.x + newoffsetX,
-              cameraPosition2.y,
-              cameraPosition2.z + newoffsetZ);
-          var newNodeagain2 = ARNode(
-            type: NodeType.webGLB,
-            uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
-            position: newPosition,
-            scale: vv.Vector3(0.2, 0.2, 0.2),
-            rotation: ARTools.getObjectRotation("front"),
-          );
-          await arObjectManager.addNode(newNodeagain2);
+            var newNodeagain = ARNode(
+              type: NodeType.webGLB,
+              uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+              position: objectPosition,
+              scale: vv.Vector3(0.2, 0.2, 0.2),
+              rotation: ARTools.getObjectRotation("right"),
+            );
+            await arObjectManager.addNode(newNodeagain);
 
-          alignmentTimer?.cancel();
-          //addDirectionalObjects();
+            double newoffsetX = 5 * cos(angleFactor);
+            double newoffsetZ = 5 * sin(angleFactor);
 
-          HelperClass.showToast("Camera Position: ${cameraPosition}");
+            vv.Vector3 newPosition = vv.Vector3(cameraPosition2.x + newoffsetX,
+                cameraPosition2.y - yMinusFactor,
+                cameraPosition2.z + newoffsetZ);
+            var newNodeagain2 = ARNode(
+              type: NodeType.webGLB,
+              uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+              position: newPosition,
+              scale: vv.Vector3(0.2, 0.2, 0.2),
+              rotation: ARTools.getObjectRotation("front"),
+            );
+            await arObjectManager.addNode(newNodeagain2);
+
+            double leftOffsetX = 7 * cos(angleFactor + (pi / 2));
+            // +90° in radians
+            double leftOffsetZ = 7 * sin(angleFactor + (pi / 2));
+
+            vv.Vector3 thirdObjectPosition = vv.Vector3(
+                newPosition.x + leftOffsetX,
+                newPosition.y - yMinusFactor,
+                newPosition.z + leftOffsetZ
+            );
+
+            var newNodeagain4 = ARNode(
+              type: NodeType.webGLB,
+              uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+              position: thirdObjectPosition,
+              scale: vv.Vector3(0.2, 0.2, 0.2),
+              rotation: ARTools.getObjectRotation("front"),
+            );
+            await arObjectManager.addNode(newNodeagain4);
+
+
+            alignmentTimer?.cancel();
+            //addDirectionalObjects();
+
+            //HelperClass.showToast("Camera Position: ${cameraPosition}");
+          }
         }
       }
 
@@ -350,6 +415,7 @@ class _CombinedScreenState extends State<CombinedScreen> {
   @override
   void dispose() {
     alignmentTimer?.cancel();
+    compassSubscription.cancel();
     _overlayEntry?.remove();
     super.dispose();
   }

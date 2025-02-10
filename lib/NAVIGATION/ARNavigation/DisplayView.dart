@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:ar_flutter_plugin_flutterflow/datatypes/config_planedetection.dart';
 import 'package:ar_flutter_plugin_flutterflow/datatypes/node_types.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_anchor_manager.dart';
@@ -10,10 +9,7 @@ import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
 import 'package:flutter/material.dart';
 import 'package:ar_flutter_plugin_flutterflow/ar_flutter_plugin.dart';
 import 'package:vector_math/vector_math_64.dart' as vv;
-
 import 'ARTools.dart';
-
-
 
 class DisplayARObjects extends StatefulWidget {
   @override
@@ -63,7 +59,7 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
                   padding: EdgeInsets.all(10),
                   color: Colors.black54,
                   child: Text(
-                    totalDistanceMoved.toStringAsFixed(2),
+                    totalDistanceMovedstring,
                     style: TextStyle(color: Colors.white, fontSize: 14),
                   ),
                 ),
@@ -90,7 +86,7 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
     arSessionManager.onInitialize(
       showFeaturePoints: false,
       showPlanes: false,
-      showWorldOrigin: false,
+      showWorldOrigin: false, // Optional: Useful for debugging
     );
 
     arSessionManager.getCameraPose().then((pose) {
@@ -111,22 +107,17 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
     print("trackUserMovement");
     Timer.periodic(Duration(milliseconds: 500), (timer) async {
       var pose = await arSessionManager.getCameraPose();
-      print("pose");
-      print(pose);
 
       if (pose != null && initialPosition != null) {
         // Update current position
-        currentPosition = vv.Vector3(pose.forward.x, pose.row3.y, pose.row3.z);
+        currentPosition = vv.Vector3(pose.row3.x, pose.row3.y, pose.row3.z);
 
         // Calculate distance from origin
         double distance = (currentPosition - initialPosition!).length;
 
         // Update total distance moved
-        setState(() {
-          totalDistanceMoved = distance;
-          totalDistanceMovedstring = currentPosition.toString(); // Update the camera pose display
-          _cameraPoseText = "Current Position: $currentPosition\nDistance Moved: ${totalDistanceMoved.toStringAsFixed(2)} meters";
-        });
+        totalDistanceMoved = distance;
+        totalDistanceMovedstring = currentPosition.toString();
 
         print("Current Position: $currentPosition");
         print("Distance Moved from Origin: ${totalDistanceMoved.toStringAsFixed(2)} meters");
@@ -135,10 +126,11 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
   }
 
   void addDirectionalObjects() async {
-    print("runnedaddDirectionalObjects");
     List<int> directionLengthList = [5, 8, 20, 8];
     List<String> directionList = ["front", "left", "left", "left"];
     double fixedCoordinatedY = -1;
+
+
 
     vv.Vector3 currentPosition = vv.Vector3(0, fixedCoordinatedY, 0); // Start at (0, -0.5, 0)
     vv.Vector3 currentDirection = vv.Vector3(0, 0, -1); // Initially facing forward
@@ -153,33 +145,41 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
     await arObjectManager.addNode(newNode);
 
     var newNode1 = ARNode(
-      type: NodeType.webGLB,
-      uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
-      position: vv.Vector3(0, fixedCoordinatedY, -5),
-      scale: vv.Vector3(0.5, 0.5, 0.5),
-      rotation: ARTools.getObjectRotation("left") // left
+        type: NodeType.webGLB,
+        uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+        //                x,   y,                 z
+        position: vv.Vector3(0, fixedCoordinatedY, -5),
+        scale: vv.Vector3(0.5, 0.5, 0.5),
+        rotation: ARTools.getObjectRotation("left") // left
     );
     await arObjectManager.addNode(newNode1);
 
     var newNode2 = ARNode(
-      type: NodeType.webGLB,
-      uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
-      position: vv.Vector3(-7, fixedCoordinatedY, -5),
-      scale: vv.Vector3(0.5, 0.5, 0.5),
+        type: NodeType.webGLB,
+        uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+        position: vv.Vector3(-7, fixedCoordinatedY, -5),
+        scale: vv.Vector3(0.5, 0.5, 0.5),
         rotation: vv.Vector4(0.0, 1.0, 0.0, -1.5708) // left
 
     );
     await arObjectManager.addNode(newNode2);
 
     var newNode3 = ARNode(
-      type: NodeType.webGLB,
-      uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
-      position: vv.Vector3(-7, fixedCoordinatedY, 15),
-      scale: vv.Vector3(0.5, 0.5, 0.5),
+        type: NodeType.webGLB,
+        uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+        position: vv.Vector3(-7, fixedCoordinatedY, 15),
+        scale: vv.Vector3(0.5, 0.5, 0.5),
         rotation: vv.Vector4(0.0, 1.0, 0.0, 0.0) // left
     );
     await arObjectManager.addNode(newNode3);
-
+    var newNode4 = ARNode(
+      type: NodeType.webGLB,
+      uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+      position: vv.Vector3(0, fixedCoordinatedY, 15),
+      scale: vv.Vector3(0.5, 0.5, 0.5),
+      rotation: ARTools.getObjectRotation("front"),
+    );
+    await arObjectManager.addNode(newNode4);
 
     // for (int i = 0; i < directionList.length; i++) {
     //   // Move in current direction
@@ -235,3 +235,51 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
     super.dispose();
   }
 }
+
+//
+// var newNode = ARNode(
+//   type: NodeType.webGLB,
+//   uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+//   position: currentPosition,
+//   scale: vv.Vector3(0.5, 0.5, 0.5),
+//   rotation: ARTools.getObjectRotation("front"),
+//
+// );
+// await arObjectManager.addNode(newNode);
+//
+// var newNode1 = ARNode(
+// type: NodeType.webGLB,
+// uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+// position: vv.Vector3(0, fixedCoordinatedY, -5),
+// scale: vv.Vector3(0.5, 0.5, 0.5),
+// rotation: ARTools.getObjectRotation("left") // left
+// );
+// await arObjectManager.addNode(newNode1);
+//
+// var newNode2 = ARNode(
+// type: NodeType.webGLB,
+// uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+// position: vv.Vector3(-7, fixedCoordinatedY, -5),
+// scale: vv.Vector3(0.5, 0.5, 0.5),
+// rotation: vv.Vector4(0.0, 1.0, 0.0, -1.5708) // left
+//
+// );
+// await arObjectManager.addNode(newNode2);
+//
+// var newNode3 = ARNode(
+// type: NodeType.webGLB,
+// uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+// position: vv.Vector3(-7, fixedCoordinatedY, 15),
+// scale: vv.Vector3(0.5, 0.5, 0.5),
+// rotation: vv.Vector4(0.0, 1.0, 0.0, 0.0) // left
+// );
+// await arObjectManager.addNode(newNode3);
+//
+// var newNode4 = ARNode(
+// type: NodeType.webGLB,
+// uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+// position: vv.Vector3(0, fixedCoordinatedY, 15),
+// scale: vv.Vector3(0.5, 0.5, 0.5),
+// rotation: ARTools.getObjectRotation("front"),
+// );
+// await arObjectManager.addNode(newNode4);

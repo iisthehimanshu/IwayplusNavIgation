@@ -18,10 +18,12 @@ import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
 import 'package:iwaymaps/NAVIGATION/API/RefreshTokenAPI.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/WayPointModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/ARNavigation/DebugOptions.dart';
+import '../NAVIGATION/ARNavigation/ARCoreScreen.dart';
 import '../NAVIGATION/ARNavigation/CombinedScreen.dart';
 import '../NAVIGATION/ARNavigation/CustomSizeRectangle.dart';
 import '../NAVIGATION/ARNavigation/DisplayView.dart';
 import '../NAVIGATION/ARNavigation/DistanceRendering.dart';
+import '../NAVIGATION/ARNavigation/NewARScreen.dart';
 import '../NAVIGATION/ARNavigation/ObjectGestures.dart';
 import '../NAVIGATION/ARNavigation/UserPositionScreen.dart';
 import '../NAVIGATION/BluetoothScanAndroid.dart';
@@ -412,19 +414,19 @@ if(userLoc!=null){
               },
             ),
 
-            // IconButton(
-            //   icon: Icon(Icons.notifications_none_outlined),
-            //   color: Color(0xff18181b),
-            //   onPressed: () {
-            //     // PushNotifications.showSimpleNotification(body: "",payload: "",title: "Title");
-            //     Navigator.push(
-            //       context,
-            //       MaterialPageRoute(
-            //         builder: (context) => CombinedScreen(),
-            //       ),
-            //     );
-            //   },
-            // ),
+            IconButton(
+              icon: Icon(Icons.notifications_none_outlined),
+              color: Color(0xff18181b),
+              onPressed: () {
+                PushNotifications.showSimpleNotification(body: "",payload: "",title: "Title");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DisplayARObjects(),
+                  ),
+                );
+              },
+            ),
             Container(
                 margin: EdgeInsets.only(right: 20),
                 // decoration: BoxDecoration(

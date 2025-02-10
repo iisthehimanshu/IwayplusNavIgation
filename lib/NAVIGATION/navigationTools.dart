@@ -1836,6 +1836,7 @@ class tools {
 
 
 
+
   static List<int> analyzeCell(List<Cell> path, Cell targetCell) {
     int targetIndex = path.indexOf(targetCell);
 

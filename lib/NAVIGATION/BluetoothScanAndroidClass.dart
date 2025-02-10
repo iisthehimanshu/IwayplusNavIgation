@@ -52,6 +52,7 @@ class BluetoothScanAndroidClass{
 
   Future<void> stopScan() async {
     try {
+      _cleanupTimer.cancel();
       await methodChannel.invokeMethod('stopScan');
       isScanning = false;
     } on PlatformException catch (e) {

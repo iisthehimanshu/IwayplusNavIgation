@@ -68,6 +68,9 @@ import 'API/waypoint.dart';
 import 'APIMODELS/DataVersion.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/outdoormodel.dart';
+import 'ARNavigation/ARCoreScreen.dart';
+import 'ARNavigation/DisplayView.dart';
+import 'ARNavigation/NewARScreen.dart';
 import 'BluetoothScanAndroidClass.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
@@ -2300,7 +2303,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           userSetLocation.doorY!.toInt(),
           SingletonFunctionController.building.patchData[user.bid]
       );
-      try{
+      if(SingletonFunctionController.apibeaconmap[lastBeaconValue] != null){
         List<double> uvalue = tools.localtoglobal(
             SingletonFunctionController.apibeaconmap[lastBeaconValue]!.coordinateX!.toInt(),
             SingletonFunctionController.apibeaconmap[lastBeaconValue]!.coordinateY!.toInt(),
@@ -2328,7 +2331,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             );
           });
         });
-      }finally{
+      }
         mapState.zoom = 22.0;
         _googleMapController.animateCamera(
           CameraUpdate.newLatLngZoom(
@@ -2336,7 +2339,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             22, // Specify your custom zoom level here
           ),
         );
-      }
 
     }
     Future.delayed(Duration(milliseconds: 5000)).then((value){
@@ -12493,44 +12495,44 @@ bool _isPlaying=false;
     arObjectManager.onInitialize();
 
     // Handle plane taps and add object
-    arSessionManager.onPlaneDetected = (plane) async {
-      // Retrieve the current camera pose
-      if (isObjectAdded) {
-        print("Object already added. Cannot add another one.");
-        return; // Prevent adding a new object if one is already placed
-      }
-
-      // Retrieve the current camera pose
-      final cameraPose = await arSessionManager.getCameraPose();
-      if (cameraPose != null) {
-        // Get the current camera position
-        vv.Vector3 cameraPosition = cameraPose.getTranslation();
-        vv.Vector3 forwardDirection = vv.Vector3(-cameraPose.storage[8], -cameraPose.storage[9], -cameraPose.storage[10]);
-
-        // Calculate the position 1 meter ahead of the camera
-        vv.Vector3 targetPosition = cameraPosition + forwardDirection * 1.0;
-
-        // Create an ARNode for the model
-        ARNode objectNode = ARNode(
-          type: NodeType.webGLB,
-          uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb", // Path to your model file
-          position: targetPosition,
-          scale: vv.Vector3(0.1, 0.1, 0.1), // Adjust the scale of the object
-          rotation: vv.Vector4(0.0, 1.0, 0.0, 0.0), // Rotate the object (w, x, y, z)
-        );
-
-        // Add the object to the scene
-        bool? didAddNode = await arObjectManager.addNode(objectNode);
-        if (didAddNode != null && didAddNode) {
-          // Set the flag to true after adding the object
-          isObjectAdded = true;
-          print("Object added 1 meter ahead of the camera!");
-          print(arLocationMan.currentLocation);
-        } else {
-          print("Failed to add object.");
-        }
-      }
-    };
+    // arSessionManager.onPlaneDetected = (plane) async {
+    //   // Retrieve the current camera pose
+    //   if (isObjectAdded) {
+    //     print("Object already added. Cannot add another one.");
+    //     return; // Prevent adding a new object if one is already placed
+    //   }
+    //
+    //   // Retrieve the current camera pose
+    //   final cameraPose = await arSessionManager.getCameraPose();
+    //   if (cameraPose != null) {
+    //     // Get the current camera position
+    //     vv.Vector3 cameraPosition = cameraPose.getTranslation();
+    //     vv.Vector3 forwardDirection = vv.Vector3(-cameraPose.storage[8], -cameraPose.storage[9], -cameraPose.storage[10]);
+    //
+    //     // Calculate the position 1 meter ahead of the camera
+    //     vv.Vector3 targetPosition = cameraPosition + forwardDirection * 1.0;
+    //
+    //     // Create an ARNode for the model
+    //     ARNode objectNode = ARNode(
+    //       type: NodeType.webGLB,
+    //       uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb", // Path to your model file
+    //       position: targetPosition,
+    //       scale: vv.Vector3(0.1, 0.1, 0.1), // Adjust the scale of the object
+    //       rotation: vv.Vector4(0.0, 1.0, 0.0, 0.0), // Rotate the object (w, x, y, z)
+    //     );
+    //
+    //     // Add the object to the scene
+    //     bool? didAddNode = await arObjectManager.addNode(objectNode);
+    //     if (didAddNode != null && didAddNode) {
+    //       // Set the flag to true after adding the object
+    //       isObjectAdded = true;
+    //       print("Object added 1 meter ahead of the camera!");
+    //       print(arLocationMan.currentLocation);
+    //     } else {
+    //       print("Failed to add object.");
+    //     }
+    //   }
+    // };
     // setState(() {
     //   _ARWorldLocation = arLocationManager.currentLocation.toString();
     // });
@@ -13381,8 +13383,7 @@ bool _isPlaying=false;
                                   val[0],
                                   val[1]),
                               icon: BitmapDescriptor
-                                  .fromBytes(
-                                  userlocdebug),
+                                  .fromBytes(userlocdebug),
                               anchor: Offset(
                                   0.5, 0.829),
                             ));
@@ -13402,7 +13403,7 @@ bool _isPlaying=false;
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => CombinedScreen(user: user,),
+                          builder: (context) => ARObjectPlacementScreen(user: user,PathState: PathState,),
                       ));
                     },
 

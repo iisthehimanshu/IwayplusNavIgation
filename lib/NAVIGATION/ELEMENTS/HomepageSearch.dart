@@ -61,11 +61,11 @@ class _HomepageSearchState extends State<HomepageSearch> {
 
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return Column(
-      children: [
+      children:[
         Semantics(
           header: true,
           label: "Search Bar",
@@ -79,7 +79,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                   color: Colors.white, // You can customize the border color
                   width: 1.0, // You can customize the border width
                 ),
-                boxShadow: [
+                boxShadow:[
                   BoxShadow(
                     color: Colors.grey, // Shadow color
                     offset:

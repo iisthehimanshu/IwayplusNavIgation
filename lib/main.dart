@@ -37,7 +37,12 @@ import 'IWAYPLUS/MainScreen.dart';
 import '/NAVIGATION/Navigation.dart';
 import 'dart:io' show Platform;
 
+import 'navigationLogManager.dart';
+
 final navigatorKey = GlobalKey<NavigatorState>();
+
+
+final navigationManager = NavigationLogManager();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -81,6 +86,7 @@ Future<void> localDBInitialsation() async {
   await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
   Hive.registerAdapter(LocalNotificationAPIDatabaseModelAdapter());
   await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
+  await navigationManager.initialize();
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');
   await Hive.openBox('Filters');
@@ -100,18 +106,12 @@ Future<void> mobileInitialization () async {
     DeviceOrientation.portraitDown,
   ]);
 }
-
-
-
-
 class MobileApp extends StatefulWidget {
   const MobileApp({super.key});
-
   @override
   State<MobileApp> createState() => _MobileAppState();
 }
-
-class _MobileAppState extends State<MobileApp> {
+class _MobileAppState extends State<MobileApp> with WidgetsBindingObserver{
   late String googleSignInUserName='';
   final FlutterLocalization localization = FlutterLocalization.instance;
   wsocket soc = wsocket('com.iwaypus.navigation');
@@ -119,9 +119,23 @@ class _MobileAppState extends State<MobileApp> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     configureLocalization();
     super.initState();
 
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      // App went to background
+      print("App is in the background");
+      NavigationLogManager().syncLogsToServer();
+    } else if (state == AppLifecycleState.resumed) {
+      // App came to foreground
+      print("App is in the foreground");
+    }
   }
   void configureLocalization(){
     localization.init(mapLocales: LOCALES, initLanguageCode: 'en');

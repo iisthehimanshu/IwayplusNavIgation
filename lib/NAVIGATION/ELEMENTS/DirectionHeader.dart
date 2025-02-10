@@ -117,7 +117,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     super.initState();
 
     // initTts();
-
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
 
@@ -146,11 +145,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }else if(Platform.isIOS){
       final scannedDevices = BluetoothScanIOSClass.startScan();
     }
-
-
-
-
-
     setState(() {});
     //btadapter.startScanning(Building.apibeaconmap);
     if(Platform.isAndroid) {
@@ -159,7 +153,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         // print(widget.user.pathobj.index);
 
         if (widget.user.pathobj.index > 3) {
-          listenToBin();
+          //listenToBin();
         }
       });
     }else if(Platform.isIOS){
@@ -171,13 +165,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         }
       });
     }
-
     btadapter.numberOfSample.clear();
     btadapter.rs.clear();
     Building.thresh = "";
-
     widget.getSemanticValue = "";
-
     if (widget.user.floor != widget.user.pathobj.destinationFloor &&
         widget.user.pathobj.connections[widget.user.bid]?[widget.user.floor] ==
             (widget.user.showcoordY * UserState.cols +
@@ -197,7 +188,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         null) {
       turnPoints = tools.getTurnpoints_inCell(widget.user.cellPath);
       turnPoints.add(widget.user.cellPath.last);
-
       (widget.user.cellPath.length % 2 == 0)
           ? turnPoints
               .add(widget.user.cellPath[widget.user.cellPath.length - 2])
@@ -219,7 +209,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             widget.user.theta);
         //
       }
-
       //print("angleeeeee $angle")  ;
       setState(() {
         widget.direction = tools.angleToClocks(angle, widget.context) == "None"

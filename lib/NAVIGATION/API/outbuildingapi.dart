@@ -9,6 +9,7 @@ import '../../IWAYPLUS/Elements/HelperClass.dart';
 import '../APIMODELS/outbuildingmodel.dart';
 import "package:http/http.dart" as http;
 
+import '../config.dart';
 import 'RefreshTokenAPI.dart';
 
 class OutBuildingData{
@@ -23,7 +24,7 @@ class OutBuildingData{
       'Content-Type': 'application/json',
       'x-access-token':'${accessToken}'
     };
-    var request = http.Request('POST', Uri.parse(kDebugMode? 'https://dev.iwayplus.in/secured/outdoor-wayfinding/' : 'https://maps.iwayplus.in/secured/outdoor-wayfinding/'));
+    var request = http.Request('POST', Uri.parse("${AppConfig.baseUrl}/secured/outdoor-wayfinding/"));
     request.body = json.encode({
       "campusId": buildingAllApi.outdoorID,
       "source": [longitude1, latitude1],
@@ -47,7 +48,7 @@ class OutBuildingData{
         'Content-Type': 'application/json',
         'x-access-token':'${accessToken}'
       };
-      var request = http.Request('POST', Uri.parse('https://dev.iwayplus.in/secured/google/routing'));
+      var request = http.Request('POST', Uri.parse("${AppConfig.baseUrl}/secured/google/routing"));
       request.body = json.encode({
         "source": {
           "lat": latitude1,

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
+import 'package:iwaymaps/NAVIGATION/config.dart';
 import '../APIMODELS/beaconData.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
@@ -13,7 +14,7 @@ import 'RefreshTokenAPI.dart';
 
 
 class beaconapi {
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building/beacons" : "https://maps.iwayplus.in/secured/building/beacons";
+  final String baseUrl = "${AppConfig.baseUrl}/secured/building/beacons";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");

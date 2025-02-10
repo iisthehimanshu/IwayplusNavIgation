@@ -5,6 +5,7 @@ import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/LandMarkApiModelBox.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import '../../IWAYPLUS/API/buildingAllApi.dart';
 import '../../IWAYPLUS/Elements/HelperClass.dart';
+import '../config.dart';
 import '/NAVIGATION/APIMODELS/landmark.dart';
 import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';
@@ -12,7 +13,7 @@ import 'package:hive/hive.dart';
 
 
 class landmarkApi {
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/landmarks-demo" : "https://maps.iwayplus.in/secured/landmarks";
+  final String baseUrl = "${AppConfig.baseUrl}/secured/landmarks";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
@@ -59,7 +60,7 @@ String getDecryptedData(String encryptedData){
       headers: {
         'Content-Type': 'application/json',
         'x-access-token': accessToken,
-       // 'Authorization': 'e28cdb80-c69a-11ef-aa4e-e7aa7912987a'
+        'Authorization': 'e28cdb80-c69a-11ef-aa4e-e7aa7912987a'
       },
     );
     if (response.statusCode == 200) {

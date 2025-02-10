@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
+import '../../NAVIGATION/config.dart';
 import '/IWAYPLUS/APIMODELS/QRDataAPIModel.dart';
 
 
@@ -15,7 +16,7 @@ class QRDataAPI{
   Future<List<QRDataAPIModel>?> fetchQRData(List<String> id)async{
     print("IDfetchQRData");
     print(id);
-    final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building-qrs" : "https://maps.iwayplus.in/secured/building-qrs";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/building-qrs";
     final Map<String, dynamic> data = {
       "buildingIds": id
     };

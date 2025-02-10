@@ -12,6 +12,7 @@ import 'APIMODELS/polylinedata.dart';
 import 'APIMODELS/polylinedata.dart' as poly;
 
 class Building{
+  bool buildingsLoaded = false;
   bool qrOpened = false;
   bool destinationQr=false;
   Map<String,int> floor;

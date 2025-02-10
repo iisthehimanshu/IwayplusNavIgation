@@ -20,6 +20,7 @@ class PathModel {
   });
 
   factory PathModel.fromJson(Map<dynamic, dynamic> json) {
+
     return PathModel(
       id: json['_id'],
       buildingID: json['building_ID'],

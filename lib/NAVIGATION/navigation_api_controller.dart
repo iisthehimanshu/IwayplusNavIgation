@@ -59,6 +59,19 @@ class NavigationAPIController {
                 patchData.patchData!.coordinates![i].globalRef!.lng!)));
       }
     }
+
+    var currentFloorDimensions = SingletonFunctionController
+        .building.floorDimenssion[id] ??
+        {};
+
+    currentFloorDimensions[0] = [
+      int.parse(patchData.patchData!.length!),
+      int.parse(patchData.patchData!.breadth!)
+    ];
+
+    SingletonFunctionController.building.floorDimenssion[id] =
+        currentFloorDimensions;
+
   }
 
   Future<void> landmarkAPIController(String id, bool selected) async {
@@ -119,6 +132,10 @@ class NavigationAPIController {
         null) {
       sendErrorToSlack(
           "Floor data is null for ${id}", null);
+    }
+    if(SingletonFunctionController.building.nonWalkable[landmarkData.landmarks!.first.buildingID!] == null){
+      Map<int, List<int>> imaginedNonWalkable = {0:[]};
+      SingletonFunctionController.building.nonWalkable[landmarkData.landmarks!.first.buildingID!] = imaginedNonWalkable;
     }
     createMarkers(landmarkData, 0, bid: id);
     ARPatch(id, selected, coordinates: coordinates);

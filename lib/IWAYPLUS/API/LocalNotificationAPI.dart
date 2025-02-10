@@ -5,13 +5,14 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+import 'package:iwaymaps/NAVIGATION/config.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
 
 import '/IWAYPLUS/APIMODELS/LocalNotificationAPIModel.dart';
 import '../DATABASE/BOXES/LocalNotificationAPIDatabaseModelBOX.dart';
 
 class LocalNotificationAPI{
-  final String baseUrl = kDebugMode? 'https://dev.iwayplus.in/secured/get-notifications?page=-1&appId=com.iwayplus.navigation' : 'https://maps.iwayplus.in/secured/get-notifications?page=-1&appId=com.iwayplus.navigation';
+  final String baseUrl = "${AppConfig.baseUrl}/secured/get-notifications?page=-1&appId=com.iwayplus.navigation";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");

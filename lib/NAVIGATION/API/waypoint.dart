@@ -7,13 +7,14 @@ import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/WayPointModel.dart';
 import '../../IWAYPLUS/API/buildingAllApi.dart';
 import '../../IWAYPLUS/Elements/HelperClass.dart';
 import '../VersioInfo.dart';
+import '../config.dart';
 import '../waypoint.dart';
 import 'RefreshTokenAPI.dart';
 
 
 class waypointapi {
 
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/indoor-path-network" : "https://maps.iwayplus.in/secured/indoor-path-network";
+  final String baseUrl = "${AppConfig.baseUrl}/secured/indoor-path-network";
   String token = "";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
@@ -63,7 +64,7 @@ class waypointapi {
       headers: {
         'Content-Type': 'application/json',
         'x-access-token': accessToken,
-        //'Authorization': 'e28cdb80-c69a-11ef-aa4e-e7aa7912987a'
+        'Authorization': 'e28cdb80-c69a-11ef-aa4e-e7aa7912987a'
       },
     );
     if (response.statusCode == 200) {

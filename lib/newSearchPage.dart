@@ -232,9 +232,6 @@ class _NewsearchpageState extends State<NewSearchPage> {
         //optionListForUI.addAll(fetchCategories(value));
       });
     });
-
-
-
   }
 
   List<String> fetchCategories(land value){
@@ -387,21 +384,21 @@ class _NewsearchpageState extends State<NewSearchPage> {
           ),
         );
         // Search using Fuzzy and build results
-        final result = fuse.search(normalizedSearchText);
+        var result = fuse.search(normalizedSearchText);
         result.sort((a, b) => b.score.compareTo(a.score));
+        result = result.toSet().toList();
+        List<SearchpageResults> newResults = [];
         print("result11-${result}");
-        result.forEach((fuseResult){
-          if (fuseResult.score <=0.5){
-            final value = landmarkData.landmarksMap!.values.firstWhere((v) => v.name != null && v.element!.subType != "beacon" && normalizeText(v.name!) == fuseResult.item);
-            if ((searchResults.isNotEmpty) &&
-                SingletonFunctionController().getlocalizedBeacon()!= null){
-              sortAndSeparateByUserLocation(
-                SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,
-                SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,
-                SingletonFunctionController().getlocalizedBeacon()!.floor!,
-                SingletonFunctionController().getlocalizedBeacon()!.buildingID!,value,normalizedSearchText);
-            }else{
-              searchResults.add(SearchpageResults(
+        result.forEach((fuseResult) {
+          if (fuseResult.score <=0.5) {
+            final matchingValues = landmarkData.landmarksMap!.values.where(
+                  (v) => v.name != null &&
+                  v.element!.subType != "beacon" &&
+                  normalizeText(v.name!) == fuseResult.item,
+            ).toList(); // Convert to list to iterate safely
+
+            for (final value in matchingValues) {
+              newResults.add(SearchpageResults(
                 name: value.name!,
                 location: value.buildingID == buildingAllApi.outdoorID
                     ? "${value.venueName}"
@@ -412,29 +409,12 @@ class _NewsearchpageState extends State<NewSearchPage> {
                 floor: value.floor!,
                 coordX: value.coordinateX!,
                 coordY: value.coordinateY!,
-                accessible: value.element!.subType == "restRoom" &&
-                    value.properties!.washroomType == "Handicapped"
+                accessible: value.element!.subType == "restRoom" && value.properties!.washroomType == "Handicapped"
                     ? "true"
                     : "false",
                 distance: 0,
               ));
             }
-            // newResults.add(SearchpageResults(
-            //   name: value.name!,
-            //   location: value.buildingID == buildingAllApi.outdoorID
-            //       ? "${value.venueName}"
-            //       : "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
-            //   onClicked: onVenueClicked,
-            //   ID: value.properties!.polyId!,
-            //   bid: value.buildingID!,
-            //   floor: value.floor!,
-            //   coordX: value.coordinateX!,
-            //   coordY: value.coordinateY!,
-            //   accessible: value.element!.subType == "restRoom" && value.properties!.washroomType == "Handicapped"
-            //       ? "true"
-            //       : "false",
-            //   distance: 0,
-            // ));
           }
         });
         // List<SearchpageResults> reversed = newResults.reversed.toList();
@@ -552,6 +532,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
 
 
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -784,10 +784,33 @@ class UserState {
     return ind;
   }
 
+  int? changeBuildingIfNear(){
+    int distance = 5;
+    for(int i = 1; i<=distance; i++){
+      if(cellPath[i].bid != cellPath[i-1].bid && cellPath[i].bid == buildingAllApi.outdoorID){
+        pathobj.index = i;
+        return i;
+      }
+    }
+    return null;
+  }
+
   Future<void> moveToStartofPath() async {
-    int i = await moveToNearestPoint();
-    await moveToNearestTurn(i);
+    int i = 0;
+    if(pathobj.sourceBid != pathobj.destinationBid){
+      int? index = changeBuildingIfNear();
+      if(index != null){
+        i = index;
+      }else{
+        i = await moveToNearestPoint();
+        await moveToNearestTurn(i);
+      }
+    }else{
+      i = await moveToNearestPoint();
+      await moveToNearestTurn(i);
+    }
     floor = pathobj.sourceFloor;
+    bid = cellPath[pathobj.index].bid??bid;
     showcoordX = cellPath[pathobj.index].x;
     showcoordY = cellPath[pathobj.index].y;
     coordX = showcoordX;

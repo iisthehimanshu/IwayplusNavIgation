@@ -29,7 +29,7 @@ class _MainScreenState extends State<MainScreen> {
     MapScreen(),
     QRViewExample(frmMainPage: true,),
     FavouriteScreen(),
-    RippleButton()
+    ProfilePage()
   ];
 
   @override

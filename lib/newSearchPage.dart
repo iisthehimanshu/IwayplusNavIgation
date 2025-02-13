@@ -47,7 +47,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
   String wordsSpoken = "";
   bool micselected = false;
   bool promptLoader = false;
-  bool isUpdated=true;
+  bool isUpdated=false;
 
 
   Set<String> optionListForUI ={};
@@ -76,9 +76,6 @@ class _NewsearchpageState extends State<NewSearchPage> {
 
 
   Future<void> loadLandmarkData() async {
-    setState(() {
-      isUpdated=true;
-    });
    try {
      print("entered here");
      await Future.forEach(
@@ -92,7 +89,6 @@ class _NewsearchpageState extends State<NewSearchPage> {
                value.element!.subType == "lift" ||
                value.element!.subType == "ATM" ||
                value.element!.subType == "Drinking Water")) {
-         print("entered here");
          if (value.element!.subType == "restRoom") {
            optionListForUI.add("Washroom");
          } else if (value.element!.subType == "Cafeteria") {
@@ -110,6 +106,9 @@ class _NewsearchpageState extends State<NewSearchPage> {
            optionListForUI.add("ATM");
          }
        }
+     });
+     setState(() {
+       isUpdated=true;
      });
    }catch(e){
      print("error in updating liist ${e}");
@@ -329,7 +328,6 @@ class _NewsearchpageState extends State<NewSearchPage> {
             }
           }
         });
-        print("entered here");
         optionListItemBuildingName.forEach((element) {
           searcCategoryhResults.add(
             SearchpageCategoryResults(
@@ -558,14 +556,13 @@ class _NewsearchpageState extends State<NewSearchPage> {
             ),
 
 
-            searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
+            searchHintString.toLowerCase().contains("source")?const Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
             Visibility(
-              visible: isTyping,
+              visible: isTyping && optionListForUI.isNotEmpty,
               child: Semantics(
                 label: "Facilities Filter",
                 header: true,
-                child:(isUpdated==false)?
-                Container(
+                child: Container(
                   margin: EdgeInsets.only(left: 7, top: 4),
                   width: screenWidth,
                   child: ChipsChoice<int>.single(
@@ -622,7 +619,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
                     },
                     direction: Axis.horizontal,
                   ),
-                ):Container(),
+                ),
               ),
 
             ),

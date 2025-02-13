@@ -160,20 +160,69 @@ class ARTools{
     return firstTurnCoords;
   }
 
+
   static List<int> getCoordN(double theta){
     if(theta >= 0 && theta < 90){
-      return [1,1];
-    }else if(theta >= 90 && theta < 180){
-      return [-1,1];
-    }else if(theta >=180 && theta < 270){
-      return [-1,-1];
-    }else if(theta>=270 && theta<360){
+      print("0 90");
       return [1,-1];
+    }else if(theta >= 90 && theta < 180){
+      print("90 180");
+      return [1,1];
+    }else if(theta >=180 && theta < 270){
+      print("180 270");
+      return [-1,1];
+    }else if(theta>=270 && theta<360){
+      print("270 360");
+      return [-1,-1];
     }else{
       print("getCoordNinelse");
       return [0,0];
     }
   }
+  static late double Quadrant1;
+  static late double Quadrant2;
+  static late  double Quadrant3;
+  static late  double Quadrant4;
+  static void makeQuad(double theta){
+    print(theta);
+
+    Quadrant1 = theta;
+
+    if(Quadrant1+90>360){
+      Quadrant2 = (Quadrant1+90)-360;
+    }else{
+      Quadrant2 = Quadrant1+90;
+    }
+    if(Quadrant2+90>360){
+      Quadrant3 = (Quadrant2+90)-360;
+    }else{
+      Quadrant3 = Quadrant2+90;
+    }
+    if(Quadrant3+90>360){
+      Quadrant4 = (Quadrant3+90)-360;
+    }else{
+      Quadrant4 = Quadrant3+90;
+    }
+    print("makeQuad");
+    print(Quadrant1);
+    print(Quadrant2);
+    print(Quadrant3);
+    print(Quadrant4);
+  }
+
+  static List<int> getCCoord(double theta) {
+    if (theta >= Quadrant1 && theta < Quadrant2) {
+      return [-1, -1];
+    } else if (theta >= Quadrant2 && theta < Quadrant3) {
+      return [1, -1];
+    } else if (theta >= Quadrant3 && theta < Quadrant4) {
+      return [1, 1];
+    } else {
+      // Covers angles that wrap around 360 degrees
+      return [-1, 1];
+    }
+  }
+
 
   static double calculateOpposite(double angleInDegrees, double hypotenuse) {
     double angleInRadians = angleInDegrees * (pi / 180); // Convert degrees to radians
@@ -183,6 +232,22 @@ class ARTools{
   static double calculateAdjacent(double angleInDegrees, double hypotenuse) {
     double angleInRadians = angleInDegrees * (pi / 180); // Convert degrees to radians
     return hypotenuse * cos(angleInDegrees);
+  }
+
+
+  static Vector3 getPosition(String direction, double distance) {
+    switch (direction) {
+      case "Turn Left, and Go Straight":
+        return Vector3(-distance, 0, 0);  // Move left (-X)
+      case "Turn Right, and Go Straight":
+        return Vector3(distance, 0, 0);   // Move right (+X)
+      case "front":
+        return Vector3(0, 0, -distance);  // Move forward (-Z)
+      case "back":
+        return Vector3(0, 0, distance);  // Move backward (+Z)
+      default:
+        throw ArgumentError("Invalid direction: Use 'left', 'right', 'front', or 'back'.");
+    }
   }
 
 

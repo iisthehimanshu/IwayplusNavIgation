@@ -67,9 +67,9 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    print("widget.IsMultiFloor");
-    print(widget.IsMultiFloor);
-    print(widget.IsMultiBuilding);
+    // print("widget.IsMultiFloor");
+    // print(widget.IsMultiFloor);
+    // print(widget.IsMultiBuilding);
 
 
     return Semantics(

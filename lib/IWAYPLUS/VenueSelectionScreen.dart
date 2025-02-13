@@ -419,12 +419,12 @@ if(userLoc!=null){
               color: Color(0xff18181b),
               onPressed: () {
                 PushNotifications.showSimpleNotification(body: "",payload: "",title: "Title");
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DisplayARObjects(),
-                  ),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => DisplayARObjects(),
+                //   ),
+                // );
               },
             ),
             Container(

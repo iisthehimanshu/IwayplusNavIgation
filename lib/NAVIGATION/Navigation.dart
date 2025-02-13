@@ -11938,6 +11938,8 @@ bool _isPlaying=false;
   }
 
   void onLandmarkVenueClicked(String ID, {bool DirectlyStartNavigation = false}) async {
+
+    print("arlandmarkID: $ID");
     final snapshot = await SingletonFunctionController.building.landmarkdata;
 
     _isBuildingPannelOpen = false;
@@ -13403,7 +13405,7 @@ bool _isPlaying=false;
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ARObjectPlacementScreen(user: user,PathState: PathState,),
+                          builder: (context) => DisplayARObjects(user: user,PathState: PathState,),
                       ));
                     },
 

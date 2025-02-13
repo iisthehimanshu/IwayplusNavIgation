@@ -10,6 +10,7 @@ import 'package:ar_flutter_plugin_flutterflow/models/ar_anchor.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
 import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:iwaymaps/IWAYPLUS/Elements/HelperClass.dart';
 import 'package:iwaymaps/NAVIGATION/ARNavigation/ARTools.dart';
@@ -89,7 +90,11 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
       print("compassHeading<0?compassHeading+360:compassHeading");
       userDirectionWRTN = compassHeading<0?compassHeading+360:compassHeading;
 
+      ARTools.makeQuad(userDirectionWRTN);
+
       print(userDirectionWRTN);
+
+
       Future.microtask(() => compassSubscription?.cancel());
       doInitialAsyncTasks();
     },onError: (error) {
@@ -98,12 +103,41 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
   }
 
   late Vector4 objectRotation;
+
+  List<double> directionLenList = [];
+  List<int> directionLenList2 = [];
+  List<String> directionDirectionList = [];
   void doInitialAsyncTasks()async{
     turnPoints = await tools.getCellTurnpoints(widget.user.cellPath);
     List<double> pointA = [];
     List<double> pointB = [];
+    List<int> forPathX = [];
+    List<int> forPathY = [];
+
     pointA.add(widget.user.lat);
     pointA.add(widget.user.lng);
+    forPathX.add(widget.user.coordX);
+    forPathX.add(widget.user.coordX);
+    print("doInitialAsyncTasks");
+    directionLenList2.add((tools.calculateDistance([widget.user.coordX,widget.user.coordY],[turnPoints[0].x,turnPoints[0].y])/4).toInt());
+    directionDirectionList.add("front");
+
+    for(int i=0 ; i<turnPoints.length-1 ; i++){
+      print("turn $i ${tools.calculateDistance([turnPoints[i].x,turnPoints[i].y], [turnPoints[i+1].x,turnPoints[i+1].y])}");
+      directionLenList2.add((tools.calculateDistance([turnPoints[i].x,turnPoints[i].y], [turnPoints[i+1].x,turnPoints[i+1].y])/4).toInt());
+      widget.PathState.directions.forEach((value){
+        if(value.x==turnPoints[i].x && value.y==turnPoints[i].y){
+          print(value.turnDirection);
+          directionDirectionList.add(value.turnDirection!);
+          objectRotation = ARTools.getObjectRotation(value.turnDirection!)!;
+        }
+      });
+    }
+
+    print("directionLenList2 ${directionLenList2}");
+    print("directionLenList2 ${directionDirectionList}");
+
+
 
 
 
@@ -111,9 +145,16 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
     print(turnPoints);
     turnPoints.forEach((turn) async {
       pointB.clear();
+      forPathY.clear();
       pointB.add(turn.lat);
       pointB.add(turn.lng);
+      forPathY.add(turn.x);
+      forPathY.add(turn.y);
       print("lists ${pointA} ${pointB}");
+      print("lists ${forPathX} ${forPathY}");
+      double length = tools.calculateDistance(forPathX, forPathY);
+      forPathX = forPathY;
+      print("currentLength ${length}");
       double turnAngleWRTN = tools.calculateBearing(pointA, pointB);
       print("turnAngleWRTN ${turnAngleWRTN} ${userDirectionWRTN}");
       print("actual andle ${turnAngleWRTN - userDirectionWRTN}");
@@ -149,14 +190,14 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
         }
       });
 
-      ARNode newNode = ARNode(
-        type: NodeType.webGLB,
-        uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
-        scale: Vector3(0.2, 0.2, 0.2),
-        position: Vector3(placeInQuad[0]*adjacentDistance.abs().ceil().toDouble(),-1,placeInQuad[1]*opositeDistance.abs().ceil().toDouble()) , // Front
-        rotation: objectRotation
-      );
-      await arObjectManager.addNode(newNode);
+      // ARNode newNode = ARNode(
+      //     type: NodeType.webGLB,
+      //     uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+      //     scale: Vector3(0.2, 0.2, 0.2),
+      //     position: Vector3(placeInQuad[0]*adjacentDistance.abs().ceil().toDouble(),-1,placeInQuad[1]*opositeDistance.abs().ceil().toDouble()) , // Front
+      //     rotation: objectRotation
+      // );
+      // await arObjectManager.addNode(newNode);
 
 
     });
@@ -168,6 +209,54 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
     // }
     //await calculateUserPathAngle();
     //startAlignmentCheck();
+    pathForamation();
+  }
+
+
+  late Vector3 referencePosition;
+
+  Future<void> pathForamation() async {
+    print("pathForamation $directionLenList2");
+    for(int i=0; i<directionLenList2.length ; i++){
+      if(i==0){
+        print("inffff");
+        referencePosition = Vector3(0, 0, 0);
+        await add3DObject(arObjectManager, referencePosition); // Reference point (0,0,-5)
+      }else{
+        print("directionDirectionList ${directionDirectionList[i]}");
+        Vector3 currentFinalPosition = getPosition2(referencePosition ,directionDirectionList[i], directionLenList2[i].toDouble());
+        await add3DObject(arObjectManager, currentFinalPosition);      // Left (-3,0,-5)
+        print("referencePosition initial $referencePosition");
+        referencePosition = currentFinalPosition;
+        print("referencePosition new $referencePosition");
+      }
+    }
+  }
+
+  Vector3 getPosition2(Vector3 referencePosition, String direction, double distance) {
+    switch (direction) {
+      case "Turn Left, and Go Straight":
+        return referencePosition + Vector3(-distance, 0, 0); // Move left (-X)
+      case "Turn Right, and Go Straight":
+        return referencePosition + Vector3(distance, 0, 0);  // Move right (+X)
+      case "front":
+        return referencePosition + Vector3(0, 0, -distance); // Move forward (-Z)
+      case "back":
+        return referencePosition + Vector3(0, 0, distance);  // Move backward (+Z)
+      default:
+        throw ArgumentError("Invalid direction: Use 'left', 'right', 'front', or 'back'.");
+    }
+  }
+
+  Future<void> add3DObject(ARObjectManager arObjectManager, Vector3 position) async {
+    var newNode = ARNode(
+      type: NodeType.webGLB,
+      uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+      position: position,
+      scale: Vector3(0.2, 0.2, 0.2),
+      rotation: Vector4(0, 1, 0, 0), // No rotation
+    );
+    await arObjectManager.addNode(newNode);
   }
 
   Future<void> startAlignmentCheck() async {

@@ -52,6 +52,7 @@ import '/IWAYPLUS/API/RatingsaveAPI.dart';
 import 'API/DataVersionApi.dart';
 import 'API/GlobalAnnotationapi.dart';
 import 'API/PolyLineApi.dart';
+import 'API/fingerPrintGet.dart';
 import 'API/outBuilding.dart';
 import 'API/waypoint.dart';
 import 'APIMODELS/DataVersion.dart';
@@ -405,7 +406,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           _clusterTextColor,
           70,
           _googleMapController);
-
       updatedMarkers.forEach((currentMarker) {
         if (currentMarker.markerId.toString().contains(closestBuildingId)) {
           currentMarker.visible = true;
@@ -447,6 +447,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   void initState() {
     super.initState();
     initializeMarkers();
+    getFingerPrintData();
     //add a timer of duration 5sec
     //PolylineTestClass.polylineSet.clear();
     // StartPDR();
@@ -564,6 +565,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     } catch (E) {}
     // fetchlist();
     // filterItems();
+  }
+
+
+  Future<void> getFingerPrintData()async{
+    var fingerPrintData = await fingerPrintingGetApi().Finger_Printing_GET_API(buildingAllApi.selectedBuildingID);
+    print("fingerprint::${fingerPrintData}");
   }
 
   // Start the animation loop
@@ -1564,6 +1571,65 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         ),
       );
     }
+  }
+
+  Future<void> collectSensorDataEverySecond() async {
+    if(apibeaconmap != null){
+      bluetoothScanAndroidClass.listenToScanUpdates(apibeaconmap!);
+    }else{
+      HelperClass.showToast("Getting beacon data!!");
+    }
+
+    _startListeningToScannedResults();
+
+    data = Data(position: "${userPosition?.coordx},${userPosition?.coordy},$floor");
+
+    gps.startGpsUpdates();
+    gps.positionStream.listen((position){
+      gpsPosition = position;
+    });
+
+    accelerometerEvents.listen((AccelerometerEvent event) {
+      _x = event.x;
+      _y = event.y;
+      _z = event.z;
+    });
+
+
+    FlutterCompass.events!.listen((event){
+      theta = event.heading!;
+    });
+
+    _Lightsubscription = _light.lightSensorStream.listen((value){
+      _lightValue = value;
+    });
+
+    timer = Timer.periodic(Duration(seconds: 1), (timer) async {
+      print("apibeaconmap:: ${apibeaconmap}");
+      List<Beacon> beacons = await fetchBeaconData(apibeaconmap);
+      print(beacons);
+      var gpsData = await fetchGpsData();
+      var wifi = await fetchWifiData();
+      var magnetometerData = await fetchMagnetometerData();
+      var accelerometerData = await fetchAccelerometerData();
+      var lux = await fetchLux();
+
+      var fingerprint = SensorFingerprint(
+          beacons: beacons,
+          wifi: wifi,
+          gpsData: gpsData,
+          magnetometerData: magnetometerData,
+          accelerometerData: accelerometerData,
+          lux: lux,
+          timeStamp: dateFormat.format(DateTime.now().toUtc())
+      );
+
+      data?.sensorFingerprint ??= [];
+      data?.sensorFingerprint?.add(fingerprint);
+
+      print("data.toJson() ${data?.toJson()}");
+
+    });
   }
 
   Future<void> updateNearbyLandmarkMarkers(MarkerId id) async {

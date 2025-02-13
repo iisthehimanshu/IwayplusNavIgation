@@ -783,11 +783,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         }
       }
     }
-
     // If no number is greater than the target, return null
     if (path.length >= widget.user.pathobj.index) {
       return path[widget.user.pathobj.index];
-    } else {
+    }else{
       return Cell(
           0,
           0,
@@ -892,16 +891,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       });
       List<Cell> remainingPath =
           widget.user.cellPath.sublist(widget.user.pathobj.index + 1);
-      //
-      //
       Cell nextTurn = findNextTurn(turnPoints, remainingPath);
-      //
-      //
-
       nextTurnIndex = widget.user.pathobj.directions
           .indexWhere((element) => element.node == nextTurn.node);
-      //
-
       if (turnPoints
           .contains(widget.user.cellPath[widget.user.pathobj.index])) {
         if (DirectionIndex + 1 < widget.user.pathobj.directions.length) {
@@ -944,24 +936,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           widget.user.cellPath[widget.user.pathobj.index + 1],
           widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!,
           widget.user.theta);
-
       widget.direction =
-          (tools.angleToClocks(angle, widget.context) == "None" ||
-                  tools
-                      .angleToClocks(angle, widget.context)
-                      .toLowerCase()
-                      .contains("slight"))
+          (tools.angleToClocks(angle, widget.context) == "None")
               ? oldWidget.direction
               : tools.angleToClocks(angle, widget.context);
-      String userdirection =
-          (tools.angleToClocks(userangle, widget.context) == "None" ||
-                  tools
-                      .angleToClocks(angle, widget.context)
-                      .toLowerCase()
-                      .contains("slight"))
+      String userdirection = (tools.angleToClocks(userangle, widget.context) == "None")
               ? oldWidget.direction
               : tools.angleToClocks(userangle, widget.context);
-      if (userdirection == "Straight") {
+      if (userdirection == "Straight"){
         widget.direction = "Straight";
       }
       if (widget.user.pathobj.index < 3) {

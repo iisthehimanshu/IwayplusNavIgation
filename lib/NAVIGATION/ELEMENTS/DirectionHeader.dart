@@ -283,8 +283,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   String? highestKey;
   double highestAverage = double.negativeInfinity;
 
-
-
   double highestweight = Platform.isIOS?2.8 : 3.25;
 
   String? parseString(String input) {

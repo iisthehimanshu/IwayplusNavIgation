@@ -11815,6 +11815,9 @@ bool _isPlaying=false;
   }
   String finalDestinationDirection="";
   void closeNavigation() {
+    if(_isreroutePannelOpen || !user.isnavigating){
+      return;
+    }
     String destname = PathState.destinationName;
     //String destPolyyy=PathState.destinationPolyID;
     destiName = destname;

@@ -97,6 +97,7 @@ dependencies:
   new_version_plus: ^0.0.12
   provider: ^6.1.2
   image:
+  ml_linalg: ^13.12.6
 
 
 

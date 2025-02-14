@@ -21,6 +21,7 @@ ${BUILT_PRODUCTS_DIR}/PromisesObjC/FBLPromises.framework
 ${BUILT_PRODUCTS_DIR}/SwiftJWT/SwiftJWT.framework
 ${BUILT_PRODUCTS_DIR}/Toast/Toast.framework
 ${BUILT_PRODUCTS_DIR}/Try/Try.framework
+${BUILT_PRODUCTS_DIR}/arkit_plugin/arkit_plugin.framework
 ${BUILT_PRODUCTS_DIR}/bluetooth_enable_fork/bluetooth_enable_fork.framework
 ${BUILT_PRODUCTS_DIR}/connectivity_plus/connectivity_plus.framework
 ${BUILT_PRODUCTS_DIR}/device_info_plus/device_info_plus.framework

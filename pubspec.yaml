@@ -98,6 +98,8 @@ dependencies:
   image:
   ar_flutter_plugin_flutterflow:
   vector_math: ^2.1.0
+  arkit_plugin: ^1.1.2
+  dio:
 
 
 

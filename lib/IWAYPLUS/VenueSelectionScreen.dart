@@ -16,8 +16,11 @@ import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
 import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
 import 'package:iwaymaps/NAVIGATION/API/RefreshTokenAPI.dart';
+import 'package:iwaymaps/NAVIGATION/ARIOS/MeasurePage.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/WayPointModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/ARNavigation/DebugOptions.dart';
+import '../NAVIGATION/ARIOS/ARKitViewScreen.dart';
+import '../NAVIGATION/ARIOS/LoadGltfOrGlbFilePage.dart';
 import '../NAVIGATION/ARNavigation/ARCoreScreen.dart';
 import '../NAVIGATION/ARNavigation/CombinedScreen.dart';
 import '../NAVIGATION/ARNavigation/CustomSizeRectangle.dart';
@@ -418,13 +421,13 @@ if(userLoc!=null){
               icon: Icon(Icons.notifications_none_outlined),
               color: Color(0xff18181b),
               onPressed: () {
-                PushNotifications.showSimpleNotification(body: "",payload: "",title: "Title");
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => DisplayARObjects(),
-                //   ),
-                // );
+                // PushNotifications.showSimpleNotification(body: "",payload: "",title: "Title");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MeasurePage(),
+                  ),
+                );
               },
             ),
             Container(

@@ -24,8 +24,7 @@ class buildingAllApi {
   static String selectedID="";
   static String selectedBuildingID="";
   static String selectedVenue="";
-  static Map<String,g.LatLng> allBuildingID = {
-  };
+  static Map<String,g.LatLng> allBuildingID = {};
   // static String selectedID="65d8833adb333f89456e6519";
   // static String selectedBuildingID="65d8833adb333f89456e6519";
   // static String selectedVenue="65d8833adb333f89456e6519";
@@ -36,48 +35,6 @@ class buildingAllApi {
   static String outdoorID = "";
 
 
-  void checkForUpdate() async {
-    final BuildingAllBox = BuildingAllAPIModelBOX.getData();
-    accessToken = signInBox.get("accessToken");
-
-    final response = await http.post(
-      Uri.parse(baseUrl),
-      headers: {
-        'Content-Type': 'application/json',
-        'x-access-token': accessToken
-      },
-    );
-    if (response.statusCode == 200) {
-      List<dynamic> responseBody = json.decode(response.body);
-      final buildingData = BuildingAllAPIModel(responseBody: responseBody);
-      String APITime = responseBody[0]['updatedAt']!;
-
-      if(BuildingAllBox.length==0){
-        print("BUILDINGALL UPDATE BOX EMPTY AND SAVED IN THE DATABASE");
-        BuildingAllBox.add(buildingData);
-        buildingData.save();
-      }else{
-        List<dynamic> databaseresponseBody = BuildingAllBox.getAt(0)!.responseBody;
-        String LastUpdatedTime = databaseresponseBody[0]['updatedAt']!;
-        if(APITime != LastUpdatedTime){
-          print("BUILDINGALL UPDATE API DATA FROM DATABASE AND UPDATED");
-          print("Current Time: ${APITime} Last updated Time: ${LastUpdatedTime}");
-          BuildingAllBox.add(buildingData);
-          buildingData.save();
-        }
-      }
-    }else if(response.statusCode == 403) {
-      print('DATA VERSION API in error 403');
-      String newAccessToken = await RefreshTokenAPI.refresh();
-      print('Refresh done');
-      accessToken = newAccessToken;
-      return checkForUpdate();
-    }else{
-      print(response.statusCode);
-      print(response.body);
-      throw Exception('Failed to load data');
-    }
-  }
 
   Future<List<buildingAll>> fetchBuildingAllData() async {
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();

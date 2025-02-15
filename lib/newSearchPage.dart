@@ -333,7 +333,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
           }
         });
         print("entered here");
-        optionListItemBuildingName.forEach((element) {
+        optionListItemBuildingName.forEach((element){
           searcCategoryhResults.add(
             SearchpageCategoryResults(
               name: searchText,

@@ -79,7 +79,7 @@ class ARTools{
       }else{
         return [-1,-1];
       }
-    }else if(initial[0]==0 && initial[1]==-1){  //on origin -z
+    }else if(initial[0]==0 && initial[1]==-1){  //on origin x=0 , z=-something
       if(direction=="Turn Left, and Go Straight"){
         return [-1,-1];
       }else if(direction=="Turn Right, and Go Straight"){
@@ -103,14 +103,24 @@ class ARTools{
 
     double x, y, z;
 
-    if (!singular) {
-      x = atan2(rotationMatrix.entry(2, 1), rotationMatrix.entry(2, 2)); // Roll
-      y = atan2(-rotationMatrix.entry(2, 0), sy); // Pitch
-      z = atan2(rotationMatrix.entry(1, 0), rotationMatrix.entry(0, 0)); // Yaw (Heading)
-    } else {
-      x = atan2(-rotationMatrix.entry(1, 2), rotationMatrix.entry(1, 1));
+    // if (!singular) {
+    //   x = atan2(rotationMatrix.entry(2, 1), rotationMatrix.entry(2, 2)); // Roll
+    //   y = atan2(-rotationMatrix.entry(2, 0), sy); // Pitch
+    //   z = atan2(rotationMatrix.entry(1, 0), rotationMatrix.entry(0, 0)); // Yaw (Heading)
+    // }else {
+    //   x = atan2(-rotationMatrix.entry(1, 2), rotationMatrix.entry(1, 1));
+    //   y = atan2(-rotationMatrix.entry(2, 0), sy);
+    //   z = 0; // Yaw is 0 in singular case
+    // }
+
+    if(singular){
+      x = atan2(-rotationMatrix.entry(1,1),rotationMatrix.entry(1, 1));
       y = atan2(-rotationMatrix.entry(2, 0), sy);
-      z = 0; // Yaw is 0 in singular case
+      z = 0;
+    }else{
+      x = atan2(rotationMatrix.entry(2, 1), rotationMatrix.entry(2, 2));
+      y = atan2(-rotationMatrix.entry(2, 0), sy);
+      z = atan2(rotationMatrix.entry(1, 0), rotationMatrix.entry(0, 0));
     }
 
     return Vector3(radians(x), radians(y),radians(z));
@@ -179,50 +189,29 @@ class ARTools{
       return [0,0];
     }
   }
-  static late double Quadrant1;
-  static late double Quadrant2;
-  static late  double Quadrant3;
-  static late  double Quadrant4;
-  static void makeQuad(double theta){
-    print(theta);
-
-    Quadrant1 = theta;
-
-    if(Quadrant1+90>360){
-      Quadrant2 = (Quadrant1+90)-360;
+  static List<int> getCoordN2(double theta){
+    if(theta >= 0 && theta < 90){
+      print("0 90");
+      return [-1,1];
+    }else if(theta >= 90 && theta < 180){
+      print("90 180");
+      return [-1,-1];
+    }else if(theta >=180 && theta < 270){
+      print("180 270");
+      return [1,-1];
+    }else if(theta>=270 && theta<360){
+      print("270 360");
+      return [1,1];
     }else{
-      Quadrant2 = Quadrant1+90;
-    }
-    if(Quadrant2+90>360){
-      Quadrant3 = (Quadrant2+90)-360;
-    }else{
-      Quadrant3 = Quadrant2+90;
-    }
-    if(Quadrant3+90>360){
-      Quadrant4 = (Quadrant3+90)-360;
-    }else{
-      Quadrant4 = Quadrant3+90;
-    }
-    print("makeQuad");
-    print(Quadrant1);
-    print(Quadrant2);
-    print(Quadrant3);
-    print(Quadrant4);
-  }
-
-  static List<int> getCCoord(double theta) {
-    if (theta >= Quadrant1 && theta < Quadrant2) {
-      return [-1, -1];
-    } else if (theta >= Quadrant2 && theta < Quadrant3) {
-      return [1, -1];
-    } else if (theta >= Quadrant3 && theta < Quadrant4) {
-      return [1, 1];
-    } else {
-      // Covers angles that wrap around 360 degrees
-      return [-1, 1];
+      print("ERROR getCoordNinelse");
+      return [0,0];
     }
   }
 
+  Vector3 _getForwardVector(Quaternion rotation) {
+    double x = rotation.x, y = rotation.y, z = rotation.z, w = rotation.w;
+    return Vector3(1.5 * (x * z + w * y), 1, 1.5 * (w * w + x * x) - 1,).normalized();
+  }
 
   static double calculateOpposite(double angleInDegrees, double hypotenuse) {
     double angleInRadians = angleInDegrees * (pi / 180); // Convert degrees to radians
@@ -235,20 +224,7 @@ class ARTools{
   }
 
 
-  static Vector3 getPosition(String direction, double distance) {
-    switch (direction) {
-      case "Turn Left, and Go Straight":
-        return Vector3(-distance, 0, 0);  // Move left (-X)
-      case "Turn Right, and Go Straight":
-        return Vector3(distance, 0, 0);   // Move right (+X)
-      case "front":
-        return Vector3(0, 0, -distance);  // Move forward (-Z)
-      case "back":
-        return Vector3(0, 0, distance);  // Move backward (+Z)
-      default:
-        throw ArgumentError("Invalid direction: Use 'left', 'right', 'front', or 'back'.");
-    }
-  }
+
 
 
 }

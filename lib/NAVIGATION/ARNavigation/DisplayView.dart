@@ -115,7 +115,7 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
       }
     });
     check();
-
+    //
     // if((widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "c7b082-725b-a34-085d-062884b523ac") || (widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "7c8e88a-78ca-3cb1-c4aa-75efde7eae0")){
     //   addDirectionalObjects();//iwp to pantry
     // }else if((widget.PathState.sourcePolyID == "c7b082-725b-a34-085d-062884b523ac" && widget.PathState.destinationPolyID == "c2ba564-24f-a8e2-c7-4cfc00cdff") || (widget.PathState.sourcePolyID == "c7b082-725b-a34-085d-062884b523ac" && widget.PathState.destinationPolyID == "8b7c1-46a0-2f3-ad2a-030024c0016b") || (widget.PathState.sourcePolyID == "c7b082-725b-a34-085d-062884b523ac" && widget.PathState.destinationPolyID == "846c0d-b27b-c037-ebb8-b55131efbe86")){
@@ -134,7 +134,12 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
     //   addDirectionalObjects6();
     // }else if((widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "224d500-4823-f2ef-42aa-7f67804c6000") || (widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "bb4a73-bdaa-f3ae-1dca-7c1aef761363") || (widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "458af70-dbd-ab2-f064-38f30a762c3")){
     //   addDirectionalObjects7();
+    // }else if((widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "c2ba564-24f-a8e2-c7-4cfc00cdff") || (widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "8b7c1-46a0-2f3-ad2a-030024c0016b") || (widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "846c0d-b27b-c037-ebb8-b55131efbe86")){
+    //   addDirectionalObject8();
+    // }else if((widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "724f73b-00c-f850-eb-bb3433fde60")){
+    //   addDirectionalObject9();
     // }
+    //
 
 
 
@@ -183,6 +188,120 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
     });
   }
   double fixedCoordinatedY = -1;
+  Future<void> addDirectionalObject9() async {
+    var newNode = ARNode(
+      type: NodeType.webGLB,
+      uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+      position: currentPosition,
+      scale: vv.Vector3(0.5, 0.5, 0.5),
+      rotation: ARTools.getObjectRotation("front"),
+
+    );
+    await arObjectManager.addNode(newNode);
+
+    var newNode1 = ARNode(
+        type: NodeType.webGLB,
+        uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+        //                x,   y,                 z
+        position: vv.Vector3(0, fixedCoordinatedY, -5),
+        scale: vv.Vector3(0.5, 0.5, 0.5),
+        rotation: ARTools.getObjectRotation("left") // left
+    );
+    await arObjectManager.addNode(newNode1);
+
+    var newNode2 = ARNode(
+        type: NodeType.webGLB,
+        uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+        position: vv.Vector3(-7, fixedCoordinatedY, -5),
+        scale: vv.Vector3(0.5, 0.5, 0.5),
+        rotation: vv.Vector4(0.0, 1.0, 0.0, -1.5708) // left
+
+    );
+    await arObjectManager.addNode(newNode2);
+
+    var newNode6 = ARNode(
+        type: NodeType.webGLB,
+        uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+        position: vv.Vector3(-7, fixedCoordinatedY, 6),
+        scale: vv.Vector3(0.5, 0.5, 0.5),
+        rotation: ARTools.getObjectRotation("front") // left
+    );
+    await arObjectManager.addNode(newNode6);
+
+    var newNode3 = ARNode(
+        type: NodeType.webGLB,
+        uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+        position: vv.Vector3(-3, fixedCoordinatedY, 6),
+        scale: vv.Vector3(0.5, 0.5, 0.5),
+        rotation: ARTools.getObjectRotation("right") // left
+    );
+    await arObjectManager.addNode(newNode3);
+  }
+
+
+  Future<void> addDirectionalObject8() async {
+    var newNode = ARNode(
+      type: NodeType.webGLB,
+      uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+      position: currentPosition,
+      scale: vv.Vector3(0.5, 0.5, 0.5),
+      rotation: ARTools.getObjectRotation("front"),
+
+    );
+    await arObjectManager.addNode(newNode);
+
+    var newNode1 = ARNode(
+        type: NodeType.webGLB,
+        uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+        //                x,   y,                 z
+        position: vv.Vector3(0, fixedCoordinatedY, -5),
+        scale: vv.Vector3(0.5, 0.5, 0.5),
+        rotation: ARTools.getObjectRotation("left") // left
+    );
+    await arObjectManager.addNode(newNode1);
+
+    var newNode2 = ARNode(
+        type: NodeType.webGLB,
+        uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+        position: vv.Vector3(-7, fixedCoordinatedY, -5),
+        scale: vv.Vector3(0.5, 0.5, 0.5),
+        rotation: vv.Vector4(0.0, 1.0, 0.0, -1.5708) // left
+
+    );
+    await arObjectManager.addNode(newNode2);
+    var newNode6 = ARNode(
+        type: NodeType.webGLB,
+        uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+        position: vv.Vector3(-7, fixedCoordinatedY, -1),
+        scale: vv.Vector3(0.5, 0.5, 0.5),
+        rotation: ARTools.getObjectRotation("front") // left
+    );
+    await arObjectManager.addNode(newNode6);
+    var newNode3 = ARNode(
+        type: NodeType.webGLB,
+        uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+        position: vv.Vector3(-25, fixedCoordinatedY, -1),
+        scale: vv.Vector3(0.5, 0.5, 0.5),
+        rotation: ARTools.getObjectRotation("right") // left
+    );
+    await arObjectManager.addNode(newNode3);
+    var newNode4 = ARNode(
+        type: NodeType.webGLB,
+        uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+        position: vv.Vector3(-25, fixedCoordinatedY, -5),
+        scale: vv.Vector3(0.5, 0.5, 0.5),
+        rotation: ARTools.getObjectRotation("left") // left
+    );
+    await arObjectManager.addNode(newNode4);
+    var newNode5 = ARNode(
+        type: NodeType.webGLB,
+        uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+        position: vv.Vector3(-30, fixedCoordinatedY, -5),
+        scale: vv.Vector3(0.5, 0.5, 0.5),
+        rotation: ARTools.getObjectRotation("right") // left
+    );
+    await arObjectManager.addNode(newNode5);
+  }
 
   void addDirectionalObjects3() async {
     var newNode = ARNode(
@@ -411,12 +530,23 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
 
   }
   List<int> testingDirection(double angle) {
+    //angle 45
     if(angle==180){
       return [0,1];
     }else if(angle==90){
       return [-1,0];
     }else if(angle == 0){
       return [0,-1];
+    }else if(angle == 45){
+      return [0,-1]; //
+    }else if(angle == 135){
+      return [-1,0];
+    }else if(angle == 225){
+      //++
+      return [1,0];
+    }else if(angle == 315){
+      //
+      return [1,0];
     }else{
       return [1,0];
     }
@@ -425,17 +555,26 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
   late int z;
 
   Future<void> check() async {
-    List<int> result = testingDirection(270);
+    List<int> result = testingDirection(225);
 
     print('result $result');
-    int distance =5;
+    int distance = 5;
+    // if(result[0]!=0 && result[1]!=0){
+    //   if(result[0]>0){
+    //     x = result[0];
+    //     z = result[1]*3;
+    //   }else {
+    //     x = result[0] * 3;
+    //     z = result[1];
+    //   }
+    // }
 
     if(result[0] != 0){
       x = result[0]*distance;
-      z=0;
+      z = -1;
     }else{
       z = result[1]*distance;
-      x=0;
+      x = -1;
     }
     print("${x} ${z}");
     var newNode = ARNode(

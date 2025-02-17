@@ -70,7 +70,7 @@ import 'APIMODELS/landmark.dart';
 import 'APIMODELS/outdoormodel.dart';
 import 'ARNavigation/ARCoreScreen.dart';
 import 'ARNavigation/DisplayView.dart';
-import 'ARNavigation/NewARScreen.dart';
+import 'ARNavigation/ARViewScreen.dart';
 import 'BluetoothScanAndroidClass.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
@@ -13405,7 +13405,7 @@ bool _isPlaying=false;
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DisplayARObjects(user: user,PathState: PathState,),
+                          builder: (context) => ARObjectPlacementScreen(user: user,PathState: PathState,),
                       ));
                     },
 

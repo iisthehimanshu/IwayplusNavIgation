@@ -143,8 +143,7 @@ class _CombinedScreenState extends State<CombinedScreen> {
             vv.Matrix3 rotationMatrix = pose.getRotation();
             vv.Vector3 eulerAngles = ARTools.matrixToEuler(rotationMatrix);
 
-            double yawDegrees = vv.degrees(
-                eulerAngles.z); // Convert radians to degrees
+            double yawDegrees = vv.degrees(eulerAngles.z); // Convert radians to degrees
             print("Heading Direction (Yaw): $userPathAngle");
             double distance = 1;
             double headingRadians = eulerAngles.z;

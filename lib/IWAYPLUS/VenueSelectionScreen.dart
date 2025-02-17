@@ -26,7 +26,7 @@ import '../NAVIGATION/ARNavigation/CombinedScreen.dart';
 import '../NAVIGATION/ARNavigation/CustomSizeRectangle.dart';
 import '../NAVIGATION/ARNavigation/DisplayView.dart';
 import '../NAVIGATION/ARNavigation/DistanceRendering.dart';
-import '../NAVIGATION/ARNavigation/NewARScreen.dart';
+import '../NAVIGATION/ARNavigation/ARViewScreen.dart';
 import '../NAVIGATION/ARNavigation/ObjectGestures.dart';
 import '../NAVIGATION/ARNavigation/UserPositionScreen.dart';
 import '../NAVIGATION/BluetoothScanAndroid.dart';
@@ -425,7 +425,7 @@ if(userLoc!=null){
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => MeasurePage(),
+                    builder: (context) => ARViewScreen(),
                   ),
                 );
               },

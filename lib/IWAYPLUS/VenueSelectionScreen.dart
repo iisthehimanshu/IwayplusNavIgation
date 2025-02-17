@@ -411,7 +411,7 @@ if(userLoc!=null){
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ARDepthScreen(),
+                    builder: (context) => DebugOptions(),
                   ),
                 );
               },

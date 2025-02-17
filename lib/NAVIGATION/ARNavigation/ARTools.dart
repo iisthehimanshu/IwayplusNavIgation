@@ -4,6 +4,8 @@ import 'package:ar_flutter_plugin_flutterflow/datatypes/node_types.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../Cell.dart';
+
 
 // Yaw (θ) – Rotation Around the Y-Axis
 // Definition: Rotates the camera left or right (like turning your head left/right).
@@ -16,83 +18,81 @@ import 'package:vector_math/vector_math_64.dart';
 
 
 class ARTools{
+  double objectDegree = 0.0;
+
   static Vector4? getObjectRotation(String direction){
     switch(direction){
       case "front":
         return Vector4(0.0, 1.0, 0.0, 1.5708);
       case "back":
-        return Vector4(0.0, 1.0, 0.0, -3.14159);
-      case "Turn Left, and Go Straight":
+        return Vector4(0.0, 1.0, 0.0, -1.5708);
+      case "left":
         return Vector4(0.0, 1.0, 0.0, 3.14159);
-      case "Turn Right, and Go Straight":
+      case "right":
         return Vector4(0.0, 1.0, 0.0, 0.0);
     }
   }
-  static List<int> getQuadrant(List<int> initial, String direction){
-    if(initial[0]==0 && initial[1]==0){
-      if(direction=="Turn Left, and Go Straight"){
-        return [-1,0];
-      }else if(direction == "Go Straight"){
-        return [0,-1];
-      }else if(direction == "Turn Right, and Go Straight"){
-        return [0,-1];
-      }else{
-        return [0,0];
-      }
-    }else if(initial[0]==1 && initial[1]==1){
-      if(direction=="Turn Left, and Go Straight"){
-        return [-1,1];
-      }else if(direction=="Turn Right, and Go Straight"){
-        return [1,1];
-      }else if(direction=="Go Straight"){
-        return [1,1];
-      }else{
-        return [1,-1];
-      }
-    }else if(initial[0]==1 && initial[1]==-1){
-      if(direction=="Turn Left, and Go Straight"){
-        return [-1,-1];
-      }else if(direction=="Turn Right, and Go Straight"){
-        return [1,-1];
-      }else if(direction=="Go Straight"){
-        return [1,-1];
-      }else{
-        return [1,1];
-      }
-    }else if(initial[0]==-1 && initial[1]==-1){
-      if(direction=="Turn Left, and Go Straight"){
-        return [-1,1];
-      }else if(direction=="Turn Right, and Go Straight"){
-        return [-1,-1];
-      }else if(direction=="Go Straight"){
-        return [-1,-1];
-      }else{
-        return [1,-1];
-      }
-    }else if(initial[0]==-1 && initial[1]==1){
-      if(direction=="Turn Left, and Go Straight"){
-        return [1,1];
-      }else if(direction=="Turn Right, and Go Straight"){
-        return [-1,1];
-      }else if(direction=="Go Straight"){
-        return [-1,1];
-      }else{
-        return [-1,-1];
-      }
-    }else if(initial[0]==0 && initial[1]==-1){  //on origin x=0 , z=-something
-      if(direction=="Turn Left, and Go Straight"){
-        return [-1,-1];
-      }else if(direction=="Turn Right, and Go Straight"){
-        return [1,-1];
-      }else if(direction=="Go Straight"){
-        return [0,-1];
-      }else{
-        return [0,1];
-      }
+  static Vector4? getObjectRotation2(double rotationValueZ2,double rotationValueZ1,double rotationValueX2 ,double rotationValueX1){
+    double rotationValue = 0.0;
+
+    if(rotationValueZ2> rotationValueZ1){
+      rotationValue = -1.5708;
+    }else if(rotationValueZ2 < rotationValueZ1){
+      rotationValue = 1.5708;
     }else{
-      return [];
+      if(rotationValueX2 > rotationValueX1){
+        rotationValue = 0.0;
+      }else if(rotationValueX2 < rotationValueX1){
+        rotationValue = 3.14159;
+      }
+    }
+
+    switch(rotationValue){
+      case 1.5708:
+        return Vector4(0.0, 1.0, 0.0, 1.5708);
+      case -3.14159:
+        return Vector4(0.0, 1.0, 0.0, -3.14159);
+      case 3.14159:
+        return Vector4(0.0, 1.0, 0.0, 3.14159);
+      case 0.0:
+        return Vector4(0.0, 1.0, 0.0, 0.0);
     }
   }
+
+  // 1.5708 //front
+  // 3.14159 left
+  // 0.0 right
+  // --1.5708
+  static double? giveRotationDouble(int rotationValueZ2,int rotationValueZ1,int rotationValueX2 ,int rotationValueX1){
+    print("giveRotationDouble");
+    print("z2 $rotationValueZ2 z1 $rotationValueZ1");
+    print("x2 $rotationValueX1 x1 $rotationValueX2");
+
+    if(rotationValueZ2 > rotationValueZ1){
+      return -1.5708;
+    }else if(rotationValueZ2 < rotationValueZ1){
+      return 1.5708;
+    }else{
+      if(rotationValueX2 > rotationValueX1){
+        return 0.0;
+      }else if(rotationValueX2 < rotationValueX1){
+        return 3.14159;
+      }
+    }
+  }
+
+
+
+  static List<List<int>> absoluteARPathCoordinates(List<Cell> turnPoints,List<int> userABScrd){
+    List<List<int>> processedCRDList = [];
+    for(int i=0 ; i<turnPoints.length ; i++){
+      int xC = (((turnPoints[i].y - userABScrd[1])/3.2)*-1).toInt();
+      int zC = ((turnPoints[i].x - userABScrd[0])/3.2).toInt();
+      processedCRDList.add([xC,zC]);
+    }
+    return processedCRDList;
+  }
+
 
 
   static Vector3 matrixToEuler(Matrix3 rotationMatrix) {
@@ -103,24 +103,14 @@ class ARTools{
 
     double x, y, z;
 
-    // if (!singular) {
-    //   x = atan2(rotationMatrix.entry(2, 1), rotationMatrix.entry(2, 2)); // Roll
-    //   y = atan2(-rotationMatrix.entry(2, 0), sy); // Pitch
-    //   z = atan2(rotationMatrix.entry(1, 0), rotationMatrix.entry(0, 0)); // Yaw (Heading)
-    // }else {
-    //   x = atan2(-rotationMatrix.entry(1, 2), rotationMatrix.entry(1, 1));
-    //   y = atan2(-rotationMatrix.entry(2, 0), sy);
-    //   z = 0; // Yaw is 0 in singular case
-    // }
-
-    if(singular){
-      x = atan2(-rotationMatrix.entry(1,1),rotationMatrix.entry(1, 1));
+    if (!singular) {
+      x = atan2(rotationMatrix.entry(2, 1), rotationMatrix.entry(2, 2)); // Roll
+      y = atan2(-rotationMatrix.entry(2, 0), sy); // Pitch
+      z = atan2(rotationMatrix.entry(1, 0), rotationMatrix.entry(0, 0)); // Yaw (Heading)
+    }else {
+      x = atan2(-rotationMatrix.entry(1, 2), rotationMatrix.entry(1, 1));
       y = atan2(-rotationMatrix.entry(2, 0), sy);
-      z = 0;
-    }else{
-      x = atan2(rotationMatrix.entry(2, 1), rotationMatrix.entry(2, 2));
-      y = atan2(-rotationMatrix.entry(2, 0), sy);
-      z = atan2(rotationMatrix.entry(1, 0), rotationMatrix.entry(0, 0));
+      z = 0; // Yaw is 0 in singular case
     }
 
     return Vector3(radians(x), radians(y),radians(z));
@@ -141,36 +131,6 @@ class ARTools{
     return Vector3(matrix.entry(0, 3), matrix.entry(1, 3), matrix.entry(2, 3));
   }
 
-  static List<int> findFirstTurnCoord(Vector3 cameraPosition){
-    print("findFirstTurnCoord");
-    List<int> firstTurnCoords = [];
-    if(cameraPosition.z<0){
-      if(cameraPosition.x < 0){
-        firstTurnCoords = [-1,-1];
-      }else if(cameraPosition.x > 0){
-        firstTurnCoords = [1,-1];
-      }else {
-        firstTurnCoords = [0, -1];
-      }
-    }else if (cameraPosition.z>0){
-      if(cameraPosition.x < 0){
-        firstTurnCoords = [-1,1];
-      }else if(cameraPosition.x > 0){
-        firstTurnCoords = [1,1];
-      }else {
-        firstTurnCoords = [0,1];
-      }
-    }else{
-      if (cameraPosition.x < 0) {
-        firstTurnCoords = [-1,0];
-      }else if(cameraPosition.x > 0){
-        firstTurnCoords = [1,0];
-      }
-    }
-    return firstTurnCoords;
-  }
-
-
   static List<int> getCoordN(double theta){
     if(theta >= 0 && theta < 90){
       print("0 90");
@@ -189,28 +149,52 @@ class ARTools{
       return [0,0];
     }
   }
-  static List<int> getCoordN2(double theta){
-    if(theta >= 0 && theta < 90){
-      print("0 90");
-      return [-1,1];
-    }else if(theta >= 90 && theta < 180){
-      print("90 180");
-      return [-1,-1];
-    }else if(theta >=180 && theta < 270){
-      print("180 270");
-      return [1,-1];
-    }else if(theta>=270 && theta<360){
-      print("270 360");
-      return [1,1];
-    }else{
-      print("ERROR getCoordNinelse");
-      return [0,0];
-    }
-  }
 
   Vector3 _getForwardVector(Quaternion rotation) {
     double x = rotation.x, y = rotation.y, z = rotation.z, w = rotation.w;
     return Vector3(1.5 * (x * z + w * y), 1, 1.5 * (w * w + x * x) - 1,).normalized();
+  }
+
+  Vector3 quaternionToEuler(Quaternion q) {
+    double ysqr = q.y * q.y;
+
+    // Compute pitch (X-axis rotation)
+    double t0 = 2.0 * (q.w * q.x + q.y * q.z);
+    double t1 = 1.0 - 2.0 * (q.x * q.x + ysqr);
+    double pitch = atan2(t0, t1);
+
+    // Compute yaw (Y-axis rotation)
+    double t2 = 2.0 * (q.w * q.y - q.z * q.x);
+    t2 = t2.clamp(-1.0, 1.0);
+    double yaw = asin(t2);
+
+    // Compute roll (Z-axis rotation)
+    double t3 = 2.0 * (q.w * q.z + q.x * q.y);
+    double t4 = 1.0 - 2.0 * (ysqr + q.z * q.z);
+    double roll = atan2(t3, t4);
+
+    return Vector3(pitch, yaw, roll); // In radians
+  }
+
+
+  void printEulerAngles(Quaternion q) {
+    Vector3 eulerAngles = quaternionToEuler(q);
+
+    print("Euler Angles:");
+    print("Pitch (X-axis): ${degrees(eulerAngles.x)}°");
+    objectDegree = degrees(eulerAngles.x);
+    print("Yaw (Y-axis): ${degrees(eulerAngles.y)}°");
+    print("Roll (Z-axis): ${degrees(eulerAngles.z)}°");
+  }
+
+  // Extracts rotation as a quaternion from a transformation matrix
+  Quaternion _extractRotation(Matrix4 matrix) {
+    Vector3 scale = Vector3.zero();
+    Vector3 translation = Vector3.zero();
+    Quaternion rotation = Quaternion.identity();
+
+    matrix.decompose(scale, rotation, translation);
+    return rotation;
   }
 
   static double calculateOpposite(double angleInDegrees, double hypotenuse) {

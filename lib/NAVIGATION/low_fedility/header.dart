@@ -5,8 +5,7 @@ import 'package:iwaymaps/NAVIGATION/low_fedility/homepage.dart';
 import '../APIMODELS/landmark.dart';
 import '../Navigation.dart';
 class Header extends StatelessWidget {
-  Landmarks? detectedLocation;
-  Header(this.detectedLocation,{super.key});
+  Header({super.key});
   FlutterTts flutterTts = FlutterTts();
   @override
   Widget build(BuildContext context) {
@@ -52,7 +51,7 @@ class Header extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${detectedLocation?.name}',
+                  '${Homepage.detectedLocation?.name}',
                   style: TextStyle(
                     color: Color(0xFF003366),
                     fontSize: 18,
@@ -65,6 +64,7 @@ class Header extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
+              Homepage.homePageKey.currentState?.showLoading();
               flutterTts.speak("Relocalizing");
               Homepage.relocalize();
             },

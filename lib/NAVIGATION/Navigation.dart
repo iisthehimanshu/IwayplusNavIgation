@@ -126,6 +126,7 @@ import 'package:lottie/lottie.dart' as lott;
 
 import 'fetchrouteParams.dart';
 import 'low_fedility/homepage.dart';
+import 'low_fedility/lowFedility.dart';
 import 'navigationTools.dart';
 
 import 'navigation_api_controller.dart';
@@ -133,20 +134,6 @@ import 'navigation_api_controller.dart';
 import 'package:iwaymaps/NAVIGATION/RippleButton.dart';
 import 'package:iwaymaps/NAVIGATION/BluetoothScanIOSClass.dart';
 
-
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Navigation(),
-    );
-  }
-}
 
 class Navigation extends StatefulWidget {
   String directLandID = "";
@@ -451,6 +438,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   void initState() {
     super.initState();
     Homepage.relocalize = relocalizeUser;
+    Homepage.onVenueClicked = onLandmarkVenueClicked;
     initializeMarkers();
     //add a timer of duration 5sec
     //PolylineTestClass.polylineSet.clear();
@@ -4462,22 +4450,25 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       landmark = singletonData!.landmarksMap![id];
     }
 
-    if(coordinates != null){
-      _googleMapController.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          tools.calculateRoomCenterinLatLng(coordinates),
-          22,
-        ),
-      );
-    }else{
-      print("called polygonTap animating to landmark");
-      _googleMapController.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          LatLng(double.parse(landmark!.properties!.latitude!), double.parse(landmark.properties!.longitude!)),
-          22,
-        ),
-      );
-    }
+    try {
+      if (coordinates != null) {
+        _googleMapController.animateCamera(
+          CameraUpdate.newLatLngZoom(
+            tools.calculateRoomCenterinLatLng(coordinates),
+            22,
+          ),
+        );
+      } else {
+        print("called polygonTap animating to landmark");
+        _googleMapController.animateCamera(
+          CameraUpdate.newLatLngZoom(
+            LatLng(double.parse(landmark!.properties!.latitude!),
+                double.parse(landmark.properties!.longitude!)),
+            22,
+          ),
+        );
+      }
+    }catch(_){}
 
 
     setState(() {
@@ -11971,13 +11962,15 @@ bool _isPlaying=false;
     } catch (e) {}
     ///
 
-    _googleMapController.animateCamera(
-      CameraUpdate.newLatLngZoom(
-        LatLng(coords[0], coords[1]),
-        22,
-      ),
-    );
-
+    try {
+      _googleMapController.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(coords[0], coords[1]),
+          22,
+        ),
+      );
+    }catch(_){}
+    print("onlandmarkclick");
     if (snapshot!.landmarksMap![ID]!.buildingID != buildingAllApi.outdoorID && SingletonFunctionController.building.floor[snapshot!.landmarksMap![ID]!.buildingID] != floor) {
       SingletonFunctionController.building.floor[snapshot!.landmarksMap![ID]!.buildingID!] = floor;
       createRooms(SingletonFunctionController.building.polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID]!, floor);
@@ -12302,8 +12295,8 @@ bool _isPlaying=false;
     double statusBarHeight = MediaQuery.of(context).padding.top;
     isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
     HelperClass.SemanticEnabled = MediaQuery.of(context).accessibleNavigation;
-    return Homepage(key: Homepage.homePageKey);
-    return Scaffold(
+    return Lowfedility.LFDesign?Homepage(key: Homepage.homePageKey):
+    Scaffold(
       body: Stack(
         children: [
           detected

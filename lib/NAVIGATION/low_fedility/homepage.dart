@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iwaymaps/NAVIGATION/low_fedility/searchBar.dart';
+import 'package:iwaymaps/NAVIGATION/low_fedility/homePageSearchBar.dart';
 import 'package:iwaymaps/NAVIGATION/low_fedility/searchResult.dart';
 import '../../IWAYPLUS/API/buildingAllApi.dart';
 import '../API/ladmarkApi.dart';
@@ -8,11 +8,14 @@ import '../navigationTools.dart';
 import '../singletonClass.dart';
 import 'header.dart';
 import 'loadingScreen.dart';
+import 'lowFedility.dart';
 import 'nearbyPlaces.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
   static Function relocalize=() {};
+  static late  Function(String ID,{bool DirectlyStartNavigation}) onVenueClicked;
+  static Landmarks? detectedLocation;
   static final GlobalKey<_HomepageState> homePageKey = GlobalKey<_HomepageState>();
 
   @override
@@ -21,7 +24,7 @@ class Homepage extends StatefulWidget {
 
 class _HomepageState extends State<Homepage> {
   bool loading = true;
-  Landmarks? detectedLocation;
+
 
   @override
   void initState() {
@@ -49,15 +52,30 @@ class _HomepageState extends State<Homepage> {
     });
   }
 
+  void showLoading(){
+    setState(() {
+      loading = true;
+    });
+  }
+
   void hideLoading() {
     setState(() {
       loading = false;
     });
   }
 
+  void getDirection(Landmarks landmark){
+    print("closing ${landmark.properties!.polyId!} ${landmark.sId}");
+    setState(() {
+      Lowfedility.LFDesign = false;
+    });
+    Homepage.onVenueClicked(landmark.properties!.polyId!);
+  }
+
+
   Future<void> locationDetected(Landmarks landmark) async {
-    detectedLocation = landmark;
-    await fetchNearbyFacilities(detectedLocation, landmarkData) ?? [];
+    Homepage.detectedLocation = landmark;
+    await fetchNearbyFacilities(Homepage.detectedLocation, landmarkData) ?? [];
   }
 
   Future<List<Widget>?> fetchNearbyFacilities(Landmarks? detectedLocation, land landmarkData) async {
@@ -67,7 +85,7 @@ class _HomepageState extends State<Homepage> {
     try {
       nearbyFacilities.clear();
       // Create a map to store the nearest facility for each type
-      Map<String, Searchresult> nearestFacilities = {};
+      Map<String, SearchresultWithoutAddress> nearestFacilities = {};
 
       await Future.forEach(landmarkData.landmarksMap!.entries, (MapEntry keyValue) async {
         var value = keyValue.value;
@@ -95,7 +113,7 @@ class _HomepageState extends State<Homepage> {
 
               // Add the nearest facility of this type to the map
               print("adding landmark");
-              nearestFacilities[subType] = Searchresult(detectedLocation, Location: value);
+              nearestFacilities[subType] = SearchresultWithoutAddress(detectedLocation, Location: value);
             }
           }
         }
@@ -142,8 +160,8 @@ class _HomepageState extends State<Homepage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Header(detectedLocation),
-                        searchBar(),
+                        Header(),
+                        homePageSearchBar(),
                         Expanded(
                           // Use Expanded to take up remaining space
                           child: SingleChildScrollView(
@@ -179,7 +197,7 @@ class _HomepageState extends State<Homepage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => Nearbyplaces(detectedLocation: detectedLocation,),
+                                builder: (context) => Nearbyplaces(),
                               ),
                             );
                           },

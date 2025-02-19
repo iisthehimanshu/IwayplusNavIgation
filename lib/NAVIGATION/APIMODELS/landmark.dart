@@ -20,6 +20,8 @@ class land {
         landmarks!.add(landmark);
         if(landmark.properties!.polyId != null){
           landmarksMap![landmark.properties!.polyId!] = landmark; // Add to the map using polyID as the key
+        }else{
+          landmarksMap![landmark.sId!] = landmark;
         }
         if(landmark.name != null){
           landmarkNames!.add(landmark.name!);

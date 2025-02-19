@@ -6,10 +6,10 @@ import '../API/ladmarkApi.dart';
 import '../APIMODELS/landmark.dart';
 import '../navigationTools.dart';
 import '../singletonClass.dart';
+import 'homepage.dart';
 
 class Nearbyplaces extends StatefulWidget {
-  Landmarks? detectedLocation;
-  Nearbyplaces({super.key, required this.detectedLocation});
+  Nearbyplaces({super.key});
 
   @override
   State<Nearbyplaces> createState() => _NearbyplacesState();
@@ -27,7 +27,7 @@ class _NearbyplacesState extends State<Nearbyplaces> {
   }
 
   Future<void> fetchData() async {
-    nearbyFacilities = await fetchNearbyPlaces(widget.detectedLocation);
+    nearbyFacilities = await fetchNearbyPlaces(Homepage.detectedLocation);
     setState(() {});
   }
 
@@ -41,25 +41,9 @@ class _NearbyplacesState extends State<Nearbyplaces> {
       await Future.forEach(landmarkData.landmarksMap!.entries, (MapEntry keyValue) async {
         var value = keyValue.value;
         if (detectedLocation!.sId != value.sId && detectedLocation!.buildingID == value.buildingID && detectedLocation!.floor == value.floor && value.name != null && value.element!.subType != "beacons" && tools.calculateDistance([detectedLocation.coordinateX!,detectedLocation.coordinateY!], [value!.coordinateX!,value!.coordinateY!])<35) {
-          nearbyFacilities.add(Searchresult(detectedLocation, Location: value));
+          nearbyFacilities.add(SearchresultWithoutAddress(detectedLocation, Location: value, invert: true,));
         }
       });
-
-      if(nearbyFacilities.isNotEmpty){
-        nearbyFacilities.insert(0, Container(
-          margin: EdgeInsets.only(left: 13),
-          child: Text(
-            'Nearby Facilities',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 24,
-              fontFamily: 'Roboto',
-              fontWeight: FontWeight.w700,
-              height: 1.20,
-            ),
-          ),));
-      }
-
     } catch (e) {
       print("Error in updating list: $e");
     }

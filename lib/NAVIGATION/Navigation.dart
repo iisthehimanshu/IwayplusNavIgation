@@ -162,7 +162,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Timer? _exploreModeTimer;
   String maptheme = "";
   var _initialCameraPosition = CameraPosition(
-    target: LatLng(60.543833319119475, 77.18729871127312),
+    target: buildingAllApi.allBuildingID.values.first,
     zoom: 0,
   );
   late GoogleMapController _googleMapController;

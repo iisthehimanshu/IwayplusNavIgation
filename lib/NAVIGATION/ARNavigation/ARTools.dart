@@ -64,10 +64,6 @@ class ARTools{
   // 0.0 right
   // --1.5708
   static double? giveRotationDouble(int rotationValueZ2,int rotationValueZ1,int rotationValueX2 ,int rotationValueX1){
-    print("giveRotationDouble");
-    print("z2 $rotationValueZ2 z1 $rotationValueZ1");
-    print("x2 $rotationValueX1 x1 $rotationValueX2");
-
     if(rotationValueZ2 > rotationValueZ1){
       return -1.5708;
     }else if(rotationValueZ2 < rotationValueZ1){
@@ -92,6 +88,69 @@ class ARTools{
     }
     return processedCRDList;
   }
+
+  static List<List<int>> generatePath(List<List<int>> path) {
+    List<List<int>> modifiedPath = [];
+
+    for (int i = 0; i < path.length - 1; i++) {
+      int x1 = path[i][0], y1 = path[i][1];
+      int x2 = path[i + 1][0], y2 = path[i + 1][1];
+
+      if (x1 == x2) {
+        // Vertical movement
+        int step = y1 < y2 ? 1 : -1;
+        for (int y = y1; y != y2; y += step) {
+          modifiedPath.add([x1, y]);
+        }
+      } else if (y1 == y2) {
+        // Horizontal movement
+        int step = x1 < x2 ? 1 : -1;
+        for (int x = x1; x != x2; x += step) {
+          modifiedPath.add([x, y1]);
+        }
+      }
+    }
+    // Add the last point
+    modifiedPath.add(path.last);
+
+    return modifiedPath;
+  }
+
+  static List<List<double>> realWorldARPathCoordinates(List<List<int>> absPathCRD,List<int> userCRD,double marginAngle){
+
+    print("marginAngleforloop2 ${marginAngle}");
+    List<List<double>> realWorldPath = [];
+
+    for(int i=0 ; i<absPathCRD.length ; i++){
+      int xC = absPathCRD[i][0];
+      int zC = absPathCRD[i][1];
+
+      double newX = xC * cos(marginAngle) + zC * sin(marginAngle);
+      double newZ = -xC * sin(marginAngle) + zC * cos(marginAngle);
+
+      realWorldPath.add([newX, newZ]);
+    }
+    return realWorldPath;
+  }
+
+
+
+  static List<double> generateRotationARValues(List<List<int>> absoluteARPathCoordinates) {
+    List<double> rotationARValueList = [];
+    for (int i = 0; i < absoluteARPathCoordinates.length - 1; i++) {
+      rotationARValueList.add(ARTools.giveRotationDouble(
+        absoluteARPathCoordinates[i + 1][1].toInt(),
+        absoluteARPathCoordinates[i][1].toInt(),
+        absoluteARPathCoordinates[i + 1][0].toInt(),
+        absoluteARPathCoordinates[i][0].toInt(),
+      )!);
+    }
+    return rotationARValueList;
+  }
+
+
+
+
 
 
 

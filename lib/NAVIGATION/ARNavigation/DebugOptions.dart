@@ -149,8 +149,8 @@ class _DebugOptionsState extends State<DebugOptions> {
 
     ARNode node = ARNode(
       type: NodeType.webGLB,
-      uri: "https://github.com/Wilson-Daniel/3DModels/raw/refs/heads/main/abstract_shape.glb",
-      scale: vv.Vector3(10, 10, 10),
+      uri: "https://github.com/Wilson-Daniel/3DModels/raw/refs/heads/main/sphere.fbx.glb",
+      scale: vv.Vector3(0.5, 0.5, 0.5),
       position: vv.Vector3(0,-1,-5), // Updated position
       rotation: vv.Vector4(1.0, 0.0, 0.0, 0),
     );

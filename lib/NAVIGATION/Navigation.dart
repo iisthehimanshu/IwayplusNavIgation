@@ -6867,6 +6867,48 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     return null;
   }
 
+  void fitToPath(List<dynamic> result)async{
+    Map<String, dynamic> dataCurrent = await result.first;
+    Map<String, dynamic> dataNext = await result.last;
+    if(PathState.sourceBid == PathState.destinationBid){
+        List<LatLng> points = [
+          LatLng(dataCurrent["svalue"][0], dataCurrent["svalue"][1]),
+          LatLng(dataCurrent["dvalue"][0], dataCurrent["dvalue"][1])
+        ];
+        setCameraPositionusingCoords(points);
+    }else{
+      List<LatLng> points = [
+        LatLng(dataCurrent["svalue"][0], dataCurrent["svalue"][1]),
+        LatLng(dataNext["dvalue"][0], dataNext["dvalue"][1])
+      ];
+      print("last data ${[dataNext["dvalue"][0], dataNext["dvalue"][1]]}");
+      print("first data ${[dataCurrent["dvalue"][0], dataCurrent["dvalue"][1]]}");
+      fitTwoPoints(points);
+    }
+  }
+
+  Future<void> fitTwoPoints(List<LatLng> points) async {
+    LatLng point1 = points.first;
+    LatLng point2 = points.last;
+    LatLngBounds bounds = LatLngBounds(
+      southwest: LatLng(
+        point1.latitude < point2.latitude ? point1.latitude : point2.latitude,
+        point1.longitude < point2.longitude ? point1.longitude : point2.longitude,
+      ),
+      northeast: LatLng(
+        point1.latitude > point2.latitude ? point1.latitude : point2.latitude,
+        point1.longitude > point2.longitude ? point1.longitude : point2.longitude,
+      ),
+    );
+
+    CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 100);
+
+    // First move to an intermediate zoom level for a smooth effect
+    await _googleMapController.animateCamera(CameraUpdate.zoomOut());
+    await Future.delayed(Duration(milliseconds: 500));
+    _googleMapController.animateCamera(cameraUpdate);
+  }
+
   Future<void> runPaths(List<dynamic Function()> fetchrouteFutures) async {
     if(PathState.sourceBid != buildingAllApi.outdoorID && PathState.destinationBid != buildingAllApi.outdoorID){
       if (PathState.sourceBid == PathState.destinationBid) {
@@ -6896,6 +6938,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       //await createRooms(SingletonFunctionController.building.polylinedatamap[PathState.sourceBid]!, PathState.sourceFloor);
       print("starting calc");
       List<dynamic> result = fetchrouteFutures.map((func) => func()).toList();
+      fitToPath(result);
       for (int i = 0; i < result.length - 1; i++) {
         Map<String, dynamic> dataCurrent = await result[i];
         Map<String, dynamic> dataNext = await result[i + 1];

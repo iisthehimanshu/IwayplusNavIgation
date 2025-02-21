@@ -24,6 +24,8 @@ class SingletonFunctionController {
   static Future<void>? timer;
   static String currentBeacon = "";
   static String SC_LOCALIZED_BEACON = "";
+  static bool inLocalizationRunning = false;
+  static late DateTime IL_runningTimr;
 
   BluetoothScanAndroidClass bluetoothScanAndroidClass = BluetoothScanAndroidClass();
   static Map<String, double> SC_IL_RSSI_AVERAGE = {};
@@ -85,17 +87,16 @@ class SingletonFunctionController {
       })).then((value) async {
         print("blue statusssss");
         print(await FlutterBluePlus.isOn);
+        IL_runningTimr = DateTime.now();
+
         if(Platform.isAndroid){
-          // print("apibeaconmap");
-          // print(apibeaconmap);
-          // blueToothAndroid.listenToScanUpdates(apibeaconmap);
           await bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap).then((value) {
-            SC_LOCALIZED_BEACON = value;
-            bluetoothScanAndroidClass.stopScan();
+            print("singletonclass");
+            print("singletonclass$value");
+            print("singletonclass$SC_LOCALIZED_BEACON");
+            print(bluetoothScanAndroidClass.isScanning);
           });
 
-          // bluetoothScanAndroidClass.stopScan();
-          // btadapter.startScanning(apibeaconmap);
 
         }else if(Platform.isIOS){
           print("isIOS");

@@ -447,6 +447,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   void initState() {
     super.initState();
     initializeMarkers();
+    if(SingletonFunctionController.IL_runningTimr != null){
+
+    }
+
+
     //add a timer of duration 5sec
     //PolylineTestClass.polylineSet.clear();
     // StartPDR();
@@ -3010,8 +3015,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     if (SingletonFunctionController.timer != null) {
       await Future.wait([SingletonFunctionController.timer!, allBuildingCalls]);
     }
+
     if (widget.directLandID.length < 2) {
-      localizeUser(beacon: SingletonFunctionController.SC_LOCALIZED_BEACON);
+      print("Cureent remaining ${DateTime.now()} ${SingletonFunctionController.IL_runningTimr}");
+      print("Cureent remaining ${6 - DateTime.now().difference(SingletonFunctionController.IL_runningTimr).inSeconds}");
+      Future.delayed(Duration(seconds: 6-DateTime.now().difference(SingletonFunctionController.IL_runningTimr).inSeconds)).then((_){
+        print("SingletonFunctionController.SC_LOCALIZED_BEACON ${SingletonFunctionController.SC_LOCALIZED_BEACON}");
+        if(SingletonFunctionController.SC_LOCALIZED_BEACON != ""){
+          localizeUser(beacon: SingletonFunctionController.SC_LOCALIZED_BEACON);
+        }else{
+          localizeUser(beacon: "");
+        }
+      });
+
     } else {
       //got here using a destination qr
       localizeUser(beacon: SingletonFunctionController.SC_LOCALIZED_BEACON,speakTTS: false);

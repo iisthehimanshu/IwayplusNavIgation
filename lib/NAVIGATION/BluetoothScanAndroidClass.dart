@@ -86,6 +86,7 @@ class BluetoothScanAndroidClass{
   static Map<String, String> EM_DEVICE_NAME = {};
   static Map<String, List<double>> EM_RSSI_WEIGHT = {};
   static Map<String, double> EM_RSSI_AVERAGE = {};
+
   Future<void> listenToScanExploreMode(HashMap<String, beacon> apibeaconmap) async {
     EM_isScanning = true;
     print("listenToScanExploreMode");
@@ -164,6 +165,10 @@ class BluetoothScanAndroidClass{
 
   Future<String> listenToScanInitialLocalization(HashMap<String, beacon> apibeaconmap) async {
     print("listenToScanInitialLocalization");
+    DateTime now = DateTime.now();
+    print(now);
+    SingletonFunctionController.inLocalizationRunning = true;
+
     Map<String, String> IL_DEVICE_NAME = {};
     Map<String, List<int>> IL_RSSI_VALUES = {};
     Map<String, List<double>> IL_RSSI_WEIGHT = {};
@@ -175,10 +180,9 @@ class BluetoothScanAndroidClass{
     print("Starting scan...");
     startScan(); // Ensure this function is implemented and starts the Bluetooth scan
 
-    StreamSubscription? subscription;
     try {
       // Listen to the stream continuously
-      subscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
+      _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
         print("Received device detail: $deviceDetail");
 
         BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
@@ -204,9 +208,10 @@ class BluetoothScanAndroidClass{
     await Future.delayed(Duration(seconds: 6));
 
     print("Stopping scan...");
-    await subscription?.cancel();
+    print(DateTime.now());
+    await _scanSubscription?.cancel();
     stopScan();
-
+    SingletonFunctionController.inLocalizationRunning = false;
     print("Processing scan results...");
     print("Device Names: $IL_DEVICE_NAME");
     print("RSSI Values: $IL_RSSI_VALUES");
@@ -226,12 +231,7 @@ class BluetoothScanAndroidClass{
     // }
     SingletonFunctionController.SC_LOCALIZED_BEACON = "";
     SingletonFunctionController.SC_LOCALIZED_BEACON = closestDeviceDetails;
-    stopScan();
     return closestDeviceDetails;
-
-
-
-
   }
 
 

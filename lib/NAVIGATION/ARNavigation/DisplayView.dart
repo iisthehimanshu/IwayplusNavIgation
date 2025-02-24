@@ -115,30 +115,30 @@ class _DisplayARObjectsState extends State<DisplayARObjects> {
       }
     });
     check();
-    //
-    // if((widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "c7b082-725b-a34-085d-062884b523ac") || (widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "7c8e88a-78ca-3cb1-c4aa-75efde7eae0")){
-    //   addDirectionalObjects();//iwp to pantry
-    // }else if((widget.PathState.sourcePolyID == "c7b082-725b-a34-085d-062884b523ac" && widget.PathState.destinationPolyID == "c2ba564-24f-a8e2-c7-4cfc00cdff") || (widget.PathState.sourcePolyID == "c7b082-725b-a34-085d-062884b523ac" && widget.PathState.destinationPolyID == "8b7c1-46a0-2f3-ad2a-030024c0016b") || (widget.PathState.sourcePolyID == "c7b082-725b-a34-085d-062884b523ac" && widget.PathState.destinationPolyID == "846c0d-b27b-c037-ebb8-b55131efbe86")){
-    //   addDirectionalObjects2(); //pantry to lift 2 front landmark
-    // }else if((widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0") ||
-    //     (widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "707dd03-13c5-28ab-48c-b84460a3c")||
-    //     (widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "257615-7b2e-4e2-287a-d1b120c110f7")||
-    //     (widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "c0113d-d324-5a77-3e1-22c3fd237")){
-    //   addDirectionalObjects3(); //lift2 to iwp
-    // }else if((widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "0c32010-b523-6c0-7ed6-4d3bd6204dc6") ||
-    //     (widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "13ae3e2-6388-d70d-216b-cb35b821a7") ){
-    //   addDirectionalObjects4(); //iwp to dark stairs +side 1
-    // }else if((widget.PathState.sourcePolyID == "c7b082-725b-a34-085d-062884b523ac" && widget.PathState.destinationPolyID == "fddee8-11ba-05d7-fa28-25fa6363c53d") || (widget.PathState.sourcePolyID == "c7b082-725b-a34-085d-062884b523ac" && widget.PathState.destinationPolyID == "175e6a3-7ecf-b0dc-ab7e-3f52e3bd52")) {
-    //   addDirectionalObjects5();
-    // } else if((widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "ebedc38-33f6-f43e-2168-d6a8ef1acb55") || (widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "d3446-340f-ff3-f203-dac575c3565")){
-    //   addDirectionalObjects6();
-    // }else if((widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "224d500-4823-f2ef-42aa-7f67804c6000") || (widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "bb4a73-bdaa-f3ae-1dca-7c1aef761363") || (widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "458af70-dbd-ab2-f064-38f30a762c3")){
-    //   addDirectionalObjects7();
-    // }else if((widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "c2ba564-24f-a8e2-c7-4cfc00cdff") || (widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "8b7c1-46a0-2f3-ad2a-030024c0016b") || (widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "846c0d-b27b-c037-ebb8-b55131efbe86")){
-    //   addDirectionalObject8();
-    // }else if((widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "724f73b-00c-f850-eb-bb3433fde60")){
-    //   addDirectionalObject9();
-    // }
+
+    if((widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "c7b082-725b-a34-085d-062884b523ac") || (widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "7c8e88a-78ca-3cb1-c4aa-75efde7eae0")){
+      addDirectionalObjects();//iwp to pantry
+    }else if((widget.PathState.sourcePolyID == "c7b082-725b-a34-085d-062884b523ac" && widget.PathState.destinationPolyID == "c2ba564-24f-a8e2-c7-4cfc00cdff") || (widget.PathState.sourcePolyID == "c7b082-725b-a34-085d-062884b523ac" && widget.PathState.destinationPolyID == "8b7c1-46a0-2f3-ad2a-030024c0016b") || (widget.PathState.sourcePolyID == "c7b082-725b-a34-085d-062884b523ac" && widget.PathState.destinationPolyID == "846c0d-b27b-c037-ebb8-b55131efbe86")){
+      addDirectionalObjects2(); //pantry to lift 2 front landmark
+    }else if((widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0") ||
+        (widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "707dd03-13c5-28ab-48c-b84460a3c")||
+        (widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "257615-7b2e-4e2-287a-d1b120c110f7")||
+        (widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "c0113d-d324-5a77-3e1-22c3fd237")){
+      addDirectionalObjects3(); //lift2 to iwp
+    }else if((widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "0c32010-b523-6c0-7ed6-4d3bd6204dc6") ||
+        (widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "13ae3e2-6388-d70d-216b-cb35b821a7") ){
+      addDirectionalObjects4(); //iwp to dark stairs +side 1
+    }else if((widget.PathState.sourcePolyID == "c7b082-725b-a34-085d-062884b523ac" && widget.PathState.destinationPolyID == "fddee8-11ba-05d7-fa28-25fa6363c53d") || (widget.PathState.sourcePolyID == "c7b082-725b-a34-085d-062884b523ac" && widget.PathState.destinationPolyID == "175e6a3-7ecf-b0dc-ab7e-3f52e3bd52")) {
+      addDirectionalObjects5();
+    } else if((widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "ebedc38-33f6-f43e-2168-d6a8ef1acb55") || (widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "d3446-340f-ff3-f203-dac575c3565")){
+      addDirectionalObjects6();
+    }else if((widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "224d500-4823-f2ef-42aa-7f67804c6000") || (widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "bb4a73-bdaa-f3ae-1dca-7c1aef761363") || (widget.PathState.sourcePolyID == "ec2325b-0dbb-73b5-67d-4218d76853f4" && widget.PathState.destinationPolyID == "458af70-dbd-ab2-f064-38f30a762c3")){
+      addDirectionalObjects7();
+    }else if((widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "c2ba564-24f-a8e2-c7-4cfc00cdff") || (widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "8b7c1-46a0-2f3-ad2a-030024c0016b") || (widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "846c0d-b27b-c037-ebb8-b55131efbe86")){
+      addDirectionalObject8();
+    }else if((widget.PathState.sourcePolyID == "0a8bdc2-b0b2-662a-ae5-bff7bff350c0" && widget.PathState.destinationPolyID == "724f73b-00c-f850-eb-bb3433fde60")){
+      addDirectionalObject9();
+    }
     //
 
 

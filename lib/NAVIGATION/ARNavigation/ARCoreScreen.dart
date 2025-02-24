@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:ar_flutter_plugin_flutterflow/datatypes/node_types.dart';
@@ -9,6 +10,7 @@ import 'package:ar_flutter_plugin_flutterflow/managers/ar_session_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_anchor.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
 import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
+import 'package:arkit_plugin/arkit_plugin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_beep/flutter_beep.dart';
@@ -79,8 +81,12 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ARView(
+      body: Platform.isAndroid? ARView(
         onARViewCreated: onARViewCreated,
+      ) : ARKitSceneView(onARKitViewCreated: onARKitViewCreated,
+        enableTapRecognizer: false,
+        showFeaturePoints: false,
+        showWorldOrigin: true,
       ),
       floatingActionButton: Column(
         children: [
@@ -105,6 +111,26 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
         ],
       ),
     );
+  }
+
+  late ARKitController arkitController;
+
+  void onARKitViewCreated(ARKitController arkitController) {
+    this.arkitController = arkitController;
+    final newNode = ARKitNode(
+      geometry: ARKitTorus(pipeRadius: 5,ringRadius: 5),
+      position: Vector3(0, 0, -5), // 5 meters in front of the camera
+      scale: Vector3(0.1, 0.1, 0.1),
+    );
+    this.arkitController.add(newNode);
+
+    final node = ARKitReferenceNode(
+      url: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+      position: Vector3(0, 0, -5), // 5 meters in front of the camera
+      scale: Vector3(0.1, 0.1, 0.1), // Adjust scale if needed
+    );
+    this.arkitController.add(node);
+    //handleCompassEvents();
   }
 
 
@@ -189,6 +215,9 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
     print("userCoordd ${forPathX}");
     print("doInitialAsyncTasks");
     turnPoints.forEach((value){
+      print("turnPoints");
+      print(value.lat);
+      print(value.lng);
       print(value.x);
       print(value.y);
     });
@@ -298,30 +327,53 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
     // print("realWorldARPathCoordinates $realWorldARPathCoordinates ${realWorldARPathCoordinates.length}");
     // print("rotationARValueList $rotationARValueList");
 
+
+
     for(int i=0 ; i<realWorldModifiedPath.length-1 ; i++){
-      ARNode newNode = ARNode(
-        type: NodeType.webGLB,
-        uri: "https://github.com/Wilson-Daniel/3DModels/raw/refs/heads/main/sphere.fbx.glb",
-        scale: Vector3(0.2, 0.2, 0.2),
-        position: Vector3(realWorldModifiedPath[i][0], -1, realWorldModifiedPath[i][1]),
-      );
-      await arObjectManager.addNode(newNode);
+      if(Platform.isAndroid) {
+        ARNode newNode = ARNode(
+          type: NodeType.webGLB,
+          uri: "https://github.com/Wilson-Daniel/3DModels/raw/refs/heads/main/sphere.fbx.glb",
+          scale: Vector3(0.2, 0.2, 0.2),
+          position: Vector3(
+              realWorldModifiedPath[i][0], -1, realWorldModifiedPath[i][1]),
+        );
+        await arObjectManager.addNode(newNode);
+      }else if(Platform.isIOS){
+        final node = ARKitReferenceNode(
+          url: "https://github.com/Wilson-Daniel/3DModels/raw/refs/heads/main/sphere.fbx.glb",
+          scale: Vector3(0.2, 0.2, 0.2),
+          position: Vector3(realWorldModifiedPath[i][0], -1, realWorldModifiedPath[i][1]), // Adjust scale if needed
+        );
+        this.arkitController.add(node);
+      }
     }
 
 
 
     for (int i = 0; i < realWorldARPathCoordinates.length-1; i++) {
       print("inIfPart");
-      ARNode newNode$i = ARNode(
-        type: NodeType.webGLB,
-        uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
-        scale: Vector3(0.4, 0.4, 0.4),
-        rotation: Vector4(0.0, 1.0, 0.0, rotationARValueList[i]+marginAngle),
-        position: Vector3(realWorldARPathCoordinates[i][0], -1, realWorldARPathCoordinates[i][1]),
-      );
-      bool? isAdded = await arObjectManager.addNode(newNode$i);
-      if (isAdded==true) {
-        addedNodes.add(newNode$i);  // Store the reference of added node
+      if(Platform.isAndroid) {
+        ARNode newNode$i = ARNode(
+          type: NodeType.webGLB,
+          uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+          scale: Vector3(0.4, 0.4, 0.4),
+          rotation: Vector4(
+              0.0, 1.0, 0.0, rotationARValueList[i] + marginAngle),
+          position: Vector3(realWorldARPathCoordinates[i][0], -1,
+              realWorldARPathCoordinates[i][1]),
+        );
+        bool? isAdded = await arObjectManager.addNode(newNode$i);
+        if (isAdded == true) {
+          addedNodes.add(newNode$i); // Store the reference of added node
+        }
+      }else if(Platform.isIOS){
+        final node = ARKitReferenceNode(
+          url: "https://github.com/Wilson-Daniel/3DModels/raw/refs/heads/main/sphere.fbx.glb",
+          scale: Vector3(0.2, 0.2, 0.2),
+          position: Vector3(realWorldModifiedPath[i][0], -1, realWorldModifiedPath[i][1]), // Adjust scale if needed
+        );
+        this.arkitController.add(node);
       }
 
     }

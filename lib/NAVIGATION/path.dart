@@ -1372,7 +1372,6 @@ List<Cell> findCorridorSegments(
     int pos = path[i];
     int row = pos % numCols;
     int col = pos ~/ numCols;
-
     int nextrow = row;
     int nextcol = col;
 

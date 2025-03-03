@@ -129,10 +129,8 @@ class PathSnapper {
     }
     return nearestCell;
   }
-
   // Project point onto a segment
   navPoints? _projectPointOnSegment(double px, double py, Cell a, Cell b) {
-
     geo.LatLng? projectLatLngIfWithinSegment(geo.LatLng user, geo.LatLng start, geo.LatLng end) {
       double ax = user.latitude - start.latitude;
       double ay = user.longitude - start.longitude;
@@ -140,12 +138,10 @@ class PathSnapper {
       double by = end.longitude - start.longitude;
 
       double t = (ax * bx + ay * by) / (bx * bx + by * by);
-
       // Check if the projection lies within the segment
       if (t < 0 || t > 1) {
         return null; // Outside the segment
       }
-
       return geo.LatLng(start.latitude + t * bx, start.longitude + t * by);
     }
 

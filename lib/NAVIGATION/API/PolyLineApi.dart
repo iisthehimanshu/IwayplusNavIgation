@@ -41,32 +41,27 @@ class PolyLineApi {
     return jsonEncode(wrappedResponse);
   }
 
-  Future<polylinedata> fetchPolyData({String? id = null, bool outdoor = false}) async {
+  Future<polylinedata> fetchPolyData({String? id = null, bool outdoor = false})async{
     print("polyline");
     final PolyLineBox = PolylineAPIModelBOX.getData();
     accessToken = signInBox.get("accessToken");
-
     if(PolyLineBox.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingPolylineDataVersionUpdate.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingPolylineDataVersionUpdate[id??buildingAllApi.getStoredString()]! == false){
       print("POLYLINE API DATA FROM DATABASE");
       print(buildingAllApi.getStoredString());
       Map<String, dynamic> responseBody = PolyLineBox.get(id??buildingAllApi.getStoredString())!.responseBody;
       return polylinedata.fromJson(responseBody);
     }
-
-
-
     final Map<String, dynamic> data = {
       "id": id??buildingAllApi.getStoredString(),
       "outdoor": outdoor
     };
-
     final response = await http.post(
       Uri.parse(baseUrl),
       body: json.encode(data),
       headers: {
         'Content-Type': 'application/json',
         'x-access-token': accessToken,
-        'Authorization': 'e28cdb80-c69a-11ef-aa4e-e7aa7912987a'
+       // 'Authorization': 'e28cdb80-c69a-11ef-aa4e-e7aa7912987a'
       },
     );
     if (response.statusCode == 200) {

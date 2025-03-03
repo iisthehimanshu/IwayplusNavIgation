@@ -1,25 +1,21 @@
 class Data {
   String? position;
   List<SensorFingerprint>? sensorFingerprint;
-
   Data({this.position, this.sensorFingerprint});
-
-  factory Data.fromJson(Map<String, dynamic> json) {
+  factory Data.fromJson(Map<String, dynamic> json){
     return Data(
       position: json['position'],
       sensorFingerprint: json['sensorFingerprint'],
     );
   }
-
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson(){
     return {
       'position': position,
       'sensorFingerprint': sensorFingerprint?.map((fingerPrint) => fingerPrint.toJson()).toList(),
     };
   }
 }
-
-class SensorFingerprint {
+class SensorFingerprint{
   List<Beacon>? beacons;
   List<Wifi>? wifi;
   GpsData? gpsData;
@@ -27,7 +23,6 @@ class SensorFingerprint {
   AccelerometerData? accelerometerData;
   double? lux;
   String? timeStamp;
-
   SensorFingerprint({
     this.beacons,
     this.wifi,
@@ -37,9 +32,8 @@ class SensorFingerprint {
     this.lux,
     this.timeStamp
   });
-
   // Serialize to JSON
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson(){
     return {
       'beacons': beacons?.map((beacon) => beacon.toJson()).toList(),
       'wifi': wifi?.map((wifi) => wifi.toJson()).toList(),
@@ -50,7 +44,6 @@ class SensorFingerprint {
       'timeStamp': timeStamp,
     };
   }
-
   // Deserialize from JSON
   factory SensorFingerprint.fromJson(Map<String, dynamic> json) {
     return SensorFingerprint(
@@ -71,12 +64,11 @@ class SensorFingerprint {
       accelerometerData: json['accelerometerData'] != null
           ? AccelerometerData.fromJson(json['accelerometerData'])
           : null,
-      lux: json['lux'],
+      lux: json['lux'].toDouble(),
       timeStamp: json['timeStamp'],
     );
   }
 }
-
 class Beacon {
   String? beaconMacId;
   String? beaconName;
@@ -84,7 +76,6 @@ class Beacon {
   Position? beaconPosition;
   String? beaconFloor;
   String? buildingId;
-
   Beacon({
     this.beaconMacId,
     this.beaconName,
@@ -93,9 +84,8 @@ class Beacon {
     this.beaconFloor,
     this.buildingId,
   });
-
   Map<String, dynamic> toJson() {
-    return {
+    return{
       'beaconMacId': beaconMacId,
       'beaconName': beaconName,
       'beaconRssi': beaconRssi,
@@ -104,7 +94,6 @@ class Beacon {
       'buildingId': buildingId,
     };
   }
-
   factory Beacon.fromJson(Map<String, dynamic> json) {
     return Beacon(
       beaconMacId: json['beaconMacId'],
@@ -118,23 +107,19 @@ class Beacon {
     );
   }
 }
-
 class Wifi {
   String? wifiName;
   int? wifiStrength;
-
   Wifi({
     this.wifiName,
     this.wifiStrength,
   });
-
   Map<String, dynamic> toJson() {
     return {
       'wifiName': wifiName,
       'wifiStrength': wifiStrength,
     };
   }
-
   factory Wifi.fromJson(Map<String, dynamic> json) {
     return Wifi(
       wifiName: json['wifiName'],
@@ -142,20 +127,16 @@ class Wifi {
     );
   }
 }
-
 class Position {
   double? x;
   double? y;
-
   Position({this.x, this.y});
-
   factory Position.fromJson(Map<String, dynamic> json) {
     return Position(
-      x: json['x'],
-      y: json['y'],
+      x: json['x'].toDouble(),
+      y: json['y'].toDouble(),
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'x': x,
@@ -163,7 +144,6 @@ class Position {
     };
   }
 }
-
 class GpsData {
   double? latitude;
   double? longitude;
@@ -174,10 +154,10 @@ class GpsData {
 
   factory GpsData.fromJson(Map<String, dynamic> json) {
     return GpsData(
-      latitude: json['latitude'],
-      longitude: json['longitude'],
-      accuracy: json['accuracy'],
-      altitude: json['altitude']
+        latitude: json['latitude'].toDouble(),
+        longitude: json['longitude'].toDouble(),
+        accuracy: json['accuracy'].toDouble(),
+        altitude: json['altitude'].toDouble()
     );
   }
 
@@ -198,7 +178,7 @@ class MagnetometerData {
 
   factory MagnetometerData.fromJson(Map<String, dynamic> json) {
     return MagnetometerData(
-      value: json['value'],
+      value: json['value'].toDouble(),
     );
   }
 
@@ -218,9 +198,9 @@ class AccelerometerData {
 
   factory AccelerometerData.fromJson(Map<String, dynamic> json) {
     return AccelerometerData(
-      x: json['x'],
-      y: json['y'],
-      z: json['z'],
+      x: json['x'].toDouble(),
+      y: json['y'].toDouble(),
+      z: json['z'].toDouble(),
     );
   }
 

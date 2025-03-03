@@ -1,5 +1,4 @@
 
-
 import '../SensorFingerprint.dart';
 
 class FingerPrintData {
@@ -50,7 +49,6 @@ class SensorData {
   AccelerometerData accelerometerData;
   int lux;
   String timeStamp;
-
   SensorData({
     this.beacons,
     required this.gpsData,
@@ -59,7 +57,6 @@ class SensorData {
     required this.lux,
     required this.timeStamp,
   });
-
   factory SensorData.fromJson(Map<String, dynamic> json) {
     return SensorData(
       beacons: json['beacons'] != null
@@ -74,7 +71,6 @@ class SensorData {
       timeStamp: json['timeStamp'],
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'beacons': beacons?.map((beacon) => beacon.toJson()).toList(),
@@ -104,8 +100,8 @@ class GPSData {
     return GPSData(
       latitude: json['latitude'],
       longitude: json['longitude'],
-      accuracy: json['accuracy'],
-      altitude: json['altitude'],
+      accuracy: json['accuracy'] != null?json['accuracy'].toDouble():json['accuracy'],
+      altitude: json['altitude'] != null?json['altitude'].toDouble():json['altitude'],
     );
   }
 
@@ -121,25 +117,23 @@ class GPSData {
 
 class MagnetometerData {
   double value;
-
   MagnetometerData({required this.value});
 
-  factory MagnetometerData.fromJson(Map<String, dynamic> json) {
-    return MagnetometerData(value: json['value']);
-  }
 
+
+  factory MagnetometerData.fromJson(Map<String, dynamic> json) {
+    return MagnetometerData(value:(json['value']!=null)?json['value'].toDouble():json['value']);
+  }
   Map<String, dynamic> toJson() {
     return {
       'value': value,
     };
   }
 }
-
 class AccelerometerData {
   double x;
   double y;
   double z;
-
   AccelerometerData({
     required this.x,
     required this.y,

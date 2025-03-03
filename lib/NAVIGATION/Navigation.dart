@@ -46,6 +46,7 @@ import '../IWAYPLUS/FIREBASE NOTIFICATION API/PushNotifications.dart';
 import '../IWAYPLUS/MODELS/FilterInfoModel.dart';
 import '../IWAYPLUS/VenueSelectionScreen.dart';
 import '../IWAYPLUS/websocket/UserLog.dart';
+import '../fingerprinting.dart';
 import '../newSearchPage.dart';
 import '../path_snapper.dart';
 import '/IWAYPLUS/API/RatingsaveAPI.dart';
@@ -516,16 +517,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     //SingletonFunctionController.btadapter.strtScanningIos(SingletonFunctionController.apibeaconmap);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_){
       speak("${LocaleData.loadingMaps.getString(context)}", _currentLocale);
       apiCalls(context);
     });
-
     !DebugToggle.Slider ? handleCompassEvents() : () {};
-
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
-        .then((value) {
+        .then((value){
       maptheme = value;
     });
     checkPermissions();
@@ -535,8 +534,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     try {
       _streamSubscriptions.add(
-        userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
-                (UserAccelerometerEvent event) {
+        userAccelerometerEventStream(samplingPeriod: sensorInterval).listen((UserAccelerometerEvent event){
               final now = DateTime.now();
               // setState(() {
               //   _userAccelerometerEvent = event;
@@ -548,41 +546,35 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               //   }
               // });
               _userAccelerometerUpdateTime = now;
-            }, onError: (e) {
-          showDialog(
+            },
+            onError:(e){
+            showDialog(
               context: context,
-              builder: (context) {
+              builder: (context){
                 return const AlertDialog(
                   title: Text("Sensor Not Found"),
-                  content: Text(
-                      "It seems that your device doesn't support User Accelerometer Sensor"),
+                  content: Text("It seems that your device doesn't support User Accelerometer Sensor"),
                 );
               });
-          cancelOnError:
-          true;
+          cancelOnError:true;
         }),
       );
-    } catch (E) {}
+    }catch(E){}
     // fetchlist();
     // filterItems();
   }
-
-
   Future<void> getFingerPrintData()async{
-    var fingerPrintData = await fingerPrintingGetApi().Finger_Printing_GET_API(buildingAllApi.selectedBuildingID);
-    print("fingerprint::${fingerPrintData}");
+    fingerprinting.enableFingerprinting();
   }
-
   // Start the animation loop
-  void PB_startAnimation() {
-    if (!PB_isProgressing) {
-      setState(() {
+  void PB_startAnimation(){
+    if (!PB_isProgressing){
+      setState((){
         PB_isProgressing = true;
       });
       PB_controller.repeat(); // Make the animation repeat indefinitely
     }
   }
-
   // Stop the animation loop
   void PB_stopAnimation() {
     if (PB_isProgressing) {
@@ -592,9 +584,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       PB_controller.stop(); // Stop the animation
     }
   }
-
-
-  void initializeMarkers() async {
+  void initializeMarkers()async{
     userloc = await getImagesFromMarker('assets/userloc0.png', 130);
     if (kDebugMode) {
       userlocdebug = await getImagesFromMarker('assets/tealtorch.png', 35);
@@ -614,21 +604,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           isAppinForeground=false;
         });
       }
-    } else if (state == AppLifecycleState.resumed) {
+    }else if (state == AppLifecycleState.resumed){
       // App came to foreground
       print("App is in the foreground");
       if(user.isnavigating){
-        setState(() {
+        setState((){
           isAppinForeground=true;
         });
       }
     }
   }
-
   Future<void> zoomWhileWait(
       Map<String, LatLng> allBuildingID, GoogleMapController controller) async {
     print("allbuilding id ${allBuildingID}");
-
     if (allBuildingID.length > 1) {
       while (!SingletonFunctionController.building.destinationQr &&
           !user.initialallyLocalised &&
@@ -713,7 +701,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     setState(() {
       isCalibrating = true;
     });
-
     accelerometerEvents.listen((AccelerometerEvent event) {
       double magnitude =
       sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
@@ -721,7 +708,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         accelerationMagnitudes.add(magnitude);
       });
     });
-
     Timer(Duration(seconds: 10), () {
       //calculateThresholds();
       setState(() {
@@ -1070,8 +1056,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 user.move(context).then((value) {
                   renderHere();
                 });
-              } else {
-                if (user.isnavigating) {
+              }else{
+                if (user.isnavigating){
                   // reroute();
                   // showToast("You are out of path");
                 }
@@ -1573,64 +1559,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
 
-  Future<void> collectSensorDataEverySecond() async {
-    if(apibeaconmap != null){
-      bluetoothScanAndroidClass.listenToScanUpdates(apibeaconmap!);
-    }else{
-      HelperClass.showToast("Getting beacon data!!");
-    }
-
-    _startListeningToScannedResults();
-
-    data = Data(position: "${userPosition?.coordx},${userPosition?.coordy},$floor");
-
-    gps.startGpsUpdates();
-    gps.positionStream.listen((position){
-      gpsPosition = position;
-    });
-
-    accelerometerEvents.listen((AccelerometerEvent event) {
-      _x = event.x;
-      _y = event.y;
-      _z = event.z;
-    });
-
-
-    FlutterCompass.events!.listen((event){
-      theta = event.heading!;
-    });
-
-    _Lightsubscription = _light.lightSensorStream.listen((value){
-      _lightValue = value;
-    });
-
-    timer = Timer.periodic(Duration(seconds: 1), (timer) async {
-      print("apibeaconmap:: ${apibeaconmap}");
-      List<Beacon> beacons = await fetchBeaconData(apibeaconmap);
-      print(beacons);
-      var gpsData = await fetchGpsData();
-      var wifi = await fetchWifiData();
-      var magnetometerData = await fetchMagnetometerData();
-      var accelerometerData = await fetchAccelerometerData();
-      var lux = await fetchLux();
-
-      var fingerprint = SensorFingerprint(
-          beacons: beacons,
-          wifi: wifi,
-          gpsData: gpsData,
-          magnetometerData: magnetometerData,
-          accelerometerData: accelerometerData,
-          lux: lux,
-          timeStamp: dateFormat.format(DateTime.now().toUtc())
-      );
-
-      data?.sensorFingerprint ??= [];
-      data?.sensorFingerprint?.add(fingerprint);
-
-      print("data.toJson() ${data?.toJson()}");
-
-    });
-  }
 
   Future<void> updateNearbyLandmarkMarkers(MarkerId id) async {
 
@@ -1885,14 +1813,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 beaconData,
                 landmarkData.landmarksMap!
             );
-
             if (userSetLocation != null) {
               initializeUser(userSetLocation,beaconData, speakTTS: speakTTS, render: render);
             } else {
               unableToFindLocation();
             }
           }
-
         } else {
           print("_handleBeaconLocalization2");
           unableToFindLocation();
@@ -1929,38 +1855,32 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
 
-
-
   Future<void> _handleGlobalCoordinatesLocalization(
       bool speakTTS,
       bool render,
       bool providePinSelection
       ) async {
-
-
     GPS gps = GPS();
     KalmanFilter _kalmanFilter = KalmanFilter();
     await gps.startGpsUpdates();
     StreamSubscription<Position>? subscription;
-    subscription = gps.positionStream.listen((position) {
+    subscription = gps.positionStream.listen((position){
       _kalmanFilter.applyFilter(position.latitude, position.longitude);
     });
     await Future.delayed(const Duration(seconds: 9));
     subscription.cancel();
     gps.dispose();
-
-    if(_kalmanFilter.latitudeEstimate != null && _kalmanFilter.longitudeEstimate != null) {
+    if(_kalmanFilter.latitudeEstimate != null && _kalmanFilter.longitudeEstimate != null){
       UserState.geoLat = _kalmanFilter.latitudeEstimate;
       UserState.geoLng = _kalmanFilter.longitudeEstimate;
       print("globalcoord ${UserState.geoLat},${UserState.geoLng}");
       final userSetLocation = await getglobalcoords(
           LatLng(UserState.geoLat!, UserState.geoLng!)
       );
-
-      if (userSetLocation != null) {
+      if (userSetLocation != null){
         String polyID = userSetLocation.properties!.polyId!;
         initializeUser(userSetLocation,null, speakTTS: speakTTS, render: render);
-      } else {
+      }else{
         unableToFindLocation();
       }
     }else{
@@ -2081,8 +2001,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.longitude!);
 
     //did this change over here UDIT...
-    user.coordX = userSetLocation.coordinateX!;
-    user.coordY = userSetLocation.coordinateY!;
+    user.coordX = 74;
+    user.coordY = 32;
     List<double> ls = tools.localtoglobal(
         user.coordX,
         user.coordY,
@@ -2090,23 +2010,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             .building.patchData[userSetLocation.buildingID]);
     user.lat = ls[0];
     user.lng = ls[1];
-
-    if (userSetLocation!.doorX != null) {
+    if(userSetLocation!.doorX != null){
       print("usercoord fetched ${user.coordX},${user.coordY}       ${userSetLocation!.doorX!} ${userSetLocation!.doorY!}");
-      user.coordX = userSetLocation!.doorX!;
-      user.coordY = userSetLocation!.doorY!;
+      user.coordX = 74;
+      user.coordY = 32;
       List<double> latlng = tools.localtoglobal(
-          userSetLocation!.doorX!,
-          userSetLocation!.doorY!,
+          74,
+          32,
           SingletonFunctionController
               .building.patchData[userSetLocation!.buildingID]);
-
       user.lat = latlng[0];
       user.lng = latlng[1];
       user.locationName = userSetLocation!.name ??
           userSetLocation!.element!.subType;
-
-    } else if (userSetLocation!.doorX == null) {
+    } else if(userSetLocation!.doorX == null){
       user.coordX = userSetLocation!.coordinateX!;
       user.coordY = userSetLocation!.coordinateY!;
       List<double> latlng = tools.localtoglobal(
@@ -2114,7 +2031,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           userSetLocation!.coordinateY!,
           SingletonFunctionController
               .building.patchData[userSetLocation!.buildingID]);
-
       user.lat = latlng[0];
       user.lng = latlng[1];
       user.locationName = userSetLocation!.name ??
@@ -2986,7 +2902,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   SingletonFunctionController controller = SingletonFunctionController();
   void apiCalls(context) async {
     NavigationAPIController apiController = NavigationAPIController(createPatch: createPatch, findCentroid: findCentroid, createotherPatch: createotherPatch, createRooms: createRooms, createARPatch: createARPatch, createotherARPatch: createotherARPatch, createMarkers: createMarkers);
-
     try{
       await DataVersionApi()
           .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
@@ -2994,7 +2909,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       print(" APICALLS DataVersionApi API TRY-CATCH");
     }
     _updateProgress();
-
     if(!kIsWeb){
       print("checkingplat ${Platform.isIOS}");
       (SingletonFunctionController.btadapter.isScanningOn() == false &&
@@ -3002,7 +2916,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           ? controller.executeFunction(buildingAllApi.allBuildingID)
           : null;
     }
-
     setState(() {
       resBeacons = SingletonFunctionController.apibeaconmap;
     });
@@ -3220,18 +3133,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     //   }
     // }
     print("beaconcmaed ${beacon}");
-
     nearestBeacon = beacon?? SingletonFunctionController.SC_LOCALIZED_BEACON;
     print("nearestBeacon");
     print(nearestBeacon);
-
     setState(() {
       //lastBeaconValue = nearestBeacon;
     });
-
     // nearestLandmarkToBeacon = nearestBeacon;
     // nearestLandmarkToMacid = highestweight.toString();
-
     setState(() {
       testBIn = SingletonFunctionController.btadapter.BIN;
       testBIn.forEach((key, value) {
@@ -3239,9 +3148,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       });
     });
     //SingletonFunctionController.btadapter.stopScanning();
-
     // sumMap = SingletonFunctionController.btadapter.calculateAverage();
-    if (nearestBeacon != "" && Building.apibeaconmap[nearestBeacon] != null) {
+    if (nearestBeacon != "" && Building.apibeaconmap[nearestBeacon] != null){
       buildingAllApi
           .setStoredString(Building.apibeaconmap[nearestBeacon]!.buildingID!);
       buildingAllApi.selectedID =
@@ -7640,7 +7548,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   double cordLt = 0;
   List<List<int>> getPoints = [];
   List<int> getnodes = [];
-
   List<LatLng> _polylineCoordinates = [];
   Marker? _movingMarker;
   Timer? _polytimer;
@@ -12468,8 +12375,8 @@ bool _isPlaying=false;
 
   late Timer EM_TIMER;
   String EM_LastBeacon = "";
-
-
+  Fingerprinting fingerprinting = Fingerprinting();
+  bool isScanning = false;
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -12995,7 +12902,7 @@ bool _isPlaying=false;
                                   _isExploreModePannelOpen = false;
                                   _isBuildingPannelOpen = true;
                                   lastBeaconValue = "";
-                                } else {
+                                }else{
                                   speak(
                                       "${LocaleData.exploremodenabled.getString(context)}",
                                       _currentLocale);
@@ -13021,10 +12928,8 @@ bool _isPlaying=false;
                                         Future.delayed(
                                             Duration(milliseconds: 1500))
                                             .then((value) => {
-
                                           realTimeReLocalizeUser(
                                               resBeacons)
-
                                             // listenToBin()
                                         });
                                       });
@@ -13046,14 +12951,26 @@ bool _isPlaying=false;
                               0xff24B9B0), // Set the background color of the FAB
                         )
                       : Container(), // Adjust the height as needed// Adjust the height as needed
-                  // FloatingActionButton(
-                  //   onPressed: () async {
-                  //     AppSettings.openAppSettings(type: AppSettingsType.settings, asAnotherTask: true);
-                  //   },
-                  //   child: Icon(Icons.settings),
-                  //   backgroundColor: Color(
-                  //       0xff24B9B0), // Set the background color of the FAB
-                  // )
+                  FloatingActionButton(
+                    onPressed:()async{
+                      if(isScanning==false){
+                        fingerprinting.collectSensorDataEverySecond();
+                        Future.delayed(Duration(seconds: 10),(){
+                          fingerprinting.stopCollectingData();
+                          setState(() {
+                            isScanning=true;
+                          });
+                        });
+                      }else{
+                      String nearestPoint=fingerprinting.findNearestLocation(fingerprinting.getRealData()["Beacons"],fingerprinting.getProcessedData());
+                        //fingerprinting.getHeaderDetails(fingerprinting.calculatedData!,nearestPoint);
+                        print(fingerprinting.nearestNode(nearestPoint));
+                      }
+                    },
+                    child: Icon((isScanning)?Icons.settings:Icons.account_balance),
+                    backgroundColor: Color(
+                        0xff24B9B0), // Set the background color of the FAB
+                  )
                 ],
               ),
             ),

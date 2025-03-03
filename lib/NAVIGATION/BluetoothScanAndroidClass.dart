@@ -168,13 +168,9 @@ class BluetoothScanAndroidClass{
     Map<String, List<int>> IL_RSSI_VALUES = {};
     Map<String, List<double>> IL_RSSI_WEIGHT = {};
     Map<String, double> IL_RSSI_AVERAGE = {};
-
-
     String closestDeviceDetails = "";
-
     print("Starting scan...");
     startScan(); // Ensure this function is implemented and starts the Bluetooth scan
-
     StreamSubscription? subscription;
     try {
       // Listen to the stream continuously
@@ -232,6 +228,15 @@ class BluetoothScanAndroidClass{
 
 
 
+  }
+  Map<String, List<int>> getDeviceWithRssi(){
+    return rssiValues;
+  }
+  Map<String, double> getDeviceWithAverage(){
+    return rssiAverage;
+  }
+  Map<String, String> getDeviceName(){
+    return deviceNames;
   }
 
 
@@ -317,7 +322,58 @@ class BluetoothScanAndroidClass{
     }
 
   }
+  void listenToScanUpdatesWhileFingerPrinting(Map<String, beacon> apibeaconmap) {
+    startScan();
+    String deviceMacId = "";
+    // Start listening to the stream continuously
+    _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
+      BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
+      if(apibeaconmap.containsKey(deviceDetails.DeviceName)) {
+        print("device name: ${deviceDetails.DeviceName}");
+        deviceMacId = deviceDetails.DeviceAddress;
+        deviceNames[deviceDetails.DeviceName] = deviceDetails.DeviceName;
+        rssiValues.putIfAbsent(deviceDetails.DeviceName, () => []);
+        rssiWeight.putIfAbsent(deviceDetails.DeviceName, () => []);
+        rssiValues[deviceDetails.DeviceName]!.add(int.parse(deviceDetails.DeviceRssi));
+        rssiWeight[deviceDetails.DeviceName]!.add(getWeight(getBinNumber(int.parse(deviceDetails.DeviceRssi).abs())));
+        if (rssiValues[deviceDetails.DeviceName]!.length > 7) {
+          rssiValues[deviceDetails.DeviceName]!.removeAt(0);
+        }
+        if(rssiWeight[deviceDetails.DeviceName]!.length > 7){
+          rssiWeight[deviceDetails.DeviceName]!.removeAt(0);
+        }
+        rssiAverage = calculateAverageFromRssi(rssiValues,deviceNames,rssiWeight);
+        closestDeviceDetails = findLowestRssiDevice(rssiAverage);
+      }
+    }, onError: (error) {
+      print('Error receiving device updates: $error');
+    });
 
+    if(isScanning) {
+      Timer.periodic(Duration(seconds: 2), (timer) {
+        if (rssiValues.isNotEmpty) {
+          rssiValues.forEach((key, value) {
+            if (deviceMacId != key) {
+              if (value.isNotEmpty) value.removeAt(0);
+            }
+          });
+        }
+
+        if (rssiWeight.isNotEmpty) {
+          rssiWeight.forEach((key, value) {
+            if (deviceMacId != key) {
+              if (value.isNotEmpty) value.removeAt(0);
+            }
+          });
+        }
+        // Calculate average RSSI values
+        Map<String, double> sumMap = calculateAverage();
+        // Sort the map by value (e.g., strongest signal first)
+        Map<String, double> sortedSumMap = sortMapByValue(sumMap);
+        sumMapCallBack = sortedSumMap;
+      });
+    }
+  }
 
 
   Map<String, List<double>> giveSumMapCallBack(){

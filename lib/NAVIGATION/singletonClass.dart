@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../IWAYPLUS/API/buildingAllApi.dart';
+import '../fingerprinting.dart';
 import 'BluetoothScanAndroidClass.dart';
 import 'buildingState.dart';
 
@@ -27,6 +28,7 @@ class SingletonFunctionController {
 
   BluetoothScanAndroidClass bluetoothScanAndroidClass = BluetoothScanAndroidClass();
   static Map<String, double> SC_IL_RSSI_AVERAGE = {};
+  Fingerprinting fingerprinting = Fingerprinting();
 
   BluetoothScanIOSClass bluetoothScanIOSClass = BluetoothScanIOSClass();
 
@@ -50,8 +52,6 @@ class SingletonFunctionController {
     // Mark the function as running and create a new Completer
     _isRunning = true;
     _completer = Completer<void>();
-
-
     var beaconData = await beaconapi().fetchBeaconData("65d9cacfdb333f8945861f0f");
     building.beacondata = beaconData;
     print("building.beacondata.length");
@@ -69,12 +69,12 @@ class SingletonFunctionController {
           print("entryprintifstate${key}");
           building.beacondata = beaconData;
           print("entryprintifstate${building.beacondata!.length}");
-        } else {
+        }else{
           print("entryprint${building.beacondata!.length}");
           building.beacondata = List.from(building.beacondata!)..addAll(beaconData);
           print("entryprint${building.beacondata!.length}");
         }
-        for (var beacon in beaconData) {
+        for (var beacon in beaconData){
           if (beacon.name != null) {
             apibeaconmap[beacon.name!] = beacon;
           }
@@ -82,6 +82,7 @@ class SingletonFunctionController {
         Building.apibeaconmap = apibeaconmap;
         print(buildingAllApi.allBuildingID);
         print(apibeaconmap);
+        fingerprinting.collectSensorDataEverySecond();
       })).then((value) async {
         print("blue statusssss");
         print(await FlutterBluePlus.isOn);
@@ -89,8 +90,9 @@ class SingletonFunctionController {
           // print("apibeaconmap");
           // print(apibeaconmap);
           // blueToothAndroid.listenToScanUpdates(apibeaconmap);
-          await bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap).then((value) {
+          await bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap).then((value){
             SC_LOCALIZED_BEACON = value;
+            fingerprinting.stopCollectingData();
             bluetoothScanAndroidClass.stopScan();
           });
 
@@ -100,12 +102,12 @@ class SingletonFunctionController {
         }else if(Platform.isIOS){
           print("isIOS");
           String resp = await BluetoothScanIOSClass.getInitialLocalizedDevice();
-
           //await btadapter.startScanningIOS(apibeaconmap);
         }
+       String nearestPoint= fingerprinting.findNearestLocation(fingerprinting.getRealData()["Beacons"],fingerprinting.getProcessedData());
+        print(fingerprinting.nearestNode(nearestPoint));
         //timer= Future.delayed((await FlutterBluePlus.isOn==true)?Duration(seconds:9):Duration(seconds:0));
       });
-
       // Simulate a long-running task
       print("Function completed.");
     } finally {

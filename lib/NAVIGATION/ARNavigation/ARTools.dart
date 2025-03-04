@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:ar_flutter_plugin_flutterflow/datatypes/node_types.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
+import 'package:iwaymaps/NAVIGATION/ARNavigation/Class/ARPathInfo.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../Cell.dart';
@@ -91,8 +92,10 @@ class ARTools{
 
   static List<List<int>> generatePath(List<List<int>> path) {
     List<List<int>> modifiedPath = [];
+    Map<int,List<List<int>>> indexPath = Map();
 
     for (int i = 0; i < path.length - 1; i++) {
+      List<List<int>> indexList = [];
       int x1 = path[i][0], y1 = path[i][1];
       int x2 = path[i + 1][0], y2 = path[i + 1][1];
 
@@ -101,26 +104,28 @@ class ARTools{
         int step = y1 < y2 ? 1 : -1;
         for (int y = y1; y != y2; y += step) {
           modifiedPath.add([x1, y]);
+          indexList.add([x1, y]);
         }
       } else if (y1 == y2) {
         // Horizontal movement
         int step = x1 < x2 ? 1 : -1;
         for (int x = x1; x != x2; x += step) {
           modifiedPath.add([x, y1]);
+          indexList.add([x,y1]);
         }
       }
+      indexPath[i] = indexList;
     }
     // Add the last point
     modifiedPath.add(path.last);
+    ARPathinfo.arIndexPath = indexPath;
+    print("ARPathinfo().modifiedPath ${ARPathinfo.arIndexPath}");
 
     return modifiedPath;
   }
 
   static List<List<double>> realWorldARPathCoordinates(List<List<int>> absPathCRD,List<int> userCRD,double marginAngle){
-
-    print("marginAngleforloop2 ${marginAngle}");
     List<List<double>> realWorldPath = [];
-
     for(int i=0 ; i<absPathCRD.length ; i++){
       int xC = absPathCRD[i][0];
       int zC = absPathCRD[i][1];
@@ -132,6 +137,22 @@ class ARTools{
     }
     return realWorldPath;
   }
+
+  static List<List<double>> singleRealWorldARPathCoordinates(List<List<int>> absPathCRD,double marginAngle){
+    List<List<double>> realWorldPath = [];
+    for(int i=0 ; i<absPathCRD.length ; i++){
+      int xC = absPathCRD[i][0];
+      int zC = absPathCRD[i][1];
+
+      double newX = xC * cos(marginAngle) + zC * sin(marginAngle);
+      double newZ = -xC * sin(marginAngle) + zC * cos(marginAngle);
+
+      realWorldPath.add([newX, newZ]);
+    }
+    return realWorldPath;
+
+  }
+
 
 
 

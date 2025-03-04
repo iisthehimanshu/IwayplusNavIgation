@@ -7,29 +7,23 @@ import 'package:ar_flutter_plugin_flutterflow/managers/ar_anchor_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_location_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_object_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_session_manager.dart';
-import 'package:ar_flutter_plugin_flutterflow/models/ar_anchor.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_node.dart';
 import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
 import 'package:arkit_plugin/arkit_plugin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_beep/flutter_beep.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_compass/flutter_compass.dart';
-import 'package:flutter_localization/flutter_localization.dart';
 import 'package:geodesy/geodesy.dart';
 import 'package:iwaymaps/IWAYPLUS/Elements/HelperClass.dart';
 import 'package:iwaymaps/NAVIGATION/ARNavigation/ARTools.dart';
+import 'package:iwaymaps/NAVIGATION/ARNavigation/Class/ARPathInfo.dart';
 import 'package:iwaymaps/NAVIGATION/navigationTools.dart';
-import 'package:iwaymaps/path_snapper.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import '../../IWAYPLUS/Elements/locales.dart';
-import '../../IWAYPLUS/websocket/UserLog.dart';
 import '../APIMODELS/landmark.dart';
 import '../Cell.dart';
-import '../ELEMENTS/DirectionHeader.dart';
 import '../MotionModel.dart';
 import '../Navigation.dart';
 import '../UserState.dart';
@@ -76,6 +70,7 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
   }
 
   String detectionText = "";
+  int counter = 0;
 
 
   @override
@@ -96,17 +91,21 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
           Text(detectionText),
 
           FloatingActionButton(
-            child: Icon(Icons.ac_unit),
             onPressed: (){
-              clearNodes();
+              renderIndexPath(counter);
+              setState(() {
+                counter = counter+1;
+              });
             },
+
+            child: Icon(Icons.area_chart_outlined),
+            shape: RoundedRectangleBorder(
+              borderRadius:
+              BorderRadius.circular(25.0), // Change radius here
+            ),
+            backgroundColor: Color(0xff),
           ),
-          FloatingActionButton(
-            child: Icon(Icons.ac_unit),
-            onPressed: (){
-              reRenderPath(arObjectManager, realWorldARPathCoordinates);
-            },
-          ),
+
 
         ],
       ),
@@ -198,6 +197,9 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
 
   double check1turnAngleWRTN = 0.0;
 
+  int proximityCounter = 5;
+  int initialProximityCounter = 0;
+  late Timer distanceTimer;
 
 
 
@@ -222,27 +224,7 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
       print(value.y);
     });
 
-
-    // directionLenList2.add((tools.calculateDistance([widget.user.coordX,widget.user.coordY],[turnPoints[0].x,turnPoints[0].y])/4).toInt());
-    // directionDirectionList.add("front");
-
-    // for(int i=0 ; i<turnPoints.length-1 ; i++){
-    //   print("turn $i ${tools.calculateDistance([turnPoints[i].x,turnPoints[i].y], [turnPoints[i+1].x,turnPoints[i+1].y])}");
-    //   directionLenList2.add((tools.calculateDistance([turnPoints[i].x,turnPoints[i].y], [turnPoints[i+1].x,turnPoints[i+1].y])/4).toInt());
-    //   widget.PathState.directions.forEach((value){
-    //     if(value.x==turnPoints[i].x && value.y==turnPoints[i].y){
-    //       print(value.turnDirection);
-    //       directionDirectionList.add(value.turnDirection!);
-    //       objectRotation = ARTools.getObjectRotation(value.turnDirection!)!;
-    //     }
-    //   });
-    // }
-    //
-    // print("directionLenList2 ${directionLenList2}");
-    // print("directionLenList2 ${directionDirectionList}");
-
     if(widget.user.coordX == widget.PathState.sourceX && widget.user.coordY == widget.PathState.sourceY){
-      print("Iniff");
       List<double> newpointB = [];
       newpointB.add(turnPoints[0].lat);
       newpointB.add(turnPoints[0].lng);
@@ -258,138 +240,116 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
       marginAngle = (360 - ((turnAngleWRTN-20) - userDirectionWRTN))/180*3.14;
       print("marginAngle ${marginAngle} ${turnAngleWRTN} $userDirectionWRTN");
     }
-    print("turnPoints.length ${turnPoints.length}");
 
-
-
-    print("marginAngleforloop ${marginAngle}");
     for(int i=0 ; i<turnPoints.length ; i++){
         pointB.clear();
         pointB.add(turnPoints[i].lat);
         pointB.add(turnPoints[i].lng);
         if(i==1){
           check1turnAngleWRTN = tools.calculateBearing(pointA, pointB);
-          setState(() {
-
-          });
+          setState(() {});
         }
-        print("forPathX ${forPathX}");
-        print("turnpoints ${turnPoints[i].x} ${turnPoints[i].y}");
 
         int zC = ((turnPoints[i].x - forPathX[0])/3.2).toInt();
         int xC = (((turnPoints[i].y - forPathX[1])/3.2)*-1).toInt();
-        print("zCXC ${zC} ${xC}");
 
         double newX = xC*cos(marginAngle) + zC*sin(marginAngle);
         double newZ = -xC*sin(marginAngle) + zC*cos(marginAngle);
-        print("newX $newX $newZ");
         absoluteARPathCoordinates.add([xC,zC]);
         realWorldARPathCoordinates.add([newX,newZ]);
-        // ARNode newNode1 = ARNode(
-        //   type: NodeType.webGLB,
-        //   uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
-        //   scale: Vector3(0.5, 0.5, 0.5),
-        //   position: Vector3(newX,-1,newZ), // Front
-        // );
-        // await arObjectManager.addNode(newNode1);
-      }
+    }
 
 
     //for last turn means adding destination coord for last turn object render
-    print("widget.turnPoint ${turnPoints[turnPoints.length-1].x} ${turnPoints[turnPoints.length-1].y}");
-    print("widget.PathState.destinationX ${widget.PathState.destinationX} ${widget.PathState.destinationY}");
     int zC = ((widget.PathState.destinationX - forPathX[0])/3.2).ceil().toInt();
     int xC = (((widget.PathState.destinationY - forPathX[1])/3.2)*-1).ceil().toInt();
-    print("zCXC ${zC} ${xC}");
     double newX = xC*cos(marginAngle) + zC*sin(marginAngle);
     double newZ = -xC*sin(marginAngle) + zC*cos(marginAngle);
-    print("newX $newX $newZ");
     absoluteARPathCoordinates.add([xC,zC]);
     realWorldARPathCoordinates.add([newX,newZ]);
     modifiedPath = ARTools.generatePath(absoluteARPathCoordinates);
-    print("absoluteARPathCoordinates $absoluteARPathCoordinates ${absoluteARPathCoordinates.length}");
-    print("modifiedPath $modifiedPath");
-    modifiedPath.removeWhere((point) =>
-        absoluteARPathCoordinates.any((value) => value[0] == point[0] && value[1] == point[1])
-    );
-    // print("finalremovedList $modifiedPath");
 
-    print("realWorldARPathCoordinates $realWorldARPathCoordinates ${realWorldARPathCoordinates.length}");
+    print("wilsonmodifiedPath $modifiedPath");
+
+    // modifiedPath.removeWhere((point) =>
+    //     absoluteARPathCoordinates.any((value) => value[0] == point[0] && value[1] == point[1])
+    // );
+
     realWorldModifiedPath = ARTools.realWorldARPathCoordinates(modifiedPath, forPathX, marginAngle);
-    print("realWorldModifiedPath $realWorldModifiedPath");
-
-
 
     for(int i=0 ; i<absoluteARPathCoordinates.length-1; i++){
       rotationARValueList.add(ARTools.giveRotationDouble(absoluteARPathCoordinates[i+1][1].toInt(),absoluteARPathCoordinates[i][1].toInt(),absoluteARPathCoordinates[i+1][0].toInt(),absoluteARPathCoordinates[i][0].toInt())!);
     }
-    // print("absoluteARPathCoordinates $absoluteARPathCoordinates ${absoluteARPathCoordinates.length}");
-    // print("realWorldARPathCoordinates $realWorldARPathCoordinates ${realWorldARPathCoordinates.length}");
-    // print("rotationARValueList $rotationARValueList");
-
-
 
     for(int i=0 ; i<realWorldModifiedPath.length-1 ; i++){
       if(Platform.isAndroid) {
-        ARNode newNode = ARNode(
+        ARNode newNode$i = ARNode(
           type: NodeType.webGLB,
           uri: "https://github.com/Wilson-Daniel/3DModels/raw/refs/heads/main/sphere.fbx.glb",
           scale: Vector3(0.2, 0.2, 0.2),
           position: Vector3(
               realWorldModifiedPath[i][0], -1, realWorldModifiedPath[i][1]),
         );
-        await arObjectManager.addNode(newNode);
+        // await arObjectManager.addNode(newNode$i);
+        addedNodes.add(newNode$i);
       }else if(Platform.isIOS){
-        final node = ARKitReferenceNode(
-          url: "https://github.com/Wilson-Daniel/3DModels/raw/refs/heads/main/sphere.fbx.glb",
-          scale: Vector3(0.2, 0.2, 0.2),
-          position: Vector3(realWorldModifiedPath[i][0], -1, realWorldModifiedPath[i][1]), // Adjust scale if needed
-        );
-        this.arkitController.add(node);
+        // final node = ARKitReferenceNode(
+        //   url: "https://github.com/Wilson-Daniel/3DModels/raw/refs/heads/main/sphere.fbx.glb",
+        //   scale: Vector3(0.2, 0.2, 0.2),
+        //   position: Vector3(realWorldModifiedPath[i][0], -1, realWorldModifiedPath[i][1]), // Adjust scale if needed
+        // );
+        // this.arkitController.add(node);
       }
     }
 
 
 
-    for (int i = 0; i < realWorldARPathCoordinates.length-1; i++) {
-      print("inIfPart");
-      if(Platform.isAndroid) {
-        ARNode newNode$i = ARNode(
-          type: NodeType.webGLB,
-          uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
-          scale: Vector3(0.4, 0.4, 0.4),
-          rotation: Vector4(
-              0.0, 1.0, 0.0, rotationARValueList[i] + marginAngle),
-          position: Vector3(realWorldARPathCoordinates[i][0], -1,
-              realWorldARPathCoordinates[i][1]),
-        );
-        bool? isAdded = await arObjectManager.addNode(newNode$i);
-        if (isAdded == true) {
-          addedNodes.add(newNode$i); // Store the reference of added node
-        }
-      }else if(Platform.isIOS){
-        final node = ARKitReferenceNode(
-          url: "https://github.com/Wilson-Daniel/3DModels/raw/refs/heads/main/sphere.fbx.glb",
-          scale: Vector3(0.2, 0.2, 0.2),
-          position: Vector3(realWorldModifiedPath[i][0], -1, realWorldModifiedPath[i][1]), // Adjust scale if needed
-        );
-        this.arkitController.add(node);
-      }
 
-    }
+
+    // for (int i = 0; i < realWorldARPathCoordinates.length-1; i++) {
+    //   print("inIfPart");
+    //   if(Platform.isAndroid) {
+    //     ARNode newNode$i = ARNode(
+    //       type: NodeType.webGLB,
+    //       uri: "https://github.com/Wilson-Daniel/Assignment/raw/refs/heads/main/direction_arrow.glb",
+    //       scale: Vector3(0.4, 0.4, 0.4),
+    //       rotation: Vector4(
+    //           0.0, 1.0, 0.0, rotationARValueList[i] + marginAngle),
+    //       position: Vector3(realWorldARPathCoordinates[i][0], -1,
+    //           realWorldARPathCoordinates[i][1]),
+    //     );
+    //     bool? isAdded = await arObjectManager.addNode(newNode$i);
+    //     if (isAdded == true) {
+    //       addedNodes.add(newNode$i); // Store the reference of added node
+    //     }
+    //   }else if(Platform.isIOS){
+    //     final node = ARKitReferenceNode(
+    //       url: "https://github.com/Wilson-Daniel/3DModels/raw/refs/heads/main/sphere.fbx.glb",
+    //       scale: Vector3(0.2, 0.2, 0.2),
+    //       position: Vector3(realWorldModifiedPath[i][0], -1, realWorldModifiedPath[i][1]), // Adjust scale if needed
+    //     );
+    //     this.arkitController.add(node);
+    //   }
+    //
+    // }
+
+
     // List<List<int>> modifiedPath = ARTools.generatePath(absoluteARPathCoordinates);
     // print("modifiedPath $modifiedPath");
     // List<List<double>> realWorldModifiedPath = ARTools.realWorldARPathCoordinates(modifiedPath, forPathX, marginAngle);
     // print("realWorldModifiedPath $realWorldModifiedPath");
     // List<double> modifiedRotationARValueList = ARTools.generateRotationARValues(modifiedPath);
     // print("modifiedRotationARValueList ${modifiedRotationARValueList}");
-    Timer.periodic(Duration(seconds: 1), (timer) {
+    distanceTimer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (addedNodes.isNotEmpty) {
-        print("addedNodes${addedNodes[1].position!}");
-        checkProximity(addedNodes[1], 1);  // Check proximity for the first node
+        print("addedNodes${addedNodes[proximityCounter].position!}");
+        checkProximity(addedNodes[proximityCounter], 3);  // Check proximity for the first node
       }
     });
   }
+
+
+
   Future<void> checkProximity(ARNode node, double threshold) async {
     print("checkingProximity");
     // Get the camera position
@@ -407,7 +367,16 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
     if(distance != null) {
       if (distance <= threshold) {
         detectionText = "You're very close $distance";
+
         print("You're very close to the object! Distance: $distance meters");
+        if((proximityCounter+=5) <realWorldModifiedPath.length-1) {
+          initialProximityCounter = proximityCounter;
+          proximityCounter += 5;
+          setState(() {});
+        }else{
+          distanceTimer.cancel();
+          HelperClass.showToast("distanceTimer cancel()");
+        }
         // You can trigger any action here, like displaying a message
       } else {
         detectionText = "You're too far $distance";
@@ -418,6 +387,14 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
     }
   }
 
+
+  Future<void> renderNextNodes(int initialProximityCounter,int proximityCounter){
+    // for(int i=initialProximityCounter  ; i<=proximityCounter ; i++){
+    //   List<ARNode> list = addedNodes.getRange(initialProximityCounter, proximityCounter);
+    //   await arObjectManager.addNode(newNode$i);
+    // }
+  }
+
   Future<void> clearNodes() async {
     for (ARNode node in addedNodes) {
       await arObjectManager.removeNode(node);
@@ -425,19 +402,54 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
     addedNodes.clear();  // Clear the list after removing nodes
   }
 
-  Future<void> reRenderPath(ARObjectManager arObjectManager, List<List<double>> realWorldModifiedPath) async {
-    print("reRenderPath");
-    for(int i=(realWorldModifiedPath.length/2).toInt() ; i<realWorldModifiedPath.length-1 ; i++){
-      ARNode newNode$i = ARNode(
+  late double reformTurnAngleWRTN;
+  Future<void> renderIndexPath(int counter) async {
+    print("renderIndexPath");
+
+
+    if(counter == 0){
+      List<double> point1UL = [];
+      point1UL.add(widget.user.lat);
+      point1UL.add(widget.user.lng);
+      List<double> point2TL = [];
+      point2TL.add(turnPoints[counter+1].lat);
+      point2TL.add(turnPoints[counter+1].lng);
+      reformTurnAngleWRTN = tools.calculateBearing(point1UL, point2TL);
+      print("reformTurnAngleWRTN$reformTurnAngleWRTN");
+    }else{
+      List<double> point1UL = [];
+      point1UL.add(turnPoints[counter].lat);
+      point1UL.add(turnPoints[counter].lng);
+      List<double> point2TL = [];
+      point2TL.add(turnPoints[counter+1].lat);
+      point2TL.add(turnPoints[counter+1].lng);
+      reformTurnAngleWRTN = tools.calculateBearing(point1UL, point2TL);
+      print("reformTurnAngleWRTN$reformTurnAngleWRTN");
+    }
+
+    //marginAngle = (360 - ((reformTurnAngleWRTN-20) - userDirectionWRTN))/180*3.14;
+
+
+
+
+
+    Map<int,List<List<int>>> arIndexPath = ARPathinfo.arIndexPath;
+    List<List<int>> currPath = arIndexPath[counter]!;
+    List<List<double>> reformedCurrPath = ARTools.singleRealWorldARPathCoordinates(currPath, marginAngle);
+
+    print("reformedCurrPath$reformedCurrPath");
+    print(realWorldModifiedPath);
+    print(realWorldARPathCoordinates);
+
+
+    for(int i=0 ; i<reformedCurrPath.length ; i++){
+      ARNode newNode = ARNode(
         type: NodeType.webGLB,
         uri: "https://github.com/Wilson-Daniel/3DModels/raw/refs/heads/main/sphere.fbx.glb",
         scale: Vector3(0.2, 0.2, 0.2),
-        position: Vector3(realWorldModifiedPath[i][0], -1.2, realWorldModifiedPath[i][1]),
+        position: Vector3(reformedCurrPath[i][0], -1.2, reformedCurrPath[i][1]),
       );
-      bool? isAdded = await arObjectManager.addNode(newNode$i);
-      if (isAdded==true) {
-        addedNodes.add(newNode$i);  // Store the reference of added node
-      }
+      await arObjectManager.addNode(newNode);
     }
   }
 

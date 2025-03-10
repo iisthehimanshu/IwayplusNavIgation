@@ -17,7 +17,9 @@ import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
 import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
 import 'package:iwaymaps/NAVIGATION/API/RefreshTokenAPI.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/WayPointModelBOX.dart';
+import '../NAVIGATION/API/DataVersionApiMultiple.dart';
 import '../NAVIGATION/BluetoothScanAndroid.dart';
+import '../NAVIGATION/DATABASE/BOXES/DataVersionMultipleLocalModelBOX.dart';
 import '/IWAYPLUS/Elements/HelperClass.dart';
 import '/IWAYPLUS/Elements/UserCredential.dart';
 import '/IWAYPLUS/Elements/buildingCard.dart';
@@ -62,12 +64,15 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   // Replace with your actual document ID
   bool checkedForBuildingAllUpdated = false;
   bool isLocating=false;
+  final DataBox = DataVersionMultipleLocalModelBOX.getData();
+
 
 
   @override
   void initState(){
     super.initState();
     NotificationSocket.receiveMessage();
+    DataVersionApiMultiple().fetchDataVersionApiData();
     // checkForUpdate();
     //startScan();
     getLocs();

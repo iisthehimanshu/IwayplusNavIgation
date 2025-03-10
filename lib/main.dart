@@ -13,6 +13,7 @@ import 'package:iwaymaps/IWAYPLUS/BuildingInfoScreen.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/DataVersionMultipleLocalModel.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
 import 'package:path_provider/path_provider.dart';
@@ -82,6 +83,8 @@ Future<void> localDBInitialsation() async {
   await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
   Hive.registerAdapter(LocalNotificationAPIDatabaseModelAdapter());
   await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
+  Hive.registerAdapter(DataVersionMultipleLocalModelAdapter());
+  await Hive.openBox<DataVersionMultipleLocalModel>('DataVersionLocalMultipleModelFile');
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');
   await Hive.openBox('Filters');
@@ -153,11 +156,7 @@ class _MobileAppState extends State<MobileApp> {
 
     await locBox.put('location', (status.isGranted)?true:false);
     if (status.isGranted) {
-
       print('location permission granted');
-
-
-
     } else if(status.isPermanentlyDenied) {
       print('location permission is permanently granted');
     }else{
@@ -175,7 +174,7 @@ class _MobileAppState extends State<MobileApp> {
     }else if(isAndroid){
       print("Android");
     }
-requestLocationPermission();
+    requestLocationPermission();
     return MaterialApp(
       title: "IWAYPLUS",
       home: FutureBuilder<bool>(

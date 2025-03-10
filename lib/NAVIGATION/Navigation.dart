@@ -1815,6 +1815,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         unableToFindLocation();
         return;
       }
+      print("providePinSelection $providePinSelection");
 
       if (providePinSelection) {
         SingletonFunctionController.building.listOfNearbyLandmarksToLocalize =
@@ -2928,7 +2929,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       await DataVersionApi()
           .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
     }catch(e){
-      print(" APICALLS DataVersionApi API TRY-CATCH");
+      print("APICALLS DataVersionApi API TRY-CATCH");
     }
     _updateProgress();
 
@@ -3141,7 +3142,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
 
   Future<void> localizeUser({bool speakTTS = true,String beacon=""}) async {
-
     speak("${LocaleData.searchingyourlocation.getString(context)}",
         _currentLocale);
     setState(() {
@@ -3249,6 +3249,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   }
   String firstValue = "";
+  LatLng lastExplorePosition = LatLng(0.0, 0.0);
 
   Future<void> realTimeReLocalizeUser(HashMap<String, beacon> apibeaconmap) async {
 
@@ -3261,20 +3262,27 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     sumMap.forEach((key, value) {
       List<double> position = [];
-      if(SingletonFunctionController.apibeaconmap[key]! != null) {
+      if(SingletonFunctionController.apibeaconmap[key]! != null ) {
         if (SingletonFunctionController.apibeaconmap[key]!.coordinateX! != null) {
+
           position = tools.localtoglobal(
               SingletonFunctionController.apibeaconmap[key]!.coordinateX!, SingletonFunctionController.apibeaconmap[key]!.coordinateY!,
               SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[key]!.sId! ??
                   buildingAllApi.getStoredString()]);
-          _exploreModeDebugBeaconMarker.add(
-            Marker(
-              markerId: MarkerId("${SingletonFunctionController.apibeaconmap[key]!.name!}${position[0]}, ${position[1]}"),
-              position: LatLng(position[0], position[1]),
-              icon: BitmapDescriptor.fromBytes(iconMarker),
-              onTap: () {},
-            ),
-          );
+          if(lastExplorePosition.latitude != position[0] && lastExplorePosition.longitude != position[1]) {
+            // _exploreModeDebugBeaconMarker.add(
+            //   Marker(
+            //     markerId: MarkerId(
+            //         "${SingletonFunctionController.apibeaconmap[key]!
+            //             .name!}${position[0]}, ${position[1]}"),
+            //     position: LatLng(position[0], position[1]),
+            //     icon: BitmapDescriptor.fromBytes(iconMarker),
+            //     onTap: () {},
+            //   ),
+            // );
+            lastExplorePosition = LatLng(position[0], position[1]) ;
+            setState(() {});
+          }
         }
       }
     });
@@ -3287,6 +3295,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     if (sumMap.isNotEmpty) {
       Map<String, double> sortedsumMap = sortMapByValue(sumMap);
       firstValue = sortedsumMap.entries.first.key;
+      print("wilsonsortedsumMap $sortedsumMap");
       final Uint8List iconMarker = await getImagesFromMarker('assets/EM_CurrentLocationMarker.png', 85);
       if (lastBeaconValue != firstValue && sortedsumMap.entries.first.value >= 0.4) {
         SingletonFunctionController.btadapter.stopScanning();
@@ -3296,10 +3305,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           getallnearestInfo = tools.localizefindAllNearbyLandmark(apibeaconmap[firstValue]!, value.landmarksMap!);
           getallnearestInfo.forEach((landmark) {
             List<double> value = [];
+
             if(landmark.coordinateX != null) {
               value = tools.localtoglobal(landmark.coordinateX!, landmark.coordinateY!, SingletonFunctionController.building.patchData[landmark.sId ?? buildingAllApi.getStoredString()]);
             }
-
+            print("wilsonvalues $value");
             _exploreModeMarker.add(
               Marker(
                 markerId: MarkerId("${landmark.name}${value[0]}, ${value[1]}"),
@@ -11434,7 +11444,7 @@ bool _isPlaying=false;
         value = value + 45;
       }
       if ((value >= 315 && value <= 360) || (value >= 0 && value <= 45)) {
-        Vibration.vibrate();
+        //Vibration.vibrate();
         speak("${landmark.name} is on your front", _currentLocale);
       }
     }
@@ -12824,7 +12834,9 @@ bool _isPlaying=false;
                         if (!user.isnavigating && !isLocalized) {
                           SingletonFunctionController.btadapter.stopScanning();
                           if (Platform.isAndroid) {
+                            print("Platform.isAndroid");
                             bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap).then((value){
+                              print("Platform.isAndroid then $value");
                               setState(() {
                                 isLocalized = false;
                               });
@@ -12906,8 +12918,8 @@ bool _isPlaying=false;
                           onPressed: () async {
 
                             if (user.initialallyLocalised) {
-                              Vibration.vibrate();
-                              FlutterBeep.beep();
+                              //Vibration.vibrate();
+                              //FlutterBeep.beep();
                               setState(() {
                                 if (isLiveLocalizing) {
                                   isLiveLocalizing = false;
@@ -12922,14 +12934,12 @@ bool _isPlaying=false;
                                   lastBeaconValue = "";
                                 } else {
                                   speak(
-                                      "${LocaleData.exploremodenabled.getString(context)}",
-                                      _currentLocale);
-                                  exploremodeLandmarkTimer = Timer.periodic(Duration(seconds: 2), (Timer t) => identifyFrontLandmark());
+                                      "${LocaleData.exploremodenabled.getString(context)}", _currentLocale);
+                                  exploremodeLandmarkTimer = Timer.periodic(Duration(seconds: 5), (Timer t) => identifyFrontLandmark());
                                   isLiveLocalizing = true;
-                                  HelperClass.showToast(
-                                      "Explore mode enabled");
+                                  HelperClass.showToast("Explore mode enabled");
                                   _exploreModeTimer = Timer.periodic(
-                                      Duration(milliseconds: 4000),
+                                      Duration(milliseconds: 5000),
                                           (timer) async {
                                         PB_startAnimation();
                                         if (Platform.isAndroid) {

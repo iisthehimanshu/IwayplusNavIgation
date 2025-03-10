@@ -72,6 +72,8 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
   @override
   void initState() {
     super.initState();
+    print("intistateeee");
+    print(widget.venueTitle);
     print(widget.receivedAllBuildingList);
    // allBuildingID["65d9cacfdb333f8945861f0f"] =  g.LatLng(28.9469, 77.1011);
     apiCall();

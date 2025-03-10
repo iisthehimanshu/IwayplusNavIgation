@@ -65,6 +65,7 @@ import 'ELEMENTS/DirectionHeader.dart';
 import 'ELEMENTS/DirectionInstruction.dart';
 import 'ELEMENTS/ExploreModeWidget.dart';
 import 'Elements/AccessiblePathButton.dart';
+import 'GPSStreams/GPSTracking.dart';
 import 'GlobalAnnotation/global_annotation_controller.dart';
 import 'GlobalAnnotation/global_rendering.dart';
 import 'UserState.dart';
@@ -443,6 +444,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   //--------------------------------------------------------------------------------------
   double _progressValue = 0.0;
   final double targetZoom = 22.0;
+
+  final GpsService gpsTrackingService = GpsService();
+  Completer<GoogleMapController> gpsTrackingController = Completer();
+  LatLng gpsTrackingUserPosition = LatLng(28.6139, 77.2090); // Default location (Delhi)
+  Set<Marker> gpsTrackingMarker = {};
+
+
   @override
   void initState() {
     super.initState();
@@ -562,8 +570,48 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         }),
       );
     } catch (E) {}
+    navigationStartFunction();
     // fetchlist();
     // filterItems();
+  }
+
+  Future<void> navigationStartFunction() async {
+    Uint8List iconMarker = await getImagesFromMarker('assets/GolfCart.png', 155);
+
+    Position? previousPosition;
+    double rotation = 0;
+
+    await gpsTrackingService.startTracking();
+    gpsTrackingService.gps.positionStream.listen((Position position) {
+      if (previousPosition != null) {
+        rotation = Geolocator.bearingBetween(
+          previousPosition!.latitude,
+          previousPosition!.longitude,
+          position.latitude,
+          position.longitude,
+        );
+      }
+      previousPosition = position;
+
+      setState(() {
+        gpsTrackingUserPosition = LatLng(position.latitude, position.longitude);
+        gpsTrackingMarker?.clear();
+        gpsTrackingMarker?.add(Marker(
+          markerId: MarkerId("userLocation"),
+          position: gpsTrackingUserPosition,
+          icon: BitmapDescriptor.fromBytes(iconMarker),
+        ));
+      });
+
+      gpsTrackingMoveCamera();
+    });
+  }
+
+  Future<void> gpsTrackingMoveCamera() async {
+    final GoogleMapController controller = await gpsTrackingController.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(target: gpsTrackingUserPosition, zoom: 16),
+    ));
   }
 
   // Start the animation loop
@@ -12471,7 +12519,7 @@ bool _isPlaying=false;
                     .union(_markers)
                     .union(focusturnArrow)
                     .union(Markers)
-                    .union(restBuildingMarker).union(debugMarker).union(nearbyLandmarks.values.toSet()).union(_exploreModeMarker)
+                    .union(restBuildingMarker).union(debugMarker).union(nearbyLandmarks.values.toSet()).union(_exploreModeMarker).union(gpsTrackingMarker)
                 .union(_exploreModeDebugBeaconMarker),
                 buildingsEnabled: false,
                 compassEnabled: false,

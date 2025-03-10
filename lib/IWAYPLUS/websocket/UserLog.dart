@@ -38,7 +38,9 @@ class wsocket{
     "userPosition": {
       "X": 0,
       "Y": 0,
-      "floor": 0
+      "floor": 0,
+      "latitude":0.0,
+      "longitude":0.0,
     },
     "path": {
       "source": "",

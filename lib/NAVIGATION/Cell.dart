@@ -1,4 +1,4 @@
-import 'package:geolocator/geolocator.dart';
+import 'GPSService.dart';
 
 class Cell{
   int node;
@@ -13,7 +13,7 @@ class Cell{
   int numCols;
   bool imaginedCell;
   int? imaginedIndex;
-  Position? position;
+  Location? position;
 
   Cell(this.node, this.x, this.y, this.move, this.lat, this.lng,this.bid, this.floor, this.numCols, {this.ttsEnabled = true, this.imaginedCell = false, this.imaginedIndex, this.position});
 

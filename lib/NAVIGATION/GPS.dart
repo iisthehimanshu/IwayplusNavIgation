@@ -29,10 +29,13 @@ class GPS {
     }
 
     // Start GPS subscription
+    DateTime time = DateTime.now();
     _gpsSubscription = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.bestForNavigation),
     ).listen(
           (Position position) {
+            print("got gps position in ${time.difference(DateTime.now()).inSeconds} seconds");
+            time = DateTime.now();
         _positionController.add(position); // Forward position updates to the stream
       },
     );

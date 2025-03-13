@@ -2,32 +2,37 @@ import 'dart:convert';
 
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import '/IWAYPLUS/Elements/HelperClass.dart';
+
+import '../../../../NAVIGATION/config.dart';
+import '../../../Elements/HelperClass.dart';
 class SignUpAPI{
 
-  final String baseUrl = "https://maps.iwayplus.in/auth/signup";
+  final String xaccesstoken = AppConfig.Authorization;
 
   Future<bool> signUP(String username,String name, String password,String OTP) async {
+    final String baseUrl = "${AppConfig.baseUrl}/auth/signup";
     final Map<String, dynamic> data = {
       "username": username,
       "name": name,
       "password": password,
       "otp": OTP,
-      "appId":"com.iwayplus.navigation"
+      "appId":"com.iwayplus.candor"
     };
 
     final response = await http.post(
       Uri.parse(baseUrl),
-      body: json.encode(data),
+      body: EncryptedbodyForApi(data),
       headers: {
         'Content-Type': 'application/json',
+        'x-access-token': xaccesstoken,
       },
     );
-
+    print('---response--- ${response.statusCode}');
+    print(response.body);
     if (response.statusCode == 200) {
       var responseData = json.decode(response.body);
       if (responseData['status']) {
-        return true;
+       return true;
       } else {
         print("SignUpAPI--response.statusCode ${responseData['status']} ");
         HelperClass.showToast(responseData["message"]);
@@ -39,4 +44,9 @@ class SignUpAPI{
     }
     return false;
   }
+
+  Future<bool> checkUserExists(String username) async {
+    return false;
+  }
+
 }

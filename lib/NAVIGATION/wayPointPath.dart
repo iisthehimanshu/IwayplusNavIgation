@@ -2,8 +2,9 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:http/http.dart';
-import 'package:iwaymaps/NAVIGATION/navigationTools.dart';
 import 'package:iwaymaps/NAVIGATION/path.dart';
+
+import 'navigationTools.dart';
 
 
 class Graph {

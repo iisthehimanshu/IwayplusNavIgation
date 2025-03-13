@@ -5,30 +5,28 @@ import 'package:http/http.dart' as http;
 
 import '../../../../NAVIGATION/config.dart';
 
-
 class SendOTPAPI{
 
   final String baseUrl = "${AppConfig.baseUrl}/auth/otp/send";
-  final String xaccesstoken = AppConfig.xaccesstoken;
+  final String xaccesstoken = AppConfig.Authorization;
   Future<bool> sendOTP(String username) async {
     final Map<String, dynamic> data = {
       "username": username,
       "digits":4,
-      "appName":"IWAYMAPS"
+      "appName":"Speja"
     };
 
     final response = await http.post(
       Uri.parse(baseUrl),
-      body: json.encode(data),
+      body: EncryptedbodyForApi(data),
       headers: {
         'Content-Type': 'application/json',
         'x-access-token':xaccesstoken
       },
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return true;
-      // return HelperClass.showToast("OTP sent successfully");
     } else {
       print("SendOTPAPI--response.statusCode${response.statusCode} ${response.body}");
       return false;

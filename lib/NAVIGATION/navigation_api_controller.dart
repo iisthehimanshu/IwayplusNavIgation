@@ -1,9 +1,8 @@
-import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 import 'dart:math' as math;
-import '../IWAYPLUS/API/buildingAllApi.dart';
+import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
+
 import '../IWAYPLUS/API/slackApi.dart';
 import 'API/PatchApi.dart';
-import 'package:iwaymaps/NAVIGATION/buildingState.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
 import 'API/PolyLineApi.dart';
 import 'API/ladmarkApi.dart';
@@ -11,18 +10,18 @@ import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
 import 'UserState.dart';
+import 'buildingState.dart';
 import 'navigationTools.dart';
 
 class NavigationAPIController {
   Function createPatch = (patchDataModel value) {};
   Function createotherPatch = (String key, patchDataModel value) {};
   Function findCentroid = (List<Coordinates> vertices, String bid) {};
-
   Function createRooms = (polylinedata value, int floor){};
-
   Function createARPatch = (Map<int, geo.LatLng> coordinates){};
   Function createotherARPatch = (Map<int, geo.LatLng> coordinates, String bid){};
   Function createMarkers = (land landData, int floor, {String? bid}){};
+  List<String> LandmarkPool = [];
 
   NavigationAPIController(
       {required this.createPatch,
@@ -82,6 +81,7 @@ class NavigationAPIController {
       var otherLandmarkdata = await SingletonFunctionController.building.landmarkdata;
       otherLandmarkdata?.mergeLandmarks(landmarkData.landmarks);
     }
+    LandmarkPool.add(id);
 
     var coordinates = <int, geo.LatLng>{};
 
@@ -165,7 +165,6 @@ class NavigationAPIController {
       createotherARPatch(coordinates, id);
     }
   }
-
   Future<polylinedata> polylineAPIController(String id, bool selected) async {
     var polylineData = await PolyLineApi()
         .fetchPolyData(id: id);
@@ -174,14 +173,14 @@ class NavigationAPIController {
     SingletonFunctionController
         .building.numberOfFloors[id] =
         polylineData.polyline!.floors!.length;
-
     Building.numberOfFloorsDelhi[id] =
         polylineData.polyline!.floors!.map((element) {
           return tools.alphabeticalToNumerical(element.floor!);
         }).toList();
-    if(selected) {
+    if(selected){
       SingletonFunctionController.building.polyLineData = polylineData;
     }
+    print("createroomscalledfor${id} ${polylineData.polylineExist}");
     createRooms(polylineData, 0);
     SingletonFunctionController.building.floor[id] = 0;
     return polylineData;

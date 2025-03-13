@@ -79,11 +79,13 @@ class BLueToothClass {
     //  print("himanshu 3");
     FlutterBluePlus.scanResults.listen((results) async {
       // print("himanshu 4 $apibeaconmap");
+
       for (ScanResult result in results) {
         if(result.device.platformName.length > 2){
         //  print("himanshu 5 ${result}");
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
+
           wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
           if (apibeaconmap.containsKey(MacId)) {
             //print(MacId);
@@ -217,7 +219,7 @@ class BLueToothClass {
   void stopScanning() async{
     await FlutterBluePlus.stopScan();
     emptyBin();
-    _scanResultsSubscription.cancel();
+    // _scanResultsSubscription.cancel();
     _scanResults.clear();
     // _systemDevices.clear();
     priorityQueue.clear();
@@ -272,19 +274,28 @@ class BLueToothClass {
     } else {
       BIN[binnumber]![MacId] = 1 * weight[binnumber]!;
     }
-    //print("number of sample---${numberOfSample[MacId]}");
-  }
 
+
+    //print("number of sample---${numberOfSample[MacId]}");
+
+  }
   Map<String, double> calculateAverage(){
+
     //HelperClass.showToast("Bin ${BIN} \n number $numberOfSample");
+
     Map<String, double> sumMap = {};
+
     // Iterate over each inner map and accumulate the values for each string key
+
     BIN.values.forEach((innerMap) {
       innerMap.forEach((key, value) {
         sumMap[key] = (sumMap[key] ?? 0.0) + value;
       });
     });
+
+
     // Divide the sum by the number of values for each string key
+
     sumMap.forEach((key, sum) {
       int count = numberOfSample[key]!;
       sumMap[key] = sum / count;

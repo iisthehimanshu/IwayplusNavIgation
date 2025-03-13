@@ -230,9 +230,8 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:iwaymaps/NAVIGATION/buildingState.dart';
-import 'package:iwaymaps/NAVIGATION/pathState.dart';
 
+import 'APIMODELS/Building.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'Cell.dart';

@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
+import '../IWAYPLUS/Elements/HelperClass.dart';
+import 'Cell.dart';
 import 'GPS.dart';
-import 'NAVIGATION/Cell.dart';
-import 'NAVIGATION/navigationTools.dart';
+import 'GPSService.dart';
+import 'navigationTools.dart';
 
 class KalmanFilter {
   double? latitudeEstimate;
@@ -15,7 +16,7 @@ class KalmanFilter {
 
   KalmanFilter({this.variance = 1, this.processNoise = 0.05, this.measurementNoise = 0.5});
 
-  void applyFilter(double lat, double lng) {
+  void applyFilter(double lat, double lng){
     print("got latlng $lat,$lng");
     if (latitudeEstimate == null || longitudeEstimate == null) {
       latitudeEstimate = lat;
@@ -36,30 +37,37 @@ class KalmanFilter {
 }
 
 class PathSnapper {
-  late final List<Cell> path;
+  late List<Cell> path;
   final KalmanFilter _kalmanFilter = KalmanFilter();
-  double? accuracy;
 
   void setPath(List<Cell> singleCellListPath) {
     path = singleCellListPath;
   }
 
-  final _snappedCellController = StreamController<Cell>();
+  final _snappedCellController = StreamController<Map<String,dynamic>>();
   GPS gps = GPS();
 
   PathSnapper();
 
   // Stream of snapped cells
-  Stream<Cell> get snappedCellStream => _snappedCellController.stream;
+  Stream<Map<String,dynamic>> get snappedCellStream => _snappedCellController.stream;
 
   // Start listening to GPS updates
   Future<void> startGpsUpdates() async {
 
-    await gps.startGpsUpdates();
-    gps.positionStream.listen((position) {
-      processGpsData(position);
-      accuracy = position.accuracy;
+    await GPSService.checkLocationPermissions();
+    GPSService.locationStream.listen((location) {
+      print("path_snapper recieved gps location");
+      processGpsData(location);
+    }, onError: (error) {
+      print("Error receiving GPS data: $error");
     });
+
+    // await gps.startGpsUpdates();
+    // gps.positionStream.listen((position) {
+    //   print("got gps position");
+    //   processGpsData(position);
+    // });
   }
 
   // Stop listening to GPS updates
@@ -69,15 +77,15 @@ class PathSnapper {
   }
 
   // Process GPS data
-  void processGpsData(Position position) {
+  void processGpsData(Location position) {
     //_kalmanFilter.applyFilter(lat, lng);
     // var snapped = _snapToPath(
     //     _kalmanFilter.latitudeEstimate ?? lat,
     //     _kalmanFilter.longitudeEstimate ?? lng);
     var snapped = _snapToPath(position);
-    if (snapped != null) {
+      print("_snapToPath distance second $snapped");
       _snappedCellController.add(snapped);
-    }
+
   }
 
   // Close the stream controller
@@ -87,7 +95,8 @@ class PathSnapper {
   }
 
   // Snap to the nearest point on the path
-  Cell? _snapToPath(Position position) {
+  Map<String,dynamic> _snapToPath(Location position) {
+    print("_snapToPath");
     double minDistance = double.infinity;
     Cell? nearestCell;
 
@@ -104,6 +113,50 @@ class PathSnapper {
         double projectionLng = projection.longitude ?? 0.0;
 
         double distance = _haversineDistance(position.latitude, position.longitude, projectionLat, projectionLng);
+
+
+        if (distance < minDistance) {
+          print("_snapToPath with distance $distance");
+          minDistance = distance;
+          nearestCell = Cell(
+              (projection.y * start.numCols) + projection.x,
+              projection.x,
+              projection.y,
+              start.move,
+              projectionLat,
+              projectionLng,
+              start.bid,
+              start.floor,
+              start.numCols,
+              imaginedIndex: path.indexOf(start) + 1,
+              imaginedCell: true,
+              position: position
+          );
+        }
+      }
+    }
+    return {"cell":nearestCell,
+    "position": position};
+  }
+
+  Cell? snapToPathKalman(Location position,double latitude, double longitude) {
+    print("snapToPathKalman ${position.latitude},${position.longitude}");
+    double minDistance = double.infinity;
+    Cell? nearestCell;
+
+    for (int i = 0; i < path.length - 1; i++) {
+      var start = path[i];
+      var end = path[i + 1];
+      if(start.x == end.x && start.y == end.y){
+        continue;
+      }
+      // Find the projection on the segment
+      var projection = _projectPointOnSegment(latitude, longitude, start, end);
+      if (projection != null) {
+        double projectionLat = projection.latitude ?? 0.0;
+        double projectionLng = projection.longitude ?? 0.0;
+
+        double distance = _haversineDistance(latitude, longitude, projectionLat, projectionLng);
 
         if (distance < minDistance) {
           minDistance = distance;
@@ -126,6 +179,8 @@ class PathSnapper {
     }
     if(nearestCell != null){
       // path.insert(nearestCell.imaginedIndex!, nearestCell);
+    }else{
+      HelperClass.showToast("old gps position identified");
     }
     return nearestCell;
   }

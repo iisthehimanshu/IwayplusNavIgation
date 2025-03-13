@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'APIMODELS/Building.dart';
-import 'ELEMENTS/BlurtoothDevice.dart';
+import 'Elements/BlurtoothDevice.dart';
 
 class BluetoothScanAndroid extends StatefulWidget {
   @override

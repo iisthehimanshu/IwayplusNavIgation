@@ -7,18 +7,37 @@ import 'package:iwaymaps/NAVIGATION/path.dart';
 import 'navigationTools.dart';
 
 // Function to calculate Euclidean distance between two points
-double euclideanDistance(String point1, String point2) {
+double euclideanDistance(String point1, String point2, {String? prevPoint}) {
   var p1 = point1.split(',').map((e) => double.parse(e)).toList();
   var p2 = point2.split(',').map((e) => double.parse(e)).toList();
-  return sqrt(pow((p2[0] - p1[0]), 2) + pow((p2[1] - p1[1]), 2));
+
+  double distance = sqrt(pow((p2[0] - p1[0]), 2) + pow((p2[1] - p1[1]), 2));
+
+  // Check for a turn if a previous point exists
+  if (prevPoint != null) {
+    var p0 = prevPoint.split(',').map((e) => double.parse(e)).toList();
+
+    var v1 = [p1[0] - p0[0], p1[1] - p0[1]];
+    var v2 = [p2[0] - p1[0], p2[1] - p1[1]];
+
+    double dotProduct = (v1[0] * v2[0]) + (v1[1] * v2[1]);
+    double mag1 = sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
+    double mag2 = sqrt(v2[0] * v2[0] + v2[1] * v2[1]);
+
+    if (mag1 > 0 && mag2 > 0) {
+      double cosTheta = dotProduct / (mag1 * mag2);
+      double angle = acos(cosTheta) * (180 / pi); // Convert to degrees
+
+      if (angle > 30) { // Consider a turn if the angle is greater than 30 degrees
+        distance += 5; // Add turn penalty
+      }
+    }
+  }
+
+  return distance;
 }
 
-// Dijkstra's algorithm to find the shortest path
-Future<List<List<int>>> dijkstra(Map<String, dynamic> graph, String start, String goal, int col, {bool isoutdoorPath = false})async{
-
-
-
-
+Future<List<List<int>>> dijkstra(Map<String, dynamic> graph, String start, String goal, int col, {bool isoutdoorPath = false}) async {
   var distances = <String, double>{};
   var previous = <String, String>{};
   var unvisited = PriorityQueue<MapEntry<String, double>>((a, b) => a.value.compareTo(b.value));
@@ -39,21 +58,18 @@ Future<List<List<int>>> dijkstra(Map<String, dynamic> graph, String start, Strin
         path.add(currentNode.split(',').map(int.parse).toList());
         currentNode = previous[currentNode]!;
       }
-      print("currentNode $currentNode");
       path.add(currentNode.split(',').map(int.parse).toList()); // Add the start node
-      // if(isoutdoorPath){
-      //return path.reversed.toList();
-      // }
-      if(isoutdoorPath){
+
+      if (isoutdoorPath) {
         return path.reversed.toList();
       }
-      print("graph path debug ${path.reversed.toList()}");
       return addCoordinatesBetweenVertices(path.reversed.toList(), col);
     }
 
     if (graph.containsKey(currentNode)) {
       for (var neighbor in graph[currentNode]!) {
-        var newDist = distances[currentNode]! + euclideanDistance(currentNode, neighbor);
+        String? prevNode = previous[currentNode]; // Get previous node (if available)
+        var newDist = distances[currentNode]! + euclideanDistance(currentNode, neighbor, prevPoint: prevNode);
 
         if (newDist < distances[neighbor]!) {
           distances[neighbor] = newDist;
@@ -66,6 +82,7 @@ Future<List<List<int>>> dijkstra(Map<String, dynamic> graph, String start, Strin
 
   return []; // Return an empty list if there's no path
 }
+
 
 List<List<int>> addCoordinatesBetweenVertices(List<List<int>> coordinates, int col) {
   var newCoordinates = <List<int>>[];
@@ -294,13 +311,14 @@ Future<List<int>> findShortestPath (Map<String, dynamic> graph, int sourceX, int
 
 
   if(tools.calculateDistance(temppath.first, [sourceX,sourceY])==1){
+    print("inserting ${[sourceX,sourceY]} at 0 ${temppath.first}");
     temppath.insert(0, [sourceX,sourceY]);
   }
 
   int s = 0;
   int e = temppath.length -1;
-  double d1 = 10000000;
-  double d2 = 10000000;
+  double d1 = double.infinity;
+  double d2 = double.infinity;
 
   for(int i = 0 ; i< temppath.length ; i++){
     if(tools.calculateDistance(temppath[i], [sourceX,sourceY])<d1){
@@ -325,10 +343,16 @@ Future<List<int>> findShortestPath (Map<String, dynamic> graph, int sourceX, int
   }
 
   for(int i = s ; i<=e; i++){
+    print("adding cell ${temppath[i][0]},${temppath[i][1]}");
     l2.add((temppath[i][1]*col) + temppath[i][0]);
   }
-  if((sourceY*col)+sourceX != (temppath[s][1]*col)+temppath[s][0] && isoutdoorPath){
-    l2.insert(0,(sourceY*col)+sourceX);
+  if((sourceY*col)+sourceX != (temppath[0][1]*col)+temppath[0][0] && isoutdoorPath){
+    var distance1 = tools.calculateDistance([sourceX,sourceY], [temppath[1][0],temppath[1][1]]);
+    var distance2 = tools.calculateDistance([temppath[0][0],temppath[0][1]], [temppath[1][0],temppath[1][1]]);
+    if(distance1<distance2){
+      l2.removeAt(0);
+    }
+    l2.insert(0,(sourceY*col) + sourceX);
   }
 
   // print("l2 $l2");
@@ -361,4 +385,21 @@ Future<List<int>> findShortestPath (Map<String, dynamic> graph, int sourceX, int
     return mergeLists(l1, l2, l3);
   }
 
+}
+
+List<List<int>> sortCollinearPoints(List<List<int>> points) {
+  print("points $points");
+  if (points.length != 3) throw ArgumentError("Exactly 3 points required");
+
+  // Assign points
+  var p1 = points[0], p2 = points[1], p3 = points[2];
+
+  // Calculate t values using dot product with direction vector
+  int t(List<int> p) =>
+      (p[0] - p1[0]) * (p2[0] - p1[0]) + (p[1] - p1[1]) * (p2[1] - p1[1]);
+
+  // Sort points based on t values
+  points.sort((a, b) => t(a).compareTo(t(b)));
+
+  return points;
 }

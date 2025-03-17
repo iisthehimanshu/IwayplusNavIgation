@@ -3245,22 +3245,26 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     String nearestBeacon = "";
 
     if (await FlutterBluePlus.isOn) {
-      for (int i = 0;
-      i < SingletonFunctionController.btadapter.BIN.length;
-      i++) {
-        if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
-          SingletonFunctionController.btadapter.BIN[i]!.forEach((key, value) {
-            if (value < 0) {
-              value = value * -1;
-            }
-            if (value > highestweight) {
-              highestweight = value;
-              nearestBeacon = key;
-            }
-          });
-          break;
-        }
-      }
+
+      nearestBeacon = findMaxWeightKey(SingletonFunctionController.btadapter.latesILMap);
+
+
+      // for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
+      //
+      //   if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
+      //     print("BIN[$i] - ${SingletonFunctionController.btadapter.BIN[i]}");
+      //     SingletonFunctionController.btadapter.BIN[i]!.forEach((key, value) {
+      //       if (value < 0) {
+      //         value = value * -1;
+      //       }
+      //       if (value > highestweight) {
+      //         highestweight = value;
+      //         nearestBeacon = key;
+      //       }
+      //     });
+      //     break;
+      //   }
+      // }
     }
 
     setState(() {
@@ -3302,6 +3306,44 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     SingletonFunctionController.btadapter.BIN.clear();
   }
+
+  String findMaxWeightKey(Map<String, List<int>> data) {
+    print("findMaxWeightKey $data");
+    Map<String, double> makingAVGofdata = {};
+    String maxKey = '';
+    double maxAvgWeight = double.negativeInfinity;
+
+    for (var entry in data.entries) {
+      String key = entry.key;
+      List<int> values = entry.value;
+
+      // Calculate the average weight for this key
+      double totalWeight = values.map((v) => getWeight(v.abs())).reduce((a, b) => a + b);
+      double avgWeight = totalWeight / values.length;
+
+      makingAVGofdata[key] = avgWeight;
+
+      // Update if this key has a greater average weight
+      if (avgWeight > maxAvgWeight) {
+        maxAvgWeight = avgWeight;
+        maxKey = key;
+      }
+    }
+    print("findMaxWeightKey $makingAVGofdata");
+
+    return maxKey;
+  }
+
+  double getWeight(int num) {
+    if (num <= 65) return 12.0;
+    if (num <= 75) return 6.0;
+    if (num <= 80) return 4.0;
+    if (num <= 85) return 0.5;
+    if (num <= 90) return 0.25;
+    if (num <= 95) return 0.15;
+    return 0.0;
+  }
+
   void callbackFunc(){
     print("callback");
     SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID).then((_){

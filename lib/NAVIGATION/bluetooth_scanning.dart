@@ -163,27 +163,20 @@ class BLueToothClass {
   //     print("Scan Error:, $e");
   //   });
   // }
-
   int c = 0;
-
   Future<void> startScanningIOS(HashMap<String, beacon> apibeaconmap) async {
     startbin();
-
     try {
        // _systemDevices = FlutterBluePlus.systemDevices;
     } catch (e) {
-
     }
     try {
       await FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
-    } catch (e) {
-
-    }
-
-    _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
+    } catch (e) {}
+    _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results){
       _scanResults = results;
       // print("mac $results");
-      for (ScanResult result in _scanResults) {
+      for (ScanResult result in _scanResults){
         String MacId = "${result.device.advName}";
         if(result.device.platformName.contains("IW")){
           MacId = result.device.platformName;
@@ -191,29 +184,17 @@ class BLueToothClass {
         int Rssi = result.rssi;
         // print(result);
         // print("mac $MacId   rssi $Rssi");
-
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
-
           addtoBin(MacId, Rssi);
           _binController.add(BIN); // Emitting event when BIN changes
         }
       }
-    }, onError: (e) {
-
-    });
-
+    },onError: (e) {});
     _isScanningSubscription = FlutterBluePlus.isScanning.listen((state) {
       _isScanning = state;
     });
-
   }
-
-
-
-
-
-
   void stopScanning() async{
     await FlutterBluePlus.stopScan();
     emptyBin();
@@ -222,17 +203,14 @@ class BLueToothClass {
     // _systemDevices.clear();
     priorityQueue.clear();
   }
-
-  void emptyBin() {
+  void emptyBin(){
     for (int i = 0; i < BIN.length; i++) {
       BIN[i]!.clear();
     }
     numberOfSample.clear();
     rs.clear();
   }
-
   void addtoBin(String MacId, int rssi) {
-
     int binnumber = 0;
     int Rssi = rssi * -1;
     if(numberOfSample[MacId] == null){
@@ -241,12 +219,6 @@ class BLueToothClass {
     }
     numberOfSample[MacId] = numberOfSample[MacId]! + 1;
     rs[MacId]!.add(rssi);
-
-
-
-    //print("of beacon ${rs}");
-
-
     if (Rssi <= 65) {
       binnumber = 0;
     } else if (Rssi <= 70) {

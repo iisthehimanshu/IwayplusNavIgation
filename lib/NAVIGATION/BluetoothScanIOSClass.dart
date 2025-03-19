@@ -28,12 +28,9 @@ class BluetoothScanIOSClass {
     print("initialLocalizedBeacon");
     print(initialLocalizedBeacon);
     SingletonFunctionController.SC_LOCALIZED_BEACON = initialLocalizedBeacon;
-
     print(" SingletonFunctionController.SC_LOCALIZED_BEACON ${ SingletonFunctionController.SC_LOCALIZED_BEACON}");
     return initialLocalizedBeacon;
   }
-
-
 
   static Future<void> stopScan() async {
     await _channel.invokeMethod('stopScan');

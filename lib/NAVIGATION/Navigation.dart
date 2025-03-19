@@ -47,6 +47,7 @@ import '../IWAYPLUS/MODELS/FilterInfoModel.dart';
 import '../IWAYPLUS/VenueSelectionScreen.dart';
 import '../IWAYPLUS/websocket/UserLog.dart';
 import '../fingerprinting.dart';
+import '../main.dart';
 import '../newSearchPage.dart';
 import '../path_snapper.dart';
 import '/IWAYPLUS/API/RatingsaveAPI.dart';
@@ -764,7 +765,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
 
-  Future<void> setPdrThreshold() async {
+  Future<void> setPdrThreshold()async {
     if(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!=null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold != null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold!.isNotEmpty){
       peakThreshold = double.parse(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold!);
       valleyThreshold = peakThreshold*-1;
@@ -773,7 +774,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     try {
       manufacturer = await DeviceInformation.deviceManufacturer;
       String deviceModel = await DeviceInformation.deviceModel;
-
       if (manufacturer.toLowerCase().contains("samsung")) {
         if (deviceModel.startsWith("A", 3)) {
           peakThreshold = 10.7;
@@ -785,7 +785,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           peakThreshold = 11.111111;
           valleyThreshold = -11.111111;
         }
-      } else if (manufacturer.toLowerCase().contains("oneplus")) {
+      }else if (manufacturer.toLowerCase().contains("oneplus")) {
         peakThreshold = 11.111111;
         valleyThreshold = -11.111111;
         // step_threshold = 0.7;
@@ -815,9 +815,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       throw (e);
     }
   }
-
   void handleCompassEvents() {
     compassSubscription = FlutterCompass.events!.listen((event) {
+      if (!mounted || disposed) return;
       wsocket.message["deviceInfo"]["permissions"]["compass"] = true;
       wsocket.message["deviceInfo"]["sensors"]["compass"] = true;
       double? compassHeading = event.heading!;
@@ -842,12 +842,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 compassHeading! - mapbearing, markers[user.bid]![0]);
         }
       });
-    }, onError: (error) {
+    },onError: (error){
       wsocket.message["deviceInfo"]["permissions"]["compass"] = false;
       wsocket.message["deviceInfo"]["sensors"]["compass"] = false;
     });
   }
-
   void showToast(String mssg) {
     Fluttertoast.showToast(
       msg: mssg,
@@ -859,7 +858,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       fontSize: 16.0,
     );
   }
-
   bool disposed = false;
   Future<void> speak(String msg, String lngcode, {bool prevpause = false}) async {
     if (!UserState.ttsAllStop) {
@@ -1500,14 +1498,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   Map<MarkerId, Marker> nearbyLandmarks = {};
-  Landmarks? PinedLandmark ;
-
+  Landmarks? PinedLandmark;
   Future<void> addNearbyLandmarkMarkers(LatLng point,String id, String name, bool visible) async {
     final Uint8List iconMarker = await getImagesFromMarker('assets/OptionLandmark.png', 85);
     BitmapDescriptor optionLandmark = BitmapDescriptor.fromBytes(iconMarker);
-
     final markerId = MarkerId(id);
-
     setState(() {
       if(nearbyLandmarks[markerId] != null){
         print("already exists a landmark ${markerId.value}");
@@ -1522,7 +1517,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     PinLandmarkPannel.togglePanel();
     print("Added NearbyLandmark at $point with ID: $markerId");
   }
-
   void selectPinLandmark(CameraPosition cameraposition){
     double distance = 5;
     MarkerId? id;
@@ -1537,7 +1531,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       updateNearbyLandmarkMarkers(id!);
     }
   }
-
   Future<void> focusOnPinLandmark(LatLng position) async {
     LatLngBounds bounds = await _googleMapController.getVisibleRegion();
 
@@ -1753,29 +1746,27 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       String? nearestBeacon,
       String? polyID,
       LatLng? gpsCoordinates,
-      {bool speakTTS = true, bool render = true, bool providePinSelection = false}
-      ) async {
+      {bool speakTTS = true, bool render = true, bool providePinSelection = false,int nearestNodeX=0,int nearestNodeY=0}
+      )async{
     Landmarks? userSetLocation = Landmarks();
-
-    // Handle direct source ID case
-    if (widget.directsourceID.length > 2){
+    //Handle direct source ID case
+    if(widget.directsourceID.length > 2){
       nearestBeacon = null;
       polyID = widget.directsourceID;
       widget.directsourceID = '';
     }
     // If nearestBeacon is provided, localize the user to it
-    if (nearestBeacon != null && nearestBeacon.isNotEmpty) {
-      await _handleBeaconLocalization(nearestBeacon, speakTTS, render,providePinSelection);
+    if(nearestBeacon != null && nearestBeacon.isNotEmpty){
+      await _handleBeaconLocalization(nearestBeacon, speakTTS, render,providePinSelection,nearestNodeX:nearestNodeX,nearestNodeY: nearestNodeY);
     }
     // If polyID is provided, localize the user to the polygon
-    else if (polyID != null && polyID.isNotEmpty) {
+    else if (polyID != null && polyID.isNotEmpty){
       await _handlePolygonLocalization(polyID, speakTTS, render);
     }
     // Fallback to global coordinates if neither nearestBeacon nor polyID is available
-    else {
+    else{
       await _handleGlobalCoordinatesLocalization(speakTTS, render,providePinSelection);
     }
-
     // Reset direct source ID and Land ID
     widget.directLandID = '';
     widget.directsourceID = '';
@@ -1789,32 +1780,31 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       String nearestBeacon,
       bool speakTTS,
       bool render,
-      bool providePinSelection
+      bool providePinSelection,
+  {int nearestNodeX=0,int nearestNodeY=0}
       ) async {
     try {
       wsocket.message["AppInitialization"]["localizedOn"] = nearestBeacon;
-
       final beaconData = SingletonFunctionController.apibeaconmap[nearestBeacon];
-      if (beaconData != null) {
+      if (beaconData != null){
         print("beacon debug: $beaconData");
-
         final landmarkData = await SingletonFunctionController.building.landmarkdata;
-        if (landmarkData != null) {
+        if (landmarkData != null){
           if(providePinSelection){
             SingletonFunctionController.building.listOfNearbyLandmarksToLocalize = tools.findListOfNearbyLandmark(beaconData,
                 landmarkData.landmarksMap!);
             if(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize != null){
-              detected = false;
+              detected=false;
               showListOfNearbyLandmarks(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!);
               return;
             }
-          } else{
+          }else{
             final userSetLocation = tools.localizefindNearbyLandmark(
                 beaconData,
                 landmarkData.landmarksMap!
             );
             if (userSetLocation != null) {
-              initializeUser(userSetLocation,beaconData, speakTTS: speakTTS, render: render);
+              initializeUser(userSetLocation,beaconData, speakTTS: speakTTS, render: render,nearestNodeX: nearestNodeX,nearestNodeY: nearestNodeY);
             } else {
               unableToFindLocation();
             }
@@ -1832,15 +1822,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       if (speakTTS) unableToFindLocation();
     }
   }
-
-
-
   Future<void> _handlePolygonLocalization(
       String polyID,
       bool speakTTS,
-      bool render
-      ) async {
-    try {
+      bool render)async{
+    try{
       final landmarkData = await SingletonFunctionController.building.landmarkdata;
       final userSetLocation = landmarkData?.landmarksMap?[polyID];
 
@@ -1854,7 +1840,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       if (speakTTS) unableToFindLocation();
     }
   }
-
   Future<void> _handleGlobalCoordinatesLocalization(
       bool speakTTS,
       bool render,
@@ -1887,30 +1872,27 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       unableToFindLocation();
     }
   }
-
-
   void unableToFindLocation(){
     speak("Unable to find your location. Scan nearby QR to know your location",
         _currentLocale);
     showLocationDialog(context);
     SingletonFunctionController.building.qrOpened = true;
   }
-
-  Future<void> showListOfNearbyLandmarks(List<Landmarks> landmarks) async {
+  int nearestNodeX=0;
+  int nearestNodeY=0;
+  Future<void> showListOfNearbyLandmarks(List<Landmarks> landmarks)async{
     SingletonFunctionController.building.floor[landmarks.first.buildingID!] = landmarks.first.floor??0;
     await createRooms(SingletonFunctionController.building.polylinedatamap[landmarks.first.buildingID]!, landmarks.first.floor??0);
     await Future.delayed(Duration(milliseconds: 1000));
     speak(convertTolng("Confirm Your Location Amongst Below Given List", _currentLocale, ''), _currentLocale);
     focusOnPinLandmark(LatLng(double.parse(landmarks.first.properties!.latitude!), double.parse(landmarks.first.properties!.longitude!)));
     for (var landmark in landmarks) {
-
       addNearbyLandmarkMarkers(LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),landmark.sId??"", landmark.name??"", !landmark.properties!.isWaypoint);
     }
   }
-
   void localizeOnPinedLandmark(){
     if(PinedLandmark != null){
-      initializeUser(PinedLandmark!, null);
+      initializeUser(PinedLandmark!, null,nearestNodeX: SingletonFunctionController.nearestNodeX,nearestNodeY:SingletonFunctionController.nearestNodeY);
     }else{
       unableToFindLocation();
     }
@@ -1933,26 +1915,21 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     });
   }
 
-  void initializeUser(Landmarks userSetLocation,beacon? localizedBeacon,{bool speakTTS = true, bool render = true})async{
+  void initializeUser(Landmarks userSetLocation,beacon? localizedBeacon,{bool speakTTS = true, bool render = true,int nearestNodeX=0,int nearestNodeY=0})async{
     tools.setBuildingAngle(SingletonFunctionController.building
         .patchData[userSetLocation.buildingID]!.patchData!.buildingAngle!);
-
     setState(() {
       buildingAllApi.selectedID = userSetLocation!.buildingID!;
       buildingAllApi.selectedBuildingID = userSetLocation!.buildingID!;
     });
-
     List<int> localBeconCord = [];
     localBeconCord.add(userSetLocation.coordinateX!);
     localBeconCord.add(userSetLocation.coordinateY!);
-
     pathState().beaconCords = localBeconCord;
-
     List<double> values = [];
-
     //floor alignment
     await SingletonFunctionController.building.landmarkdata!.then((land) {
-      if (userSetLocation.floor != 0) {
+      if(userSetLocation.floor != 0){
         List<PolyArray> prevFloorLifts = findLift(
             tools.numericalToAlphabetical(0),
             SingletonFunctionController
@@ -1968,10 +1945,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 .polyline!
                 .floors!);
         for (int i = 0; i < prevFloorLifts.length; i++) {}
-
         for (int i = 0; i < currFloorLifts.length; i++) {}
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
-
         UserState.xdiff = dvalue[0];
         UserState.ydiff = dvalue[1];
         values = tools.localtoglobal(
@@ -1979,7 +1954,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             userSetLocation.coordinateY!,
             SingletonFunctionController
                 .building.patchData[userSetLocation.buildingID!]);
-      } else {
+      }else{
         UserState.xdiff = 0;
         UserState.ydiff = 0;
         values = tools.localtoglobal(
@@ -1989,20 +1964,25 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 .building.patchData[userSetLocation.buildingID!]);
       }
     });
-
     mapState.target = LatLng(values[0], values[1]);
-
     user.bid = userSetLocation.buildingID!;
     print("setting userbid ${user.bid}");
     user.locationName = userSetLocation.name;
-
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
-
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.longitude!);
-
     //did this change over here UDIT...
-    user.coordX = 74;
-    user.coordY = 32;
+    if(nearestNodeX!=0){
+      print("user distance");
+      print(tools.calculateDistance([nearestNodeX,nearestNodeY],[userSetLocation.coordinateX!,userSetLocation.coordinateY!]));
+      if(tools.calculateDistance([nearestNodeX,nearestNodeY],[userSetLocation.coordinateX!,userSetLocation.coordinateY!])<=7){
+        user.coordX = nearestNodeX;
+        user.coordY = nearestNodeY;
+      }
+    }else{
+      user.coordX = userSetLocation.coordinateX!;
+      user.coordY = userSetLocation.coordinateY!;
+    }
+
     List<double> ls = tools.localtoglobal(
         user.coordX,
         user.coordY,
@@ -2012,11 +1992,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     user.lng = ls[1];
     if(userSetLocation!.doorX != null){
       print("usercoord fetched ${user.coordX},${user.coordY}       ${userSetLocation!.doorX!} ${userSetLocation!.doorY!}");
-      user.coordX = 74;
-      user.coordY = 32;
+      if(nearestNodeX!=0){
+        print("user distance");
+        print(tools.calculateDistance([nearestNodeX,nearestNodeY],[userSetLocation.coordinateX!,userSetLocation.coordinateY!]));
+        if(tools.calculateDistance([nearestNodeX,nearestNodeY],[userSetLocation.doorX!,userSetLocation.doorY!])<=7){
+          user.coordX = nearestNodeX;
+          user.coordY = nearestNodeY;
+        }
+      }else{
+        user.coordX = userSetLocation.doorX!;
+        user.coordY = userSetLocation.doorY!;
+      }
       List<double> latlng = tools.localtoglobal(
-          74,
-          32,
+          user.coordX,
+          user.coordY,
           SingletonFunctionController
               .building.patchData[userSetLocation!.buildingID]);
       user.lat = latlng[0];
@@ -2249,7 +2238,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         }
       }
     }
-
     if (speakTTS) {
       List<double> lvalue = tools.localtoglobal(
           userSetLocation.doorX!.toInt(),
@@ -2262,7 +2250,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             SingletonFunctionController.apibeaconmap[lastBeaconValue]!.coordinateY!.toInt(),
             SingletonFunctionController.building.patchData[user.bid]
         );
-
         LatLng currentMarkerPosition = LatLng(lvalue[0], lvalue[1]);
         LatLng newMarkerPosition = LatLng(uvalue[0], uvalue[1]);
 
@@ -2293,7 +2280,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           ),
         );
       }
-
     }
     Future.delayed(Duration(milliseconds: 5000)).then((value){
       if(isCalibrationNeeded(magneticValues) && UserState.lowCompassAccuracy==false){
@@ -2305,13 +2291,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       }
     });
   }
-
   bool _isExpanded = false;
   String? qrText;
-
   void showDestinationDialog(BuildContext context,String text){
     double screenWidth = MediaQuery.of(context).size.width;
-
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -3031,6 +3014,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   void _updateCircle(double lat, double lng) {
     // Create a new Tween with the provided begin and end values
     // Optionally update UI or logic with animation value
+
+    if (!mounted || disposed) return;
+
+
     final Circle updatedCircle = Circle(
         circleId: CircleId("circle"),
         center: LatLng(lat, lng),
@@ -3090,29 +3077,22 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     return distance;
   }
-
   double degreesToRadians(double degrees) {
     return degrees * pi / 180;
   }
-
   String getRandomString(List<String> stringList) {
     Random random = Random();
     int randomIndex = random.nextInt(stringList.length);
     return stringList[randomIndex];
   }
-
   String nearestLandmarkToBeacon = "";
   String nearestLandmarkToMacid = "";
-
-
-  Future<void> localizeUser({bool speakTTS = true,String beacon=""}) async {
-
+  Future<void> localizeUser({bool speakTTS = true,String beacon="",bool pinSelectionMarker=false,int nearestNodeX=0,int nearestNodeY=0}) async {
     speak("${LocaleData.searchingyourlocation.getString(context)}",
         _currentLocale);
-    setState(() {
+    setState((){
       isBlueToothLoading = true;
     });
-
     double highestweight = 0;
     String nearestBeacon = "";
     // print("binresult ${SingletonFunctionController.btadapter.BIN}");
@@ -3136,12 +3116,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     nearestBeacon = beacon?? SingletonFunctionController.SC_LOCALIZED_BEACON;
     print("nearestBeacon");
     print(nearestBeacon);
-    setState(() {
+    print(nearestNodeX);
+    setState((){
       //lastBeaconValue = nearestBeacon;
     });
     // nearestLandmarkToBeacon = nearestBeacon;
     // nearestLandmarkToMacid = highestweight.toString();
-    setState(() {
+    setState((){
       testBIn = SingletonFunctionController.btadapter.BIN;
       testBIn.forEach((key, value) {
         currentBinSIze.add(value.length);
@@ -3157,11 +3138,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       buildingAllApi.selectedBuildingID =
       Building.apibeaconmap[nearestBeacon]!.buildingID!;
     }
-    paintUser(nearestBeacon,null,null, speakTTS: speakTTS, providePinSelection: true);
+    paintUser(nearestBeacon,null,null, speakTTS: speakTTS, providePinSelection: pinSelectionMarker,nearestNodeX: nearestNodeX,nearestNodeY:nearestNodeY);
     Future.delayed(Duration(milliseconds: 1500)).then((value) => {
       _controller.stop(),
     });
-
     //emptying the bin manually
     for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
       if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
@@ -3408,6 +3388,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   void createotherPatch(String key, patchDataModel value) async {
+
+    if(!mounted || disposed)return;
 
     if (value.patchData!.coordinates!.isNotEmpty) {
       List<LatLng> polygonPoints = [];
@@ -12375,7 +12357,7 @@ bool _isPlaying=false;
 
   late Timer EM_TIMER;
   String EM_LastBeacon = "";
-  Fingerprinting fingerprinting = Fingerprinting();
+
   bool isScanning = false;
   @override
   Widget build(BuildContext context) {
@@ -12483,6 +12465,7 @@ bool _isPlaying=false;
                 onCameraIdle: () {
                   if (mapState.cameraposition != null) {
                     print("selecting landmark");
+                    print("${mapState.cameraposition!.target.latitude} ${mapState.cameraposition!.target.longitude}");
                     selectPinLandmark(mapState.cameraposition!);
                     mapState.cameraposition = null; // User has stopped panning
                   }
@@ -12617,8 +12600,7 @@ bool _isPlaying=false;
                   SizedBox(height: 28.0),
                   DebugToggle.Slider ? Text("${user.theta}") : Container(),
                   //Text(SingletonFunctionController.SC_IL_RSSI_AVERAGE.toString()),
-
-                  // Text("coord [${user.coordX},${user.coordY}] \n"
+                   Text("coord [${nearestNodeX},${nearestNodeY}]\n"),
                   //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
                   // "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
                   // // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
@@ -12805,12 +12787,23 @@ bool _isPlaying=false;
                         SingletonFunctionController.btadapter.emptyBin();
                         if (!user.isnavigating && !isLocalized) {
                           SingletonFunctionController.btadapter.stopScanning();
-                          if (Platform.isAndroid) {
+                          if (Platform.isAndroid){
+                            fingerprinting.collectSensorDataEverySecond();
                             bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap).then((value){
-                              setState(() {
+                              Future.delayed(Duration(seconds: 8)).then((onValue){
+                                fingerprinting.stopCollectingData();
+                                String nearestPoint=fingerprinting.findNearestLocation(fingerprinting.getRealData()["Beacons"],fingerprinting.getProcessedData());
+                                print("nearest point::${nearestPoint}");
+                                setState((){
+                                  nearestNodeX=fingerprinting.parsePoint(nearestPoint)[0];
+                                  nearestNodeY=fingerprinting.parsePoint(nearestPoint)[1];
+                                });
+                                localizeUser(beacon: value,pinSelectionMarker: false,nearestNodeX:nearestNodeX,nearestNodeY:nearestNodeY);
+                              });
+                              setState((){
                                 isLocalized = false;
                               });
-                              localizeUser(beacon: value);
+
                             });
                           } else {
                             //SingletonFunctionController.btadapter.startScanningIOS(SingletonFunctionController.apibeaconmap);
@@ -12820,7 +12813,6 @@ bool _isPlaying=false;
                               if(value != null){
                                 localizeUser(beacon: value);
                               }
-
                             });
                           }
                           setState(() {
@@ -12830,7 +12822,7 @@ bool _isPlaying=false;
                           });
                           late Timer _timer;
                           _timer = Timer.periodic(
-                              Duration(milliseconds: 5000), (timer) {
+                              Duration(milliseconds: 8000), (timer) {
                             //localizeUser();
                             _timer.cancel();
                           });
@@ -12953,21 +12945,152 @@ bool _isPlaying=false;
                       : Container(), // Adjust the height as needed// Adjust the height as needed
                   FloatingActionButton(
                     onPressed:()async{
-                      if(isScanning==false){
-                        fingerprinting.collectSensorDataEverySecond();
-                        Future.delayed(Duration(seconds: 10),(){
-                          fingerprinting.stopCollectingData();
-                          setState(() {
-                            isScanning=true;
-                          });
-                        });
-                      }else{
-                      String nearestPoint=fingerprinting.findNearestLocation(fingerprinting.getRealData()["Beacons"],fingerprinting.getProcessedData());
+                      // if(isScanning==false){
+                      //   fingerprinting.collectSensorDataEverySecond();
+                      //   Future.delayed(Duration(seconds: 10),(){
+                      //     fingerprinting.stopCollectingData();
+                      //     setState(() {
+                      //       isScanning=true;
+                      //     });
+                      //   });
+                      // }else{
                         //fingerprinting.getHeaderDetails(fingerprinting.calculatedData!,nearestPoint);
-                        print(fingerprinting.nearestNode(nearestPoint));
+                      late Timer _timer;
+                      SingletonFunctionController.btadapter.emptyBin();
+                      if (!user.isnavigating && !isLocalized){
+                        SingletonFunctionController.btadapter.stopScanning();
+                        if (Platform.isAndroid){
+                          bluetoothScanAndroidClass.listenToScanUpdatesWhileFingerprinting(Building.apibeaconmap);
+                          fingerprinting.collectSensorDataEverySecond();
+                          _timer = Timer.periodic(
+                              Duration(milliseconds: 5000), (timer) {
+                            String nearestPoint=fingerprinting.findNearestLocation(fingerprinting.getRealData()["Beacons"],fingerprinting.getProcessedData());
+                            print("nearest point::${nearestPoint}");
+                            setState((){
+                              nearestNodeX=fingerprinting.parsePoint(nearestPoint)[0];
+                              nearestNodeY=fingerprinting.parsePoint(nearestPoint)[1];
+                            });
+                            localizeUser(speakTTS: false,beacon:SingletonFunctionController.SC_LOCALIZED_BEACON,pinSelectionMarker: false,nearestNodeX:nearestNodeX,nearestNodeY:nearestNodeY);
+                          });
+
+                         // .then((value){
+                          //   setState((){
+                          //     isLocalized = false;
+                          //   });
+                          //   setState(() {
+                          //     nearestNodeX=fingerprinting.parsePoint(nearestPoint)[0];
+                          //     nearestNodeY=fingerprinting.parsePoint(nearestPoint)[1];
+                          //   });
+                          //   localizeUser(beacon: value,pinSelectionMarker: true);
+                          // });
+                        } else {
+                          //SingletonFunctionController.btadapter.startScanningIOS(SingletonFunctionController.apibeaconmap);
+                          BluetoothScanIOSClass.getInitialLocalizedDevice().then((value){
+                            print("localized--");
+                            print(value);
+                            if(value != null){
+                              localizeUser(beacon: value);
+                            }
+
+                          });
+                        }
+                        // setState(() {
+                        //   isLocalized = true;
+                        //   resBeacons =
+                        //       SingletonFunctionController.apibeaconmap;
+                        // });
+                        // late Timer _timer;
+                        // _timer = Timer.periodic(
+                        //     Duration(milliseconds: 5000), (timer) {
+                        //   //localizeUser();
+                        //   _timer.cancel();
+                        // });
+
+                        // late Timer _timer;
+                        // _timer = Timer.periodic(
+                        //     Duration(milliseconds: 5000), (timer) {
+                        //   localizeUser().then((value) => {
+                        //     setState(() {
+                        //       isLocalized = false;
+                        //     })
+                        //   });
+                        //   _timer.cancel();
+                        // });
                       }
+
+                    //  }
                     },
                     child: Icon((isScanning)?Icons.settings:Icons.account_balance),
+                    backgroundColor: Color(
+                        0xff24B9B0), // Set the background color of the FAB
+                  ),
+                  FloatingActionButton(
+                    onPressed:()async{
+                      // if(isScanning==false){
+                      //   fingerprinting.collectSensorDataEverySecond();
+                      //   Future.delayed(Duration(seconds: 10),(){
+                      //     fingerprinting.stopCollectingData();
+                      //     setState(() {
+                      //       isScanning=true;
+                      //     });
+                      //   });
+                      // }else{
+
+                      //fingerprinting.getHeaderDetails(fingerprinting.calculatedData!,nearestPoint);
+                      SingletonFunctionController.btadapter.emptyBin();
+                      if (!user.isnavigating && !isLocalized) {
+                        SingletonFunctionController.btadapter.stopScanning();
+                        if (Platform.isAndroid){
+                          bluetoothScanAndroidClass.stopScan();
+
+                          // .then((value){
+                          //   setState((){
+                          //     isLocalized = false;
+                          //   });
+                          //   setState(() {
+                          //     nearestNodeX=fingerprinting.parsePoint(nearestPoint)[0];
+                          //     nearestNodeY=fingerprinting.parsePoint(nearestPoint)[1];
+                          //   });
+                          //   localizeUser(beacon: value,pinSelectionMarker: true);
+                          // });
+                        } else {
+                          //SingletonFunctionController.btadapter.startScanningIOS(SingletonFunctionController.apibeaconmap);
+                          BluetoothScanIOSClass.getInitialLocalizedDevice().then((value){
+                            print("localized--");
+                            print(value);
+                            if(value != null){
+                              localizeUser(beacon: value);
+                            }
+
+                          });
+                        }
+                        // setState(() {
+                        //   isLocalized = true;
+                        //   resBeacons =
+                        //       SingletonFunctionController.apibeaconmap;
+                        // });
+                        // late Timer _timer;
+                        // _timer = Timer.periodic(
+                        //     Duration(milliseconds: 5000), (timer) {
+                        //   //localizeUser();
+                        //   _timer.cancel();
+                        // });
+
+                        // late Timer _timer;
+                        // _timer = Timer.periodic(
+                        //     Duration(milliseconds: 5000), (timer) {
+                        //   localizeUser().then((value) => {
+                        //     setState(() {
+                        //       isLocalized = false;
+                        //     })
+                        //   });
+                        //   _timer.cancel();
+                        // });
+                      }
+
+                      //  }
+                    },
+                    child: Icon(Icons.settings),
                     backgroundColor: Color(
                         0xff24B9B0), // Set the background color of the FAB
                   )

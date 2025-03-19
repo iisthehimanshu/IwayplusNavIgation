@@ -6,6 +6,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../IWAYPLUS/API/buildingAllApi.dart';
 import '../fingerprinting.dart';
+import '../main.dart';
 import 'BluetoothScanAndroidClass.dart';
 import 'buildingState.dart';
 
@@ -25,10 +26,11 @@ class SingletonFunctionController {
   static Future<void>? timer;
   static String currentBeacon = "";
   static String SC_LOCALIZED_BEACON = "";
+  static int nearestNodeX=0;
+  static int nearestNodeY=0;
 
   BluetoothScanAndroidClass bluetoothScanAndroidClass = BluetoothScanAndroidClass();
   static Map<String, double> SC_IL_RSSI_AVERAGE = {};
-  Fingerprinting fingerprinting = Fingerprinting();
 
   BluetoothScanIOSClass bluetoothScanIOSClass = BluetoothScanIOSClass();
 
@@ -65,7 +67,7 @@ class SingletonFunctionController {
         var key = entry.key;
         var beaconData = await beaconapi().fetchBeaconData(key);
         print("keydata${beaconData.length}");
-        if (building.beacondata == null) {
+        if (building.beacondata == null){
           print("entryprintifstate${key}");
           building.beacondata = beaconData;
           print("entryprintifstate${building.beacondata!.length}");
@@ -82,30 +84,34 @@ class SingletonFunctionController {
         Building.apibeaconmap = apibeaconmap;
         print(buildingAllApi.allBuildingID);
         print(apibeaconmap);
-        fingerprinting.collectSensorDataEverySecond();
-      })).then((value) async {
+        fingerprinting.enableFingerprinting();
+      })).then((value)async{
         print("blue statusssss");
         print(await FlutterBluePlus.isOn);
         if(Platform.isAndroid){
           // print("apibeaconmap");
           // print(apibeaconmap);
           // blueToothAndroid.listenToScanUpdates(apibeaconmap);
+           fingerprinting.collectSensorDataEverySecond();
           await bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap).then((value){
             SC_LOCALIZED_BEACON = value;
             fingerprinting.stopCollectingData();
+             String nearestPoint= fingerprinting.findNearestLocation(fingerprinting.getRealData()["Beacons"],fingerprinting.getProcessedData());
+            // print("nearest waypoint ${fingerprinting.findNearestLocation(fingerprinting.getRealData()["Beacons"],fingerprinting.getProcessedData())}");
+            // print(fingerprinting.nearestNode(nearestPoint));
+            nearestNodeX=fingerprinting.parsePoint(nearestPoint)[0];
+            nearestNodeY=fingerprinting.parsePoint(nearestPoint)[1];
             bluetoothScanAndroidClass.stopScan();
           });
-
           // bluetoothScanAndroidClass.stopScan();
           // btadapter.startScanning(apibeaconmap);
-
-        }else if(Platform.isIOS){
+        }
+        else if(Platform.isIOS){
           print("isIOS");
           String resp = await BluetoothScanIOSClass.getInitialLocalizedDevice();
           //await btadapter.startScanningIOS(apibeaconmap);
         }
-       String nearestPoint= fingerprinting.findNearestLocation(fingerprinting.getRealData()["Beacons"],fingerprinting.getProcessedData());
-        print(fingerprinting.nearestNode(nearestPoint));
+
         //timer= Future.delayed((await FlutterBluePlus.isOn==true)?Duration(seconds:9):Duration(seconds:0));
       });
       // Simulate a long-running task

@@ -61,8 +61,6 @@ class DirectionInstructionWidget extends StatefulWidget {
 
 class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget> {
   bool ListExpand = false;
-
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -70,8 +68,6 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
     print("widget.IsMultiFloor");
     print(widget.IsMultiFloor);
     print(widget.IsMultiBuilding);
-
-
     return Semantics(
     label: "",
       child: GestureDetector(
@@ -82,8 +78,6 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
           print(widget.StartBuildingName);
           print(widget.EndName);
           print(widget.EndBuildingName);
-
-
         },
         child: Container(
           margin: EdgeInsets.only(top: !widget.IsMultiBuilding? 20:10,),
@@ -152,7 +146,6 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
                       child: SvgPicture.asset(
                         "assets/DirectionInstruction_locationPin.svg",height: 25,),
                     ):Container()
-
                   ],
                 ),
               ),

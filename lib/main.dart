@@ -37,7 +37,11 @@ import 'IWAYPLUS/MainScreen.dart';
 import '/NAVIGATION/Navigation.dart';
 import 'dart:io' show Platform;
 
+import 'fingerprinting.dart';
+
 final navigatorKey = GlobalKey<NavigatorState>();
+
+Fingerprinting fingerprinting = Fingerprinting();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

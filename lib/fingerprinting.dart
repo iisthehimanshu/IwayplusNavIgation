@@ -64,6 +64,7 @@ class Fingerprinting{
   Future<void> enableFingerprinting()async{
     var fingerPrintData = await fingerPrintingGetApi().Finger_Printing_GET_API("676171576711e89104527934");
     calculatedData=fingerPrintData;
+    print("calculated data::${calculatedData}");
   }
   // Future<void> showNearestPoint(PolygonController polygonController,String nearestPoint) async {
   //   _Markers.clear();
@@ -87,7 +88,6 @@ class Fingerprinting{
     return values.map((e) => e.toDouble()).reduce((a, b) => a + b) / values.length;
   }
   polylinedata? polydata;
-
   Future<List<Nodes>> extractWaypoints() async {
     print("called");
     polydata ??= await PolyLineApi().fetchPolyData(id: buildingAllApi.selectedBuildingID);
@@ -132,7 +132,6 @@ class Fingerprinting{
     print("waypoints ${waypoints.length}");
     return waypoints;
   }
-
   Future<Nodes?> nearestNode(String nearestLocation)async{
     List<int> nearestList = parsePoint(nearestLocation);
     List<Nodes> wayNodes = await extractFromAllWaypoints();
@@ -144,11 +143,6 @@ class Fingerprinting{
     print("Nearest waypoint details: $nearestNode");
     return nearestNode;
   }
-
-
-
-
-
   String findNearestLocation(
       Map<String, Map<String, double>> realTimeData,
       Map<String, Map<String, dynamic>> processedPools,
@@ -168,7 +162,6 @@ class Fingerprinting{
           matchingBeacons++; // Increment count of matching beacons
           final processedStats = poolData[beaconId]!;
           double avgDiff = realStats["average"]! - processedStats["average"]!;
-
           // Use mean difference (squared) for comparison
           distance += pow(avgDiff, 2);
         }
@@ -478,8 +471,8 @@ class Fingerprinting{
       // Beacons
       if (fingerprint.beacons != null) {
         for (var beacon in fingerprint.beacons!) {
-          if (beacon.beaconRssi != null && beacon.beaconName != null) {
-            String beaconName = beacon.beaconName!;
+          if (beacon.beaconRssi != null && beacon.beaconMacId != null) {
+            String beaconName = beacon.beaconMacId!;
             // Add RSSI values grouped by beacon name
             beaconRssiValues.putIfAbsent(beaconName, () => []);
             beaconRssiValues[beaconName]!.add(beacon.beaconRssi!.toDouble().abs());
@@ -663,16 +656,16 @@ class Fingerprinting{
   //   final Uint8List bytes = byteData!.buffer.asUint8List();
   //
   //   return BitmapDescriptor.fromBytes(bytes);
-  // }
+  //}
   Set<Marker> getMarkers(){
     return _dotMarkers.union(_Markers);
   }
   Future<void> collectSensorDataEverySecond()async{
-    if(SingletonFunctionController.apibeaconmap != null){
-      bluetoothScanAndroidClass.listenToScanUpdatesWhileFingerPrinting(SingletonFunctionController.apibeaconmap);
-    }else{
-      HelperClass.showToast("Getting beacon data!!");
-    }
+    // if(SingletonFunctionController.apibeaconmap != null){
+    //   bluetoothScanAndroidClass.listenToScanInitialLocalization(SingletonFunctionController.apibeaconmap);
+    // }else{
+    //   HelperClass.showToast("Getting beacon data!!");
+    // }
     _startListeningToScannedResults();
     data = Data(position: "${userPosition?.coordx},${userPosition?.coordy},$floor");
     gps.startGpsUpdates();
@@ -739,7 +732,7 @@ class Fingerprinting{
     }
   }
   Future<List<Beacon>> fetchBeaconData(Map<String, beacon>? apibeaconmap)async{
-    Map<String, List<int>> beaconvalues = await bluetoothScanAndroidClass.getDeviceWithRssi();
+    Map<String, List<int>> beaconvalues = await BluetoothScanAndroidClass.getDeviceWithRssi();
     Map<String, double> averageValue = await bluetoothScanAndroidClass.getDeviceWithAverage();
     Map<String, String> deviceNames = await bluetoothScanAndroidClass.getDeviceName();
     print("beaconvalues ${beaconvalues}");

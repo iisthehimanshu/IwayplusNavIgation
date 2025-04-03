@@ -389,8 +389,8 @@ class _NewsearchpageState extends State<NewSearchPage> {
         result = result.toSet().toList();
         List<SearchpageResults> newResults = [];
         print("result11-${result}");
-        result.forEach((fuseResult) {
-          if (fuseResult.score <=0.5) {
+        result.forEach((fuseResult){
+          if (fuseResult.score <=0.5){
             final matchingValues = landmarkData.landmarksMap!.values.where(
                   (v) => v.name != null &&
                   v.element!.subType != "beacon" &&

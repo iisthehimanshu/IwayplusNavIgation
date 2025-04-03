@@ -53,16 +53,12 @@ class DirectionInstructionWidget extends StatefulWidget {
         required this.TotalDistanceInFeet,
         required this.BuildingID,
         this.reverse = false});
-
   @override
   _DirectionInstructionWidgetState createState() =>
       _DirectionInstructionWidgetState();
 }
-
 class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget> {
   bool ListExpand = false;
-
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -70,8 +66,6 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
     print("widget.IsMultiFloor");
     print(widget.IsMultiFloor);
     print(widget.IsMultiBuilding);
-
-
     return Semantics(
     label: "",
       child: GestureDetector(
@@ -82,8 +76,6 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
           print(widget.StartBuildingName);
           print(widget.EndName);
           print(widget.EndBuildingName);
-
-
         },
         child: Container(
           margin: EdgeInsets.only(top: !widget.IsMultiBuilding? 20:10,),
@@ -94,7 +86,7 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
             ),
             borderRadius: BorderRadius.circular(12),
             color: Colors.white,// Optional: Rounded corners
-          ) : BoxDecoration(),
+          ):BoxDecoration(),
           padding: widget.IsMultiBuilding? EdgeInsets.only(left: 10,top: 10,right: 10,bottom: 15):EdgeInsets.only(),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,

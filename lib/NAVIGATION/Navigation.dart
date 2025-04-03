@@ -7,6 +7,7 @@ import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/NAVIGATION/ELEMENTS/PickupLocationPin.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
@@ -962,14 +963,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       }
     }
   }
-
   int stepCount = 0;
   int lastPeakTime = 0;
   int lastValleyTime = 0;
   //will have to set according to the device
   double peakThreshold = 11.1111111;
   double valleyThreshold = -11.1111111;
-
   int peakInterval = 300;
   int valleyInterval = 300;
   //it is the smoothness factor of the low pass filter.
@@ -978,12 +977,22 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   double filteredY = 0;
   double filteredZ = 0;
   bool restartScanning = false;
-
   List<double> orientationHistory = [];
   int orientationWindowSize = 10;  // Number of readings for stability check
   double orientationThreshold = 0.1;
-
 // late StreamSubscription<AccelerometerEvent>? pdr;
+  String currentActivity = "UNKNOWN";
+  StreamSubscription<AccelerometerEvent>? accelerometerSubscription;
+  StreamSubscription<Activity>? activitySubscription;
+  void startActivityRecognition() {
+    final activityRecognition = FlutterActivityRecognition.instance;
+    activitySubscription = activityRecognition.activityStream.listen((event) {
+      setState(() {
+        currentActivity = event.type.toString(); // e.g., "WALKING", "STILL"
+      });
+      print("currentActivity ${currentActivity}");
+    });
+  }
   void pdrstepCount() {
     pdr.add(accelerometerEventStream().listen(
           (AccelerometerEvent event) {
@@ -13290,10 +13299,8 @@ int currentCols=0;
                                         Future.delayed(
                                             Duration(milliseconds: 1500))
                                             .then((value) => {
-
                                           realTimeReLocalizeUser(
                                               resBeacons)
-
                                             // listenToBin()
                                         });
                                       });

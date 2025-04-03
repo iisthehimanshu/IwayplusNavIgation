@@ -96,6 +96,7 @@ dependencies:
   new_version_plus: ^0.0.12
   provider: ^6.1.2
   image:
+  flutter_activity_recognition: ^4.0.0
 
 
 

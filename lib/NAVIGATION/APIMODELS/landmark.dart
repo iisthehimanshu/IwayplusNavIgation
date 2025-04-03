@@ -320,6 +320,7 @@ class Properties {
   List<String>? clickedPoints;
   int? floorAngle;
   List<String>? polygonId;
+  String? escalatorDir;
 
   Properties(
       {this.contactNo,
@@ -385,7 +386,7 @@ class Properties {
         this.frConn,
         this.clickedPoints,
         this.floorAngle,
-        this.polygonId});
+        this.polygonId,this.escalatorDir});
 
   Properties.fromJson(Map<dynamic, dynamic> json) {
     contactNo = json['contactNo'];
@@ -452,6 +453,7 @@ class Properties {
     clickedPoints = json['clickedPoints'].cast<String>();
     floorAngle = json['floorAngle'];
     polygonId = json['polygonId'].cast<String>();
+    escalatorDir = json['escalatorDir'].cast<String>();
   }
 
   Map<dynamic, dynamic> toJson() {
@@ -520,6 +522,7 @@ class Properties {
     data['clickedPoints'] = this.clickedPoints;
     data['floorAngle'] = this.floorAngle;
     data['polygonId'] = this.polygonId;
+    data['escalatorDir'] = this.escalatorDir;
     return data;
   }
 }

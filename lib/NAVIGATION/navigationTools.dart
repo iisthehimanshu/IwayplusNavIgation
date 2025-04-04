@@ -65,6 +65,7 @@ class tools {
     return [latCenter, lngCenter];
   }
 
+
   static String numericalToAlphabetical(int number) {
     switch (number) {
       case 0:
@@ -714,10 +715,12 @@ class tools {
 
 
 
-  static double PathDistance(List<Cell> mergedList) {
+  static double PathDistance(List<Cell> mergedList, {int index = 0}) {
     double totalDistance = 0.0;
 
     if (mergedList.isEmpty) return totalDistance;
+
+    mergedList = mergedList.sublist(index);
 
     if (mergedList.every((item) => (item.bid == buildingAllApi.outdoorID && item.floor == mergedList.first.floor))) {
       for (int i = 1; i < mergedList.length; i++) {
@@ -1127,7 +1130,133 @@ class tools {
     // Cross product != 0 means there is a turn.
     return crossProduct != 0;
   }
+  static List<List<Cell>> findStraightSegments(List<Cell> points) {
+    List<List<Cell>> segments = [];
+    int? start;
 
+    for (int i = 0; i < points.length; i++) {
+      if (points[i].imaginedCell) continue;
+
+      if (start == null) {
+        start = i;
+        continue;
+      }
+
+      int? nextIndex;
+      for (int j = i + 1; j < points.length; j++) {
+        if (!points[j].imaginedCell) {
+          nextIndex = j;
+          break;
+        }
+      }
+
+      if (nextIndex == null) break;
+
+      double turnAngle = angle(points[start], points[i], points[nextIndex]);
+
+      if (turnAngle > 22.5) {
+        segments.add([points[start], points[i]]);
+        start = i;
+      }
+    }
+
+    if (start != null && !points.last.imaginedCell) {
+      segments.add([points[start], points.last]);
+    }
+
+    return segments;
+  }
+
+  static List<List<Cell>> filterLongSegments(List<List<Cell>> segments) {
+    return segments.where((segment) {
+      double segmentLength = calculateDistance(
+        [segment[0].x, segment[0].y],
+        [segment[1].x, segment[1].y],
+      );
+      return segmentLength > 60;
+    }).toList();
+  }
+
+  static List<Cell>? findSegmentContainingPoint(List<Cell> points, int index) {
+    List<List<Cell>> segments = findStraightSegments(points);
+    segments = filterLongSegments(segments);
+
+    for (List<Cell> segment in segments) {
+      if (segment.first == points[index] || segment.last == points[index] ||
+          (points.indexOf(segment.first) < index && points.indexOf(segment.last) > index)) {
+
+        print("user is in between [${segment.first.x}, ${segment.first.y}]  and  [${segment.last.x}, ${segment.last.y}]");
+
+        return segment;
+      }
+    }
+    return null; // If the index is not part of any valid segment
+  }
+
+  static double angle(Cell a, Cell b, Cell c) {
+    int abx = b.x - a.x, aby = b.y - a.y;
+    int bcx = c.x - b.x, bcy = c.y - b.y;
+
+    int dot = abx * bcx + aby * bcy;
+    double magAB = sqrt(abx * abx + aby * aby);
+    double magBC = sqrt(bcx * bcx + bcy * bcy);
+
+    double cosTheta = dot / (magAB * magBC);
+    return acos(cosTheta) * (180 / pi);
+  }
+
+
+  static List<Cell> findAllPointsOfSegment(List<Cell> path, List<Cell> segment){
+    List<Cell> points = [];
+    int startIndex = path.indexWhere((cell)=>cell.x == segment[0].x && cell.y == segment[0].y && cell.bid == segment[0].bid);
+    int endIndex = path.indexWhere((cell)=>cell.x == segment[1].x && cell.y == segment[1].y && cell.bid == segment[1].bid);
+    for(int i = startIndex; i<= endIndex; i++){
+      points.add(path[i]);
+    }
+    return points;
+  }
+  static List<Cell> sortCollinearPoints(List<Cell> points) {
+    if (points.length < 2) throw ArgumentError("At least 2 points required");
+
+    var firstPoint = points[0]; // Keep the first point fixed
+
+    // Sort the remaining points based on their projection
+    var remainingPoints = points.sublist(1);
+
+    // Use firstPoint as reference, choose the farthest point as second reference
+    var farthestPoint = remainingPoints.reduce((a, b) =>
+    ((a.x - firstPoint.x).abs() + (a.y - firstPoint.y).abs()) >
+        ((b.x - firstPoint.x).abs() + (b.y - firstPoint.y).abs()) ? a : b);
+
+    // Compute projection scalar t for sorting
+    num t(Cell p) =>
+        (p.x - firstPoint.x) * (farthestPoint.x - firstPoint.x) +
+            (p.y - firstPoint.y) * (farthestPoint.y - firstPoint.y);
+
+    // Sort remaining points based on t values
+    remainingPoints.sort((a, b) => t(a).compareTo(t(b)));
+
+    // Keep the first point at the start and append sorted points
+    return [firstPoint, ...remainingPoints];
+  }
+
+
+  static List<Cell>? findNextSegment(List<Cell> path, int index){
+    List<List<Cell>> segments = findStraightSegments(path);
+
+    for(int i = 0; i<segments.length; i++){
+      List<Cell> segment = segments[i];
+      if (segment.first == path[index] || segment.last == path[index] ||
+          (path.indexOf(segment.first) < index && path.indexOf(segment.last) > index)) {
+        if(i+1 == segments.length){
+          return null;
+        }else {
+          return segments[i + 1];
+        }
+      }
+    }
+    return null; // If the index is not part of any valid segment
+  }
 
   static double calculateAngleBWUserandCellPath(Cell user, Cell node , int cols,double theta) {
     if(user.bid != node.bid){
@@ -1178,6 +1307,30 @@ class tools {
 
 
     return angleInDegrees;
+  }
+
+
+  static double perpendicularDistance(Cell A, Cell B, List<int> C) {
+    int x1 = A.x, y1 = A.y;
+    int x2 = B.x, y2 = B.y;
+    int x3 = C[0], y3 = C[1];
+
+    // Check if C is within the bounding box of A and B
+    bool withinBounds = false;
+    if(x1 == x2){
+      withinBounds = true;
+    }else if(y1 == y2){
+      withinBounds = (x3 >= min(x1, x2) && x3 <= max(x1, x2));
+    }else{
+      withinBounds = (x3 >= min(x1, x2) && x3 <= max(x1, x2)) && (y3 >= min(y1, y2) && y3 <= max(y1, y2));
+    }
+
+    if (!withinBounds) return double.infinity; // C is not between A and B
+
+    int numerator = ((y2 - y1) * x3 - (x2 - x1) * y3 + x2 * y1 - y2 * x1).abs();
+    double denominator = sqrt(pow(y2 - y1, 2) + pow(x2 - x1, 2));
+
+    return denominator == 0 ? 0 : numerator / denominator;
   }
 
   static double calculateAngleonPath(Cell current, Cell prev , Cell next) {

@@ -12,7 +12,6 @@ import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:iwaymaps/IWAYPLUS/API/buildingAllApi.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,6 +19,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
+import '../IWAYPLUS/API/buildingAllApi.dart';
 import '../IWAYPLUS/Elements/HelperClass.dart';
 import 'API/ladmarkApi.dart';
 import 'APIMODELS/landmark.dart';

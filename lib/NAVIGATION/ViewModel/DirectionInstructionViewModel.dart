@@ -2,12 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
-import 'package:iwaymaps/NAVIGATION/UserState.dart';
 
 import '../../IWAYPLUS/API/buildingAllApi.dart';
 import '../../IWAYPLUS/Elements/locales.dart';
 import '../directionClass.dart';
-import '../navigationTools.dart';
 
 class DirectionInstructionViewModel extends ChangeNotifier {
   final List<direction> directionList;
@@ -39,10 +37,15 @@ class DirectionInstructionViewModel extends ChangeNotifier {
   String destinationLiftString = "";
   int totalDestinationTurns = 0;
   double totalDestinationDistance = 0;
+
+
   List<direction> _outdoorDirection = [];
   double _outdoorWidgetHeight = 1.1;
   double totalOutdoorLength = 0.0;
+
   bool _MultiBuilding = false;
+
+
   List<direction> get sourceDirection => _sourceDirection;
   List<direction> get destinationDirection => _destinationDirection;
   List<direction> get outdoorDirection => _outdoorDirection;
@@ -80,9 +83,9 @@ class DirectionInstructionViewModel extends ChangeNotifier {
     _destinationDirection = parseDirections(dtemp, context);
     List<direction> otemp =  directionList.where((e) => e.Bid == buildingAllApi.outdoorID).toList();
     _outdoorDirection = parseDirections(otemp, context);
+
     checkMultiFloor();
     _calculateHeight();
-    UserState.mapPathGuide= tools.processInstructions(_sourceDirection);
     notifyListeners();
   }
 
@@ -146,9 +149,9 @@ class DirectionInstructionViewModel extends ChangeNotifier {
       }
     }else{
       for (var dir in _sourceDirection) {
-          if (dir.turnDirection!.split(' ').first.toLowerCase() == "take") {
-            _sourceMultiFloor = true;
-          }
+        if (dir.turnDirection!.split(' ').first.toLowerCase() == "take") {
+          _sourceMultiFloor = true;
+        }
       }
     }
   }
@@ -178,10 +181,10 @@ class DirectionInstructionViewModel extends ChangeNotifier {
     }
 
     return output;
+
   }
 
   List<direction> parseDirections(List<direction> directionList, BuildContext context){
-
     List<direction> parsedList = [];
     for(var direction in directionList){
       if(direction.turnDirection != null && direction.turnDirection!.split(' ').first.toLowerCase() != "go" && direction.turnDirection!.split(' ').first.toLowerCase() != "turn" && direction.turnDirection!.split(' ').first.toLowerCase() != "take"){
@@ -201,14 +204,7 @@ class DirectionInstructionViewModel extends ChangeNotifier {
         }
 
       }
-
     }
-
-
-
-
-
-
     return directionList;
   }
 }

@@ -7,12 +7,10 @@ import 'package:flutter_tts/flutter_tts.dart';
 //import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:iwaymaps/newSearchPage.dart';
-import '/IWAYPLUS/Elements/HelperClass.dart';
-import '/IWAYPLUS/Elements/locales.dart';
-import 'package:iwaymaps/NAVIGATION/SourceAndDestinationPage.dart';
-
-import '/NAVIGATION/APIMODELS/landmark.dart';
+import '../../IWAYPLUS/Elements/HelperClass.dart';
+import '../../IWAYPLUS/Elements/locales.dart';
+import '../SourceAndDestinationPage.dart';
+import '/newSearchPage.dart';
 import '../DestinationSearchPage.dart';
 import 'package:animated_checkmark/animated_checkmark.dart';
 

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
-import '../IWAYPLUS/Elements/HelperClass.dart';
 import 'Cell.dart';
 import 'GPS.dart';
 import 'GPSService.dart';
@@ -107,7 +106,7 @@ class PathSnapper {
         continue;
       }
       // Find the projection on the segment
-      var projection = _projectPointOnSegment(position.latitude, position.longitude, start, end);
+      var projection = projectPointOnSegment(position.latitude, position.longitude, start, end);
       if (projection != null) {
         double projectionLat = projection.latitude ?? 0.0;
         double projectionLng = projection.longitude ?? 0.0;
@@ -139,54 +138,65 @@ class PathSnapper {
     "position": position};
   }
 
-  Cell? snapToPathKalman(Location position,double latitude, double longitude) {
+  Cell? snapToPathKalman(Location position,double latitude, double longitude, int index, List<Cell> path) {
     print("snapToPathKalman ${position.latitude},${position.longitude}");
     double minDistance = double.infinity;
     Cell? nearestCell;
 
-    for (int i = 0; i < path.length - 1; i++) {
-      var start = path[i];
-      var end = path[i + 1];
-      if(start.x == end.x && start.y == end.y){
-        continue;
-      }
-      // Find the projection on the segment
-      var projection = _projectPointOnSegment(latitude, longitude, start, end);
-      if (projection != null) {
-        double projectionLat = projection.latitude ?? 0.0;
-        double projectionLng = projection.longitude ?? 0.0;
+    List<Cell>? points = tools.findSegmentContainingPoint(path, index);
+    if(points == null){
+      return null;
+    }
+    int d1 = tools.calculateAerialDist(path[index].lat, path[index].lng, points[0].lat, points[0].lng).ceil();
+    int d2 = tools.calculateAerialDist(path[index].lat, path[index].lng, points[1].lat, points[1].lng).ceil();
+    print("d1 is $d1 and d2 is $d2");
+    if(d1<3 || d2<3){
+      return null;
+    }
+    Cell start = points[0];
+    Cell end = points[1];
 
-        double distance = _haversineDistance(latitude, longitude, projectionLat, projectionLng);
+    // Find the projection on the segment
+    var projection = projectPointOnSegment(latitude, longitude, start, end);
+    if (projection != null) {
+      double projectionLat = projection.latitude ?? 0.0;
+      double projectionLng = projection.longitude ?? 0.0;
 
-        if (distance < minDistance) {
-          minDistance = distance;
-          nearestCell = Cell(
-              (projection.y * start.numCols) + projection.x,
-              projection.x,
-              projection.y,
-              start.move,
-              projectionLat,
-              projectionLng,
-              start.bid,
-              start.floor,
-              start.numCols,
-              imaginedIndex: path.indexOf(start) + 1,
-              imaginedCell: true,
-              position: position
-          );
-        }
+      double distance = _haversineDistance(latitude, longitude, projectionLat, projectionLng);
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestCell = convertToCell(projection, start, position);
       }
     }
     if(nearestCell != null){
       // path.insert(nearestCell.imaginedIndex!, nearestCell);
     }else{
-      HelperClass.showToast("old gps position identified");
+      // HelperClass.showToast("old gps position identified");
+      return null;
     }
     return nearestCell;
   }
 
+  Cell convertToCell(navPoints projection, Cell start, Location? position){
+    return Cell(
+        (projection.y * start.numCols) + projection.x,
+        projection.x,
+        projection.y,
+        start.move,
+        projection.latitude,
+        projection.longitude,
+        start.bid,
+        start.floor,
+        start.numCols,
+        imaginedIndex: path.indexOf(start),
+        imaginedCell: true,
+        position: position
+    ) ;
+  }
+
   // Project point onto a segment
-  navPoints? _projectPointOnSegment(double px, double py, Cell a, Cell b) {
+  navPoints? projectPointOnSegment(double px, double py, Cell a, Cell b) {
 
     geo.LatLng? projectLatLngIfWithinSegment(geo.LatLng user, geo.LatLng start, geo.LatLng end) {
       double ax = user.latitude - start.latitude;
@@ -200,7 +210,9 @@ class PathSnapper {
       if (t < 0 || t > 1) {
         return null; // Outside the segment
       }
-
+      if((start.latitude + t * bx).isNaN || (start.longitude + t * by).isNaN){
+        return null;
+      }
       return geo.LatLng(start.latitude + t * bx, start.longitude + t * by);
     }
 

@@ -38,7 +38,17 @@ import 'IWAYPLUS/MainScreen.dart';
 import '/NAVIGATION/Navigation.dart';
 import 'dart:io' show Platform;
 
+import 'IWAYPLUS/websocket/interactionManager.dart';
+import 'IWAYPLUS/websocket/navigationLogManager.dart';
+import 'IWAYPLUS/websocket/sessionManager.dart';
+import 'NAVIGATION/DATABASE/DATABASEMODEL/GlobalAnnotationAPIModel.dart';
+
 final navigatorKey = GlobalKey<NavigatorState>();
+
+
+final interactionManager = InteractionManager();
+final sessionManager = SessionManager();
+final navigationManager=NavigationLogManager();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -82,6 +92,13 @@ Future<void> localDBInitialsation() async {
   await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
   Hive.registerAdapter(LocalNotificationAPIDatabaseModelAdapter());
   await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
+  Hive.registerAdapter(GlobalAnnotationAPIModelAdapter());
+  await Hive.openBox<GlobalAnnotationAPIModel>('GlobalAnnotationAPIModelFile');
+
+  await interactionManager.initialize();
+  await sessionManager.initialize();
+  await navigationManager.initialize();
+
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');
   await Hive.openBox('Filters');

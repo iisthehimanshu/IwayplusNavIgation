@@ -2,14 +2,13 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
-import 'package:iwaymaps/NAVIGATION/config.dart';
-import '../APIMODELS/beaconData.dart';
-import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/BeaconAPIModelBOX.dart';
-import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
-import '/IWAYPLUS/Elements/HelperClass.dart';
 
+import '../../IWAYPLUS/Elements/HelperClass.dart';
+import '../APIMODELS/beaconData.dart';
+import '../DATABASE/BOXES/BeaconAPIModelBOX.dart';
+import '../DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import '../VersioInfo.dart';
+import '../config.dart';
 import 'RefreshTokenAPI.dart';
 
 
@@ -18,17 +17,10 @@ class beaconapi {
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
-  String encryptDecrypt(String input, String key){
-    StringBuffer result = StringBuffer();
-    for (int i = 0; i < input.length; i++) {
-      // XOR each character of the input with the corresponding character of the key
-      result.writeCharCode(input.codeUnitAt(i) ^ key.codeUnitAt(i % key.length));
-    }
-    return result.toString();
-  }
+
   String getDecryptedData(String encryptedData){
     Map<String, dynamic> encryptedResponseBody = json.decode(encryptedData);
-    String newResponse=encryptDecrypt(encryptedResponseBody['encryptedData'], "xX7/kWYt6cjSDMwB4wJPOBI+/AwC+Lfbd610sWfwywU=");
+    String newResponse=encryptDecrypt(encryptedResponseBody['encryptedData']);
     List<dynamic> originalList = jsonDecode(newResponse);
     // Wrap in landmarks header
     Map<String, dynamic> wrappedResponse = {

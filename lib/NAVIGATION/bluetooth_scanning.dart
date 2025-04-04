@@ -8,7 +8,6 @@ import '../IWAYPLUS/websocket/UserLog.dart';
 import 'APIMODELS/beaconData.dart';
 
 
-
 class BLueToothClass {
   HashMap<int, HashMap<String, double>> BIN = HashMap();
   HashMap<String,int> numberOfSample = HashMap();
@@ -106,7 +105,6 @@ class BLueToothClass {
               print("Beacon $MacId $Rssi ${result.timeStamp.difference(SourceTSP)} ${result.timeStamp} ${SourceTSP}");
 
             }
-
             //print(MacId);
             //print("mac1 $MacId    rssi $Rssi");
             beacondetail[MacId] = Rssi * -1;
@@ -194,7 +192,7 @@ class BLueToothClass {
     startbin();
 
     try {
-       // _systemDevices = FlutterBluePlus.systemDevices;
+      // _systemDevices = FlutterBluePlus.systemDevices;
     } catch (e) {
 
     }
@@ -286,7 +284,7 @@ class BLueToothClass {
     } else {
       binnumber = 6;
     }
-    
+
     if(BIN[binnumber]==null){
       startbin();
     }

@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:iwaymaps/NAVIGATION/buildingState.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 
 import '../IWAYPLUS/API/slackApi.dart';
@@ -10,7 +11,6 @@ import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
 import 'UserState.dart';
-import 'buildingState.dart';
 import 'navigationTools.dart';
 
 class NavigationAPIController {

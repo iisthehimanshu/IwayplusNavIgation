@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:iwaymaps/NAVIGATION/APIMODELS/landmark.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/pinLandmark.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+
+import '../APIMODELS/landmark.dart';
 
 class pinLandmarkPannel {
   final PanelController _panelController = PanelController();

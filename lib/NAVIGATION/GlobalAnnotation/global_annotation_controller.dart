@@ -19,7 +19,7 @@ class GlobalAnnotationController {
     if(pathNetwork == null){
       return null;
     }
-    Map<String, dynamic> JSONPathNetwork = pathNetwork.toJson();
+    Map<dynamic, dynamic> JSONPathNetwork = pathNetwork.toJson();
     JSONPathNetwork["floor"] = 0;
     JSONPathNetwork["building_ID"] = data.mappingElements?.first.buildingID;
     way.PathModel wayPointList = way.PathModel.fromJson(JSONPathNetwork as Map<dynamic, dynamic>);

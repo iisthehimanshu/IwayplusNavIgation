@@ -388,12 +388,12 @@ class _ARObjectPlacementScreenState extends State<ARObjectPlacementScreen> {
   }
 
 
-  Future<void> renderNextNodes(int initialProximityCounter,int proximityCounter){
-    // for(int i=initialProximityCounter  ; i<=proximityCounter ; i++){
-    //   List<ARNode> list = addedNodes.getRange(initialProximityCounter, proximityCounter);
-    //   await arObjectManager.addNode(newNode$i);
-    // }
-  }
+  // Future<void> renderNextNodes(int initialProximityCounter,int proximityCounter){
+  //   // for(int i=initialProximityCounter  ; i<=proximityCounter ; i++){
+  //   //   List<ARNode> list = addedNodes.getRange(initialProximityCounter, proximityCounter);
+  //   //   await arObjectManager.addNode(newNode$i);
+  //   // }
+  // }
 
   Future<void> clearNodes() async {
     for (ARNode node in addedNodes) {

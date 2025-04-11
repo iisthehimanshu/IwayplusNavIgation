@@ -3,8 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  app_links
-  firebase_core
+  connectivity_plus
   flutter_localization
   flutter_tts
   geolocator_windows

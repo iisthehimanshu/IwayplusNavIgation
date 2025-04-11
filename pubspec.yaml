@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 6.2.7+20
+version: 6.3.1+24
 
 environment:
   sdk: '>=3.0.6 <4.0.0'
@@ -36,6 +36,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   google_maps_flutter: ^2.5.3
+  google_maps_flutter_web:
   google_maps_polyline:
   http: ^1.1.0
   flutter_speed_dial: ^7.0.0
@@ -49,7 +50,6 @@ dependencies:
   flutter_svg: ^2.0.9
   path_provider:
   hive: ^2.2.3
-  firebase_core: ^3.3.0
   hive_flutter: ^1.1.0
   flutter_animate: ^4.5.0 #animations
   flutter_staggered_animations:
@@ -65,10 +65,8 @@ dependencies:
   geodesy: ^0.10.2
   chips_choice: ^3.0.1
   turf: ^0.0.10
-  geolocator: ^11.0.0
+  geolocator: ^12.0.0
   upgrader:
-  firebase_messaging: ^15.0.4
-  intl_phone_number_input: ^0.7.3+1
   lottie: ^2.6.0
   speech_to_text:
   fuzzy: <1.0.0
@@ -89,12 +87,23 @@ dependencies:
   test: ^1.16.0
   mockito: ^5.1.0
   flutter_beep: ^1.0.0
-  app_links: ^6.1.1
   qr_code_scanner:
   loading_animation_widget: ^1.2.1
   wakelock_plus: ^1.2.7
   widget_to_marker:
   app_settings: ^5.1.1
+  connectivity_plus: ^6.0.3
+  string_similarity: ^2.1.1
+  new_version_plus: ^0.0.12
+  provider: ^6.1.2
+  image:
+  ml_linalg: ^13.12.6
+  flutter_activity_recognition: ^4.0.0
+
+
+
+
+
 
 
 dev_dependencies:

@@ -75,8 +75,6 @@ class UserState {
   static Function createCircle = (double lat, double lng) {};
   static Function addDebugMarkers = (geo.LatLng point, {double? hue,int? id}){};
   PathSnapper snapper = PathSnapper();
-
-
   UserState(
       {required this.floor,
         required this.coordX,
@@ -91,7 +89,6 @@ class UserState {
         this.isnavigating = false,
         this.coordXf = 0.0,
         this.coordYf = 0.0});
-
   Future<void> move(BuildContext context, {int? steps, bool isFlying = false}) async {
     List<Cell> turnPoints = [];
     try {
@@ -107,7 +104,6 @@ class UserState {
     }
     incrementSteps();
   }
-
   bool isMovementAllowed(List<Cell> turnPoints, BuildContext context) {
     bool movementAllowed = MotionModel.isValidStep(this, cols, rows, nonWalkable[bid]![floor]!, reroute, context);
     if (!movementAllowed || !isnavigating) return movementAllowed;

@@ -969,7 +969,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           widget.user.cellPath[widget.user.pathobj.index + 1],
           widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!,
           widget.user.theta);
-
       widget.direction =
           (tools.angleToClocks(angle, widget.context) == "None")
               ? oldWidget.direction

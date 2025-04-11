@@ -19,9 +19,7 @@ class PolyLineApi {
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
-
-
-  String getDecryptedData(String encryptedData){
+  String getDecryptedData(String encryptedData) {
     Map<String, dynamic> encryptedResponseBody = json.decode(encryptedData);
     print("encryptedResponseBody $encryptedResponseBody");
     String newResponse=encryptDecrypt(encryptedResponseBody['encryptedData']);
@@ -33,7 +31,6 @@ class PolyLineApi {
     };
     return jsonEncode(wrappedResponse);
   }
-
   Future<polylinedata> fetchPolyData({String? id = null, bool outdoor = false}) async {
     print("polyline");
     final PolyLineBox = PolylineAPIModelBOX.getData();

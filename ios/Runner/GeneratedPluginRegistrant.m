@@ -36,6 +36,12 @@
 @import device_information;
 #endif
 
+#if __has_include(<flutter_activity_recognition/FlutterActivityRecognitionPlugin.h>)
+#import <flutter_activity_recognition/FlutterActivityRecognitionPlugin.h>
+#else
+@import flutter_activity_recognition;
+#endif
+
 #if __has_include(<flutter_beep/FlutterBeepPlugin.h>)
 #import <flutter_beep/FlutterBeepPlugin.h>
 #else
@@ -170,6 +176,7 @@
   [ConnectivityPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"ConnectivityPlusPlugin"]];
   [FPPDeviceInfoPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FPPDeviceInfoPlusPlugin"]];
   [DeviceInformationPlugin registerWithRegistrar:[registry registrarForPlugin:@"DeviceInformationPlugin"]];
+  [FlutterActivityRecognitionPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterActivityRecognitionPlugin"]];
   [FlutterBeepPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterBeepPlugin"]];
   [FlutterBluePlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterBluePlusPlugin"]];
   [FlutterCompassPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterCompassPlugin"]];

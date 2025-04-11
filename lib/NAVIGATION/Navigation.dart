@@ -7,6 +7,7 @@ import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
 import 'package:iwaymaps/NAVIGATION/path.dart';
@@ -960,7 +961,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   //will have to set according to the device
   double peakThreshold = 11.1111111;
   double valleyThreshold = -11.1111111;
-
   int peakInterval = 300;
   int valleyInterval = 300;
   //it is the smoothness factor of the low pass filter.
@@ -969,10 +969,25 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   double filteredY = 0;
   double filteredZ = 0;
   bool restartScanning = false;
-
   List<double> orientationHistory = [];
   int orientationWindowSize = 10;  // Number of readings for stability check
   double orientationThreshold = 0.1;
+  String currentActivity = "UNKNOWN";
+  StreamSubscription<AccelerometerEvent>? accelerometerSubscription;
+  StreamSubscription<Activity>? activitySubscription;
+  void startActivityRecognition(){
+    print("got into it1");
+    final activityRecognition = FlutterActivityRecognition.instance;
+    activitySubscription = activityRecognition.activityStream.listen((event) {
+      print("got into it2");
+      setState((){
+        currentActivity = event.type.toString(); // e.g., "WALKING", "STILL"
+      });
+      print("currentActivity111 ${currentActivity}  ${event.confidence.toString()}");
+    },onError: (e){
+      print("flutter activity $e");
+    },);
+  }
 
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
@@ -2006,6 +2021,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   void initializeUser(Landmarks userSetLocation,beacon? localizedBeacon,{bool speakTTS = true, bool render = true})async{
+    startActivityRecognition();
     tools.setBuildingAngle(SingletonFunctionController.building
         .patchData[userSetLocation.buildingID]!.patchData!.buildingAngle!);
 
@@ -12920,7 +12936,7 @@ bool _isPlaying=false;
 
                   SizedBox(height: 28.0),
                   DebugToggle.Slider ? Text("${user.theta}") : Container(),
-                  // Text(SingletonFunctionController.SC_IL_RSSI_AVERAGE.toString()),
+                  Text(currentActivity),
 
 
                   // Text("coord [${user.coordX},${user.coordY}] \n"

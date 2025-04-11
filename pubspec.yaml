@@ -98,6 +98,7 @@ dependencies:
   provider: ^6.1.2
   image:
   ml_linalg: ^13.12.6
+  flutter_activity_recognition: ^4.0.0
 
 
 

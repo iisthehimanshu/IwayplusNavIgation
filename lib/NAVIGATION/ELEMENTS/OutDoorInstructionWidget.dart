@@ -66,7 +66,7 @@ class _OutDoorInstructionWidgetState extends State<OutDoorInstructionWidget>{
             ),
             SizedBox(width: 20,),
             Semantics(
-              label: "Take Outdoor path and Walk ${(widget.TotalOutDoorInFeet*0.3048).toInt()} meters to reach ${widget.EndBuildingName}",
+              label: "Take Outdoor path and Walk ${widget.TotalOutDoorInFeet.toInt()} meters to reach ${widget.EndBuildingName}",
               child: Container(
                 width: screenWidth*0.74,
                 child: Column(
@@ -139,16 +139,8 @@ class _OutDoorInstructionWidgetState extends State<OutDoorInstructionWidget>{
                       physics: NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         final direction = widget.directions[index];
-                        String distance = (direction.turnDirection?.startsWith("Take") == true)
-                            ? "${direction.distanceToNextTurnInFeet}"
-                            : "${((direction.distanceToNextTurnInFeet ?? 0) * 0.3048).ceil()} m";
-
-                        String text = index == widget.directions.length - 1
-                            ? "${direction.turnDirection} $distance, you'll reach ${widget.endName}"
-                            : "${direction.turnDirection} $distance";
-
                         return Semantics(
-                          label: text,
+                          label: index == widget.directions.length-1? "${direction.turnDirection} ${((direction.turnDirection??"").substring(0,4)=="Take")? "${direction.distanceToNextTurnInFeet}" :"${(direction.distanceToNextTurnInFeet??0*0.3048).ceil()} m"}, you'll reach ${widget.endName}":"${direction.turnDirection} ${((direction.turnDirection??"").substring(0,4)=="Take")? "${direction.distanceToNextTurnInFeet}" :"${(direction.distanceToNextTurnInFeet??0*0.3048).ceil()} m"}",
                           excludeSemantics: true,
                           child: Column(
                             children: [

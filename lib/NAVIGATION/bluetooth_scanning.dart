@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import '../IWAYPLUS/websocket/UserLog.dart';
 import 'APIMODELS/beaconData.dart';
-
 
 
 class BLueToothClass {
@@ -91,7 +91,7 @@ class BLueToothClass {
         if(result.device.platformName.length > 2){
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
-          wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
+          // wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
           if (apibeaconmap.containsKey(MacId)) {
             if (result.timeStamp.difference(SourceTSP).inSeconds>=0 && result.timeStamp.difference(SourceTSP).inSeconds < 10) {
               print("result.timeStamp.difference(SourceTSP) ${result.timeStamp.difference(SourceTSP)}  ${result.timeStamp.difference(SourceTSP).inSeconds}");
@@ -106,7 +106,6 @@ class BLueToothClass {
               print("Beacon $MacId $Rssi ${result.timeStamp.difference(SourceTSP)} ${result.timeStamp} ${SourceTSP}");
 
             }
-
             //print(MacId);
             //print("mac1 $MacId    rssi $Rssi");
             beacondetail[MacId] = Rssi * -1;
@@ -194,7 +193,7 @@ class BLueToothClass {
     startbin();
 
     try {
-       // _systemDevices = FlutterBluePlus.systemDevices;
+      // _systemDevices = FlutterBluePlus.systemDevices;
     } catch (e) {
 
     }
@@ -241,7 +240,7 @@ class BLueToothClass {
   void stopScanning() async{
     await FlutterBluePlus.stopScan();
     emptyBin();
-    // _scanResultsSubscription.cancel();
+    if(Platform.isIOS) _scanResultsSubscription.cancel();
     _scanResults.clear();
     // _systemDevices.clear();
     priorityQueue.clear();
@@ -286,7 +285,7 @@ class BLueToothClass {
     } else {
       binnumber = 6;
     }
-    
+
     if(BIN[binnumber]==null){
       startbin();
     }

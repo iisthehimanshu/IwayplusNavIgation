@@ -30,12 +30,10 @@ class _DirectionInstructionState extends State<DirectionInstruction> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
     return ChangeNotifierProvider.value(
       value: widget.viewModel,
       child: Consumer<DirectionInstructionViewModel>(
         builder: (context, vm, child) {
-
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -90,6 +88,7 @@ class _DirectionInstructionState extends State<DirectionInstruction> {
               vm.isMultiBuilding && vm.destinationBID == buildingAllApi.outdoorID && !vm.isSourceMultiFloor && !vm.isDestinationMultiFloor? DirectionInstructionWidget(StartName: vm.sourceBuildingName, StartBuildingName: vm.sourceBuildingName, StartFloor: vm.sourceFloor, directionList: vm.sourceDirection, IsMultiFloor: false, IsMultiBuilding: true,FirstHeight: (vm.sourceUPHeight/2)+screenHeight*0.125,SecondHeight: vm.sourceUPHeight/2+screenHeight*0.1,ThirdHeight: vm.sourceDownHeight/2,ForthHeight: vm.sourceDownHeight/2, LiftString: vm.sourceLiftString,EndBuildingName: vm.destinationBuildingName,EndFloor: vm.destionationFloor,EndName: vm.destinationName,TotalDistanceInFeet: vm.totalDestinationDistance,Turns: vm.totalDestinationTurns,reverse: false,BuildingID: vm.sourceBID): Container(),
               vm.isMultiBuilding && vm.destinationBID == buildingAllApi.outdoorID && !vm.isSourceMultiFloor && !vm.isDestinationMultiFloor? SizedBox(height: 20,): Container(),
               vm.isMultiBuilding && vm.destinationBID == buildingAllApi.outdoorID && !vm.isSourceMultiFloor && !vm.isDestinationMultiFloor? OutDoorInstructionWidget(ListHeight: vm.outdoorWidgetHeight+screenHeight*0.14, TotalOutDoorInFeet: vm.totalOutdoorLength, EndBuildingName: vm.destinationBuildingName, directions: vm.outdoorDirection,ShowLandmark: true,endName: vm.destinationName): Container(),
+
 
               //Source OutDoor Destination MultiFloor
               vm.isMultiBuilding && vm.sourceBID == buildingAllApi.outdoorID && !vm.isSourceMultiFloor && vm.isDestinationMultiFloor? OutDoorInstructionWidget(ListHeight: vm.outdoorWidgetHeight+screenHeight*0.14, TotalOutDoorInFeet: vm.totalOutdoorLength, EndBuildingName: vm.destinationBuildingName, directions: vm.outdoorDirection,ShowLandmark: true,endName: vm.destinationBuildingName): Container(),
@@ -151,7 +150,7 @@ class _DirectionInstructionState extends State<DirectionInstruction> {
         color: Colors.black,
         size: 32,
       );
-    } else if (direction.contains(LocaleData.slightleft.getString(context))) {
+    } else if (direction.contains(LocaleData.slightleft.getString(context))){
       return Icon(
         Icons.turn_slight_left,
         color: Colors.black,

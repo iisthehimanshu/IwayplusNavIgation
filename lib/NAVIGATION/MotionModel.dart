@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+
 import '../IWAYPLUS/API/buildingAllApi.dart';
 import 'UserState.dart';
 import 'navigationTools.dart';
@@ -30,7 +31,7 @@ class MotionModel{
       if(stuckCount==5){
         //if the pointer gets stuck in the non walkable during navigation.
         if(user.bid == buildingAllApi.outdoorID){
-          user.moveToPointOnPathOnPath(((stuckCount*UserState.stepSize)-1).toInt());
+          user.moveToPointOnPathOnPath(context, ((stuckCount*UserState.stepSize)-1).toInt());
         }else{
           user.moveToPointOnPath((user.pathobj.index+(stuckCount*UserState.stepSize)-1).toInt(), context);
         }

@@ -8,8 +8,9 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 
+import '../IWAYPLUS/websocket/UserLog.dart';
 import 'APIMODELS/beaconData.dart';
-import 'Elements/BlurtoothDevice.dart';
+import 'ELEMENTS/BlurtoothDevice.dart';
 
 class BluetoothScanAndroidClass{
   static const methodChannel = MethodChannel('com.example.bluetooth/scan');
@@ -22,6 +23,8 @@ class BluetoothScanAndroidClass{
 
   Map<String, String> deviceNames = {};
   Map<String, List<int>> rssiValues = {};
+  Map<String, DateTime> lastSeenTimestamps = {};
+
   Map<String, double> distances = {};
   String closestDeviceDetails = "";
   String closestrssiDevice = "";
@@ -35,6 +38,7 @@ class BluetoothScanAndroidClass{
   String EM_NEAREST_BEACON = "";
   beacon EM_NEAREST_BEACON_VALUE = beacon();
   static Map<String, List<int>> EM_RSSI_VALUES = {};
+  late Timer cleanupTimer;
 
 
 
@@ -53,6 +57,7 @@ class BluetoothScanAndroidClass{
     try {
       await methodChannel.invokeMethod('stopScan');
       isScanning = false;
+      cleanupTimer.cancel();
     } on PlatformException catch (e) {
       print("Failed to stop scan: ${e.message}");
     }
@@ -61,7 +66,7 @@ class BluetoothScanAndroidClass{
 
   BluetoothDevice parseDeviceDetails(String response) {
     final deviceRegex = RegExp(
-      r'Device Name: (.+?)\n.*?Address: (.+?)\n.*?RSSI: (-?\d+)',
+      r'Device Name: (.+?)\n.*?Address: (.+?)\n.*?RSSI: (-?\d+).*?Raw Data: ([0-9A-Fa-f\-]+)',
       dotAll: true,
     );
 
@@ -71,16 +76,19 @@ class BluetoothScanAndroidClass{
       final deviceName = match.group(1) ?? 'Unknown';
       final deviceAddress = match.group(2) ?? 'Unknown';
       final deviceRssi = match.group(3) ?? '0';
+      final rawData = match.group(4) ?? '';
 
       return BluetoothDevice(
         DeviceName: deviceName,
         DeviceAddress: deviceAddress,
         DeviceRssi: deviceRssi,
+        rawData: rawData,
       );
     } else {
       throw Exception('Invalid device details string');
     }
   }
+
 
 
   List<String> nearestBeaconList = [];
@@ -98,24 +106,28 @@ class BluetoothScanAndroidClass{
       subscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
         BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
         if (apibeaconmap.containsKey(deviceDetails.DeviceName)) {
-          deviceMacId = deviceDetails.DeviceAddress;
-          EM_DEVICE_NAME[deviceDetails.DeviceAddress] = deviceDetails.DeviceName;
+          if(int.parse(deviceDetails.DeviceRssi)<90) {
+            deviceMacId = deviceDetails.DeviceAddress;
+            EM_DEVICE_NAME[deviceDetails.DeviceAddress] = deviceDetails.DeviceName;
 
-          EM_RSSI_VALUES.putIfAbsent(deviceDetails.DeviceAddress, () => []);
-          EM_RSSI_WEIGHT.putIfAbsent(deviceDetails.DeviceAddress, () => []);
+            EM_RSSI_VALUES.putIfAbsent(deviceDetails.DeviceAddress, () => []);
+            EM_RSSI_WEIGHT.putIfAbsent(deviceDetails.DeviceAddress, () => []);
 
-          EM_RSSI_VALUES[deviceDetails.DeviceAddress]!.add(int.parse(deviceDetails.DeviceRssi));
-          EM_RSSI_WEIGHT[deviceDetails.DeviceAddress]!.add(getWeight(getBinNumber(int.parse(deviceDetails.DeviceRssi).abs())));
-          print("EM_RSSI_VALUES");
-          print(EM_RSSI_VALUES);
+            EM_RSSI_VALUES[deviceDetails.DeviceAddress]!.add(
+                int.parse(deviceDetails.DeviceRssi));
+            EM_RSSI_WEIGHT[deviceDetails.DeviceAddress]!.add(getWeight(
+                getBinNumber(int.parse(deviceDetails.DeviceRssi).abs())));
+            print("EM_RSSI_VALUES");
+            print(EM_RSSI_VALUES);
 
 
-          if (EM_RSSI_VALUES[deviceDetails.DeviceAddress]!.length > 7) {
-            EM_RSSI_VALUES[deviceDetails.DeviceAddress]!.removeAt(0);
-          }
+            if (EM_RSSI_VALUES[deviceDetails.DeviceAddress]!.length > 7) {
+              EM_RSSI_VALUES[deviceDetails.DeviceAddress]!.removeAt(0);
+            }
 
-          if(EM_RSSI_WEIGHT[deviceDetails.DeviceAddress]!.length > 7){
-            EM_RSSI_WEIGHT[deviceDetails.DeviceAddress]!.removeAt(0);
+            if (EM_RSSI_WEIGHT[deviceDetails.DeviceAddress]!.length > 7) {
+              EM_RSSI_WEIGHT[deviceDetails.DeviceAddress]!.removeAt(0);
+            }
           }
         }
       }, onError: (error) {
@@ -251,21 +263,29 @@ class BluetoothScanAndroidClass{
   }
 
 
-
   void listenToScanUpdates(HashMap<String, beacon> apibeaconmap) {
     startScan();
+    startCleanupTimer();
     print("listenToScanUpdates");
 
-    Map<String, List<int>> rssiValues = {};
+
     String deviceMacId = "";
     // Start listening to the stream continuously
     _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
+      print("deviceDetail----- $deviceDetail");
       BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
+      String dataaa = parseLog(deviceDetail);
+      wsocket.message["AppInitialization"]["nearByDevices"][deviceDetails.rawData] = deviceDetails.DeviceRssi;
+      print("dataaa- $dataaa");
+
       if(apibeaconmap.containsKey(deviceDetails.DeviceName)) {
+        DateTime currentTime = DateTime.now();
+        //wsocket.message["AppInitialization"]["bleScanResults"][deviceDetails.DeviceName] = deviceDetails.DeviceRssi;
         deviceMacId = deviceDetails.DeviceAddress;
         print("iffffff");
         print(deviceDetails.DeviceName);
         deviceNames[deviceDetails.DeviceAddress] = deviceDetails.DeviceName;
+        lastSeenTimestamps[deviceDetails.DeviceAddress] = currentTime;
 
         rssiValues.putIfAbsent(deviceDetails.DeviceAddress, () => []);
         rssiWeight.putIfAbsent(deviceDetails.DeviceAddress, () => []);
@@ -286,15 +306,16 @@ class BluetoothScanAndroidClass{
         }
 
 
-        rssiAverage = calculateAverageFromRssi(rssiValues,deviceNames,rssiWeight);
-
-        print("rssiAverage");
-        print(rssiAverage);
-
-        closestDeviceDetails = findLowestRssiDevice(rssiAverage);
-
-        print("closestDeviceDetails");
-        print(closestDeviceDetails);
+        // rssiAverage = calculateAverageFromRssi(rssiValues,deviceNames,rssiWeight);
+        //
+        // print("rssiAverage");
+        // print(rssiValues);
+        // print(rssiAverage);
+        //
+        // closestDeviceDetails = findLowestRssiDevice(rssiAverage);
+        //
+        // print("closestDeviceDetails");
+        // print(closestDeviceDetails);
 
         //addtoBin(deviceDetails.DeviceAddress, int.parse(deviceDetails.DeviceRssi));
       }else{
@@ -305,31 +326,36 @@ class BluetoothScanAndroidClass{
     });
 
 
-    Timer.periodic(Duration(seconds: 2), (timer) {
-      if (rssiValues.isNotEmpty) {
-        rssiValues.forEach((key, value) {
-          if (deviceMacId != key) {
-            if (value.isNotEmpty) value.removeAt(0);
-          }
-        });
-      }
 
-      if (rssiWeight.isNotEmpty) {
-        rssiWeight.forEach((key, value) {
-          if (deviceMacId != key) {
-            if (value.isNotEmpty) value.removeAt(0);
+  }
+  Map<String, double> candorAverage = {};
+
+  void startCleanupTimer(){
+    print("proofstartCleanupTimer");
+    cleanupTimer = Timer.periodic(Duration(seconds: 2), (timer)  {
+      print("startCleanupTimer");
+      DateTime currTime = DateTime.now();
+
+      lastSeenTimestamps.forEach((key,value){
+        if(currTime.difference(value).inSeconds > 2){
+          if (rssiValues[key] != [] && rssiValues[key]!.isNotEmpty) {
+            rssiValues[key]!.removeAt(0);
           }
-        });
-      }
-      // Calculate average RSSI values
+          if(rssiWeight[key] != [] && rssiWeight[key]!.isNotEmpty){
+            rssiWeight[key]!.removeAt(0);
+          }
+        }
+      });
+      print(rssiValues);
+      print(rssiWeight);
+      candorAverage = calculateCandorAverage(rssiWeight);
+      print("candorAverage$candorAverage");
       Map<String, double> sumMap = calculateAverage();
       // Sort the map by value (e.g., strongest signal first)
       Map<String, double> sortedSumMap = sortMapByValue(sumMap);
       sumMapCallBack = sortedSumMap;
       print("SortedSumMap: $sortedSumMap");
-
     });
-
   }
 
 
@@ -349,6 +375,52 @@ class BluetoothScanAndroidClass{
   }
   String giveRssiCallBAck(){
     return closestRSSI;
+  }
+
+  Map<String, double> calculateCandorAverage(Map<String, List<double>> data) {
+    Map<String, double> averageMap = {};
+
+    data.forEach((key, values) {
+      if (values.isNotEmpty) {
+        double average = values.reduce((a, b) => a + b) / values.length;
+        averageMap[key] = average;
+      }
+    });
+    return averageMap;
+  }
+
+
+  String parseLog(String log) {
+    final lines = log.split('\n');
+
+    String? name;
+    String? address;
+    String? manufacturerData;
+    String? serviceData;
+
+    for (String line in lines) {
+      if (line.contains("Device Name:")) {
+        name = line.split("Device Name:").last.trim();
+      } else if (line.contains("Address:")) {
+        address = line.split("Address:").last.trim();
+      } else if (line.contains("Manufacturer Data:")) {
+        final match = RegExp(r'Data: (0x[0-9A-Fa-f]+)').firstMatch(line);
+        if (match != null) {
+          manufacturerData = match.group(1);
+        }
+      } else if (line.contains("Service Data:")) {
+        final match = RegExp(r'Data: (0x[0-9A-Fa-f]+)').firstMatch(line);
+        if (match != null) {
+          serviceData = match.group(1);
+        }
+      }
+    }
+
+    print("Name: $name");
+    print("Address: $address");
+    print("Manufacturer Data: $manufacturerData");
+    print("Service Data: $serviceData");
+    return serviceData??"";
   }
 
   Map<String, double> calculateAverageFromRssi(
@@ -388,8 +460,7 @@ class BluetoothScanAndroidClass{
 
   Map<String, double> sortMapByValue(Map<String, double> map) {
     var sortedEntries = map.entries.toList()
-      ..sort(
-              (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
+      ..sort((a, b) => b.value.compareTo(a.value)); // Sorting in descending order
 
     return Map.fromEntries(sortedEntries);
   }

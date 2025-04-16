@@ -5,12 +5,10 @@ import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:iwaymaps/NAVIGATION/UserState.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 import '../IWAYPLUS/API/buildingAllApi.dart';
 import '../IWAYPLUS/Elements/UserCredential.dart';
-
 import '../IWAYPLUS/Elements/locales.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/landmark.dart';
@@ -21,6 +19,7 @@ import 'APIMODELS/polylinedata.dart';
 import 'Cell.dart';
 import 'Navigation.dart';
 import 'directionClass.dart';
+import 'package:iwaymaps/NAVIGATION/UserState.dart';
 
 
 class tools {
@@ -714,10 +713,12 @@ class tools {
 
 
 
-  static double PathDistance(List<Cell> mergedList) {
+  static double PathDistance(List<Cell> mergedList, {int index = 0}) {
     double totalDistance = 0.0;
 
     if (mergedList.isEmpty) return totalDistance;
+
+    mergedList = mergedList.sublist(index);
 
     if (mergedList.every((item) => (item.bid == buildingAllApi.outdoorID && item.floor == mergedList.first.floor))) {
       for (int i = 1; i < mergedList.length; i++) {
@@ -871,17 +872,167 @@ class tools {
     return path[index];
   }
 
-  static bool findSegmentLength(List<Cell> path, int index){
-    Cell previousPoint = findingprevpoint(path, index);
-    Cell nextPoint = findingnextpoint(path, index);
-    double distance = calculateDistance([previousPoint.x, previousPoint.y], [nextPoint.x, nextPoint.y]);
-    if(distance>=50){
-      print("findSegmentLength true $distance");
-      return true;
+  static bool findSegmentLength(List<int> user, List<List<Cell>> segments){
+    bool between = false;
+    for (var segment in segments) {
+      if(perpendicularDistance(segment[0], segment[1], user) < 5){
+        print("found segment ${segment[0].x},${segment[0].y}   and    ${segment[1].x},${segment[1].y}");
+        between = true;
+      }
     }
-    print("findSegmentLength false $distance");
-    return false;
+    return between;
   }
+
+
+  static double perpendicularDistance(Cell A, Cell B, List<int> C) {
+    int x1 = A.x, y1 = A.y;
+    int x2 = B.x, y2 = B.y;
+    int x3 = C[0], y3 = C[1];
+
+    // Check if C is within the bounding box of A and B
+    bool withinBounds = false;
+    if(x1 == x2){
+      withinBounds = true;
+    }else if(y1 == y2){
+      withinBounds = (x3 >= min(x1, x2) && x3 <= max(x1, x2));
+    }else{
+      withinBounds = (x3 >= min(x1, x2) && x3 <= max(x1, x2)) && (y3 >= min(y1, y2) && y3 <= max(y1, y2));
+    }
+
+    if (!withinBounds) return double.infinity; // C is not between A and B
+
+    int numerator = ((y2 - y1) * x3 - (x2 - x1) * y3 + x2 * y1 - y2 * x1).abs();
+    double denominator = sqrt(pow(y2 - y1, 2) + pow(x2 - x1, 2));
+
+    return denominator == 0 ? 0 : numerator / denominator;
+  }
+
+  static double angle(Cell a, Cell b, Cell c) {
+    int abx = b.x - a.x, aby = b.y - a.y;
+    int bcx = c.x - b.x, bcy = c.y - b.y;
+
+    int dot = abx * bcx + aby * bcy;
+    double magAB = sqrt(abx * abx + aby * aby);
+    double magBC = sqrt(bcx * bcx + bcy * bcy);
+
+    double cosTheta = dot / (magAB * magBC);
+    return acos(cosTheta) * (180 / pi);
+  }
+
+  static List<List<Cell>> findStraightSegments(List<Cell> points) {
+    List<List<Cell>> segments = [];
+    int? start;
+
+    for (int i = 0; i < points.length; i++) {
+      if (points[i].imaginedCell) continue;
+
+      if (start == null) {
+        start = i;
+        continue;
+      }
+
+      int? nextIndex;
+      for (int j = i + 1; j < points.length; j++) {
+        if (!points[j].imaginedCell) {
+          nextIndex = j;
+          break;
+        }
+      }
+
+      if (nextIndex == null) break;
+
+      double turnAngle = angle(points[start], points[i], points[nextIndex]);
+
+      if (turnAngle > 22.5) {
+        segments.add([points[start], points[i]]);
+        start = i;
+      }
+    }
+
+    if (start != null && !points.last.imaginedCell) {
+      segments.add([points[start], points.last]);
+    }
+
+    return segments;
+  }
+
+  static List<List<Cell>> filterLongSegments(List<List<Cell>> segments) {
+    return segments.where((segment) {
+      double segmentLength = calculateDistance(
+        [segment[0].x, segment[0].y],
+        [segment[1].x, segment[1].y],
+      );
+      return segmentLength > 60;
+    }).toList();
+  }
+
+
+  static List<Cell>? findSegmentContainingPoint(List<Cell> points, int index) {
+    List<List<Cell>> segments = findStraightSegments(points);
+    segments = filterLongSegments(segments);
+
+    for (List<Cell> segment in segments) {
+      if (segment.first == points[index] || segment.last == points[index] ||
+          (points.indexOf(segment.first) < index && points.indexOf(segment.last) > index)) {
+
+        print("user is in between [${segment.first.x}, ${segment.first.y}]  and  [${segment.last.x}, ${segment.last.y}]");
+
+        return segment;
+      }
+    }
+    return null; // If the index is not part of any valid segment
+  }
+
+  static List<Cell>? findNextSegment(List<Cell> path, int index){
+    List<List<Cell>> segments = findStraightSegments(path);
+
+    for(int i = 0; i<segments.length; i++){
+      List<Cell> segment = segments[i];
+      if (segment.first == path[index] || segment.last == path[index] ||
+          (path.indexOf(segment.first) < index && path.indexOf(segment.last) > index)) {
+        if(i+1 == segments.length){
+          return null;
+        }else {
+          return segments[i + 1];
+        }
+      }
+    }
+    return null; // If the index is not part of any valid segment
+  }
+
+
+  static List<Cell> findAllPointsOfSegment(List<Cell> path, List<Cell> segment){
+    List<Cell> points = [];
+    int startIndex = path.indexWhere((cell)=>cell.x == segment[0].x && cell.y == segment[0].y && cell.bid == segment[0].bid);
+    int endIndex = path.indexWhere((cell)=>cell.x == segment[1].x && cell.y == segment[1].y && cell.bid == segment[1].bid);
+    for(int i = startIndex; i<= endIndex; i++){
+      points.add(path[i]);
+    }
+    return points;
+  }
+
+  static int? findIndexOnPath(List<Cell> segment, List<int> point){
+    for(int i = 0; i<segment.length-1; i++){
+      if(canProjectOntoSegment(point[0], point[1], segment[i], segment[i+1])){
+        return i+1;
+      }
+    }
+    return null;
+  }
+
+  static bool canProjectOntoSegment(int px, int py, Cell a, Cell b) {
+    int ax = px - a.x;
+    int ay = py - a.y;
+    int bx = b.x - a.x;
+    int by = b.y - a.y;
+
+    double t = (ax * bx + ay * by) / (bx * bx + by * by);
+
+    return t >= 0 && t <= 1; // Returns true if the projection lies within the segment
+  }
+
+
+
 
   static List<int> findIntegersWithMean(double d) {
     print("Desired mean is $d -----> ${double.parse(d.toStringAsFixed(1))}");
@@ -1138,6 +1289,9 @@ class tools {
     if(user.move == tools.eightcelltransitionforTurns){
       tval = tools.eightcelltransition(theta);
     }
+    if(user.move == tools.eightcelltransition){
+      tval = tools.fourcelltransition(theta);
+    }
     List<int> b = [user.x+tval[0], user.y+tval[1]];
     List<int> c = [node.x , node.y];
 
@@ -1393,6 +1547,31 @@ class tools {
 
     // Return the Cartesian coordinates of point Z
     return navPoints(pointZ.latitude, pointZ.longitude, xZ, yZ);
+  }
+
+  static List<Cell> sortCollinearPoints(List<Cell> points) {
+    if (points.length < 2) throw ArgumentError("At least 2 points required");
+
+    var firstPoint = points[0]; // Keep the first point fixed
+
+    // Sort the remaining points based on their projection
+    var remainingPoints = points.sublist(1);
+
+    // Use firstPoint as reference, choose the farthest point as second reference
+    var farthestPoint = remainingPoints.reduce((a, b) =>
+    ((a.x - firstPoint.x).abs() + (a.y - firstPoint.y).abs()) >
+        ((b.x - firstPoint.x).abs() + (b.y - firstPoint.y).abs()) ? a : b);
+
+    // Compute projection scalar t for sorting
+    num t(Cell p) =>
+        (p.x - firstPoint.x) * (farthestPoint.x - firstPoint.x) +
+            (p.y - firstPoint.y) * (farthestPoint.y - firstPoint.y);
+
+    // Sort remaining points based on t values
+    remainingPoints.sort((a, b) => t(a).compareTo(t(b)));
+
+    // Keep the first point at the start and append sorted points
+    return [firstPoint, ...remainingPoints];
   }
 
   static IntPoint findCoordinatesOfWaypoint(LatLng waypoint){

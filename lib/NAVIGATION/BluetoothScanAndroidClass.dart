@@ -262,6 +262,7 @@ class BluetoothScanAndroidClass{
     return closestDeviceDetails;
   }
 
+  
 
   void listenToScanUpdates(HashMap<String, beacon> apibeaconmap) {
     startScan();
@@ -274,9 +275,9 @@ class BluetoothScanAndroidClass{
     _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
       print("deviceDetail----- $deviceDetail");
       BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
-      String dataaa = parseLog(deviceDetail);
+      // String dataaa = parseLog(deviceDetail);
       wsocket.message["AppInitialization"]["nearByDevices"][deviceDetails.rawData] = deviceDetails.DeviceRssi;
-      print("dataaa- $dataaa");
+      // print("dataaa- $dataaa");
 
       if(apibeaconmap.containsKey(deviceDetails.DeviceName)) {
         DateTime currentTime = DateTime.now();

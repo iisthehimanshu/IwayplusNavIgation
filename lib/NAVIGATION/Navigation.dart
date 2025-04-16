@@ -9339,8 +9339,8 @@ bool _isPlaying=false;
       UserState.changeBuilding =
           changeBuilding;
       //user.realWorldCoordinates = PathState.realWorldCoordinates;
-      user.floor =
-          PathState.sourceFloor;
+      print("startnavigation 1 ${PathState.sourceFloor}");
+      user.floor = PathState.sourceFloor;
 
       user.path = PathState
           .singleListPath;
@@ -9351,9 +9351,11 @@ bool _isPlaying=false;
           .singleCellListPath
           .forEach(
               (element) {});
+      user.pathobj = PathState;
       user
           .moveToStartofPath(context)
           .then((value) async {
+        print("startnavigation 2 ${user.floor}");
         setState(() {
           markers.clear();
           List<double> val = tools.localtoglobal(
@@ -12918,15 +12920,15 @@ bool _isPlaying=false;
                   // Text(SingletonFunctionController.SC_IL_RSSI_AVERAGE.toString()),
 
 
-                  // Text("coord [${user.coordX},${user.coordY}] \n"
-                  //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                  // "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
-                  // // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
-                  //     "floor ${user.floor}\n"
-                  //      "userBid ${user.bid} \n"
-                  // "stepSize ${UserState.stepSize}\n"
-                  //     "index ${user.pathobj.index} \n"
-                  //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                  Text("coord [${user.coordX},${user.coordY}] \n"
+                      "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                  "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
+                  // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
+                      "floor ${user.floor}\n"
+                       "userBid ${user.bid} \n"
+                  "stepSize ${UserState.stepSize}\n"
+                      "index ${user.pathobj.index} \n"
+                      "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
 
                   DebugToggle.Slider
                       ? Slider(

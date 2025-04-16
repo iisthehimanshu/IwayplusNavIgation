@@ -384,21 +384,20 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     if(Platform.isAndroid) {
       sumMap.clear();
-      // sumMap = btadapter.calculateAverage();
-      nearestBeacon = bluetoothScanAndroidClass.closestDeviceDetails;
-      sumMapAvg = bluetoothScanAndroidClass.rssiAverage;
-      threshold = bluetoothScanAndroidClass.closestRSSI;
-      // print("---nearestBeacon");
-      // print(nearestBeacon);
+
+      candorAverageDH = bluetoothScanAndroidClass.candorAverage;
+      List<dynamic> receivedCandorValue = findLastAboveThresholdCandor(candorAverageDH,5.8)??[];
+
+      nearestBeacon = receivedCandorValue[0]??"";
+      candorThreshold = receivedCandorValue[1]??0.0;
+
       debuglNearestbeacon = nearestBeacon;
       sumMap = bluetoothScanAndroidClass.giveSumMapCallBack();
-      // print("listenToBin${sumMap} ");
+      sumRSSI = bluetoothScanAndroidClass.rssiValues;
 
       sumMap.forEach((key, value) {
         if (value.isNotEmpty) {
           double average = value.reduce((a, b) => a + b) / value.length;
-          // print("--average");
-          // print(average);
           if (average > highestAverage) {
             highestAverage = average;
             highestKey = key;
@@ -409,142 +408,25 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       });
     }else if(Platform.isIOS){
       String receivedStringFromIOS = await BluetoothScanIOSClass.getBestDevice();
-      print("receivedStringFromIOS");
-      print(receivedStringFromIOS);
       nearestBeacon = parseString(receivedStringFromIOS)??"";
-
       threshold = parseStringT(receivedStringFromIOS)??"";
       debuglNearestbeacon = "${nearestBeacon} ${threshold}";
     }
-    print("highestweight");
-    print(highestweight);
 
 
-
-    // setState(() {
-    //   // displayString = sumMap.entries
-    //   //     .map((entry) => '${entry.key}: ${entry.value.join(", ")}')
-    //   //     .join("\n");
-    //
-    //
-    // });
-
-
-    // print("threshold");
-    // print(Building.apibeaconmap);
-    // print(sumMap);
-    // // threshold = widget.user.building!.patchData[widget.user.bid]!.patchData!.realtimeLocalisationThreshold??'5';
-    // //threshold = '3.5';
-    // print(widget.user.building!.patchData[widget.user.bid]!.patchData!
-    //     .realtimeLocalisationThreshold);
-    // print(threshold);
-    //
     sortedsumMap.clear();
-    //
-
-    // sumMap.forEach((key, value) {
-    //   if (highestweight <= value) {
-    //     nearestBeacon = key;
-    //     highestweight = value;
-    //   }
-    // });
-    //
-    // setState(() {
-    //   sumMap;
-    //   ShowsumMap = HelperClass().sortMapByValue(sumMap);
-    // });
-
-    // btadapter.emptyBin();
-    // btadapter.priorityQueue.clear();
-    // btadapter.stopScanning();
-    // btadapter.startScanning(Building.apibeaconmap);
-
-    // sortedsumMap.entries.forEach((element) {
-    //   if (Building.apibeaconmap[element.key]!.floor ==
-    //           widget.user.pathobj.destinationFloor &&
-    //       element.value >= 0.05) {
-    //     nearestBeacon = Building.apibeaconmap[element.key]!.name.toString();
-    //     highestweight = element.value;
-    //   }
-    // });
-    // highestweight = 12;
-
-    // //
-    // //
-
-    // for (int i = 0; i < btadapter.BIN.length; i++) {
-    //   if (btadapter.BIN[i]!.isNotEmpty) {
-    //
-    //     btadapter.BIN[i]!.forEach((key, value) {
-    //       //
-    //       //
-    //       //
-    //
-    //       setState(() {
-    //             widget.direction = "${widget.direction}$key   $value\n";
-    //           });
-    //
-    //       //
-    //
-    //       if (value > highestweight) {
-    //         highestweight = value;
-    //         //nearestBeacon = key;
-    //       }
-    //     });
-    //     break;
-    //   }
-    // }
-
-    // btadapter.emptyBin();
-    //
-
-    // sortedsumMap.forEach((key, value) {
-    //
-    //   setState(() {
-    //     widget.direction = "${widget.direction}$key   $value\n";
-    //   });
-    //
-    //   //
-    //
-    //   if(value>highestweight){
-    //     highestweight =  value;
-    //     nearestBeacon = key;
-    //   }
-    // });
-    // setState(() {
-    //   debuglNearestbeacon = nearestBeacon;
-    //   if (debuglastNearestbeacon != nearestBeacon) {
-    //     debuglastNearestbeacon = nearestBeacon;
-    //   }
-    // });
-    // nearestBeacon = bluetoothScanAndroidClass.closestrssiDevice;
-    // setState(() {});
-    // print("nearestBeacon");
-    // print(nearestBeacon);
-    // print(Building.apibeaconmap[nearestBeacon]!);
-
-    ////
-
-    //
     try {
       if (nearestBeacon != "") {
         if (widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null) {
+          int beaconCoordinateX = Building.apibeaconmap[nearestBeacon]!.coordinateX!;
+          int beaconCoordinateY = Building.apibeaconmap[nearestBeacon]!.coordinateY!;
+          List<int> beaconcoord = [beaconCoordinateX,beaconCoordinateY];
+
           if (widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId) {
-            //widget.user.pathobj.destinationFloor
-            if (widget.user.floor != widget.user.pathobj.destinationFloor &&
-                widget.user.pathobj.destinationFloor !=
-                    widget.user.pathobj.sourceFloor &&
-                widget.user.pathobj.destinationFloor ==
-                    Building.apibeaconmap[nearestBeacon]!.floor) {
-              List<int> beaconcoord = [
-                Building.apibeaconmap[nearestBeacon]!.coordinateX!,
-                Building.apibeaconmap[nearestBeacon]!.coordinateY!
-              ];
+            if (widget.user.floor != widget.user.pathobj.destinationFloor && widget.user.pathobj.destinationFloor != widget.user.pathobj.sourceFloor && widget.user.pathobj.destinationFloor == Building.apibeaconmap[nearestBeacon]!.floor) {
               int distanceFromPath = 100000000;
               widget.user.cellPath.forEach((node) {
-                if (node.floor == Building.apibeaconmap[nearestBeacon]!.floor ||
-                    node.bid ==
-                        Building.apibeaconmap[nearestBeacon]!.buildingID) {
+                if (node.floor == Building.apibeaconmap[nearestBeacon]!.floor || node.bid == Building.apibeaconmap[nearestBeacon]!.buildingID) {
                   List<int> pathcoord = [node.x, node.y];
                   double d1 = tools.calculateDistance(beaconcoord, pathcoord);
                   if (d1 < distanceFromPath) {
@@ -553,96 +435,32 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 }
               });
 
-              if (distanceFromPath > 10) {
-
-                _timer.cancel();
-                widget.repaint(nearestBeacon);
-                widget.reroute;
-                DirectionIndex = 1;
-                nextTurnIndex = 1;
+              if (distanceFromPath > 25) {
+                setEssentialsForReroute(nearestBeacon);
                 return false; //away from path
               } else {
-                widget.user.onConnection = false;
-
-                widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-                UserState.createCircle(widget.user.lat, widget.user.lng);
-
-                speak(
-                    "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor",
-                    _currentLocale);
-                DirectionIndex = nextTurnIndex;
-                //need to render on beacon for aiims jammu
-                print("calling expected function");
-                widget.paint(nearestBeacon, null, null, render: false);
+                reacedDestinationEssentials(nearestBeacon);
                 return true;
               }
-            }
-            // else if(widget.user.floor != Building.apibeaconmap[nearestBeacon]!.floor &&  highestweight >= 1.1){
-            //   widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-            //   speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
-            //   widget.paint(nearestBeacon,render: false);
-            //   return true;
-            // }
-
-            else if (widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor && double.parse(threshold!) >= highestweight) {
-              print("calling expected function 2${highestweight} -- ${threshold}");
+            } else if (widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor && candorThreshold >= highestweight) {
               widget.user.onConnection = false;
-              //
-              List<int> beaconcoord = [
-                Building.apibeaconmap[nearestBeacon]!.coordinateX!,
-                Building.apibeaconmap[nearestBeacon]!.coordinateY!
-              ];
-              List<int> usercoord = [
-                widget.user.showcoordX,
-                widget.user.showcoordY
-              ];
-              double d = tools.calculateDistance(beaconcoord, usercoord);
+
               int distanceFromPath = 100000000;
               int? indexOnPath = null;
               List<double> newPoint = [];
               if (widget.user.bid == buildingAllApi.outdoorID) {
-                List<double> beaconLatLng = tools.localtoglobal(
-                    beaconcoord[0],
-                    beaconcoord[1],
-                    SingletonFunctionController.building.patchData[
-                    Building.apibeaconmap[nearestBeacon]!.buildingID!]);
-                List<Cell> nearPoints = findTwoNearestPoints(
-                    beaconLatLng, widget.user.cellPath, widget.user.bid);
-                for (var point in nearPoints) {
-                  print("found near point is [${point.x},${point.y}]");
-                }
+                List<double> beaconLatLng = tools.localtoglobal(beaconcoord[0], beaconcoord[1], SingletonFunctionController.building.patchData[Building.apibeaconmap[nearestBeacon]!.buildingID!]);
+                List<Cell> nearPoints = findTwoNearestPoints(beaconLatLng, widget.user.cellPath, widget.user.bid);
 
-                newPoint = projectCellOntoSegment(
-                    beaconLatLng,
-                    nearPoints[0],
-                    nearPoints[1],
-                    widget.user.pathobj.numCols![widget.user.bid]![
-                    Building.apibeaconmap[nearestBeacon]!.floor]!);
+                newPoint = projectCellOntoSegment(beaconLatLng, nearPoints[0], nearPoints[1], widget.user.pathobj.numCols![widget.user.bid]![Building.apibeaconmap[nearestBeacon]!.floor]!);
 
-                List<int> np = tools.findLocalCoordinates(
-                    nearPoints[0], nearPoints[1], newPoint);
-                Cell point = Cell(
-                    (np[1] * nearPoints[0].numCols) + np[0],
-                    np[0],
-                    np[1],
-                    tools.eightcelltransition,
-                    newPoint[0],
-                    newPoint[1],
-                    nearPoints[0].bid,
-                    nearPoints[0].floor,
-                    nearPoints[0].numCols);
+                List<int> np = tools.findLocalCoordinates(nearPoints[0], nearPoints[1], newPoint);
+                Cell point = Cell((np[1] * nearPoints[0].numCols) + np[0], np[0], np[1], tools.eightcelltransition, newPoint[0], newPoint[1], nearPoints[0].bid, nearPoints[0].floor, nearPoints[0].numCols);
 
                 indexOnPath = insertProjectedPoint(widget.user.cellPath, point);
                 widget.user.path.insert(indexOnPath, point.node);
-                widget.user.cellPath.insert(
-                    indexOnPath,
-                    Cell(point.node, point.x, point.y, tools.eightcelltransition,
-                        point.lat,
-                        point.lng,
-                        buildingAllApi.outdoorID,
-                        point.floor,
-                        point.numCols,
-                        imaginedCell: true));
+                widget.user.cellPath.insert(indexOnPath, Cell(point.node, point.x, point.y, tools.eightcelltransition, point.lat, point.lng, buildingAllApi.outdoorID, point.floor, point.numCols, imaginedCell: true));
+
               } else {
                 widget.user.cellPath.forEach((node) {
                   List<int> pathcoord = [node.x, node.y];
@@ -653,30 +471,17 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   }
                 });
               }
-              if (distanceFromPath > 10) {
-                _timer.cancel();
-                widget.repaint(nearestBeacon);
-                widget.reroute;
-                DirectionIndex = 1;
-                nextTurnIndex = 1;
+              if (distanceFromPath > 25) {
+                setEssentialsForReroute(nearestBeacon);
                 return false; //away from path
               } else {
-                widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-                if (!UserState.ttsOnlyTurns) {
-                  speak(
-                      "${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}",
-                      _currentLocale);
-                }
-                widget.user.moveToPointOnPath(indexOnPath!, context);
-                widget.moveUser();
-                DirectionIndex = nextTurnIndex;
+                moveOnPathEssentials(nearestBeacon,indexOnPath);
                 return true; //moved on path
               }
             }
           }
-        } else {
-          if (highestweight > 1.2) {
-            print("calling expected function 3");
+        }else{
+          if ((double.parse(threshold!) >= highestweight)){
             _timer.cancel();
             widget.repaint(nearestBeacon);
             widget.reroute;
@@ -686,9 +491,36 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       }
     } catch (e) {}
 
-    // btadapter.emptyBin();
-
     return false;
+  }
+
+  void setEssentialsForReroute(String nearestBeacon){
+    _timer.cancel();
+    widget.repaint(nearestBeacon);
+    widget.reroute;
+    DirectionIndex = 1;
+    nextTurnIndex = 1;
+  }
+
+
+  void reacedDestinationEssentials(String nearestBeacon){
+    widget.user.onConnection = false;
+    widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+    UserState.createCircle(widget.user.lat, widget.user.lng);
+    speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor", _currentLocale);
+    DirectionIndex = nextTurnIndex;
+    //need to render on beacon for aiims jammu
+    widget.paint(nearestBeacon, null, null, render: false);
+  }
+
+  void moveOnPathEssentials(String nearestBeacon,int? indexOnPath){
+    widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+    if (!UserState.ttsOnlyTurns) {
+      speak("${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}", _currentLocale);
+    }
+    widget.user.moveToPointOnPath(indexOnPath!, context);
+    widget.moveUser();
+    DirectionIndex = nextTurnIndex;
   }
 
   int insertProjectedPointInIntList(

@@ -446,14 +446,14 @@ class Properties {
     polygonExist = json['polygonExist'];
     polyId = json['polyId'];
     filename = json['filename'];
-    nonWalkableGrids = json['nonWalkableGrids'].cast<String>();
+    nonWalkableGrids = json['nonWalkableGrids']?.cast<String>();
     floorLength = json['floorLength'];
     floorBreadth = json['floorBreadth'];
-    flrDistMatrix = json['flr_dist_matrix'].cast<String>();
-    frConn = json['frConn'].cast<String>();
-    clickedPoints = json['clickedPoints'].cast<String>();
+    flrDistMatrix = json['flr_dist_matrix']?.cast<String>();
+    frConn = json['frConn']?.cast<String>();
+    clickedPoints = json['clickedPoints']?.cast<String>();
     floorAngle = json['floorAngle'];
-    polygonId = json['polygonId'].cast<String>();
+    polygonId = json['polygonId']?.cast<String>();
   }
 
   Map<dynamic, dynamic> toJson() {

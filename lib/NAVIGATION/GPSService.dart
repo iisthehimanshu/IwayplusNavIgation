@@ -41,4 +41,12 @@ class Location{
   DateTime timeStamp;
 
   Location({required this.latitude,required this.longitude,required this.accuracy, required this.timeStamp});
+  Map<String, dynamic> toJson() {
+    return {
+      'latitude': latitude,
+      'longitude': longitude,
+      'accuracy': accuracy,
+      'timeStamp': timeStamp.toIso8601String(), // Serializing DateTime to string
+    };
+  }
 }

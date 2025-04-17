@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
@@ -377,42 +378,42 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     return [BluetoothScanAndroidClass().deviceNames[lastKey],lastKey,lastValue]; // Returns the last key that went above the threshold
   }
 
-  Future<bool> listenToBin()  async {
+  Future<bool> listenToBin() async {
+    print("widget.user");
+    print(widget.user);
+  print("-------");
+List<Cell> cell
+  widget.user.cellPath.forEach((value){
+    Cell value = value;
+    });
+  print("-------");
+
+    widget.user.pathobj.path.forEach((key, value){
+      print("$key $value");
+    });
+    print(widget.user.pathobj);
+    // print(widget.user.lat);
+    // print(widget.user.lng);
+    // print(widget.user.cellPath);
+    // widget.user.cellPath.forEach((value){
+    //   print(value.)
+    // });
+    // print(widget.user.bid);
+    // print(widget.user.floor);
+    // print(widget.user.pathobj);
+    // print(widget.user.coordX);
+    // print(widget.user.coordY);
+    // print(widget.user.theta);
     // print("listentobin");
 
     String nearestBeacon = "";
 
     if(Platform.isAndroid) {
       sumMap.clear();
-
-      candorAverageDH = bluetoothScanAndroidClass.candorAverage;
-      List<dynamic> receivedCandorValue = findLastAboveThresholdCandor(candorAverageDH,5.8)??[];
-
-      nearestBeacon = receivedCandorValue[0]??"";
-      candorThreshold = receivedCandorValue[1]??0.0;
-
-      debuglNearestbeacon = nearestBeacon;
-      sumMap = bluetoothScanAndroidClass.giveSumMapCallBack();
-      sumRSSI = bluetoothScanAndroidClass.rssiValues;
-
-      sumMap.forEach((key, value) {
-        if (value.isNotEmpty) {
-          double average = value.reduce((a, b) => a + b) / value.length;
-          if (average > highestAverage) {
-            highestAverage = average;
-            highestKey = key;
-          }
-        } else {
-          print("else---");
-        }
-      });
+      nearestBeacon = findNearestBeaconTaksForAndroid();
     }else if(Platform.isIOS){
-      String receivedStringFromIOS = await BluetoothScanIOSClass.getBestDevice();
-      nearestBeacon = parseString(receivedStringFromIOS)??"";
-      threshold = parseStringT(receivedStringFromIOS)??"";
-      debuglNearestbeacon = "${nearestBeacon} ${threshold}";
+      nearestBeacon = await findNearestBeaconTaksForIOS();
     }
-
 
     sortedsumMap.clear();
     try {
@@ -492,6 +493,44 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     } catch (e) {}
 
     return false;
+  }
+
+  String findNearestBeaconTaksForAndroid(){
+    String beaconCalculate = "";
+    candorAverageDH = bluetoothScanAndroidClass.candorAverage;
+    print("candorAverageDH $candorAverageDH");
+    List<dynamic> receivedCandorValue = findLastAboveThresholdCandor(candorAverageDH,5.8)??[];
+    print("receivedCandorValue $receivedCandorValue");
+    beaconCalculate = receivedCandorValue[0]??"";
+    candorThreshold = receivedCandorValue[1]??0.0;
+
+
+    debuglNearestbeacon = beaconCalculate;
+    sumMap = bluetoothScanAndroidClass.giveSumMapCallBack();
+    sumRSSI = bluetoothScanAndroidClass.rssiValues;
+
+    sumMap.forEach((key, value) {
+      if (value.isNotEmpty) {
+        double average = value.reduce((a, b) => a + b) / value.length;
+        if (average > highestAverage) {
+          highestAverage = average;
+          highestKey = key;
+        }
+      } else {
+        print("else---");
+      }
+    });
+    return beaconCalculate;
+  }
+
+  Future<String> findNearestBeaconTaksForIOS() async {
+    String beaconCalculate = "";
+
+    String receivedStringFromIOS = await BluetoothScanIOSClass.getBestDevice();
+    beaconCalculate = parseString(receivedStringFromIOS)??"";
+    threshold = parseStringT(receivedStringFromIOS)??"";
+    debuglNearestbeacon = "${beaconCalculate} ${threshold}";
+    return beaconCalculate;
   }
 
   void setEssentialsForReroute(String nearestBeacon){

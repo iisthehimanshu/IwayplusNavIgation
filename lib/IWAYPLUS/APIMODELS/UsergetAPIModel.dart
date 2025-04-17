@@ -60,7 +60,7 @@ class UsergetAPIModel {
     language = json['language'];
     googleId = json['googleId'];
     appId = json['appId'];
-    roles = json['roles'].cast<String>();
+    roles = json['roles']?.cast<String>();
     if (json['favourites'] != null) {
       favourites = [];
       json['favourites'].forEach((v) {

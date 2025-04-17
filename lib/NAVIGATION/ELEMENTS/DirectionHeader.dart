@@ -894,215 +894,238 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   void didUpdateWidget(DirectionHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.user.floor == widget.user.pathobj.sourceFloor &&
-        widget.user.pathobj.connections.isNotEmpty &&
-        widget.user.showcoordY * UserState.cols + widget.user.showcoordX ==
-            widget.user.pathobj.connections[widget.user.bid]
-                ?[widget.user.pathobj.sourceFloor]) {
-    } else if (widget.user.path.isNotEmpty &&
-        widget.user.cellPath.length - 1 > widget.user.pathobj.index) {
-      widget.user.pathobj.connections.forEach((key, value) {
-        value.forEach((inkey, invalue) {
-          if (widget.user.path[widget.user.pathobj.index] == invalue) {
-            widget.direction = "You have reached ";
-          }
-        });
-      });
-      List<Cell> remainingPath =
-          widget.user.cellPath.sublist(widget.user.pathobj.index + 1);
-      //
-      //
-      Cell nextTurn = findNextTurn(turnPoints, remainingPath);
-      //
-      //
+    final user = widget.user;
+    final pathObj = user.pathobj;
+    final currentFloor = user.floor;
+    final currentBid = user.bid;
+    final showCoordX = user.showcoordX;
+    final showCoordY = user.showcoordY;
+    final path = user.path;
+    final cellPath = user.cellPath;
 
-      nextTurnIndex = widget.user.pathobj.directions
+    // Check if user reached a connection point at the source floor
+    if (_isAtSourceConnection(user)) {
+      return;
+    }
+
+    // Process path updates if there are remaining steps
+    if (path.isNotEmpty && cellPath.length - 1 > pathObj.index) {
+      _updateDirectionOnPath(oldWidget, user);
+
+      final remainingPath = cellPath.sublist(pathObj.index + 1);
+      final nextTurn = findNextTurn(turnPoints, remainingPath);
+      nextTurnIndex = pathObj.directions
           .indexWhere((element) => element.node == nextTurn.node);
-      //
 
-      if (turnPoints
-          .contains(widget.user.cellPath[widget.user.pathobj.index])) {
-        if (DirectionIndex + 1 < widget.user.pathobj.directions.length) {
-          DirectionIndex = widget.user.pathobj.directions.indexWhere(
-                  (element) =>
-                      element.node ==
-                      widget.user.cellPath[widget.user.pathobj.index].node) +
-              1;
-        }
-        if (DirectionIndex >= widget.user.pathobj.directions.length) {
-          DirectionIndex = widget.user.pathobj.directions.length - 1;
-        }
-      }
+      _updateDirectionIndexOnTurn(user);
+
       widget.distance = tools.distancebetweennodes_inCell(
-          nextTurn, widget.user.cellPath[widget.user.pathobj.index]);
-      double angle = 0.0;
-      try {
-        angle = tools.calculateAnglefifth(
-            widget.user.cellPath[widget.user.pathobj.index].node,
-            widget.user.cellPath[widget.user.pathobj.index + 1].node,
-            widget.user.cellPath[widget.user.pathobj.index + 2].node,
-            widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
-      } catch (e) {
-        print("error to be solved later $e");
-      }
-      if (widget.user.pathobj.index != 0) {
-        try {
-          angle = tools.calculateAnglefifth(
-              widget.user.cellPath[widget.user.pathobj.index - 1].node,
-              widget.user.cellPath[widget.user.pathobj.index].node,
-              widget.user.cellPath[widget.user.pathobj.index + 1].node,
-              widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
-        } catch (e) {
-          print("problem to be solved later $e");
-        }
-      }
-      double userangle = tools.calculateAngleBWUserandCellPath(
-          widget.user.cellPath[widget.user.pathobj.index],
-          widget.user.cellPath[widget.user.pathobj.index + 1],
-          widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!,
-          widget.user.theta);
+          nextTurn, cellPath[pathObj.index]);
 
-      widget.direction =
-          (tools.angleToClocks(angle, widget.context) == "None")
-              ? oldWidget.direction
-              : tools.angleToClocks(userangle, widget.context);
-      String userdirection =
-          (tools.angleToClocks(userangle, widget.context) == "None")
-              ? oldWidget.direction
-              : tools.angleToClocks(userangle, widget.context);
-      if (userdirection == "Straight") {
+      final angle = _calculateAngle(user);
+      final userAngle = tools.calculateAngleBWUserandCellPath(
+          cellPath[pathObj.index],
+          cellPath[pathObj.index + 1],
+          pathObj.numCols![currentBid]![currentFloor]!,
+          user.theta);
+
+      final newUserDirection = tools.angleToClocks(userAngle, context);
+      widget.direction = (newUserDirection == "None")
+          ? oldWidget.direction
+          : newUserDirection;
+
+      if (newUserDirection == "Straight") {
         widget.direction = "Straight";
       }
-      if (widget.user.pathobj.index < 3) {
-        widget.direction = userdirection;
+      if (pathObj.index < 3) {
+        widget.direction = newUserDirection;
       }
-      print("userdirection $userdirection");
+      print("userdirection $newUserDirection");
 
       if (UserCredentials().getUserPersonWithDisability() == 1 ||
           UserCredentials().getUserPersonWithDisability() == 2) {
-        widget.direction = userdirection;
+        widget.direction = newUserDirection;
       }
 
-      int turnIndex = widget.user.cellPath.indexOf(nextTurn);
-      //
-      double a = 0;
-      if (turnIndex + 1 == widget.user.path.length) {
-        print("index+1");
-        if (widget.user.cellPath[turnIndex - 2].bid == widget.user.cellPath[turnIndex - 1].bid && widget.user.cellPath[turnIndex - 1].bid == widget.user.cellPath[turnIndex].bid) {
-          a = tools.calculateAnglefifth(
-              widget.user.path[turnIndex - 2],
-              widget.user.path[turnIndex - 1],
-              widget.user.path[turnIndex],
-              widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
-        }
-      } else {
-        print("index");
-        if (widget.user.cellPath[turnIndex - 1].bid ==
-                widget.user.cellPath[turnIndex].bid &&
-            widget.user.cellPath[turnIndex].bid ==
-                widget.user.cellPath[turnIndex + 1].bid) {
-          a = tools.calculateAnglefifth(
-              widget.user.path[turnIndex - 1],
-              widget.user.path[turnIndex],
-              widget.user.path[turnIndex + 1],
-              widget
-                  .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
-        }
-      }
-
-      // String direc = tools.angleToClocks(a, widget.context); //giving error when turning left it says U turn = XXX
-      String direc = userdirection;
-      turnDirection = direc;
+      final turnIndex = cellPath.indexOf(nextTurn);
+      turnDirection = _calculateTurnDirection(user, turnIndex, newUserDirection);
       print("turnDirection $turnDirection");
       print("widget.direction ${widget.direction}");
 
-      if (oldWidget.direction != widget.direction) {
-        if (oldWidget.direction == "Straight") {
-          Vibration.vibrate();
+      _handleDirectionChange(oldWidget);
 
-          // if(nextTurn == turnPoints.last){
-          //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
-          // }else{
-          //   speak("${widget.direction} ${widget.distance} meter");
-          // }
+      _handleApproachingDestinationOrTurn(nextTurn, user);
+    }
+  }
 
-          speak(
-              convertTolng(
-                  "Turn ${LocaleData.getProperty5(widget.direction, context)}",
-                  _currentLocale,
-                  widget.direction,
-                  "",
-                  0,
-                  ""),
-              _currentLocale,
-              prevpause: true);
-          //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
-        } else if (widget.direction == "Straight") {
-          Vibration.vibrate();
-          UserState.isTurn = false;
-          if (!UserState.ttsOnlyTurns) {
-            speak(
-                "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}}",
-                _currentLocale,
-                prevpause: true);
-          }
+  bool _isAtSourceConnection(UserState user) {
+    final pathObj = user.pathobj;
+    return user.floor == pathObj.sourceFloor &&
+        pathObj.connections.isNotEmpty &&
+        user.showcoordY * UserState.cols + user.showcoordX ==
+            pathObj.connections[user.bid]?[pathObj.sourceFloor];
+  }
+
+  void _updateDirectionOnPath(DirectionHeader oldWidget, UserState user) {
+    user.pathobj.connections.forEach((key, value) {
+      value.forEach((inkey, invalue) {
+        if (user.path[user.pathobj.index] == invalue) {
+          widget.direction = "You have reached ";
         }
+      });
+    });
+  }
+
+  void _updateDirectionIndexOnTurn(UserState user) {
+    if (turnPoints.contains(user.cellPath[user.pathobj.index])) {
+      final currentIndex = user.pathobj.directions.indexWhere(
+              (element) => element.node == user.cellPath[user.pathobj.index].node);
+      if (currentIndex + 1 < user.pathobj.directions.length) {
+        DirectionIndex = currentIndex + 1;
       }
+      if (DirectionIndex >= user.pathobj.directions.length) {
+        DirectionIndex = user.pathobj.directions.length - 1;
+      }
+    }
+  }
 
-      if (nextTurn == turnPoints.last && widget.distance == 7) {
-        double angle = 0.0;
-        try {
-          angle = tools.calculateAngleThird(
-              [
-                widget.user.pathobj.destinationX,
-                widget.user.pathobj.destinationY
-              ],
-              widget.user.path[widget.user.pathobj.index + 1],
-              widget.user.path[widget.user.pathobj.index + 2],
-              widget
-                  .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
-        } catch (e) {
-          print("problem to be solved later $e");
-        }
+  double _calculateAngle(UserState user) {
+    final pathObj = user.pathobj;
+    final cellPath = user.cellPath;
+    final currentBid = user.bid;
+    final currentFloor = user.floor;
+    double angle = 0.0;
+    try {
+      angle = tools.calculateAnglefifth(
+          cellPath[pathObj.index].node,
+          cellPath[pathObj.index + 1].node,
+          cellPath[pathObj.index + 2].node,
+          pathObj.numCols![currentBid]![currentFloor]!);
+    } catch (e) {
+      print("error to be solved later $e");
+    }
+    if (pathObj.index != 0) {
+      try {
+        angle = tools.calculateAnglefifth(
+            cellPath[pathObj.index - 1].node,
+            cellPath[pathObj.index].node,
+            cellPath[pathObj.index + 1].node,
+            pathObj.numCols![currentBid]![currentFloor]!);
+      } catch (e) {
+        print("problem to be solved later $e");
+      }
+    }
+    return angle;
+  }
+
+  String _calculateTurnDirection(UserState user, int turnIndex, String userDirection) {
+    final pathObj = user.pathobj;
+    final cellPath = user.cellPath;
+    final currentBid = user.bid;
+    final currentFloor = user.floor;
+    double a = 0;
+    if (turnIndex + 1 == user.path.length) {
+      print("index+1");
+      if (cellPath[turnIndex - 2].bid == cellPath[turnIndex - 1].bid &&
+          cellPath[turnIndex - 1].bid == cellPath[turnIndex].bid) {
+        a = tools.calculateAnglefifth(
+            user.path[turnIndex - 2],
+            user.path[turnIndex - 1],
+            user.path[turnIndex],
+            pathObj.numCols![currentBid]![currentFloor]!);
+      }
+    } else {
+      print("index");
+      if (cellPath[turnIndex - 1].bid == cellPath[turnIndex].bid &&
+          cellPath[turnIndex].bid == cellPath[turnIndex + 1].bid) {
+        a = tools.calculateAnglefifth(
+            user.path[turnIndex - 1],
+            user.path[turnIndex],
+            user.path[turnIndex + 1],
+            pathObj.numCols![currentBid]![currentFloor]!);
+      }
+    }
+    return userDirection; // Directly using userDirection as it's already calculated
+  }
+
+  void _handleDirectionChange(DirectionHeader oldWidget) {
+    if (oldWidget.direction != widget.direction) {
+      if (oldWidget.direction == "Straight") {
+        Vibration.vibrate();
+        speak(
+            convertTolng(
+                "Turn ${LocaleData.getProperty5(widget.direction, context)}",
+                _currentLocale,
+                widget.direction,
+                "",
+                0,
+                ""),
+            _currentLocale,
+            prevpause: true);
+      } else if (widget.direction == "Straight") {
+        Vibration.vibrate();
+        UserState.isTurn = false;
         if (!UserState.ttsOnlyTurns) {
           speak(
-              "${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle, widget.context)}",
-              _currentLocale);
+              "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}}",
+              _currentLocale,
+              prevpause: true);
         }
-        widget.user.move(context);
-      } else if (nextTurn != turnPoints.last &&
-          widget.user.pathobj.connections[widget.user.bid]
-                  ?[widget.user.floor] !=
-              nextTurn &&
-          (widget.distance / UserState.stepSize).ceil() == 7) {
-        if ((!direc.toLowerCase().contains("slight") &&
-                !direc.toLowerCase().contains("straight")) &&
-            widget.user.pathobj.index > 4) {
-          if (widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null) {
-            if (!UserState.ttsOnlyTurns) {
-              speak(
-                  convertTolng(
-                      "You are approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}",
-                      _currentLocale,
-                      '',
-                      direc,
-                      nextTurn!.node,
-                      ""),
-                  _currentLocale);
-            }
+      }
+    }
+  }
 
-            return;
-            //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
-          } else {
-            if (!UserState.ttsOnlyTurns) {
-              speak(
-                  convertTolng("You are approaching ${direc} turn",
-                      _currentLocale, '', direc, nextTurn!.node, ""),
-                  _currentLocale);
-            }
-            widget.user.move(widget.context);
-            return;
+  void _handleApproachingDestinationOrTurn(Cell nextTurn, UserState user) {
+    final pathObj = user.pathobj;
+    final currentBid = user.bid;
+    final currentFloor = user.floor;
+    if (nextTurn == turnPoints.last && widget.distance == 7) {
+      double angle = 0.0;
+      try {
+        angle = tools.calculateAngleThird(
+            [pathObj.destinationX, pathObj.destinationY],
+            user.path[pathObj.index + 1],
+            user.path[pathObj.index + 2],
+            pathObj.numCols![currentBid]![currentFloor]!);
+      } catch (e) {
+        print("problem to be solved later $e");
+      }
+      if (!UserState.ttsOnlyTurns) {
+        speak(
+            "${widget.direction} ${widget.distance} steps. ${pathObj.destinationName} will be ${tools.angleToClocks2(angle, widget.context)}",
+            _currentLocale);
+      }
+      user.move(context);
+    } else if (nextTurn != turnPoints.last &&
+        pathObj.connections[currentBid]?[currentFloor] != nextTurn &&
+        (widget.distance / UserState.stepSize).ceil() == 7) {
+      final turnDirectionLower = turnDirection.toLowerCase();
+      if (!turnDirectionLower.contains("slight") &&
+          !turnDirectionLower.contains("straight") &&
+          pathObj.index > 4) {
+        final landmark = pathObj.associateTurnWithLandmark[nextTurn];
+        if (landmark != null) {
+          if (!UserState.ttsOnlyTurns) {
+            speak(
+                convertTolng(
+                    "You are approaching ${turnDirection} turn from ${landmark.name!}",
+                    _currentLocale,
+                    '',
+                    turnDirection,
+                    nextTurn!.node,
+                    ""),
+                _currentLocale);
           }
+          return;
+        } else {
+          if (!UserState.ttsOnlyTurns) {
+            speak(
+                convertTolng("You are approaching ${turnDirection} turn",
+                    _currentLocale, '', turnDirection, nextTurn!.node, ""),
+                _currentLocale);
+          }
+          user.move(widget.context);
+          return;
         }
       }
     }

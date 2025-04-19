@@ -379,7 +379,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
   Future<bool> listenToBin() async {
-
+    
     String nearestBeacon = "";
 
     if(Platform.isAndroid) {

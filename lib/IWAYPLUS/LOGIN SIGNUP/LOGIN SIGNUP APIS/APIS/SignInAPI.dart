@@ -2,13 +2,13 @@ import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../NAVIGATION/Encryption/EncryptionService.dart';
 import '../../../../NAVIGATION/config.dart';
 import '../MODELS/SignInAPIModel.dart';
 
 class SignInAPI{
-
+  Encryptionservice encryptionService = Encryptionservice();
   final String baseUrl = "${AppConfig.baseUrl}/auth/signin2";
-  final String xaccesstoken = AppConfig.Authorization;
 
   Future<SignInApiModel?> signIN(String username, String password) async {
 
@@ -17,12 +17,13 @@ class SignInAPI{
       "password": password,
       "appId":"com.iwayplus.candor"
     };
+
     final response = await http.post(
       Uri.parse(baseUrl),
-      body: EncryptedbodyForApi(data),
+      body: encryptionService.encrypt(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': xaccesstoken,
+        'x-access-token': encryptionService.authorization,
       },
     );
 
@@ -58,15 +59,15 @@ class SignInAPI{
       return null;
     }
   }
-  static Future<int> sendOtpForgetPassword(String user) async {
-    final String xaccesstoken = AppConfig.Authorization;
+
+  Future<int> sendOtpForgetPassword(String user) async {
     final Map<String, dynamic> data = {"username": "${user}", "digits":4,"appId":"com.iwayplus.candor"};
     final response = await http.post(
       Uri.parse('${AppConfig.baseUrl}/auth/otp/username'),
-      body: EncryptedbodyForApi(data),
+      body: encryptionService.encrypt(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': xaccesstoken,
+        'x-access-token': encryptionService.authorization,
       },
     );
     print("sendOtpForgetPassword");
@@ -83,8 +84,7 @@ class SignInAPI{
     }
   }
 
-  static Future<int> changePassword(String user, String pass, String otp) async {
-    final String xaccesstoken = AppConfig.Authorization;
+  Future<int> changePassword(String user, String pass, String otp) async {
     final Map<String, dynamic> data = {
       "username": "$user",
       "password": "$pass",
@@ -94,10 +94,10 @@ class SignInAPI{
     };
     final response = await http.post(
       Uri.parse('${AppConfig.baseUrl}/auth/reset-password'),
-      body: EncryptedbodyForApi(data),
+      body: encryptionService.encrypt(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': xaccesstoken,
+        'x-access-token': encryptionService.authorization,
       },
     );
     print("response while changing pass");

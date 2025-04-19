@@ -4,7 +4,7 @@ class DataVersion {
 
   DataVersion({this.status, this.versionData});
 
-  DataVersion.fromJson(Map<dynamic, dynamic> json) {
+  DataVersion.fromJson(dynamic json) {
     status = json['status'];
     versionData = json['versionData'] != null
         ? new DataVersionModel.fromJson(json['versionData'])

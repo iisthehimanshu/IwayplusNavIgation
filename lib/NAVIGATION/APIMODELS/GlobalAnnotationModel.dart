@@ -155,7 +155,7 @@ class GlobalModel {
     required this.venueName,
   });
 
-  factory GlobalModel.fromJson(Map<dynamic, dynamic> json) {
+  factory GlobalModel.fromJson(dynamic json) {
     return GlobalModel(
       mappingElements: (json['mappingElements'] as List<dynamic>)
           .map((e) => MappingElement.fromJson(e))

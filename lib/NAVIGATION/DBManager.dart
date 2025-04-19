@@ -75,4 +75,9 @@ class DataBaseManager<T> implements DBManager<T>{
     // TODO: implement update
     throw UnimplementedError();
   }
+
+  String getAccessToken(){
+    var signInBox = Hive.box('SignInDatabase');
+    return signInBox.get("accessToken");
+  }
 }

@@ -8,6 +8,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/NAVIGATION/Repository.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
 import 'package:iwaymaps/NAVIGATION/path.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
@@ -13289,14 +13290,15 @@ bool _isPlaying=false;
                         0xff24B9B0), // Set the background color of the FAB
                   )
                       : Container(),  // Adjust the height as needed// Adjust the height as needed
-                  // FloatingActionButton(
-                  //   onPressed: () async {
-                  //     AppSettings.openAppSettings(type: AppSettingsType.settings, asAnotherTask: true);
-                  //   },
-                  //   child: Icon(Icons.settings),
-                  //   backgroundColor: Color(
-                  //       0xff24B9B0), // Set the background color of the FAB
-                  // )
+                  FloatingActionButton(
+                    onPressed: () async {
+                      land data = await Repository().getLandmarkData(buildingAllApi.selectedBuildingID);
+                      print(data.landmarks);
+                    },
+                    child: Icon(Icons.settings),
+                    backgroundColor: Color(
+                        0xff24B9B0), // Set the background color of the FAB
+                  )
                 ],
               ),
             ),

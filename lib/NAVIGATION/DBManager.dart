@@ -66,7 +66,6 @@ class DataBaseManager<T> implements DBManager<T>{
   @override
   Future<void> saveData(T dataModel) async {
 
-
   }
 
 

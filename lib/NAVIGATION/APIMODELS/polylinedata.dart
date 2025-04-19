@@ -4,7 +4,7 @@ class polylinedata {
 
   polylinedata({this.polylineExist, this.polyline});
 
-  polylinedata.fromJson(Map<dynamic, dynamic> json) {
+  polylinedata.fromJson(dynamic json) {
     polylineExist = json['polylineExist'];
     polyline = json['polyline'] != null
         ? new Polyline.fromJson(json['polyline'])

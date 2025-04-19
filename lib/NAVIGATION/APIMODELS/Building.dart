@@ -97,7 +97,7 @@ class BuildingAPIInsideModel {
     liveStatus = json['liveStatus'];
     geofencing = json['geofencing'];
     description = json['description'];
-    features = json['features'].cast<String>();
+    features = json['features']?.cast<String>();
     phone = json['phone'];
     website = json['website'];
     venuePhoto = json['venuePhoto'];

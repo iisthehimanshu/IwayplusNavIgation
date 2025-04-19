@@ -262,6 +262,7 @@ class BluetoothScanAndroidClass{
     return closestDeviceDetails;
   }
 
+  Map<String,Map<String,DateTime>> slidingScan = Map();
 
   void listenToScanUpdates(HashMap<String, beacon> apibeaconmap) {
     startScan();
@@ -274,9 +275,9 @@ class BluetoothScanAndroidClass{
     _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
       print("deviceDetail----- $deviceDetail");
       BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
-      String dataaa = parseLog(deviceDetail);
+      // String dataaa = parseLog(deviceDetail);
       wsocket.message["AppInitialization"]["nearByDevices"][deviceDetails.rawData] = deviceDetails.DeviceRssi;
-      print("dataaa- $dataaa");
+      // print("dataaa- $dataaa");
 
       if(apibeaconmap.containsKey(deviceDetails.DeviceName)) {
         DateTime currentTime = DateTime.now();
@@ -284,6 +285,11 @@ class BluetoothScanAndroidClass{
         deviceMacId = deviceDetails.DeviceAddress;
         print("iffffff");
         print(deviceDetails.DeviceName);
+
+
+        slidingScan.putIfAbsent(deviceDetails.DeviceName, () => <String, DateTime>{});
+        slidingScan[deviceDetails.DeviceName]![deviceDetails.DeviceRssi] = currentTime;
+
         deviceNames[deviceDetails.DeviceAddress] = deviceDetails.DeviceName;
         lastSeenTimestamps[deviceDetails.DeviceAddress] = currentTime;
 
@@ -334,27 +340,35 @@ class BluetoothScanAndroidClass{
     print("proofstartCleanupTimer");
     cleanupTimer = Timer.periodic(Duration(seconds: 2), (timer)  {
       print("startCleanupTimer");
-      DateTime currTime = DateTime.now();
 
-      lastSeenTimestamps.forEach((key,value){
-        if(currTime.difference(value).inSeconds > 2){
-          if (rssiValues[key] != [] && rssiValues[key]!.isNotEmpty) {
-            rssiValues[key]!.removeAt(0);
-          }
-          if(rssiWeight[key] != [] && rssiWeight[key]!.isNotEmpty){
-            rssiWeight[key]!.removeAt(0);
-          }
-        }
+      slidingScan.forEach((beaconName,beaconRespVal){
+        print(beaconName);
+        beaconRespVal.forEach((beaconRssi,beaconDateTime){
+          print("$beaconRssi $beaconDateTime");
+        });
+        print("---------");
       });
-      print(rssiValues);
-      print(rssiWeight);
-      candorAverage = calculateCandorAverage(rssiWeight);
-      print("candorAverage$candorAverage");
-      Map<String, double> sumMap = calculateAverage();
-      // Sort the map by value (e.g., strongest signal first)
-      Map<String, double> sortedSumMap = sortMapByValue(sumMap);
-      sumMapCallBack = sortedSumMap;
-      print("SortedSumMap: $sortedSumMap");
+      // DateTime currTime = DateTime.now();
+      //
+      // lastSeenTimestamps.forEach((key,value){
+      //   if(currTime.difference(value).inSeconds > 2){
+      //     if (rssiValues[key] != [] && rssiValues[key]!.isNotEmpty) {
+      //       rssiValues[key]!.removeAt(0);
+      //     }
+      //     if(rssiWeight[key] != [] && rssiWeight[key]!.isNotEmpty){
+      //       rssiWeight[key]!.removeAt(0);
+      //     }
+      //   }
+      // });
+      // print(rssiValues);
+      // print(rssiWeight);
+      // candorAverage = calculateCandorAverage(rssiWeight);
+      // print("candorAverage$candorAverage");
+      // Map<String, double> sumMap = calculateAverage();
+      // // Sort the map by value (e.g., strongest signal first)
+      // Map<String, double> sortedSumMap = sortMapByValue(sumMap);
+      // sumMapCallBack = sortedSumMap;
+      // print("SortedSumMap: $sortedSumMap");
     });
   }
 

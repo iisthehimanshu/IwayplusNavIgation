@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
@@ -972,4 +973,30 @@ class UserState {
     pathobj = pathState();
     path = [];
   }
+  Map<String, dynamic> toJson() => {
+    'floor': floor,
+    'coordX': coordX,
+    'coordY': coordY,
+    'coordXf': coordXf,
+    'coordYf': coordYf,
+    'lat': lat,
+    'lng': lng,
+    'theta': theta,
+    'key': key,
+    'locationName': locationName,
+    'isnavigating': isnavigating,
+    'showcoordX': showcoordX,
+    'showcoordY': showcoordY,
+    'initialallyLocalised': initialallyLocalised,
+    'bid': bid,
+    'path': path,
+    'offPathDistance': offPathDistance,
+    'outdoorNextSegmentDistance': outdoorNextSegmentDistance,
+    'onConnection': onConnection,
+    'temporaryExit': temporaryExit,
+    'stepsArray': stepsArray,
+    // Do NOT include functions or complex custom objects unless they have their own toJson()
+  };
+
+
 }

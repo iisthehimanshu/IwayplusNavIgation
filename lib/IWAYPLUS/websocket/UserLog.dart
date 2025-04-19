@@ -33,6 +33,7 @@ class wsocket{
       "buildingName": "",
       "bleScanResults": {
       },
+      "nearByDevices":{},
       "localizedOn": ""
     },
     "userPosition": {

@@ -38,7 +38,12 @@ import 'IWAYPLUS/MainScreen.dart';
 import '/NAVIGATION/Navigation.dart';
 import 'dart:io' show Platform;
 
+import 'IWAYPLUS/websocket/navigationLogManager.dart';
+
 final navigatorKey = GlobalKey<NavigatorState>();
+
+
+final navigationManager=NavigationLogManager();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -82,17 +87,21 @@ Future<void> localDBInitialsation() async {
   await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
   Hive.registerAdapter(LocalNotificationAPIDatabaseModelAdapter());
   await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
+
+  await navigationManager.initialize();
+
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');
   await Hive.openBox('Filters');
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('LocationPermission');
   await Hive.openBox('VersionData');
+
 }
 
 Future<void> mobileInitialization () async {
-  WidgetsFlutterBinding.ensureInitialized();
   WakelockPlus.enable();
+
 
   // PushNotifications.init();
   PushNotifications.localNotiInit();

@@ -44,7 +44,7 @@ class Data {
   Data.fromJson(Map<dynamic, dynamic> json) {
     sId = json['_id'];
     campusId = json['campusId'];
-    buildingIds = json['buildingIds'].cast<String>();
+    buildingIds = json['buildingIds']?.cast<String>();
     globalAnnotation = json['globalAnnotation'] ?? false;
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
@@ -377,174 +378,126 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     return [BluetoothScanAndroidClass().deviceNames[lastKey],lastKey,lastValue]; // Returns the last key that went above the threshold
   }
 
-  Future<bool> listenToBin()  async {
-    // print("listentobin");
+  Future<bool> listenToBin() async {
+    print("widget.user");
+    print(widget.user);
+    print("-------");
+  // String data = """
+  //   {"node":7491,"x":71,"y":28,"lat":28.54358368550854,"lng":77.18752284900863,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":7756,"x":71,"y":29,"lat":28.543581203984196,"lng":77.1875215317411,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8021,"x":71,"y":30,"lat":28.54357872245985,"lng":77.18752021447358,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8286,"x":71,"y":31,"lat":28.543576240935504,"lng":77.18751889720606,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8551,"x":71,"y":32,"lat":28.543573759411156,"lng":77.18751757993853,"ttsEnabled":false,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8550,"x":70,"y":32,"lat":28.54357491657873,"lng":77.18751475508282,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8549,"x":69,"y":32,"lat":28.5435760737463,"lng":77.1875119302271,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8548,"x":68,"y":32,"lat":28.543577230913872,"lng":77.18750910537139,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8547,"x":67,"y":32,"lat":28.543578388081446,"lng":77.18750628051568,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8546,"x":66,"y":32,"lat":28.543579545249017,"lng":77.18750345565995,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8545,"x":65,"y":32,"lat":28.543580702416588,"lng":77.18750063080424,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8544,"x":64,"y":32,"lat":28.543581859584158,"lng":77.18749780594852,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8543,"x":63,"y":32,"lat":28.543583016751732,"lng":77.18749498109281,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8542,"x":62,"y":32,"lat":28.543584173919303,"lng":77.1874921562371,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8541,"x":61,"y":32,"lat":28.543585331086874,"lng":77.18748933138139,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8540,"x":60,"y":32,"lat":28.543586488254444,"lng":77.18748650652566,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8539,"x":59,"y":32,"lat":28.54358764542202,"lng":77.18748368166995,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8538,"x":58,"y":32,"lat":28.54358880258959,"lng":77.18748085681423,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8537,"x":57,"y":32,"lat":28.54358995975716,"lng":77.18747803195852,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8536,"x":56,"y":32,"lat":28.543591116924734,"lng":77.1874752071028,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8535,"x":55,"y":32,"lat":28.543592274092305,"lng":77.1874723822471,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8534,"x":54,"y":32,"lat":28.543593431259875,"lng":77.18746955739137,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8533,"x":53,"y":32,"lat":28.543594588427446,"lng":77.18746673253565,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8532,"x":52,"y":32,"lat":28.54359574559502,"lng":77.18746390767994,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8531,"x":51,"y":32,"lat":28.54359690276259,"lng":77.18746108282423,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8530,"x":50,"y":32,"lat":28.54359805993016,"lng":77.18745825796852,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8529,"x":49,"y":32,"lat":28.543599217097736,"lng":77.1874554331128,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8528,"x":48,"y":32,"lat":28.543600374265306,"lng":77.18745260825708,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8527,"x":47,"y":32,"lat":28.543601531432877,"lng":77.18744978340136,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8526,"x":46,"y":32,"lat":28.543602688600448,"lng":77.18744695854565,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8525,"x":45,"y":32,"lat":28.543603845768022,"lng":77.18744413368994,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8524,"x":44,"y":32,"lat":28.543605002935593,"lng":77.18744130883422,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8523,"x":43,"y":32,"lat":28.543606160103163,"lng":77.18743848397851,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8522,"x":42,"y":32,"lat":28.543607317270734,"lng":77.18743565912278,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8521,"x":41,"y":32,"lat":28.543608474438308,"lng":77.18743283426707,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8520,"x":40,"y":32,"lat":28.54360963160588,"lng":77.18743000941136,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8519,"x":39,"y":32,"lat":28.54361078877345,"lng":77.18742718455564,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8518,"x":38,"y":32,"lat":28.543611945941024,"lng":77.18742435969993,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8517,"x":37,"y":32,"lat":28.543613103108594,"lng":77.18742153484422,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8516,"x":36,"y":32,"lat":28.543614260276165,"lng":77.18741870998849,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8515,"x":35,"y":32,"lat":28.543615417443736,"lng":77.18741588513278,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8514,"x":34,"y":32,"lat":28.54361657461131,"lng":77.18741306027707,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8513,"x":33,"y":32,"lat":28.54361773177888,"lng":77.18741023542135,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8512,"x":32,"y":32,"lat":28.54361888894645,"lng":77.18740741056564,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8511,"x":31,"y":32,"lat":28.543620046114025,"lng":77.18740458570993,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8510,"x":30,"y":32,"lat":28.543621203281596,"lng":77.1874017608542,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8509,"x":29,"y":32,"lat":28.543622360449167,"lng":77.18739893599849,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8508,"x":28,"y":32,"lat":28.543623517616737,"lng":77.18739611114277,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8507,"x":27,"y":32,"lat":28.54362467478431,"lng":77.18739328628706,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8506,"x":26,"y":32,"lat":28.543625831951882,"lng":77.18739046143135,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8505,"x":25,"y":32,"lat":28.543626989119453,"lng":77.18738763657564,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8504,"x":24,"y":32,"lat":28.543628146287027,"lng":77.18738481171991,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8503,"x":23,"y":32,"lat":28.543629303454598,"lng":77.1873819868642,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8502,"x":22,"y":32,"lat":28.54363046062217,"lng":77.18737916200848,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8501,"x":21,"y":32,"lat":28.54363161778974,"lng":77.18737633715277,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8500,"x":20,"y":32,"lat":28.543632774957313,"lng":77.18737351229706,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8499,"x":19,"y":32,"lat":28.543633932124884,"lng":77.18737068744134,"ttsEnabled":false,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8234,"x":19,"y":31,"lat":28.543636413649228,"lng":77.18737200470886,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":7969,"x":19,"y":30,"lat":28.543638895173576,"lng":77.18737332197638,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":7704,"x":19,"y":29,"lat":28.54364137669792,"lng":77.18737463924391,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":7439,"x":19,"y":28,"lat":28.543643858222268,"lng":77.18737595651143,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //
+  //
+  //   Cell curr = Cell.fromJson({"node":8234,"x":19,"y":31,"lat":28.543636413649228,"lng":77.18737200470886,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}, (double angle, {int? currPointer, int? totalCells}) {
+  //     // Implement your logic here for the move function
+  //     print('Moving with angle: $angle');
+  //     // You can use currPointer and totalCells if needed
+  //   });
+  //   print(curr);
+  //   print("-------");
+  // widget.user.cellPath.forEach((value){
+  //   print(value);
+  //   });
+  // print("-------");
+  //
+  //   widget.user.pathobj.path.forEach((key, value){
+  //     print("$key $value");
+  //   });
+  //   print(widget.user.pathobj);
+  //   // print(widget.user.lat);
+  //   // print(widget.user.lng);
+  //   // print(widget.user.cellPath);
+  //   // widget.user.cellPath.forEach((value){
+  //   //   print(value.)
+  //   // });
+  //   // print(widget.user.bid);
+  //   // print(widget.user.floor);
+  //   // print(widget.user.pathobj);
+  //   // print(widget.user.coordX);
+  //   // print(widget.user.coordY);
+  //   // print(widget.user.theta);
+  //   // print("listentobin");
 
     String nearestBeacon = "";
 
     if(Platform.isAndroid) {
       sumMap.clear();
-      // sumMap = btadapter.calculateAverage();
-      nearestBeacon = bluetoothScanAndroidClass.closestDeviceDetails;
-      sumMapAvg = bluetoothScanAndroidClass.rssiAverage;
-      threshold = bluetoothScanAndroidClass.closestRSSI;
-      // print("---nearestBeacon");
-      // print(nearestBeacon);
-      debuglNearestbeacon = nearestBeacon;
-      sumMap = bluetoothScanAndroidClass.giveSumMapCallBack();
-      // print("listenToBin${sumMap} ");
-
-      sumMap.forEach((key, value) {
-        if (value.isNotEmpty) {
-          double average = value.reduce((a, b) => a + b) / value.length;
-          // print("--average");
-          // print(average);
-          if (average > highestAverage) {
-            highestAverage = average;
-            highestKey = key;
-          }
-        } else {
-          print("else---");
-        }
-      });
+      nearestBeacon = findNearestBeaconTaksForAndroid();
     }else if(Platform.isIOS){
-      String receivedStringFromIOS = await BluetoothScanIOSClass.getBestDevice();
-      print("receivedStringFromIOS");
-      print(receivedStringFromIOS);
-      nearestBeacon = parseString(receivedStringFromIOS)??"";
-
-      threshold = parseStringT(receivedStringFromIOS)??"";
-      debuglNearestbeacon = "${nearestBeacon} ${threshold}";
+      nearestBeacon = await findNearestBeaconTaksForIOS();
     }
-    print("highestweight");
-    print(highestweight);
 
-
-
-    // setState(() {
-    //   // displayString = sumMap.entries
-    //   //     .map((entry) => '${entry.key}: ${entry.value.join(", ")}')
-    //   //     .join("\n");
-    //
-    //
-    // });
-
-
-    // print("threshold");
-    // print(Building.apibeaconmap);
-    // print(sumMap);
-    // // threshold = widget.user.building!.patchData[widget.user.bid]!.patchData!.realtimeLocalisationThreshold??'5';
-    // //threshold = '3.5';
-    // print(widget.user.building!.patchData[widget.user.bid]!.patchData!
-    //     .realtimeLocalisationThreshold);
-    // print(threshold);
-    //
     sortedsumMap.clear();
-    //
-
-    // sumMap.forEach((key, value) {
-    //   if (highestweight <= value) {
-    //     nearestBeacon = key;
-    //     highestweight = value;
-    //   }
-    // });
-    //
-    // setState(() {
-    //   sumMap;
-    //   ShowsumMap = HelperClass().sortMapByValue(sumMap);
-    // });
-
-    // btadapter.emptyBin();
-    // btadapter.priorityQueue.clear();
-    // btadapter.stopScanning();
-    // btadapter.startScanning(Building.apibeaconmap);
-
-    // sortedsumMap.entries.forEach((element) {
-    //   if (Building.apibeaconmap[element.key]!.floor ==
-    //           widget.user.pathobj.destinationFloor &&
-    //       element.value >= 0.05) {
-    //     nearestBeacon = Building.apibeaconmap[element.key]!.name.toString();
-    //     highestweight = element.value;
-    //   }
-    // });
-    // highestweight = 12;
-
-    // //
-    // //
-
-    // for (int i = 0; i < btadapter.BIN.length; i++) {
-    //   if (btadapter.BIN[i]!.isNotEmpty) {
-    //
-    //     btadapter.BIN[i]!.forEach((key, value) {
-    //       //
-    //       //
-    //       //
-    //
-    //       setState(() {
-    //             widget.direction = "${widget.direction}$key   $value\n";
-    //           });
-    //
-    //       //
-    //
-    //       if (value > highestweight) {
-    //         highestweight = value;
-    //         //nearestBeacon = key;
-    //       }
-    //     });
-    //     break;
-    //   }
-    // }
-
-    // btadapter.emptyBin();
-    //
-
-    // sortedsumMap.forEach((key, value) {
-    //
-    //   setState(() {
-    //     widget.direction = "${widget.direction}$key   $value\n";
-    //   });
-    //
-    //   //
-    //
-    //   if(value>highestweight){
-    //     highestweight =  value;
-    //     nearestBeacon = key;
-    //   }
-    // });
-    // setState(() {
-    //   debuglNearestbeacon = nearestBeacon;
-    //   if (debuglastNearestbeacon != nearestBeacon) {
-    //     debuglastNearestbeacon = nearestBeacon;
-    //   }
-    // });
-    // nearestBeacon = bluetoothScanAndroidClass.closestrssiDevice;
-    // setState(() {});
-    // print("nearestBeacon");
-    // print(nearestBeacon);
-    // print(Building.apibeaconmap[nearestBeacon]!);
-
-    ////
-
-    //
     try {
       if (nearestBeacon != "") {
         if (widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null) {
+          int beaconCoordinateX = Building.apibeaconmap[nearestBeacon]!.coordinateX!;
+          int beaconCoordinateY = Building.apibeaconmap[nearestBeacon]!.coordinateY!;
+          List<int> beaconcoord = [beaconCoordinateX,beaconCoordinateY];
+
           if (widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId) {
-            //widget.user.pathobj.destinationFloor
-            if (widget.user.floor != widget.user.pathobj.destinationFloor &&
-                widget.user.pathobj.destinationFloor !=
-                    widget.user.pathobj.sourceFloor &&
-                widget.user.pathobj.destinationFloor ==
-                    Building.apibeaconmap[nearestBeacon]!.floor) {
-              List<int> beaconcoord = [
-                Building.apibeaconmap[nearestBeacon]!.coordinateX!,
-                Building.apibeaconmap[nearestBeacon]!.coordinateY!
-              ];
+            if (widget.user.floor != widget.user.pathobj.destinationFloor && widget.user.pathobj.destinationFloor != widget.user.pathobj.sourceFloor && widget.user.pathobj.destinationFloor == Building.apibeaconmap[nearestBeacon]!.floor) {
               int distanceFromPath = 100000000;
               widget.user.cellPath.forEach((node) {
-                if (node.floor == Building.apibeaconmap[nearestBeacon]!.floor ||
-                    node.bid ==
-                        Building.apibeaconmap[nearestBeacon]!.buildingID) {
+                if (node.floor == Building.apibeaconmap[nearestBeacon]!.floor || node.bid == Building.apibeaconmap[nearestBeacon]!.buildingID) {
                   List<int> pathcoord = [node.x, node.y];
                   double d1 = tools.calculateDistance(beaconcoord, pathcoord);
                   if (d1 < distanceFromPath) {
@@ -553,96 +506,32 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 }
               });
 
-              if (distanceFromPath > 10) {
-
-                _timer.cancel();
-                widget.repaint(nearestBeacon);
-                widget.reroute;
-                DirectionIndex = 1;
-                nextTurnIndex = 1;
+              if (distanceFromPath > 25) {
+                setEssentialsForReroute(nearestBeacon);
                 return false; //away from path
               } else {
-                widget.user.onConnection = false;
-
-                widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-                UserState.createCircle(widget.user.lat, widget.user.lng);
-
-                speak(
-                    "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor",
-                    _currentLocale);
-                DirectionIndex = nextTurnIndex;
-                //need to render on beacon for aiims jammu
-                print("calling expected function");
-                widget.paint(nearestBeacon, null, null, render: false);
+                reacedDestinationEssentials(nearestBeacon);
                 return true;
               }
-            }
-            // else if(widget.user.floor != Building.apibeaconmap[nearestBeacon]!.floor &&  highestweight >= 1.1){
-            //   widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-            //   speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
-            //   widget.paint(nearestBeacon,render: false);
-            //   return true;
-            // }
-
-            else if (widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor && double.parse(threshold!) >= highestweight) {
-              print("calling expected function 2${highestweight} -- ${threshold}");
+            } else if (widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor && candorThreshold >= highestweight) {
               widget.user.onConnection = false;
-              //
-              List<int> beaconcoord = [
-                Building.apibeaconmap[nearestBeacon]!.coordinateX!,
-                Building.apibeaconmap[nearestBeacon]!.coordinateY!
-              ];
-              List<int> usercoord = [
-                widget.user.showcoordX,
-                widget.user.showcoordY
-              ];
-              double d = tools.calculateDistance(beaconcoord, usercoord);
+
               int distanceFromPath = 100000000;
               int? indexOnPath = null;
               List<double> newPoint = [];
               if (widget.user.bid == buildingAllApi.outdoorID) {
-                List<double> beaconLatLng = tools.localtoglobal(
-                    beaconcoord[0],
-                    beaconcoord[1],
-                    SingletonFunctionController.building.patchData[
-                    Building.apibeaconmap[nearestBeacon]!.buildingID!]);
-                List<Cell> nearPoints = findTwoNearestPoints(
-                    beaconLatLng, widget.user.cellPath, widget.user.bid);
-                for (var point in nearPoints) {
-                  print("found near point is [${point.x},${point.y}]");
-                }
+                List<double> beaconLatLng = tools.localtoglobal(beaconcoord[0], beaconcoord[1], SingletonFunctionController.building.patchData[Building.apibeaconmap[nearestBeacon]!.buildingID!]);
+                List<Cell> nearPoints = findTwoNearestPoints(beaconLatLng, widget.user.cellPath, widget.user.bid);
 
-                newPoint = projectCellOntoSegment(
-                    beaconLatLng,
-                    nearPoints[0],
-                    nearPoints[1],
-                    widget.user.pathobj.numCols![widget.user.bid]![
-                    Building.apibeaconmap[nearestBeacon]!.floor]!);
+                newPoint = projectCellOntoSegment(beaconLatLng, nearPoints[0], nearPoints[1], widget.user.pathobj.numCols![widget.user.bid]![Building.apibeaconmap[nearestBeacon]!.floor]!);
 
-                List<int> np = tools.findLocalCoordinates(
-                    nearPoints[0], nearPoints[1], newPoint);
-                Cell point = Cell(
-                    (np[1] * nearPoints[0].numCols) + np[0],
-                    np[0],
-                    np[1],
-                    tools.eightcelltransition,
-                    newPoint[0],
-                    newPoint[1],
-                    nearPoints[0].bid,
-                    nearPoints[0].floor,
-                    nearPoints[0].numCols);
+                List<int> np = tools.findLocalCoordinates(nearPoints[0], nearPoints[1], newPoint);
+                Cell point = Cell((np[1] * nearPoints[0].numCols) + np[0], np[0], np[1], tools.eightcelltransition, newPoint[0], newPoint[1], nearPoints[0].bid, nearPoints[0].floor, nearPoints[0].numCols);
 
                 indexOnPath = insertProjectedPoint(widget.user.cellPath, point);
                 widget.user.path.insert(indexOnPath, point.node);
-                widget.user.cellPath.insert(
-                    indexOnPath,
-                    Cell(point.node, point.x, point.y, tools.eightcelltransition,
-                        point.lat,
-                        point.lng,
-                        buildingAllApi.outdoorID,
-                        point.floor,
-                        point.numCols,
-                        imaginedCell: true));
+                widget.user.cellPath.insert(indexOnPath, Cell(point.node, point.x, point.y, tools.eightcelltransition, point.lat, point.lng, buildingAllApi.outdoorID, point.floor, point.numCols, imaginedCell: true));
+
               } else {
                 widget.user.cellPath.forEach((node) {
                   List<int> pathcoord = [node.x, node.y];
@@ -653,30 +542,17 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   }
                 });
               }
-              if (distanceFromPath > 10) {
-                _timer.cancel();
-                widget.repaint(nearestBeacon);
-                widget.reroute;
-                DirectionIndex = 1;
-                nextTurnIndex = 1;
+              if (distanceFromPath > 25) {
+                setEssentialsForReroute(nearestBeacon);
                 return false; //away from path
               } else {
-                widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-                if (!UserState.ttsOnlyTurns) {
-                  speak(
-                      "${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}",
-                      _currentLocale);
-                }
-                widget.user.moveToPointOnPath(indexOnPath!, context);
-                widget.moveUser();
-                DirectionIndex = nextTurnIndex;
+                moveOnPathEssentials(nearestBeacon,indexOnPath);
                 return true; //moved on path
               }
             }
           }
-        } else {
-          if (highestweight > 1.2) {
-            print("calling expected function 3");
+        }else{
+          if ((double.parse(threshold!) >= highestweight)){
             _timer.cancel();
             widget.repaint(nearestBeacon);
             widget.reroute;
@@ -686,9 +562,74 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       }
     } catch (e) {}
 
-    // btadapter.emptyBin();
-
     return false;
+  }
+
+  String findNearestBeaconTaksForAndroid(){
+    String beaconCalculate = "";
+    candorAverageDH = bluetoothScanAndroidClass.candorAverage;
+    print("candorAverageDH $candorAverageDH");
+    List<dynamic> receivedCandorValue = findLastAboveThresholdCandor(candorAverageDH,5.8)??[];
+    print("receivedCandorValue $receivedCandorValue");
+    beaconCalculate = receivedCandorValue[0]??"";
+    candorThreshold = receivedCandorValue[1]??0.0;
+
+
+    debuglNearestbeacon = beaconCalculate;
+    sumMap = bluetoothScanAndroidClass.giveSumMapCallBack();
+    sumRSSI = bluetoothScanAndroidClass.rssiValues;
+
+    sumMap.forEach((key, value) {
+      if (value.isNotEmpty) {
+        double average = value.reduce((a, b) => a + b) / value.length;
+        if (average > highestAverage) {
+          highestAverage = average;
+          highestKey = key;
+        }
+      } else {
+        print("else---");
+      }
+    });
+    return beaconCalculate;
+  }
+
+  Future<String> findNearestBeaconTaksForIOS() async {
+    String beaconCalculate = "";
+
+    String receivedStringFromIOS = await BluetoothScanIOSClass.getBestDevice();
+    beaconCalculate = parseString(receivedStringFromIOS)??"";
+    threshold = parseStringT(receivedStringFromIOS)??"";
+    debuglNearestbeacon = "${beaconCalculate} ${threshold}";
+    return beaconCalculate;
+  }
+
+  void setEssentialsForReroute(String nearestBeacon){
+    _timer.cancel();
+    widget.repaint(nearestBeacon);
+    widget.reroute;
+    DirectionIndex = 1;
+    nextTurnIndex = 1;
+  }
+
+
+  void reacedDestinationEssentials(String nearestBeacon){
+    widget.user.onConnection = false;
+    widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+    UserState.createCircle(widget.user.lat, widget.user.lng);
+    speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor", _currentLocale);
+    DirectionIndex = nextTurnIndex;
+    //need to render on beacon for aiims jammu
+    widget.paint(nearestBeacon, null, null, render: false);
+  }
+
+  void moveOnPathEssentials(String nearestBeacon,int? indexOnPath){
+    widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+    if (!UserState.ttsOnlyTurns) {
+      speak("${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}", _currentLocale);
+    }
+    widget.user.moveToPointOnPath(indexOnPath!, context);
+    widget.moveUser();
+    DirectionIndex = nextTurnIndex;
   }
 
   int insertProjectedPointInIntList(
@@ -894,215 +835,238 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   void didUpdateWidget(DirectionHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.user.floor == widget.user.pathobj.sourceFloor &&
-        widget.user.pathobj.connections.isNotEmpty &&
-        widget.user.showcoordY * UserState.cols + widget.user.showcoordX ==
-            widget.user.pathobj.connections[widget.user.bid]
-                ?[widget.user.pathobj.sourceFloor]) {
-    } else if (widget.user.path.isNotEmpty &&
-        widget.user.cellPath.length - 1 > widget.user.pathobj.index) {
-      widget.user.pathobj.connections.forEach((key, value) {
-        value.forEach((inkey, invalue) {
-          if (widget.user.path[widget.user.pathobj.index] == invalue) {
-            widget.direction = "You have reached ";
-          }
-        });
-      });
-      List<Cell> remainingPath =
-          widget.user.cellPath.sublist(widget.user.pathobj.index + 1);
-      //
-      //
-      Cell nextTurn = findNextTurn(turnPoints, remainingPath);
-      //
-      //
+    final user = widget.user;
+    final pathObj = user.pathobj;
+    final currentFloor = user.floor;
+    final currentBid = user.bid;
+    final showCoordX = user.showcoordX;
+    final showCoordY = user.showcoordY;
+    final path = user.path;
+    final cellPath = user.cellPath;
 
-      nextTurnIndex = widget.user.pathobj.directions
+    // Check if user reached a connection point at the source floor
+    if (_isAtSourceConnection(user)) {
+      return;
+    }
+
+    // Process path updates if there are remaining steps
+    if (path.isNotEmpty && cellPath.length - 1 > pathObj.index) {
+      _updateDirectionOnPath(oldWidget, user);
+
+      final remainingPath = cellPath.sublist(pathObj.index + 1);
+      final nextTurn = findNextTurn(turnPoints, remainingPath);
+      nextTurnIndex = pathObj.directions
           .indexWhere((element) => element.node == nextTurn.node);
-      //
 
-      if (turnPoints
-          .contains(widget.user.cellPath[widget.user.pathobj.index])) {
-        if (DirectionIndex + 1 < widget.user.pathobj.directions.length) {
-          DirectionIndex = widget.user.pathobj.directions.indexWhere(
-                  (element) =>
-                      element.node ==
-                      widget.user.cellPath[widget.user.pathobj.index].node) +
-              1;
-        }
-        if (DirectionIndex >= widget.user.pathobj.directions.length) {
-          DirectionIndex = widget.user.pathobj.directions.length - 1;
-        }
-      }
+      _updateDirectionIndexOnTurn(user);
+
       widget.distance = tools.distancebetweennodes_inCell(
-          nextTurn, widget.user.cellPath[widget.user.pathobj.index]);
-      double angle = 0.0;
-      try {
-        angle = tools.calculateAnglefifth(
-            widget.user.cellPath[widget.user.pathobj.index].node,
-            widget.user.cellPath[widget.user.pathobj.index + 1].node,
-            widget.user.cellPath[widget.user.pathobj.index + 2].node,
-            widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
-      } catch (e) {
-        print("error to be solved later $e");
-      }
-      if (widget.user.pathobj.index != 0) {
-        try {
-          angle = tools.calculateAnglefifth(
-              widget.user.cellPath[widget.user.pathobj.index - 1].node,
-              widget.user.cellPath[widget.user.pathobj.index].node,
-              widget.user.cellPath[widget.user.pathobj.index + 1].node,
-              widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
-        } catch (e) {
-          print("problem to be solved later $e");
-        }
-      }
-      double userangle = tools.calculateAngleBWUserandCellPath(
-          widget.user.cellPath[widget.user.pathobj.index],
-          widget.user.cellPath[widget.user.pathobj.index + 1],
-          widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!,
-          widget.user.theta);
+          nextTurn, cellPath[pathObj.index]);
 
-      widget.direction =
-          (tools.angleToClocks(angle, widget.context) == "None")
-              ? oldWidget.direction
-              : tools.angleToClocks(userangle, widget.context);
-      String userdirection =
-          (tools.angleToClocks(userangle, widget.context) == "None")
-              ? oldWidget.direction
-              : tools.angleToClocks(userangle, widget.context);
-      if (userdirection == "Straight") {
+      final angle = _calculateAngle(user);
+      final userAngle = tools.calculateAngleBWUserandCellPath(
+          cellPath[pathObj.index],
+          cellPath[pathObj.index + 1],
+          pathObj.numCols![currentBid]![currentFloor]!,
+          user.theta);
+
+      final newUserDirection = tools.angleToClocks(userAngle, context);
+      widget.direction = (newUserDirection == "None")
+          ? oldWidget.direction
+          : newUserDirection;
+
+      if (newUserDirection == "Straight") {
         widget.direction = "Straight";
       }
-      if (widget.user.pathobj.index < 3) {
-        widget.direction = userdirection;
+      if (pathObj.index < 3) {
+        widget.direction = newUserDirection;
       }
-      print("userdirection $userdirection");
+      print("userdirection $newUserDirection");
 
       if (UserCredentials().getUserPersonWithDisability() == 1 ||
           UserCredentials().getUserPersonWithDisability() == 2) {
-        widget.direction = userdirection;
+        widget.direction = newUserDirection;
       }
 
-      int turnIndex = widget.user.cellPath.indexOf(nextTurn);
-      //
-      double a = 0;
-      if (turnIndex + 1 == widget.user.path.length) {
-        print("index+1");
-        if (widget.user.cellPath[turnIndex - 2].bid == widget.user.cellPath[turnIndex - 1].bid && widget.user.cellPath[turnIndex - 1].bid == widget.user.cellPath[turnIndex].bid) {
-          a = tools.calculateAnglefifth(
-              widget.user.path[turnIndex - 2],
-              widget.user.path[turnIndex - 1],
-              widget.user.path[turnIndex],
-              widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
-        }
-      } else {
-        print("index");
-        if (widget.user.cellPath[turnIndex - 1].bid ==
-                widget.user.cellPath[turnIndex].bid &&
-            widget.user.cellPath[turnIndex].bid ==
-                widget.user.cellPath[turnIndex + 1].bid) {
-          a = tools.calculateAnglefifth(
-              widget.user.path[turnIndex - 1],
-              widget.user.path[turnIndex],
-              widget.user.path[turnIndex + 1],
-              widget
-                  .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
-        }
-      }
-
-      // String direc = tools.angleToClocks(a, widget.context); //giving error when turning left it says U turn = XXX
-      String direc = userdirection;
-      turnDirection = direc;
+      final turnIndex = cellPath.indexOf(nextTurn);
+      turnDirection = _calculateTurnDirection(user, turnIndex, newUserDirection);
       print("turnDirection $turnDirection");
       print("widget.direction ${widget.direction}");
 
-      if (oldWidget.direction != widget.direction) {
-        if (oldWidget.direction == "Straight") {
-          Vibration.vibrate();
+      _handleDirectionChange(oldWidget);
 
-          // if(nextTurn == turnPoints.last){
-          //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
-          // }else{
-          //   speak("${widget.direction} ${widget.distance} meter");
-          // }
+      _handleApproachingDestinationOrTurn(nextTurn, user);
+    }
+  }
 
-          speak(
-              convertTolng(
-                  "Turn ${LocaleData.getProperty5(widget.direction, context)}",
-                  _currentLocale,
-                  widget.direction,
-                  "",
-                  0,
-                  ""),
-              _currentLocale,
-              prevpause: true);
-          //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
-        } else if (widget.direction == "Straight") {
-          Vibration.vibrate();
-          UserState.isTurn = false;
-          if (!UserState.ttsOnlyTurns) {
-            speak(
-                "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}}",
-                _currentLocale,
-                prevpause: true);
-          }
+  bool _isAtSourceConnection(UserState user) {
+    final pathObj = user.pathobj;
+    return user.floor == pathObj.sourceFloor &&
+        pathObj.connections.isNotEmpty &&
+        user.showcoordY * UserState.cols + user.showcoordX ==
+            pathObj.connections[user.bid]?[pathObj.sourceFloor];
+  }
+
+  void _updateDirectionOnPath(DirectionHeader oldWidget, UserState user) {
+    user.pathobj.connections.forEach((key, value) {
+      value.forEach((inkey, invalue) {
+        if (user.path[user.pathobj.index] == invalue) {
+          widget.direction = "You have reached ";
         }
+      });
+    });
+  }
+
+  void _updateDirectionIndexOnTurn(UserState user) {
+    if (turnPoints.contains(user.cellPath[user.pathobj.index])) {
+      final currentIndex = user.pathobj.directions.indexWhere(
+              (element) => element.node == user.cellPath[user.pathobj.index].node);
+      if (currentIndex + 1 < user.pathobj.directions.length) {
+        DirectionIndex = currentIndex + 1;
       }
+      if (DirectionIndex >= user.pathobj.directions.length) {
+        DirectionIndex = user.pathobj.directions.length - 1;
+      }
+    }
+  }
 
-      if (nextTurn == turnPoints.last && widget.distance == 7) {
-        double angle = 0.0;
-        try {
-          angle = tools.calculateAngleThird(
-              [
-                widget.user.pathobj.destinationX,
-                widget.user.pathobj.destinationY
-              ],
-              widget.user.path[widget.user.pathobj.index + 1],
-              widget.user.path[widget.user.pathobj.index + 2],
-              widget
-                  .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
-        } catch (e) {
-          print("problem to be solved later $e");
-        }
+  double _calculateAngle(UserState user) {
+    final pathObj = user.pathobj;
+    final cellPath = user.cellPath;
+    final currentBid = user.bid;
+    final currentFloor = user.floor;
+    double angle = 0.0;
+    try {
+      angle = tools.calculateAnglefifth(
+          cellPath[pathObj.index].node,
+          cellPath[pathObj.index + 1].node,
+          cellPath[pathObj.index + 2].node,
+          pathObj.numCols![currentBid]![currentFloor]!);
+    } catch (e) {
+      print("error to be solved later $e");
+    }
+    if (pathObj.index != 0) {
+      try {
+        angle = tools.calculateAnglefifth(
+            cellPath[pathObj.index - 1].node,
+            cellPath[pathObj.index].node,
+            cellPath[pathObj.index + 1].node,
+            pathObj.numCols![currentBid]![currentFloor]!);
+      } catch (e) {
+        print("problem to be solved later $e");
+      }
+    }
+    return angle;
+  }
+
+  String _calculateTurnDirection(UserState user, int turnIndex, String userDirection) {
+    final pathObj = user.pathobj;
+    final cellPath = user.cellPath;
+    final currentBid = user.bid;
+    final currentFloor = user.floor;
+    double a = 0;
+    if (turnIndex + 1 == user.path.length) {
+      print("index+1");
+      if (cellPath[turnIndex - 2].bid == cellPath[turnIndex - 1].bid &&
+          cellPath[turnIndex - 1].bid == cellPath[turnIndex].bid) {
+        a = tools.calculateAnglefifth(
+            user.path[turnIndex - 2],
+            user.path[turnIndex - 1],
+            user.path[turnIndex],
+            pathObj.numCols![currentBid]![currentFloor]!);
+      }
+    } else {
+      print("index");
+      if (cellPath[turnIndex - 1].bid == cellPath[turnIndex].bid &&
+          cellPath[turnIndex].bid == cellPath[turnIndex + 1].bid) {
+        a = tools.calculateAnglefifth(
+            user.path[turnIndex - 1],
+            user.path[turnIndex],
+            user.path[turnIndex + 1],
+            pathObj.numCols![currentBid]![currentFloor]!);
+      }
+    }
+    return userDirection; // Directly using userDirection as it's already calculated
+  }
+
+  void _handleDirectionChange(DirectionHeader oldWidget) {
+    if (oldWidget.direction != widget.direction) {
+      if (oldWidget.direction == "Straight") {
+        Vibration.vibrate();
+        speak(
+            convertTolng(
+                "Turn ${LocaleData.getProperty5(widget.direction, context)}",
+                _currentLocale,
+                widget.direction,
+                "",
+                0,
+                ""),
+            _currentLocale,
+            prevpause: true);
+      } else if (widget.direction == "Straight") {
+        Vibration.vibrate();
+        UserState.isTurn = false;
         if (!UserState.ttsOnlyTurns) {
           speak(
-              "${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle, widget.context)}",
-              _currentLocale);
+              "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}}",
+              _currentLocale,
+              prevpause: true);
         }
-        widget.user.move(context);
-      } else if (nextTurn != turnPoints.last &&
-          widget.user.pathobj.connections[widget.user.bid]
-                  ?[widget.user.floor] !=
-              nextTurn &&
-          (widget.distance / UserState.stepSize).ceil() == 7) {
-        if ((!direc.toLowerCase().contains("slight") &&
-                !direc.toLowerCase().contains("straight")) &&
-            widget.user.pathobj.index > 4) {
-          if (widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null) {
-            if (!UserState.ttsOnlyTurns) {
-              speak(
-                  convertTolng(
-                      "You are approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}",
-                      _currentLocale,
-                      '',
-                      direc,
-                      nextTurn!.node,
-                      ""),
-                  _currentLocale);
-            }
+      }
+    }
+  }
 
-            return;
-            //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
-          } else {
-            if (!UserState.ttsOnlyTurns) {
-              speak(
-                  convertTolng("You are approaching ${direc} turn",
-                      _currentLocale, '', direc, nextTurn!.node, ""),
-                  _currentLocale);
-            }
-            widget.user.move(widget.context);
-            return;
+  void _handleApproachingDestinationOrTurn(Cell nextTurn, UserState user) {
+    final pathObj = user.pathobj;
+    final currentBid = user.bid;
+    final currentFloor = user.floor;
+    if (nextTurn == turnPoints.last && widget.distance == 7) {
+      double angle = 0.0;
+      try {
+        angle = tools.calculateAngleThird(
+            [pathObj.destinationX, pathObj.destinationY],
+            user.path[pathObj.index + 1],
+            user.path[pathObj.index + 2],
+            pathObj.numCols![currentBid]![currentFloor]!);
+      } catch (e) {
+        print("problem to be solved later $e");
+      }
+      if (!UserState.ttsOnlyTurns) {
+        speak(
+            "${widget.direction} ${widget.distance} steps. ${pathObj.destinationName} will be ${tools.angleToClocks2(angle, widget.context)}",
+            _currentLocale);
+      }
+      user.move(context);
+    } else if (nextTurn != turnPoints.last &&
+        pathObj.connections[currentBid]?[currentFloor] != nextTurn &&
+        (widget.distance / UserState.stepSize).ceil() == 7) {
+      final turnDirectionLower = turnDirection.toLowerCase();
+      if (!turnDirectionLower.contains("slight") &&
+          !turnDirectionLower.contains("straight") &&
+          pathObj.index > 4) {
+        final landmark = pathObj.associateTurnWithLandmark[nextTurn];
+        if (landmark != null) {
+          if (!UserState.ttsOnlyTurns) {
+            speak(
+                convertTolng(
+                    "You are approaching ${turnDirection} turn from ${landmark.name!}",
+                    _currentLocale,
+                    '',
+                    turnDirection,
+                    nextTurn!.node,
+                    ""),
+                _currentLocale);
           }
+          return;
+        } else {
+          if (!UserState.ttsOnlyTurns) {
+            speak(
+                convertTolng("You are approaching ${turnDirection} turn",
+                    _currentLocale, '', turnDirection, nextTurn!.node, ""),
+                _currentLocale);
+          }
+          user.move(widget.context);
+          return;
         }
       }
     }

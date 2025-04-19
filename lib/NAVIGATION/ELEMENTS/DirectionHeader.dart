@@ -379,32 +379,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
   Future<bool> listenToBin() async {
-    print("widget.user");
-    print(widget.user);
-  print("-------");
-List<Cell> cell
-  widget.user.cellPath.forEach((value){
-    Cell value = value;
-    });
-  print("-------");
-
-    widget.user.pathobj.path.forEach((key, value){
-      print("$key $value");
-    });
-    print(widget.user.pathobj);
-    // print(widget.user.lat);
-    // print(widget.user.lng);
-    // print(widget.user.cellPath);
-    // widget.user.cellPath.forEach((value){
-    //   print(value.)
-    // });
-    // print(widget.user.bid);
-    // print(widget.user.floor);
-    // print(widget.user.pathobj);
-    // print(widget.user.coordX);
-    // print(widget.user.coordY);
-    // print(widget.user.theta);
-    // print("listentobin");
 
     String nearestBeacon = "";
 

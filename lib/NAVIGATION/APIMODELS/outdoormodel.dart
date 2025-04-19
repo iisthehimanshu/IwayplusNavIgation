@@ -4,7 +4,7 @@ class outdoormodel {
 
   outdoormodel({this.status, this.data});
 
-  outdoormodel.fromJson(Map<dynamic, dynamic> json) {
+  outdoormodel.fromJson(dynamic json) {
     status = json['status'];
     data = json['data'] != null ? new Data.fromJson(json['data']) : null;
   }

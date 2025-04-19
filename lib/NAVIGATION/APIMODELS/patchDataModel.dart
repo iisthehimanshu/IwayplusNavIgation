@@ -4,7 +4,7 @@ class patchDataModel {
 
   patchDataModel({this.patchExist, this.patchData});
 
-  patchDataModel.fromJson(Map<dynamic, dynamic> json) {
+  patchDataModel.fromJson(dynamic json) {
     patchExist = json['patchExist'];
     patchData = json['patchData'] != null
         ? new PatchData.fromJson(json['patchData'])

@@ -83,6 +83,10 @@ class Buildingbyvenue {
     ownerId = json['ownerId'];
   }
 
+  static List<Buildingbyvenue> fromJsonToList(dynamic responseBody){
+    return responseBody.map((data) => Buildingbyvenue.fromJson(data)).toList();
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['adminIds'] = this.adminIds;

@@ -998,5 +998,5 @@ class UserState {
     // Do NOT include functions or complex custom objects unless they have their own toJson()
   };
 
-  
+
 }

@@ -100,7 +100,6 @@ Future<void> localDBInitialsation() async {
 }
 
 Future<void> mobileInitialization () async {
-  WidgetsFlutterBinding.ensureInitialized();
   WakelockPlus.enable();
 
 

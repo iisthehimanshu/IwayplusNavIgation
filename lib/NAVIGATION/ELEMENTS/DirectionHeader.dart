@@ -381,30 +381,100 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Future<bool> listenToBin() async {
     print("widget.user");
     print(widget.user);
-  print("-------");
-List<Cell> cell
-  widget.user.cellPath.forEach((value){
-    Cell value = value;
-    });
-  print("-------");
-
-    widget.user.pathobj.path.forEach((key, value){
-      print("$key $value");
-    });
-    print(widget.user.pathobj);
-    // print(widget.user.lat);
-    // print(widget.user.lng);
-    // print(widget.user.cellPath);
-    // widget.user.cellPath.forEach((value){
-    //   print(value.)
-    // });
-    // print(widget.user.bid);
-    // print(widget.user.floor);
-    // print(widget.user.pathobj);
-    // print(widget.user.coordX);
-    // print(widget.user.coordY);
-    // print(widget.user.theta);
-    // print("listentobin");
+    print("-------");
+  // String data = """
+  //   {"node":7491,"x":71,"y":28,"lat":28.54358368550854,"lng":77.18752284900863,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":7756,"x":71,"y":29,"lat":28.543581203984196,"lng":77.1875215317411,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8021,"x":71,"y":30,"lat":28.54357872245985,"lng":77.18752021447358,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8286,"x":71,"y":31,"lat":28.543576240935504,"lng":77.18751889720606,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8551,"x":71,"y":32,"lat":28.543573759411156,"lng":77.18751757993853,"ttsEnabled":false,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8550,"x":70,"y":32,"lat":28.54357491657873,"lng":77.18751475508282,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8549,"x":69,"y":32,"lat":28.5435760737463,"lng":77.1875119302271,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8548,"x":68,"y":32,"lat":28.543577230913872,"lng":77.18750910537139,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8547,"x":67,"y":32,"lat":28.543578388081446,"lng":77.18750628051568,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8546,"x":66,"y":32,"lat":28.543579545249017,"lng":77.18750345565995,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8545,"x":65,"y":32,"lat":28.543580702416588,"lng":77.18750063080424,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8544,"x":64,"y":32,"lat":28.543581859584158,"lng":77.18749780594852,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8543,"x":63,"y":32,"lat":28.543583016751732,"lng":77.18749498109281,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8542,"x":62,"y":32,"lat":28.543584173919303,"lng":77.1874921562371,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8541,"x":61,"y":32,"lat":28.543585331086874,"lng":77.18748933138139,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8540,"x":60,"y":32,"lat":28.543586488254444,"lng":77.18748650652566,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8539,"x":59,"y":32,"lat":28.54358764542202,"lng":77.18748368166995,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8538,"x":58,"y":32,"lat":28.54358880258959,"lng":77.18748085681423,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8537,"x":57,"y":32,"lat":28.54358995975716,"lng":77.18747803195852,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8536,"x":56,"y":32,"lat":28.543591116924734,"lng":77.1874752071028,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8535,"x":55,"y":32,"lat":28.543592274092305,"lng":77.1874723822471,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8534,"x":54,"y":32,"lat":28.543593431259875,"lng":77.18746955739137,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8533,"x":53,"y":32,"lat":28.543594588427446,"lng":77.18746673253565,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8532,"x":52,"y":32,"lat":28.54359574559502,"lng":77.18746390767994,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8531,"x":51,"y":32,"lat":28.54359690276259,"lng":77.18746108282423,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8530,"x":50,"y":32,"lat":28.54359805993016,"lng":77.18745825796852,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8529,"x":49,"y":32,"lat":28.543599217097736,"lng":77.1874554331128,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8528,"x":48,"y":32,"lat":28.543600374265306,"lng":77.18745260825708,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8527,"x":47,"y":32,"lat":28.543601531432877,"lng":77.18744978340136,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8526,"x":46,"y":32,"lat":28.543602688600448,"lng":77.18744695854565,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8525,"x":45,"y":32,"lat":28.543603845768022,"lng":77.18744413368994,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8524,"x":44,"y":32,"lat":28.543605002935593,"lng":77.18744130883422,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8523,"x":43,"y":32,"lat":28.543606160103163,"lng":77.18743848397851,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8522,"x":42,"y":32,"lat":28.543607317270734,"lng":77.18743565912278,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8521,"x":41,"y":32,"lat":28.543608474438308,"lng":77.18743283426707,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8520,"x":40,"y":32,"lat":28.54360963160588,"lng":77.18743000941136,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8519,"x":39,"y":32,"lat":28.54361078877345,"lng":77.18742718455564,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8518,"x":38,"y":32,"lat":28.543611945941024,"lng":77.18742435969993,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8517,"x":37,"y":32,"lat":28.543613103108594,"lng":77.18742153484422,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8516,"x":36,"y":32,"lat":28.543614260276165,"lng":77.18741870998849,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8515,"x":35,"y":32,"lat":28.543615417443736,"lng":77.18741588513278,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8514,"x":34,"y":32,"lat":28.54361657461131,"lng":77.18741306027707,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8513,"x":33,"y":32,"lat":28.54361773177888,"lng":77.18741023542135,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8512,"x":32,"y":32,"lat":28.54361888894645,"lng":77.18740741056564,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8511,"x":31,"y":32,"lat":28.543620046114025,"lng":77.18740458570993,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8510,"x":30,"y":32,"lat":28.543621203281596,"lng":77.1874017608542,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8509,"x":29,"y":32,"lat":28.543622360449167,"lng":77.18739893599849,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8508,"x":28,"y":32,"lat":28.543623517616737,"lng":77.18739611114277,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8507,"x":27,"y":32,"lat":28.54362467478431,"lng":77.18739328628706,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8506,"x":26,"y":32,"lat":28.543625831951882,"lng":77.18739046143135,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8505,"x":25,"y":32,"lat":28.543626989119453,"lng":77.18738763657564,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8504,"x":24,"y":32,"lat":28.543628146287027,"lng":77.18738481171991,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8503,"x":23,"y":32,"lat":28.543629303454598,"lng":77.1873819868642,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8502,"x":22,"y":32,"lat":28.54363046062217,"lng":77.18737916200848,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8501,"x":21,"y":32,"lat":28.54363161778974,"lng":77.18737633715277,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8500,"x":20,"y":32,"lat":28.543632774957313,"lng":77.18737351229706,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8499,"x":19,"y":32,"lat":28.543633932124884,"lng":77.18737068744134,"ttsEnabled":false,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":8234,"x":19,"y":31,"lat":28.543636413649228,"lng":77.18737200470886,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":7969,"x":19,"y":30,"lat":28.543638895173576,"lng":77.18737332197638,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":7704,"x":19,"y":29,"lat":28.54364137669792,"lng":77.18737463924391,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //   {"node":7439,"x":19,"y":28,"lat":28.543643858222268,"lng":77.18737595651143,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}
+  //
+  //
+  //   Cell curr = Cell.fromJson({"node":8234,"x":19,"y":31,"lat":28.543636413649228,"lng":77.18737200470886,"ttsEnabled":true,"bid":"65d887a5db333f89457145f6","floor":3,"numCols":265,"imaginedCell":false,"imaginedIndex":null,"position":null}, (double angle, {int? currPointer, int? totalCells}) {
+  //     // Implement your logic here for the move function
+  //     print('Moving with angle: $angle');
+  //     // You can use currPointer and totalCells if needed
+  //   });
+  //   print(curr);
+  //   print("-------");
+  // widget.user.cellPath.forEach((value){
+  //   print(value);
+  //   });
+  // print("-------");
+  //
+  //   widget.user.pathobj.path.forEach((key, value){
+  //     print("$key $value");
+  //   });
+  //   print(widget.user.pathobj);
+  //   // print(widget.user.lat);
+  //   // print(widget.user.lng);
+  //   // print(widget.user.cellPath);
+  //   // widget.user.cellPath.forEach((value){
+  //   //   print(value.)
+  //   // });
+  //   // print(widget.user.bid);
+  //   // print(widget.user.floor);
+  //   // print(widget.user.pathobj);
+  //   // print(widget.user.coordX);
+  //   // print(widget.user.coordY);
+  //   // print(widget.user.theta);
+  //   // print("listentobin");
 
     String nearestBeacon = "";
 

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'GPSService.dart';
 
 class Cell{
@@ -67,6 +69,10 @@ class Cell{
       position: position,
     );
   }
+
+  @override
+  String toString() => jsonEncode(toJson());
+
 
 
 }

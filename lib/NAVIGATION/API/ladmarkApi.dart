@@ -69,7 +69,6 @@ String getDecryptedData(String encryptedData){
         print("checkid $id");
         String APITime = responseBody['landmarks'][0]['updatedAt']!;
         final landmarkData = LandMarkApiModel(responseBody: responseBody);
-
         print('LANDMARK DATA FROM API');
         print(responseBody.containsValue("polylineExist"));
         // print(LandMarkBox.length);

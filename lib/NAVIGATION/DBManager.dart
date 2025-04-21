@@ -73,6 +73,7 @@ class DataBaseManager<T> implements DBManager<T>{
     // print(dataModel);
     // print(details.conversionFunction(dataModel));
     // landmarkBox.
+    landmarkBox.clear();
     print(landmarkBox.keys);
 
     landmarkBox.put(bID,dataModel);

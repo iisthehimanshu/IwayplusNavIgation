@@ -134,9 +134,11 @@ class Landmarks {
         : null;
     sId = json['_id'];
     wasPolyIdNull = false;
-    if(properties!.polyId == null){
-      wasPolyIdNull = true;
-      properties!.polyId = json['_id'];
+    if(properties != null) {
+      if (properties!.polyId == null) {
+        wasPolyIdNull = true;
+        properties!.polyId = json['_id'];
+      }
     }
       buildingID = json['building_ID'];
     coordinateX = json['coordinateX']!=null?json['coordinateX'].toInt():json['coordinateX'];
@@ -148,8 +150,11 @@ class Landmarks {
     floor = json['floor'];
     geometryType = json['geometryType'];
     name = json['name'];
-    if(name == null && element!.subType!=null && element!.type != "Floor" && element!.subType != "beacons"){
-      name = element!.subType;
+    if(element != null) {
+      if (name == null && element!.subType != null &&
+          element!.type != "Floor" && element!.subType != "beacons") {
+        name = element!.subType;
+      }
     }
     if (json['lifts'] != null) {
       lifts = <Lifts>[];

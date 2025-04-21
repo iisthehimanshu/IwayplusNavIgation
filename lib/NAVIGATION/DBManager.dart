@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:iwaymaps/NAVIGATION/API/ladmarkApi.dart';
 
 import '../IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import '../IWAYPLUS/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
@@ -13,16 +14,16 @@ import 'DATABASE/DATABASEMODEL/OutDoorModel.dart';
 import 'DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/WayPointModel.dart';
+import 'Network/APIDetails.dart';
 
 abstract class DBManager<T>{
-  Future<T> getData();
-  Future<void> saveData(T dataModel);
+  Future getData();
+  Future<void> saveData(T dataModel,Detail details,String bID);
   Future<void> update(T item);
   Future<void> delete(int id);
 }
 
 class DataBaseManager<T> implements DBManager<T>{
-
 
   static void init() async {
     Hive.registerAdapter(LandMarkApiModelAdapter());
@@ -64,7 +65,18 @@ class DataBaseManager<T> implements DBManager<T>{
   }
 
   @override
-  Future<void> saveData(T dataModel) async {
+  Future<void> saveData(T dataModel,Detail details,String bID) async {
+    final landmarkBox = details.dataBaseGetData!();
+    print("conversionFunction");
+
+    // print(details.conversionFunction(dataModel).buildingID);
+    // print(dataModel);
+    // print(details.conversionFunction(dataModel));
+    // landmarkBox.
+    print(landmarkBox.keys);
+
+    landmarkBox.put(bID,dataModel);
+    print(landmarkBox.keys);
 
   }
 
@@ -80,4 +92,5 @@ class DataBaseManager<T> implements DBManager<T>{
     var signInBox = Hive.box('SignInDatabase');
     return signInBox.get("accessToken");
   }
+
 }

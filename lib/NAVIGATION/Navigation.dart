@@ -13292,8 +13292,8 @@ bool _isPlaying=false;
                       : Container(),  // Adjust the height as needed// Adjust the height as needed
                   FloatingActionButton(
                     onPressed: () async {
-                      land data = await Repository().getLandmarkData(buildingAllApi.selectedBuildingID);
-                      print(data.landmarks);
+                      Landmarks data = await Repository().getLandmarkData("65d887a5db333f89457145f6");
+                      print(data);
                     },
                     child: Icon(Icons.settings),
                     backgroundColor: Color(

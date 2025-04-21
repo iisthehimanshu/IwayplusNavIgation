@@ -4,16 +4,13 @@ import 'package:iwaymaps/NAVIGATION/DBManager.dart';
 import 'package:iwaymaps/NAVIGATION/Network/APIDetails.dart';
 import 'package:iwaymaps/NAVIGATION/Network/NetworkManager.dart';
 import 'package:iwaymaps/NAVIGATION/waypoint.dart';
-
-import '../IWAYPLUS/API/buildingAllApi.dart';
 import 'API/response.dart';
-import 'APIMODELS/Building.dart';
 import 'APIMODELS/Buildingbyvenue.dart';
 import 'APIMODELS/GlobalAnnotationModel.dart';
 import 'APIMODELS/beaconData.dart';
-import 'APIMODELS/outdoormodel.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
+import 'DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 
 class Repository{
     Networkmanager networkManager = Networkmanager();
@@ -21,17 +18,21 @@ class Repository{
     Apidetails apiDetails = Apidetails();
 
 
-    Future<land> getLandmarkData(String bID) async {
+    Future<Landmarks> getLandmarkData(String bID) async {
         Detail landmarkDetail = apiDetails.landmark(dataBaseManager.getAccessToken(), bID);
         final landmarkBox = landmarkDetail.dataBaseGetData!();
 
         if(landmarkBox.containsKey(bID)){
             Map<String, dynamic> responseBody = landmarkBox.get(bID)!.responseBody;
             print("Data from DB");
+            final landmarkData = LandMarkApiModel(responseBody: responseBody);
+            DataBaseManager().saveData(landmarkData,landmarkDetail,bID);
             return landmarkDetail.conversionFunction(responseBody);
         }else {
             Response dataFromAPI = await networkManager.request(landmarkDetail);
             print("Data from API");
+            //DataBaseManager().saveData(dataFromAPI.data,landmarkDetail);
+
             return dataFromAPI.data;
         }
     }

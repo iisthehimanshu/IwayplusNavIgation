@@ -13,11 +13,11 @@ import 'package:geodesy/geodesy.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
-import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
 import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
 import 'package:iwaymaps/NAVIGATION/API/RefreshTokenAPI.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/WayPointModelBOX.dart';
 import '../NAVIGATION/BluetoothScanAndroid.dart';
+import '../NAVIGATION/Network/NetworkManager.dart';
 import '/IWAYPLUS/Elements/HelperClass.dart';
 import '/IWAYPLUS/Elements/UserCredential.dart';
 import '/IWAYPLUS/Elements/buildingCard.dart';
@@ -53,6 +53,7 @@ class VenueSelectionScreen extends StatefulWidget{
 }
 
 class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
+  NetworkManager networkManager = NetworkManager();
   late List<buildingAll> buildingList=[];
   late List<buildingAll> newbuildingList=[];
   bool isLoading_buildingList = true;
@@ -158,7 +159,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
           print("mac $MacId    rssi $Rssi");
-          wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
+          networkManager.ws.updateInitialization(bleScanResults: MapEntry(MacId, Rssi));
         }
       }
     });

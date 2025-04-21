@@ -14,7 +14,7 @@ class UsergetAPIModel {
   Null? googleId;
   String? appId;
   List<String>? roles;
-  List<Null>? favourites;
+  List<Map<String, dynamic>>? favourites;
   String? createdAt;
   String? updatedAt;
   int? iV;

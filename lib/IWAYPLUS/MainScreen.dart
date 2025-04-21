@@ -5,9 +5,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/IWAYPLUS/MapScreen.dart';
 import 'package:iwaymaps/IWAYPLUS/VenueSelectionScreen.dart';
-import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
 import 'package:iwaymaps/NAVIGATION/Navigation.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../NAVIGATION/Network/NetworkManager.dart';
 import 'Elements/QRLandmarkScreen.dart';
 import 'FavouriteScreen.dart';
 import 'ProfilePage.dart';
@@ -23,6 +23,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  NetworkManager networkManager = NetworkManager();
   late int index;
   final screens = [
     VenueSelectionScreen(),
@@ -44,7 +45,7 @@ class _MainScreenState extends State<MainScreen> {
   }
   void setIDforWebSocket()async{
     final signInBox = await Hive.openBox('SignInDatabase');
-    wsocket.message["userId"] = signInBox.get("userId");
+    networkManager.ws.updateUserId(signInBox.get("userId"));
   }
   var locBox=Hive.box('LocationPermission');
 

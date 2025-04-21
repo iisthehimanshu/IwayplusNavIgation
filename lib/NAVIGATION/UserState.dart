@@ -10,11 +10,11 @@ import 'package:iwaymaps/NAVIGATION/path_snapper.dart';
 import 'package:ml_linalg/matrix.dart';
 import '../IWAYPLUS/API/buildingAllApi.dart';
 import '../IWAYPLUS/Elements/locales.dart';
-import '../IWAYPLUS/websocket/UserLog.dart';
 import 'DebugToggle.dart';
 import 'GPSService.dart';
 import 'GPSStreamHandler.dart';
 import 'MotionModel.dart';
+import 'Network/NetworkManager.dart';
 import 'buildingState.dart' as b;
 
 import 'Cell.dart';
@@ -22,6 +22,7 @@ import 'navigationTools.dart';
 
 
 class UserState {
+  NetworkManager networkManager = NetworkManager();
   int floor;
   int coordX;
   double coordXf;
@@ -360,9 +361,7 @@ class UserState {
   }
 
   void userLogData() {
-    wsocket.message["userPosition"]["X"] = coordX;
-    wsocket.message["userPosition"]["Y"] = coordY;
-    wsocket.message["userPosition"]["floor"] = floor;
+    networkManager.ws.updateUserPosition(x: coordX, y: coordY, floor: floor);
   }
 
   bool shouldTerminateNavigation() {

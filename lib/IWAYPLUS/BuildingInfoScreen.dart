@@ -14,7 +14,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import '/IWAYPLUS/Elements/HelperClass.dart';
 import '/IWAYPLUS/Elements/buildingCard.dart';
@@ -319,8 +318,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                               child: ListTile(
                                 onTap: (){
                                  //if((widget.currentLatLng!.latitude.toStringAsFixed(2)==(28.544277333724025).toStringAsFixed(2) && widget.currentLatLng!.longitude.toStringAsFixed(2)==(77.18803031572772).toStringAsFixed(2)) ){
-                                    wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;
-                                    wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;
+
                                     buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setStoredAllBuildingID(allBuildingID);

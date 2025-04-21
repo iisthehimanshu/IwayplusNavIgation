@@ -42,8 +42,7 @@ class Apimanager{
         if(apiDetail.encryption){
           decryptedBody = encryptionService.decrypt(responseBody);
         }
-        dynamic object = apiDetail.conversionFunction(decryptedBody);
-        Response responseObject = Response(response.statusCode, object);
+        Response responseObject = Response(response.statusCode, decryptedBody);
 
         return responseObject;
       }else if(response.statusCode == 403){

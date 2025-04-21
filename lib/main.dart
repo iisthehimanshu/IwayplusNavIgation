@@ -11,9 +11,8 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/IWAYPLUS/BuildingInfoScreen.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
-import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
-import 'package:iwaymaps/NAVIGATION/DBManager.dart';
+import 'package:iwaymaps/NAVIGATION/DataBaseManager/DBManager.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
 import 'package:path_provider/path_provider.dart';
@@ -104,13 +103,13 @@ class MobileApp extends StatefulWidget {
 class _MobileAppState extends State<MobileApp> {
   late String googleSignInUserName='';
   final FlutterLocalization localization = FlutterLocalization.instance;
-  wsocket soc = wsocket('com.iwaypus.navigation');
   NotificationSocket notificationSocket = NotificationSocket();
 
   @override
   void initState() {
     configureLocalization();
     super.initState();
+
 
   }
   void configureLocalization(){

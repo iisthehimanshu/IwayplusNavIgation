@@ -9,6 +9,7 @@ import 'API/response.dart';
 import 'APIMODELS/Buildingbyvenue.dart';
 import 'APIMODELS/GlobalAnnotationModel.dart';
 import 'APIMODELS/beaconData.dart';
+import 'APIMODELS/outdoormodel.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
 import 'DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
@@ -25,13 +26,12 @@ class Repository{
 
         if(landmarkBox.containsKey(bID)){
             Map<String, dynamic> responseBody = landmarkBox.get(bID)!.responseBody;
-
             print("Data from DB");
             final landmarkData = LandMarkApiModel(responseBody: responseBody);
             DataBaseManager().saveData(landmarkData,landmarkDetail,bID);
             return landmarkDetail.conversionFunction(responseBody);
         }else {
-            Response dataFromAPI = await networkManager.request(landmarkDetail);
+            Response dataFromAPI = await networkManager.api.request(landmarkDetail);
             print("Data from API");
             //DataBaseManager().saveData(dataFromAPI.data,landmarkDetail);
 

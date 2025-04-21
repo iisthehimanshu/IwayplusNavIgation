@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/Users/wilsondaniel/development/flutter"
-export "FLUTTER_APPLICATION_PATH=/Users/wilsondaniel/Documents/GitHub/IwayplusNavIgation"
+export "FLUTTER_ROOT=/Users/macmini/flutterdev/flutter"
+export "FLUTTER_APPLICATION_PATH=/Users/macmini/StudioProjects/iwayplus_navigation"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_TARGET=lib/main.dart"
 export "FLUTTER_BUILD_DIR=build"

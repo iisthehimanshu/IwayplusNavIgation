@@ -1,13 +1,12 @@
 
+import 'package:flutter/foundation.dart';
 import 'package:iwaymaps/NAVIGATION/APIMODELS/landmark.dart';
 import 'package:iwaymaps/NAVIGATION/DBManager.dart';
 import 'package:iwaymaps/NAVIGATION/Network/APIDetails.dart';
 import 'package:iwaymaps/NAVIGATION/Network/NetworkManager.dart';
 import 'package:iwaymaps/NAVIGATION/waypoint.dart';
 
-import '../IWAYPLUS/API/buildingAllApi.dart';
 import 'API/response.dart';
-import 'APIMODELS/Building.dart';
 import 'APIMODELS/Buildingbyvenue.dart';
 import 'APIMODELS/GlobalAnnotationModel.dart';
 import 'APIMODELS/beaconData.dart';
@@ -16,7 +15,7 @@ import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
 
 class Repository{
-    Networkmanager networkManager = Networkmanager();
+    NetworkManager networkManager = NetworkManager();
     DataBaseManager dataBaseManager = DataBaseManager();
     Apidetails apiDetails = Apidetails();
 
@@ -27,11 +26,15 @@ class Repository{
 
         if(landmarkBox.containsKey(bID)){
             Map<String, dynamic> responseBody = landmarkBox.get(bID)!.responseBody;
-            print("Data from DB");
+            if (kDebugMode) {
+              print("Data from DB");
+            }
             return landmarkDetail.conversionFunction(responseBody);
         }else {
-            Response dataFromAPI = await networkManager.request(landmarkDetail);
-            print("Data from API");
+            Response dataFromAPI = await networkManager.api.request(landmarkDetail);
+            if (kDebugMode) {
+              print("Data from API");
+            }
             return dataFromAPI.data;
         }
     }
@@ -42,11 +45,15 @@ class Repository{
 
         if(polylineBox.containsKey(bID)){
             Map<String, dynamic> responseBody = polylineBox.get(bID)!.responseBody;
-            print("Data from DB");
+            if (kDebugMode) {
+              print("Data from DB");
+            }
             return polylineDetail.conversionFunction(responseBody);
         }else {
-            Response dataFromAPI = await networkManager.request(polylineDetail);
-            print("Data from API");
+            Response dataFromAPI = await networkManager.api.request(polylineDetail);
+            if (kDebugMode) {
+              print("Data from API");
+            }
             return dataFromAPI.data;
         }
     }
@@ -57,11 +64,15 @@ class Repository{
 
         if(patchBox.containsKey(bID)){
             Map<String, dynamic> responseBody = patchBox.get(bID)!.responseBody;
-            print("Data from DB");
+            if (kDebugMode) {
+              print("Data from DB");
+            }
             return patchDetail.conversionFunction(responseBody);
         }else {
-            Response dataFromAPI = await networkManager.request(patchDetail);
-            print("Data from API");
+            Response dataFromAPI = await networkManager.api.request(patchDetail);
+            if (kDebugMode) {
+              print("Data from API");
+            }
             return dataFromAPI.data;
         }
     }
@@ -72,11 +83,15 @@ class Repository{
 
         if(beaocnBox.containsKey(bID)){
             Map<String, dynamic> responseBody = beaocnBox.get(bID)!.responseBody;
-            print("Data from DB");
+            if (kDebugMode) {
+              print("Data from DB");
+            }
             return beaconDetail.conversionFunction(responseBody);
         }else {
-            Response dataFromAPI = await networkManager.request(beaconDetail);
-            print("Data from API");
+            Response dataFromAPI = await networkManager.api.request(beaconDetail);
+            if (kDebugMode) {
+              print("Data from API");
+            }
             return dataFromAPI.data;
         }
     }
@@ -87,11 +102,15 @@ class Repository{
 
         if(buildingByVenueBox.containsKey(bID)){
             Map<String, dynamic> responseBody = buildingByVenueBox.get(bID)!.responseBody;
-            print("Data from DB");
+            if (kDebugMode) {
+              print("Data from DB");
+            }
             return buildingByVenueDetail.conversionFunction(responseBody);
         }else {
-            Response dataFromAPI = await networkManager.request(buildingByVenueDetail);
-            print("Data from API");
+            Response dataFromAPI = await networkManager.api.request(buildingByVenueDetail);
+            if (kDebugMode) {
+              print("Data from API");
+            }
             return dataFromAPI.data;
         }
     }
@@ -102,11 +121,15 @@ class Repository{
 
         if(globaAnnotaionBox.containsKey(bID)){
             Map<String, dynamic> responseBody = globaAnnotaionBox.get(bID)!.responseBody;
-            print("Data from DB");
+            if (kDebugMode) {
+              print("Data from DB");
+            }
             return globaAnnotaionDetail.conversionFunction(responseBody);
         }else {
-            Response dataFromAPI = await networkManager.request(globaAnnotaionDetail);
-            print("Data from API");
+            Response dataFromAPI = await networkManager.api.request(globaAnnotaionDetail);
+            if (kDebugMode) {
+              print("Data from API");
+            }
             return dataFromAPI.data;
         }
     }
@@ -117,12 +140,38 @@ class Repository{
 
         if(waypointBox.containsKey(bID)){
             Map<String, dynamic> responseBody = waypointBox.get(bID)!.responseBody;
-            print("Data from DB");
+            if (kDebugMode) {
+              print("Data from DB");
+            }
             return waypointBox.conversionFunction(responseBody);
         }else {
-            Response dataFromAPI = await networkManager.request(waypointDetails);
-            print("Data from API");
+            Response dataFromAPI = await networkManager.api.request(waypointDetails);
+            if (kDebugMode) {
+              print("Data from API");
+            }
             return dataFromAPI.data;
         }
     }
+
+    Future<outdoormodel> getCampusData(List<String> bIDS) async {
+        Detail campusDetails = apiDetails.outBuilding(dataBaseManager.getAccessToken(), bIDS);
+        final campusBox = campusDetails.dataBaseGetData!();
+
+        for (var bid in bIDS) {
+            if(campusBox.containsKey(bid)){
+                Map<String, dynamic> responseBody = campusBox.get(bid)!.responseBody;
+                if (kDebugMode) {
+                    print("Data from DB");
+                }
+                return campusBox.conversionFunction(responseBody);
+            }
+        }
+            Response dataFromAPI = await networkManager.api.request(campusDetails);
+            if (kDebugMode) {
+                print("Data from API");
+            }
+            return dataFromAPI.data;
+
+    }
+
 }

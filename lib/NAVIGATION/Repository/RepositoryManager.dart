@@ -23,12 +23,12 @@ import '../DATABASE/DATABASEMODEL/GlobalAnnotationAPIModel.dart';
 import '../DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import '../DATABASE/DATABASEMODEL/OutDoorModel.dart';
 
-class RepositoryManager{
+class RepositoryManager<T>{
     NetworkManager networkManager = NetworkManager();
     DataBaseManager dataBaseManager = DataBaseManager();
     Apidetails apiDetails = Apidetails();
 
-    Future<Landmarks> getLandmarkData(String bID) async {
+    Future<T> getLandmarkData(String bID) async {
         Detail landmarkDetail = apiDetails.landmark(dataBaseManager.getAccessToken(), bID);
         final landmarkBox = landmarkDetail.dataBaseGetData!();
 
@@ -36,8 +36,8 @@ class RepositoryManager{
             if (kDebugMode) {
                 print("Data from DB");
             }
-            final responseFromDatabase = DataBaseManager().getData(landmarkDetail, bID);
-            return responseFromDatabase;
+            LandMarkApiModel responseFromDatabase = DataBaseManager().getData(landmarkDetail, bID);
+            return landmarkDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(landmarkDetail);
             if (kDebugMode) {
@@ -57,8 +57,8 @@ class RepositoryManager{
             if (kDebugMode) {
               print("Data from DB");
             }
-            final responseFromDatabase = DataBaseManager().getData(polylineDetail, bID);
-            return responseFromDatabase;
+            PolyLineAPIModel responseFromDatabase = DataBaseManager().getData(polylineDetail, bID);
+            return polylineDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(polylineDetail);
             if (kDebugMode) {
@@ -78,8 +78,8 @@ class RepositoryManager{
             if (kDebugMode) {
               print("Data from DB");
             }
-            final responseFromDatabase = DataBaseManager().getData(patchDetail, bID);
-            return responseFromDatabase;
+            PatchAPIModel responseFromDatabase = DataBaseManager().getData(patchDetail, bID);
+            return patchDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(patchDetail);
             if (kDebugMode) {
@@ -99,8 +99,8 @@ class RepositoryManager{
             if (kDebugMode) {
               print("Data from DB");
             }
-            final responseFromDatabase = DataBaseManager().getData(beaconDetail, bID);
-            return responseFromDatabase;
+            BeaconAPIModel responseFromDatabase = DataBaseManager().getData(beaconDetail, bID);
+            return beaconDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(beaconDetail);
             if (kDebugMode) {
@@ -120,8 +120,8 @@ class RepositoryManager{
             if (kDebugMode) {
               print("Data from DB");
             }
-            final responseFromDatabase = DataBaseManager().getData(buildingByVenueDetail, bID);
-            return responseFromDatabase;
+            BuildingByVenueAPIModel responseFromDatabase = DataBaseManager().getData(buildingByVenueDetail, bID);
+            return buildingByVenueDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(buildingByVenueDetail);
             if (kDebugMode) {
@@ -141,8 +141,8 @@ class RepositoryManager{
             if (kDebugMode) {
               print("Data from DB");
             }
-            final responseFromDatabase = DataBaseManager().getData(globalAnnotationDetail, bID);
-            return responseFromDatabase;
+            GlobalAnnotationAPIModel responseFromDatabase = DataBaseManager().getData(globalAnnotationDetail, bID);
+            return globalAnnotationDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(globalAnnotationDetail);
             if (kDebugMode) {
@@ -162,8 +162,8 @@ class RepositoryManager{
             if (kDebugMode) {
               print("Data from DB");
             }
-            final responseFromDatabase = DataBaseManager().getData(waypointDetails, bID);
-            return responseFromDatabase;
+            WayPointModel responseFromDatabase = DataBaseManager().getData(waypointDetails, bID);
+            return waypointDetails.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(waypointDetails);
             if (kDebugMode) {
@@ -184,8 +184,8 @@ class RepositoryManager{
                 if (kDebugMode) {
                     print("Data from DB");
                 }
-                final responseFromDatabase = DataBaseManager().getData(campusDetails, bid);
-                return responseFromDatabase;
+                OutDoorModel responseFromDatabase = DataBaseManager().getData(campusDetails, bid);
+                return campusDetails.conversionFunction(responseFromDatabase.responseBody);
             }
         }
 

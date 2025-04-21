@@ -60,8 +60,13 @@ class DataBaseManager<T> implements DBManager<T>{
     await Hive.openBox<BuildingByVenueAPIModel>('BuildingByVenueModelFile');
     Hive.registerAdapter(GlobalAnnotationAPIModelAdapter());
     await Hive.openBox<GlobalAnnotationAPIModel>('GlobalAnnotationAPIModelFile');
-    Hive.registerAdapter(BuildingAllAPIModelAdapter());
-    await Hive.openBox<BuildingAllAPIModel>('BuildingAllAPIModelFile');
+
+    await Hive.openBox('Favourites');
+    await Hive.openBox('UserInformation');
+    await Hive.openBox('Filters');
+    await Hive.openBox('SignInDatabase');
+    await Hive.openBox('LocationPermission');
+    await Hive.openBox('VersionData');
 
   }
 
@@ -94,7 +99,6 @@ class DataBaseManager<T> implements DBManager<T>{
   String getAccessToken(){
     var signInBox = Hive.box('SignInDatabase');
     String accessToken = signInBox.get("accessToken");
-    signInBox.close();
     return accessToken;
   }
 
@@ -103,14 +107,12 @@ class DataBaseManager<T> implements DBManager<T>{
     var signInBox = Hive.box('SignInDatabase');
     signInBox.delete("accessToken");
     signInBox.put("accessToken", newAccessToken);
-    signInBox.close();
   }
 
   @override
   String getRefreshToken(){
     var signInBox = Hive.box('SignInDatabase');
     String refreshToken = signInBox.get("refreshToken");
-    signInBox.close();
     return refreshToken;
   }
 
@@ -119,6 +121,5 @@ class DataBaseManager<T> implements DBManager<T>{
     var signInBox = Hive.box('SignInDatabase');
     signInBox.delete("refreshToken");
     signInBox.put("refreshToken", newRefreshToken);
-    signInBox.close();
   }
 }

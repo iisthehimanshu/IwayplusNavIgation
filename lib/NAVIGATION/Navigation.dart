@@ -8,7 +8,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
-import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
+import 'package:iwaymaps/NAVIGATION/Sensor/SensorManager.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
 import 'package:iwaymaps/NAVIGATION/path.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
@@ -223,7 +223,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   DateTime? _gyroscopeUpdateTime;
   DateTime? _magnetometerUpdateTime;
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
-  final pdr = <StreamSubscription<dynamic>>[];
+  late StreamSubscription<AccelerometerEvent> pdr;
   Duration sensorInterval = Duration(milliseconds: 100);
   final pinLandmarkPannel PinLandmarkPannel = pinLandmarkPannel();
 
@@ -434,17 +434,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   late AnimationController PB_controller;
   late Animation<double> PBanimation;
   bool PB_isProgressing = false;
-
   //--------------------------------------------------------------------------------------
   double _progressValue = 0.0;
   final double targetZoom = 22.0;
 
   late DateTime timerStartTime;
+  SensorManager sensorData = SensorManager();
   @override
   void initState() {
     super.initState();
     initializeMarkers();
     NavigationLogManager().initialize();
+    sensorData.startMagnetometer();
+    sensorData.startAccelerometer();
     //add a timer of duration 5sec
     //PolylineTestClass.polylineSet.clear();
     // StartPDR();
@@ -537,36 +539,36 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       setPdrThreshold();
       getDeviceManufacturer();
     }
-    try {
-      _streamSubscriptions.add(
-        userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
-                (UserAccelerometerEvent event) {
-              final now = DateTime.now();
-              // setState(() {
-              //   _userAccelerometerEvent = event;
-              //   if (_userAccelerometerUpdateTime != null) {
-              //     final interval = now.difference(_userAccelerometerUpdateTime!);
-              //     if (interval > _ignoreDuration) {
-              //       _userAccelerometerLastInterval = interval.inMilliseconds;
-              //     }
-              //   }
-              // });
-              _userAccelerometerUpdateTime = now;
-            }, onError: (e) {
-          showDialog(
-              context: context,
-              builder: (context) {
-                return const AlertDialog(
-                  title: Text("Sensor Not Found"),
-                  content: Text(
-                      "It seems that your device doesn't support User Accelerometer Sensor"),
-                );
-              });
-          cancelOnError:
-          true;
-        }),
-      );
-    } catch (E) {}
+    // try {
+    //   _streamSubscriptions.add(
+    //     userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
+    //             (UserAccelerometerEvent event) {
+    //           final now = DateTime.now();
+    //           // setState(() {
+    //           //   _userAccelerometerEvent = event;
+    //           //   if (_userAccelerometerUpdateTime != null) {
+    //           //     final interval = now.difference(_userAccelerometerUpdateTime!);
+    //           //     if (interval > _ignoreDuration) {
+    //           //       _userAccelerometerLastInterval = interval.inMilliseconds;
+    //           //     }
+    //           //   }
+    //           // });
+    //           _userAccelerometerUpdateTime = now;
+    //         }, onError: (e) {
+    //       showDialog(
+    //           context: context,
+    //           builder: (context) {
+    //             return const AlertDialog(
+    //               title: Text("Sensor Not Found"),
+    //               content: Text(
+    //                   "It seems that your device doesn't support User Accelerometer Sensor"),
+    //             );
+    //           });
+    //       cancelOnError:
+    //       true;
+    //     }),
+    //   );
+    // } catch (E) {}
     // fetchlist();
     // filterItems();
   }
@@ -827,7 +829,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
   void handleCompassEvents(){
-    compassSubscription = FlutterCompass.events!.listen((event) {
+    sensorData.magnetometerStream.listen((event){
       if (!mounted) return; // Prevent setState if the widget is no longer in the tree
       networkManager.ws.updateSensorStatus(compass: true);
       networkManager.ws.updatePermissions(compass: true);
@@ -946,9 +948,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         isPdr = false;
       });
       PDRTimer!.cancel();
-      for (final subscription in pdr) {
-        subscription.cancel();
-      }
+      pdr.cancel();
     }
   }
 
@@ -974,15 +974,78 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
-    pdr.add(accelerometerEventStream().listen(
-          (AccelerometerEvent event) {
-        if (pdr == null) {
-          return; // Exit the event listener if subscription is canceled
+    sensorData.accelerometerStream.listen((event){
+      if (pdr == null) {
+        return; // Exit the event listener if subscription is canceled
+      }
+      networkManager.ws.updateSensorStatus(activity: true);
+      networkManager.ws.updatePermissions(activity: true);
+      // Apply low-pass filter
+      if (detectStep(event.x, event.y, event.z)) {
+        setState(() {
+          lastPeakTime = DateTime
+              .now()
+              .millisecondsSinceEpoch;
+          stepCount++;
+          bool isvalid = MotionModel.isValidStep(
+              user,
+              SingletonFunctionController
+                  .building.floorDimenssion[user.bid]![user.floor]![0],
+              SingletonFunctionController
+                  .building.floorDimenssion[user.bid]![user.floor]![1],
+              SingletonFunctionController
+                  .building.nonWalkable[user.bid]![user.floor]!,
+              reroute, context);
+          if (isvalid) {
+            user.move(context).then((value) {
+              renderHere();
+            });
+          } else {
+            if (user.isnavigating) {
+              // reroute();
+              // showToast("You are out of path");
+            }
+          }
+        });
+      }
+      else {
+        filteredX = alpha * filteredX + (1 - alpha) * event.x;
+        filteredY = alpha * filteredY + (1 - alpha) * event.y;
+        filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
+        // Compute orientation angle from accelerometer data (e.g., pitch or roll)
+        double orientation = atan2(filteredY,
+            sqrt(filteredX * filteredX + filteredZ * filteredZ))
+        ;
+        // Add orientation to history and check variability
+        orientationHistory.add(orientation);
+        if (orientationHistory.length > orientationWindowSize) {
+          orientationHistory.removeAt(0); // Maintain a fixed window size
+
+          // Calculate standard deviation of orientation
+          double avgOrientation = orientationHistory.reduce((a, b) =>
+          a + b) / orientationWindowSize;
+          double orientationVariance = orientationHistory.fold(
+              0, (sum, value) => sum +
+              pow(value - avgOrientation, 2).toInt()) /
+              orientationWindowSize;
+          double orientationStability = sqrt(orientationVariance);
+
+          // Suppress step detection if orientation is too variable
+          if (orientationStability > orientationThreshold) {
+            // Too random, assume the user is stationary or talking, ignore steps
+            return;
+          }
         }
-        networkManager.ws.updateSensorStatus(activity: true);
-        networkManager.ws.updatePermissions(activity: true);
-        // Apply low-pass filter
-        if (detectStep(event.x, event.y, event.z)) {
+        // Compute magnitude of acceleration vector
+        double magnitude = sqrt((filteredX * filteredX +
+            filteredY * filteredY +
+            filteredZ * filteredZ));
+        // Detect peak and valley
+        if (magnitude > peakThreshold &&
+            DateTime
+                .now()
+                .millisecondsSinceEpoch - lastPeakTime >
+                peakInterval) {
           setState(() {
             lastPeakTime = DateTime
                 .now()
@@ -1008,89 +1071,23 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               }
             }
           });
+        } else if (magnitude < valleyThreshold &&
+            DateTime
+                .now()
+                .millisecondsSinceEpoch - lastValleyTime >
+                valleyInterval) {
+          setState(() {
+            lastValleyTime = DateTime
+                .now()
+                .millisecondsSinceEpoch;
+          });
         }
-        else {
-          filteredX = alpha * filteredX + (1 - alpha) * event.x;
-          filteredY = alpha * filteredY + (1 - alpha) * event.y;
-          filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
-          // Compute orientation angle from accelerometer data (e.g., pitch or roll)
-          double orientation = atan2(filteredY,
-              sqrt(filteredX * filteredX + filteredZ * filteredZ))
-          ;
-          // Add orientation to history and check variability
-          orientationHistory.add(orientation);
-          if (orientationHistory.length > orientationWindowSize) {
-            orientationHistory.removeAt(0); // Maintain a fixed window size
+      }
 
-            // Calculate standard deviation of orientation
-            double avgOrientation = orientationHistory.reduce((a, b) =>
-            a + b) / orientationWindowSize;
-            double orientationVariance = orientationHistory.fold(
-                0, (sum, value) => sum +
-                pow(value - avgOrientation, 2).toInt()) /
-                orientationWindowSize;
-            double orientationStability = sqrt(orientationVariance);
-
-            // Suppress step detection if orientation is too variable
-            if (orientationStability > orientationThreshold) {
-              // Too random, assume the user is stationary or talking, ignore steps
-              return;
-            }
-          }
-          // Compute magnitude of acceleration vector
-          double magnitude = sqrt((filteredX * filteredX +
-              filteredY * filteredY +
-              filteredZ * filteredZ));
-          // Detect peak and valley
-          if (magnitude > peakThreshold &&
-              DateTime
-                  .now()
-                  .millisecondsSinceEpoch - lastPeakTime >
-                  peakInterval) {
-            setState(() {
-              lastPeakTime = DateTime
-                  .now()
-                  .millisecondsSinceEpoch;
-              stepCount++;
-              bool isvalid = MotionModel.isValidStep(
-                  user,
-                  SingletonFunctionController
-                      .building.floorDimenssion[user.bid]![user.floor]![0],
-                  SingletonFunctionController
-                      .building.floorDimenssion[user.bid]![user.floor]![1],
-                  SingletonFunctionController
-                      .building.nonWalkable[user.bid]![user.floor]!,
-                  reroute, context);
-              if (isvalid) {
-                user.move(context).then((value) {
-                  renderHere();
-                });
-              } else {
-                if (user.isnavigating) {
-                  // reroute();
-                  // showToast("You are out of path");
-                }
-              }
-            });
-          } else if (magnitude < valleyThreshold &&
-              DateTime
-                  .now()
-                  .millisecondsSinceEpoch - lastValleyTime >
-                  valleyInterval) {
-            setState(() {
-              lastValleyTime = DateTime
-                  .now()
-                  .millisecondsSinceEpoch;
-            });
-          }
-        }
-
-      },
-      onError: (error) {
-            networkManager.ws.updateSensorStatus(activity: false);
-            networkManager.ws.updatePermissions(activity: false);
-      },
-    ));
+    },onError: (error) {
+      networkManager.ws.updateSensorStatus(activity: false);
+      networkManager.ws.updatePermissions(activity: false);
+    });
   }
   DateTime? lastStepTime; // To track the last step detection time
   final Duration stepCooldown = Duration(milliseconds: 800);
@@ -12537,6 +12534,7 @@ bool _isPlaying=false;
     for (var controller in _controllers) {
       controller.dispose();
     }
+    sensorData.stopMagnetometer();
     magnetometerSubscription.cancel();
     super.dispose();
   }
@@ -13282,18 +13280,7 @@ bool _isPlaying=false;
                         0xff24B9B0), // Set the background color of the FAB
                   )
                       : Container(),  // Adjust the height as needed// Adjust the height as needed
-                  FloatingActionButton(
-                    onPressed: () async {
-                      final data = await RepositoryManager().getLandmarkData("65d887a5db333f89457145f6");
-                      print(data);
-                      if(data != null){
-                        print("received landmark");
-                      }
-                    },
-                    child: Icon(Icons.settings),
-                    backgroundColor: Color(
-                        0xff24B9B0), // Set the background color of the FAB
-                  )
+
                 ],
               ),
             ),

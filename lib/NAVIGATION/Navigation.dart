@@ -8,7 +8,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
-import 'package:iwaymaps/NAVIGATION/Repository.dart';
+import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
 import 'package:iwaymaps/NAVIGATION/path.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
@@ -13292,7 +13292,7 @@ bool _isPlaying=false;
                       : Container(),  // Adjust the height as needed// Adjust the height as needed
                   FloatingActionButton(
                     onPressed: () async {
-                      Landmarks data = await Repository().getLandmarkData("65d887a5db333f89457145f6");
+                      Landmarks data = await RepositoryManager().getLandmarkData("65d887a5db333f89457145f6");
                       print(data);
                     },
                     child: Icon(Icons.settings),

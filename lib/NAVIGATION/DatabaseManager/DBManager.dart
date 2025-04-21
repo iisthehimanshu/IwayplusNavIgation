@@ -1,0 +1,124 @@
+import 'package:hive/hive.dart';
+import 'package:iwaymaps/NAVIGATION/API/ladmarkApi.dart';
+
+import '../../IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
+import '../../IWAYPLUS/DATABASE/DATABASEMODEL/BuildingByVenueAPIModel.dart';
+import '../../IWAYPLUS/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
+import '../../IWAYPLUS/DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
+import '../../IWAYPLUS/DATABASE/DATABASEMODEL/SignINAPIModel.dart';
+import '../DATABASE/BOXES/LandMarkApiModelBox.dart';
+import '../DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
+import '../DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import '../DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
+import '../DATABASE/DATABASEMODEL/GlobalAnnotationAPIModel.dart';
+import '../DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
+import '../DATABASE/DATABASEMODEL/OutDoorModel.dart';
+import '../DATABASE/DATABASEMODEL/PatchAPIModel.dart';
+import '../DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
+import '../DATABASE/DATABASEMODEL/WayPointModel.dart';
+import '../Network/APIDetails.dart';
+
+abstract class DBManager<T>{
+  Future updateData();
+  Future<void> saveData(T dataModel,Detail details,String bID);
+  T getData(Detail details,String bID);
+  Future<void> delete(int id);
+  String getAccessToken();
+  void updateAccessToken(String newAccessToken);
+  String getRefreshToken();
+  void updateRefreshToken(String newRefreshToken);
+}
+
+class DataBaseManager<T> implements DBManager<T>{
+
+  static void init() async {
+    Hive.registerAdapter(LandMarkApiModelAdapter());
+    await Hive.openBox<LandMarkApiModel>('LandMarkApiModelFile');
+    Hive.registerAdapter(PatchAPIModelAdapter());
+    await Hive.openBox<PatchAPIModel>('PatchAPIModelFile');
+    Hive.registerAdapter(PolyLineAPIModelAdapter());
+    await Hive.openBox<PolyLineAPIModel>("PolyLineAPIModelFile");
+    Hive.registerAdapter(BuildingAllAPIModelAdapter());
+    await Hive.openBox<BuildingAllAPIModel>("BuildingAllAPIModelFile");
+    Hive.registerAdapter(FavouriteDataBaseModelAdapter());
+    await Hive.openBox<FavouriteDataBaseModel>("FavouriteDataBaseModelFile");
+    Hive.registerAdapter(BeaconAPIModelAdapter());
+    await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
+    Hive.registerAdapter(BuildingAPIModelAdapter());
+    await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
+    Hive.registerAdapter(SignINAPIModelAdapter());
+    await Hive.openBox<SignINAPIModel>('SignINAPIModelFile');
+    Hive.registerAdapter(OutDoorModelAdapter());
+    await Hive.openBox<OutDoorModel>('OutDoorModelFile');
+    Hive.registerAdapter(WayPointModelAdapter());
+    await Hive.openBox<WayPointModel>('WayPointModelFile');
+    Hive.registerAdapter(DataVersionLocalModelAdapter());
+    await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
+    Hive.registerAdapter(LocalNotificationAPIDatabaseModelAdapter());
+    await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
+    Hive.registerAdapter(BuildingByVenueAPIModelAdapter());
+    await Hive.openBox<BuildingByVenueAPIModel>('BuildingByVenueModelFile');
+    Hive.registerAdapter(GlobalAnnotationAPIModelAdapter());
+    await Hive.openBox<GlobalAnnotationAPIModel>('GlobalAnnotationAPIModelFile');
+    Hive.registerAdapter(BuildingAllAPIModelAdapter());
+    await Hive.openBox<BuildingAllAPIModel>('BuildingAllAPIModelFile');
+
+  }
+
+  @override
+  Future<void> delete(int id) {
+    // TODO: implement delete
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<T> updateData() {
+    // TODO: implement getData
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> saveData(T dataModel,Detail details,String bID) async {
+    final databaseBox = details.dataBaseGetData!();
+    databaseBox.put(bID,dataModel);
+  }
+
+  @override
+  T getData(Detail details,String bID) {
+    final databaseBox = details.dataBaseGetData!();
+    final data = databaseBox.get(bID);
+    return data;
+  }
+
+  @override
+  String getAccessToken(){
+    var signInBox = Hive.box('SignInDatabase');
+    String accessToken = signInBox.get("accessToken");
+    signInBox.close();
+    return accessToken;
+  }
+
+  @override
+  void updateAccessToken(String newAccessToken){
+    var signInBox = Hive.box('SignInDatabase');
+    signInBox.delete("accessToken");
+    signInBox.put("accessToken", newAccessToken);
+    signInBox.close();
+  }
+
+  @override
+  String getRefreshToken(){
+    var signInBox = Hive.box('SignInDatabase');
+    String refreshToken = signInBox.get("refreshToken");
+    signInBox.close();
+    return refreshToken;
+  }
+
+  @override
+  void updateRefreshToken(String newRefreshToken){
+    var signInBox = Hive.box('SignInDatabase');
+    signInBox.delete("refreshToken");
+    signInBox.put("refreshToken", newRefreshToken);
+    signInBox.close();
+  }
+}

@@ -1,9 +1,9 @@
 import '../APIMODELS/Buildingbyvenue.dart';
 import '../APIMODELS/outdoormodel.dart';
-import '../Repository.dart';
+import '../Repository/RepositoryManager.dart';
 
 class Venuemanager{
-  Repository repository = Repository();
+  RepositoryManager repository = RepositoryManager();
   String _venueName = "IIT Delhi";
 
   String get venueName => _venueName;

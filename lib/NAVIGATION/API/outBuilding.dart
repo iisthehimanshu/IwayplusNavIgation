@@ -42,7 +42,6 @@ class outBuilding {
       final outBuildingData = OutDoorModel(responseBody: responseBody);
       print("OUTBUILDING DATA FORM API $responseBody");
 
-
       OutBuildingBox.put(ids[0], outBuildingData);
       outBuildingData.save();
 

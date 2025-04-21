@@ -470,7 +470,7 @@ class _CreateNewPasswordState extends State<CreateNewPassword> {
                                               print(widget.user);
                                               print(mailEditingController.text);
                                               print(widget.otp);
-                                              await SignInAPI.changePassword(
+                                              await SignInAPI().changePassword(
                                                   widget.user,
                                                   mailEditingController
                                                       .text,

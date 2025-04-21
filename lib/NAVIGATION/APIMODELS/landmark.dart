@@ -126,7 +126,7 @@ class Landmarks {
         this.wasPolyIdNull});
 
 
-  Landmarks.fromJson(Map<dynamic, dynamic> json) {
+  Landmarks.fromJson(dynamic json) {
     element =
     json['element'] != null ? new Element.fromJson(json['element']) : null;
     properties = json['properties'] != null

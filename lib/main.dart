@@ -13,6 +13,7 @@ import 'package:iwaymaps/IWAYPLUS/BuildingInfoScreen.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import 'package:iwaymaps/NAVIGATION/DBManager.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
 import 'package:path_provider/path_provider.dart';
@@ -63,31 +64,7 @@ Future<void> localDBInitialsation() async {
     var directory = await getApplicationDocumentsDirectory();
     Hive.init(directory.path);
   }
-  Hive.registerAdapter(LandMarkApiModelAdapter());
-  await Hive.openBox<LandMarkApiModel>('LandMarkApiModelFile');
-  Hive.registerAdapter(PatchAPIModelAdapter());
-  await Hive.openBox<PatchAPIModel>('PatchAPIModelFile');
-  Hive.registerAdapter(PolyLineAPIModelAdapter());
-  await Hive.openBox<PolyLineAPIModel>("PolyLineAPIModelFile");
-  Hive.registerAdapter(BuildingAllAPIModelAdapter());
-  await Hive.openBox<BuildingAllAPIModel>("BuildingAllAPIModelFile");
-  Hive.registerAdapter(FavouriteDataBaseModelAdapter());
-  await Hive.openBox<FavouriteDataBaseModel>("FavouriteDataBaseModelFile");
-  Hive.registerAdapter(BeaconAPIModelAdapter());
-  await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
-  Hive.registerAdapter(BuildingAPIModelAdapter());
-  await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
-  Hive.registerAdapter(SignINAPIModelAdapter());
-  await Hive.openBox<SignINAPIModel>('SignINAPIModelFile');
-  Hive.registerAdapter(OutDoorModelAdapter());
-  await Hive.openBox<OutDoorModel>('OutDoorModelFile');
-  Hive.registerAdapter(WayPointModelAdapter());
-  await Hive.openBox<WayPointModel>('WayPointModelFile');
-  Hive.registerAdapter(DataVersionLocalModelAdapter());
-  await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
-  Hive.registerAdapter(LocalNotificationAPIDatabaseModelAdapter());
-  await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
-
+  DataBaseManager.init();
   await navigationManager.initialize();
 
   await Hive.openBox('Favourites');

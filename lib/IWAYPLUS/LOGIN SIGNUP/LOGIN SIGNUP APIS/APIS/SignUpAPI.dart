@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../NAVIGATION/Encryption/EncryptionService.dart';
 import '../../../../NAVIGATION/config.dart';
 import '../../../Elements/HelperClass.dart';
 class SignUpAPI{
-
-  final String xaccesstoken = AppConfig.Authorization;
+  Encryptionservice encryptionService = Encryptionservice();
 
   Future<bool> signUP(String username,String name, String password,String OTP) async {
     final String baseUrl = "${AppConfig.baseUrl}/auth/signup";
@@ -21,10 +21,10 @@ class SignUpAPI{
 
     final response = await http.post(
       Uri.parse(baseUrl),
-      body: EncryptedbodyForApi(data),
+      body: encryptionService.encrypt(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': xaccesstoken,
+        'x-access-token': encryptionService.authorization,
       },
     );
     print('---response--- ${response.statusCode}');

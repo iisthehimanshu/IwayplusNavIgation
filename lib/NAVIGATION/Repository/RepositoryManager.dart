@@ -23,12 +23,14 @@ import '../DATABASE/DATABASEMODEL/GlobalAnnotationAPIModel.dart';
 import '../DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import '../DATABASE/DATABASEMODEL/OutDoorModel.dart';
 
-class RepositoryManager<T>{
+class RepositoryManager{
     NetworkManager networkManager = NetworkManager();
     DataBaseManager dataBaseManager = DataBaseManager();
     Apidetails apiDetails = Apidetails();
 
-    Future<T> getLandmarkData(String bID) async {
+    Future getLandmarkData(String bID) async {
+        if (bID.isEmpty) return null;
+
         Detail landmarkDetail = apiDetails.landmark(dataBaseManager.getAccessToken(), bID);
         final landmarkBox = landmarkDetail.dataBaseGetData!();
 
@@ -43,13 +45,22 @@ class RepositoryManager<T>{
             if (kDebugMode) {
                 print("Data from API");
             }
-            final landmarkData = LandMarkApiModel(responseBody: dataFromAPI.data);
-            DataBaseManager().saveData(landmarkData,landmarkDetail,bID);
-            return dataFromAPI.data;
+            if(dataFromAPI.statusCode == 200){
+                final landmarkData = LandMarkApiModel(responseBody: dataFromAPI.data);
+                DataBaseManager().saveData(landmarkData,landmarkDetail,bID);
+                return landmarkDetail.conversionFunction(dataFromAPI.data);
+            }else if(dataFromAPI.statusCode == 201){
+                return null;
+            }else{
+                return null;
+                //open new screen
+            }
         }
     }
 
-    Future<polylinedata> getPolylineData(String bID) async {
+    Future getPolylineData(String bID) async {
+        if (bID.isEmpty) return null;
+
         Detail polylineDetail = apiDetails.polyline(dataBaseManager.getAccessToken(), bID);
         final polylineBox = polylineDetail.dataBaseGetData!();
 
@@ -64,13 +75,20 @@ class RepositoryManager<T>{
             if (kDebugMode) {
               print("Data from API");
             }
-            final polyLineData = PolyLineAPIModel(responseBody: dataFromAPI.data);
-            DataBaseManager().saveData(polyLineData, polylineDetail, bID);
-            return dataFromAPI.data;
+            if(dataFromAPI.statusCode == 200) {
+                final polyLineData = PolyLineAPIModel(
+                    responseBody: dataFromAPI.data);
+                DataBaseManager().saveData(polyLineData, polylineDetail, bID);
+                return polylineDetail.conversionFunction(dataFromAPI.data);
+            }else if(dataFromAPI.statusCode == 201){
+                return null;
+            }else{
+                return null;
+            }
         }
     }
 
-    Future<patchDataModel> getPatchData(String bID) async {
+    Future<dynamic> getPatchData(String bID) async {
         Detail patchDetail = apiDetails.patch(dataBaseManager.getAccessToken(), bID);
         final patchBox = patchDetail.dataBaseGetData!();
 
@@ -85,13 +103,19 @@ class RepositoryManager<T>{
             if (kDebugMode) {
               print("Data from API");
             }
-            final patchData = PatchAPIModel(responseBody: dataFromAPI.data);
-            DataBaseManager().saveData(patchData, patchDetail, bID);
-            return dataFromAPI.data;
+            if(dataFromAPI.statusCode == 200) {
+                final patchData = PatchAPIModel(responseBody: dataFromAPI.data);
+                DataBaseManager().saveData(patchData, patchDetail, bID);
+                return patchDetail.conversionFunction(dataFromAPI.data);
+            }else if(dataFromAPI.statusCode == 201){
+                return null;
+            }else{
+                return null;
+            }
         }
     }
 
-    Future<List<beacon>> getBeaconData(String bID) async {
+    Future<dynamic> getBeaconData(String bID) async {
         Detail beaconDetail = apiDetails.beacons(dataBaseManager.getAccessToken(), bID);
         final beaconBox = beaconDetail.dataBaseGetData!();
 
@@ -106,13 +130,21 @@ class RepositoryManager<T>{
             if (kDebugMode) {
               print("Data from API");
             }
-            final beaconData = BeaconAPIModel(responseBody: dataFromAPI.data);
-            DataBaseManager().saveData(beaconData, beaconDetail, bID);
-            return dataFromAPI.data;
+            if(dataFromAPI.statusCode == 200) {
+                final beaconData = BeaconAPIModel(
+                    responseBody: dataFromAPI.data);
+                DataBaseManager().saveData(beaconData, beaconDetail, bID);
+                return dataFromAPI.data;
+            }else if(dataFromAPI.statusCode == 201){
+                return null;
+            }else{
+                return null;
+            }
+
         }
     }
 
-    Future<List<Buildingbyvenue>> getBuildingByVenue(String bID) async {
+    Future<dynamic> getBuildingByVenue(String bID) async {
         Detail buildingByVenueDetail = apiDetails.buildingByVenueApi(dataBaseManager.getAccessToken(), bID);
         final buildingByVenueBox = buildingByVenueDetail.dataBaseGetData!();
 
@@ -127,13 +159,21 @@ class RepositoryManager<T>{
             if (kDebugMode) {
               print("Data from API");
             }
-            final buildingByVenueData = BuildingByVenueAPIModel(responseBody: dataFromAPI.data);
-            DataBaseManager().saveData(buildingByVenueData, buildingByVenueDetail, bID);
-            return dataFromAPI.data;
+            if(dataFromAPI.statusCode == 200) {
+                final buildingByVenueData = BuildingByVenueAPIModel(
+                    responseBody: dataFromAPI.data);
+                DataBaseManager().saveData(
+                    buildingByVenueData, buildingByVenueDetail, bID);
+                return dataFromAPI.data;
+            }else if(dataFromAPI.statusCode == 201){
+                return null;
+            }else{
+                return null;
+            }
         }
     }
 
-    Future<GlobalModel> getGlobalAnnotationData(String bID) async {
+    Future<dynamic> getGlobalAnnotationData(String bID) async {
         Detail globalAnnotationDetail = apiDetails.globalAnnotation(dataBaseManager.getAccessToken(), bID);
         final globalAnnotationBox = globalAnnotationDetail.dataBaseGetData!();
 
@@ -148,13 +188,20 @@ class RepositoryManager<T>{
             if (kDebugMode) {
               print("Data from API");
             }
-            final globalAnnotationData = GlobalAnnotationAPIModel(responseBody: dataFromAPI.data);
-            DataBaseManager().saveData(globalAnnotationData, globalAnnotationDetail, bID);
-            return dataFromAPI.data;
+            if(dataFromAPI.statusCode == 200) {
+                final globalAnnotationData = GlobalAnnotationAPIModel(responseBody: dataFromAPI.data);
+                DataBaseManager().saveData(
+                    globalAnnotationData, globalAnnotationDetail, bID);
+                return dataFromAPI.data;
+            }else if(dataFromAPI.statusCode == 201){
+                return null;
+            }else{
+                return null;
+            }
         }
     }
 
-    Future<List<PathModel>> getWaypointData(String bID) async {
+    Future<dynamic> getWaypointData(String bID) async {
         Detail waypointDetails = apiDetails.waypoint(dataBaseManager.getAccessToken(), bID);
         final waypointBox = waypointDetails.dataBaseGetData!();
 
@@ -169,13 +216,20 @@ class RepositoryManager<T>{
             if (kDebugMode) {
               print("Data from API");
             }
-            final wayPointData = WayPointModel(responseBody: dataFromAPI.data);
-            DataBaseManager().saveData(wayPointData, waypointDetails, bID);
-            return dataFromAPI.data;
+            if(dataFromAPI.statusCode == 200) {
+                final wayPointData = WayPointModel(
+                    responseBody: dataFromAPI.data);
+                DataBaseManager().saveData(wayPointData, waypointDetails, bID);
+                return dataFromAPI.data;
+            }else if(dataFromAPI.statusCode == 201){
+                return null;
+            }else{
+                return null;
+            }
         }
     }
 
-    Future<outdoormodel> getCampusData(List<String> bIDS) async {
+    Future<dynamic> getCampusData(List<String> bIDS) async {
         Detail campusDetails = apiDetails.outBuilding(dataBaseManager.getAccessToken(), bIDS);
         final campusBox = campusDetails.dataBaseGetData!();
 
@@ -193,9 +247,15 @@ class RepositoryManager<T>{
         if (kDebugMode) {
             print("Data from API");
         }
-        final campusData = OutDoorModel(responseBody: dataFromAPI.data);
-        DataBaseManager().saveData(campusData, campusDetails, bIDS[0]);
-        return dataFromAPI.data;
+        if(dataFromAPI.statusCode == 200) {
+            final campusData = OutDoorModel(responseBody: dataFromAPI.data);
+            DataBaseManager().saveData(campusData, campusDetails, bIDS[0]);
+            return dataFromAPI.data;
+        }else if(dataFromAPI.statusCode == 201){
+            return null;
+        }else{
+            return null;
+        }
 
     }
 

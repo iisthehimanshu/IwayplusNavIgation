@@ -13284,8 +13284,11 @@ bool _isPlaying=false;
                       : Container(),  // Adjust the height as needed// Adjust the height as needed
                   FloatingActionButton(
                     onPressed: () async {
-                      Landmarks data = await RepositoryManager().getLandmarkData("65d887a5db333f89457145f6");
+                      final data = await RepositoryManager().getLandmarkData("65d887a5db333f89457145f6");
                       print(data);
+                      if(data != null){
+                        print("received landmark");
+                      }
                     },
                     child: Icon(Icons.settings),
                     backgroundColor: Color(

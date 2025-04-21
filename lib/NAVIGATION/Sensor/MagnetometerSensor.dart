@@ -1,16 +1,17 @@
 import 'dart:async';
 
+import 'package:flutter_compass/flutter_compass.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
 import 'baseSensorClass.dart';
 
 class MagnetometerSensor implements BaseSensor {
   StreamSubscription? _subscription;
-  final StreamController<MagnetometerEvent> _controller = StreamController.broadcast();
+  final StreamController<CompassEvent> _controller = StreamController.broadcast();
 
   @override
   void startListening() {
-    _subscription = magnetometerEvents.listen((event) {
+    _subscription = FlutterCompass.events!.listen((event) {
       _controller.add(event);
     });
   }
@@ -21,5 +22,5 @@ class MagnetometerSensor implements BaseSensor {
   }
 
   @override
-  Stream<MagnetometerEvent> get stream => _controller.stream;
+  Stream<CompassEvent> get stream => _controller.stream;
 }

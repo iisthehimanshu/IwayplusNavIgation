@@ -127,6 +127,13 @@ class MainActivity : FlutterActivity() {
         bluetoothAdapter = bluetoothManager.adapter
         bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
 
+        if (bluetoothAdapter != null && bluetoothAdapter.isEnabled) {
+            bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+        } else {
+            // Handle gracefully — maybe prompt to enable Bluetooth
+            Log.w("BLE", "Bluetooth is OFF or unavailable")
+        }
+
         if (!hasPermissions()) {
             requestPermissions()
         }

@@ -8,11 +8,12 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 
-import '../IWAYPLUS/websocket/UserLog.dart';
 import 'APIMODELS/beaconData.dart';
 import 'ELEMENTS/BlurtoothDevice.dart';
+import 'Network/NetworkManager.dart';
 
 class BluetoothScanAndroidClass{
+  NetworkManager networkManager = NetworkManager();
   static const methodChannel = MethodChannel('com.example.bluetooth/scan');
   static const eventChannel = EventChannel('com.example.bluetooth/scanUpdates');
   List<BluetoothDevice> devices = [];
@@ -276,7 +277,7 @@ class BluetoothScanAndroidClass{
       print("deviceDetail----- $deviceDetail");
       BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
       // String dataaa = parseLog(deviceDetail);
-      wsocket.message["AppInitialization"]["nearByDevices"][deviceDetails.rawData] = deviceDetails.DeviceRssi;
+      networkManager.ws.updateInitialization(nearByDevices: MapEntry(deviceDetails.rawData, deviceDetails.DeviceRssi));
       // print("dataaa- $dataaa");
 
       if(apibeaconmap.containsKey(deviceDetails.DeviceName)) {

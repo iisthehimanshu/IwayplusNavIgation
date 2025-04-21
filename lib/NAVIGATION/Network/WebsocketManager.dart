@@ -1,15 +1,14 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-import 'package:flutter/foundation.dart';
+import '../config.dart';
 
 class WebSocketManager {
-  WebSocket? _socket;
+  late IO.Socket socket;
   Timer? _timer;
 
   final Map<String, dynamic> _message = {
-    'appId': 'appID',
+    'appId': AppConfig.appID,
     "userId": "",
     "deviceInfo": {
       "sensors": {
@@ -45,29 +44,41 @@ class WebSocketManager {
     }
   };
 
-  // ----- WebSocket handling -----
-  Future<void> connect(String url) async {
-    _socket = await WebSocket.connect(url);
-    if (kDebugMode) {
-      print('WebSocket connected');
-    }
+  Map<String, dynamic> _lastSentMessage = {};
 
-    _socket!.listen(
-          (data) => _handleMessage(data),
-      onDone: () => print('WebSocket closed'),
-      onError: (error) => print('WebSocket error: $error'),
-    );
+  void init() {
+    socket = IO.io(AppConfig.baseUrl, {
+      'transports': ['websocket'],
+      'autoConnect': false,
+    });
+
+    socket.onConnect((_) {
+      print('Socket connected');
+      startAutoSend();
+    });
+
+    socket.onDisconnect((_) {
+      print('Socket disconnected');
+      stopAutoSend();
+    });
+
+    socket.on('message', (data) {
+      print('Received: $data');
+    });
   }
 
-  void send(Map<String, dynamic> data) {
-    if (_socket?.readyState == WebSocket.open) {
-      _socket!.add(jsonEncode(data));
-    }
+  void connect() {
+    socket.connect();
   }
 
-  void startAutoSend(int frequencyInSeconds) {
+  void disconnect() {
     stopAutoSend();
-    _timer = Timer.periodic(Duration(seconds: frequencyInSeconds), (_) {
+    socket.disconnect();
+  }
+
+  void startAutoSend() {
+    stopAutoSend(); // avoid duplicates
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
       send(_message);
     });
   }
@@ -77,20 +88,39 @@ class WebSocketManager {
     _timer = null;
   }
 
-  void disconnect() {
-    stopAutoSend();
-    _socket?.close();
-    _socket = null;
-  }
+  void send(Map<String, dynamic> data) {
+    final dataString = _deepSortAndStringify(data);
+    final lastString = _deepSortAndStringify(_lastSentMessage);
 
-  void _handleMessage(dynamic data) {
-    if (kDebugMode) {
-      print('Received: $data');
+    if (socket.connected && dataString != lastString) {
+      socket.emit('user-log-socket', data);
+      _lastSentMessage = _cloneDeep(data);
+      print("socket data $data");
     }
   }
 
-  // ----- Sectional update methods -----
+  Map<String, dynamic> get currentMessage => Map.unmodifiable(_message);
 
+  // --- Utility Methods ---
+  String _deepSortAndStringify(Map<String, dynamic> data) {
+    return _sortAndConvert(data).toString();
+  }
+
+  dynamic _sortAndConvert(dynamic value) {
+    if (value is Map) {
+      final sorted = Map.fromEntries(value.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
+      return sorted.map((k, v) => MapEntry(k, _sortAndConvert(v)));
+    } else if (value is List) {
+      return value.map(_sortAndConvert).toList();
+    }
+    return value;
+  }
+
+  Map<String, dynamic> _cloneDeep(Map<String, dynamic> original) {
+    return Map<String, dynamic>.from(_sortAndConvert(original));
+  }
+
+  // --- Update Methods ---
   void updateUserId(String userId) {
     _message["userId"] = userId;
   }
@@ -128,19 +158,19 @@ class WebSocketManager {
   void updateInitialization({
     String? bid,
     String? buildingName,
-    Map<String, dynamic>? bleScanResults,
-    Map<String, dynamic>? nearByDevices,
+    MapEntry<String, dynamic>? bleScanResults,
+    MapEntry<String, dynamic>? nearByDevices,
     String? localizedOn,
   }) {
     final init = _message["AppInitialization"];
     if (bid != null) init["BID"] = bid;
     if (buildingName != null) init["buildingName"] = buildingName;
-    if (bleScanResults != null) init["bleScanResults"] = bleScanResults;
-    if (nearByDevices != null) init["nearByDevices"] = nearByDevices;
+    if (bleScanResults != null) init["bleScanResults"][bleScanResults.key] = bleScanResults;
+    if (nearByDevices != null) init["nearByDevices"][nearByDevices.key] = nearByDevices.value;
     if (localizedOn != null) init["localizedOn"] = localizedOn;
   }
 
-  void updateUserPosition({required double x, required double y, required int floor}) {
+  void updateUserPosition({required int x, required int y, required int floor}) {
     _message["userPosition"]["X"] = x;
     _message["userPosition"]["Y"] = y;
     _message["userPosition"]["floor"] = floor;
@@ -153,6 +183,4 @@ class WebSocketManager {
     if (didPathForm != null) path["didPathForm"] = didPathForm;
   }
 
-  // Optional: expose read-only message
-  Map<String, dynamic> get currentMessage => Map.unmodifiable(_message);
 }

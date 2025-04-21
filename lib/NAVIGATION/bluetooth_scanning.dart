@@ -5,11 +5,12 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import '../IWAYPLUS/websocket/UserLog.dart';
 import 'APIMODELS/beaconData.dart';
+import 'Network/NetworkManager.dart';
 
 
 class BLueToothClass {
+  NetworkManager networkManager = NetworkManager();
   HashMap<int, HashMap<String, double>> BIN = HashMap();
   HashMap<String,int> numberOfSample = HashMap();
   HashMap<String,List<int>> rs = HashMap();
@@ -81,7 +82,6 @@ class BLueToothClass {
     print("proof $latesILMap ${latesILMapTimeStamp}");
     SourceTSP = DateTime.now();
     print("SourceTSP set to : $SourceTSP");
-    wsocket.message["AppInitialization"]["bleScanResults"] = {};
     startbin();
     FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
 
@@ -91,6 +91,7 @@ class BLueToothClass {
         if(result.device.platformName.length > 2){
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
+          networkManager.ws.updateInitialization(bleScanResults: MapEntry(MacId, Rssi));
           // wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
           if (apibeaconmap.containsKey(MacId)) {
             if (result.timeStamp.difference(SourceTSP).inSeconds>=0 && result.timeStamp.difference(SourceTSP).inSeconds < 10) {

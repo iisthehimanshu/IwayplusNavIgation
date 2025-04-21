@@ -11,5 +11,7 @@ class NetworkManager {
   NetworkManager._internal() {
     api = Apimanager();
     ws = WebSocketManager();
+    ws.init();
+    ws.connect();
   }
 }

@@ -42,10 +42,10 @@
 @import flutter_beep;
 #endif
 
-#if __has_include(<flutter_blue_plus_darwin/FlutterBluePlusPlugin.h>)
-#import <flutter_blue_plus_darwin/FlutterBluePlusPlugin.h>
+#if __has_include(<flutter_blue_plus/FlutterBluePlusPlugin.h>)
+#import <flutter_blue_plus/FlutterBluePlusPlugin.h>
 #else
-@import flutter_blue_plus_darwin;
+@import flutter_blue_plus;
 #endif
 
 #if __has_include(<flutter_compass/FlutterCompassPlugin.h>)
@@ -138,10 +138,10 @@
 @import speech_to_text;
 #endif
 
-#if __has_include(<sqflite_darwin/SqflitePlugin.h>)
-#import <sqflite_darwin/SqflitePlugin.h>
+#if __has_include(<sqflite/SqflitePlugin.h>)
+#import <sqflite/SqflitePlugin.h>
 #else
-@import sqflite_darwin;
+@import sqflite;
 #endif
 
 #if __has_include(<url_launcher_ios/URLLauncherPlugin.h>)

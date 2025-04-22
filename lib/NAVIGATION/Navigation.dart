@@ -949,6 +949,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       });
       PDRTimer!.cancel();
       pdr.cancel();
+      print("pdrstate:${pdr}");
+
     }
   }
 
@@ -974,7 +976,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
-    sensorData.accelerometerStream.listen((event){
+   pdr=sensorData.accelerometerStream.listen((event){
       if (pdr == null) {
         return; // Exit the event listener if subscription is canceled
       }
@@ -12535,6 +12537,7 @@ bool _isPlaying=false;
       controller.dispose();
     }
     sensorData.stopMagnetometer();
+    sensorData.stopAccelerometer();
     magnetometerSubscription.cancel();
     super.dispose();
   }

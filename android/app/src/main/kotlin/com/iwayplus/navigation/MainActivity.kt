@@ -90,9 +90,7 @@ class MainActivity : FlutterActivity() {
                 RSSI: $rssi
                 Manufacturer Data: $manufacturerData1
                 Raw Data: $rawData""".trimIndent()
-
-
-                Log.d("BluetoothScan--", "New Device Found: $deviceDetails")
+               // Log.d("BluetoothScan--", "New Device Found: $deviceDetails")
                 eventSink?.success(deviceDetails)
             }
         }

@@ -10,7 +10,7 @@ class AccelerometerSensor implements BaseSensor {
   @override
   void startListening() {
     print("subscription started");
-    _subscription = accelerometerEvents.listen((event) {
+    _subscription = accelerometerEventStream().listen((event) {
       _controller.add(event);
     },onError: (e){
       print("error in starting accelerometer stream $e");

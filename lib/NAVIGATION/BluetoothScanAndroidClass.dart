@@ -274,7 +274,7 @@ class BluetoothScanAndroidClass{
     String deviceMacId = "";
     // Start listening to the stream continuously
     _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
-      print("deviceDetail----- $deviceDetail");
+      // print("deviceDetail----- $deviceDetail");
       BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
       // String dataaa = parseLog(deviceDetail);
       networkManager.ws.updateInitialization(nearByDevices: MapEntry(deviceDetails.rawData, deviceDetails.DeviceRssi));
@@ -284,8 +284,8 @@ class BluetoothScanAndroidClass{
         DateTime currentTime = DateTime.now();
         //wsocket.message["AppInitialization"]["bleScanResults"][deviceDetails.DeviceName] = deviceDetails.DeviceRssi;
         deviceMacId = deviceDetails.DeviceAddress;
-        print("iffffff");
-        print(deviceDetails.DeviceName);
+        // print("iffffff");
+        // print(deviceDetails.DeviceName);
 
 
         slidingScan.putIfAbsent(deviceDetails.DeviceName, () => <String, DateTime>{});
@@ -299,8 +299,8 @@ class BluetoothScanAndroidClass{
 
 
         rssiValues[deviceDetails.DeviceAddress]!.add(int.parse(deviceDetails.DeviceRssi));
-        print("deviceDetails.DeviceRssi");
-        print(deviceDetails.DeviceRssi);
+        // print("deviceDetails.DeviceRssi");
+        // print(deviceDetails.DeviceRssi);
 
         rssiWeight[deviceDetails.DeviceAddress]!.add(getWeight(getBinNumber(int.parse(deviceDetails.DeviceRssi).abs())));
 
@@ -338,16 +338,14 @@ class BluetoothScanAndroidClass{
   Map<String, double> candorAverage = {};
 
   void startCleanupTimer(){
-    print("proofstartCleanupTimer");
     cleanupTimer = Timer.periodic(Duration(seconds: 2), (timer)  {
-      print("startCleanupTimer");
 
       slidingScan.forEach((beaconName,beaconRespVal){
-        print(beaconName);
+        // print(beaconName);
         beaconRespVal.forEach((beaconRssi,beaconDateTime){
-          print("$beaconRssi $beaconDateTime");
+          // print("$beaconRssi $beaconDateTime");
         });
-        print("---------");
+        // print("---------");
       });
       // DateTime currTime = DateTime.now();
       //
@@ -376,9 +374,6 @@ class BluetoothScanAndroidClass{
 
 
   Map<String, List<double>> giveSumMapCallBack(){
-    print("newList");
-
-    print(newList);
     return newList;
   }
 
@@ -431,10 +426,10 @@ class BluetoothScanAndroidClass{
       }
     }
 
-    print("Name: $name");
-    print("Address: $address");
-    print("Manufacturer Data: $manufacturerData");
-    print("Service Data: $serviceData");
+    // print("Name: $name");
+    // print("Address: $address");
+    // print("Manufacturer Data: $manufacturerData");
+    // print("Service Data: $serviceData");
     return serviceData??"";
   }
 
@@ -453,9 +448,9 @@ class BluetoothScanAndroidClass{
         // Update the newList for debugging or other purposes
         newList[deviceList[address]!] = rssiList;
 
-        print("deviceList[address]");
-        print(average);
-        print(newList);
+        // print("deviceList[address]");
+        // print(average);
+        // print(newList);
 
         // Add the average to the map
         averagedRssiValues[deviceList[address]!] = average;
@@ -521,8 +516,8 @@ class BluetoothScanAndroidClass{
       }
     });
     closestRSSI = lowestValue.toString();
-    print("findLowestRssiDevice");
-    print(lowestValue);
+    // print("findLowestRssiDevice");
+    // print(lowestValue);
 
     return lowestKey ?? "";
   }
@@ -530,8 +525,8 @@ class BluetoothScanAndroidClass{
   String EM_findLowestRssiDevice(Map<String, double> rssiAverage) {
     String? lowestKey;
     double? lowestValue = 3;
-print("rssiAverage");
-print(rssiAverage);
+// print("rssiAverage");
+// print(rssiAverage);
     rssiAverage.forEach((key, value) {
 
       if (lowestValue == null || value > lowestValue!) {
@@ -540,9 +535,9 @@ print(rssiAverage);
       }
     });
     closestRSSI = lowestValue.toString();
-    print("findLowestRssiDevice");
-    print(lowestValue);
-    print(lowestKey);
+    // print("findLowestRssiDevice");
+    // print(lowestValue);
+    // print(lowestKey);
 
     return lowestKey ?? "No devices found";
   }
@@ -555,16 +550,12 @@ print(rssiAverage);
 
   int getBinNumber(int Rssi){
     if (Rssi <= 55) {
-      print("getBinNumber0");
       return 0;
     }else if (Rssi <= 65) {
-      print("getBinNumber1");
       return 1;
     } else if (Rssi <= 75) {
-      print("getBinNumber2");
       return 2;
     } else if (Rssi <= 80) {
-      print("getBinNumber3");
       return 3;
     } else if (Rssi <= 85) {
       return 4;

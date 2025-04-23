@@ -4560,7 +4560,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     floorData.forEach((Element) {
       if (Element.floor == floor) {
         Element.polyArray!.forEach((element) {
-          if (element.name!.toLowerCase().contains("lift")) {
+          if ((element.name??"").toLowerCase().contains("lift")) {
             lifts.add(element);
           }
         });
@@ -4930,7 +4930,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               }
             } else if (polyArray.polygonType == 'Cubicle') {
               if (polyArray.cubicleName == "Green Area" ||
-                  polyArray.cubicleName == "Green Area | Pots" || polyArray.name!.toLowerCase().contains('auditorium') || polyArray.name!.toLowerCase().contains('basketball') || polyArray.name!.toLowerCase().contains('cricket') || polyArray.name!.toLowerCase().contains('football') || polyArray.name!.toLowerCase().contains('gym') || polyArray.name!.toLowerCase().contains('swimming') || polyArray.name!.toLowerCase().contains('tennis')) {
+                  polyArray.cubicleName == "Green Area | Pots" || (polyArray.name??"").toLowerCase().contains('auditorium') ||(polyArray.name??"").toLowerCase().contains('basketball') || (polyArray.name??"").toLowerCase().contains('cricket') || (polyArray.name??"").toLowerCase().contains('football') || (polyArray.name??"").toLowerCase().contains('gym') || (polyArray.name??"").toLowerCase().contains('swimming') || (polyArray.name??"").toLowerCase().contains('tennis')) {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(

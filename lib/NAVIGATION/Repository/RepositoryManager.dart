@@ -6,6 +6,7 @@ import 'package:iwaymaps/NAVIGATION/APIMODELS/outbuildingmodel.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/VenueBeaconAPIModel.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/WayPointModel.dart';
 import 'package:iwaymaps/NAVIGATION/DataBaseManager/DBManager.dart';
 import 'package:iwaymaps/NAVIGATION/Network/APIDetails.dart';
@@ -151,8 +152,7 @@ class RepositoryManager{
               print("Data from API");
             }
             if(dataFromAPI.statusCode == 200) {
-                final beaconData = BeaconAPIModel(
-                    responseBody: dataFromAPI.data);
+                final beaconData = BeaconAPIModel(responseBody: dataFromAPI.data);
                 DataBaseManager().saveData(beaconData, beaconDetail, bID);
                 return dataFromAPI.data;
             }else if(dataFromAPI.statusCode == 201){
@@ -168,33 +168,31 @@ class RepositoryManager{
         Detail venueBeaconDetail = apiDetails.venueBeacons(dataBaseManager.getAccessToken(), VenueManager().venueName);
         Response dataFromAPI = await networkManager.api.request(venueBeaconDetail);
 
-
         print("venueBeaconDetail.conversionFunction(venueBeaconDetail.body)  ${venueBeaconDetail.conversionFunction(dataFromAPI.data)}");
-        // final beaconBox = beaconDetail.dataBaseGetData!();
+        final venueBeaconBox = venueBeaconDetail.dataBaseGetData!();
         //
-        // if(beaconBox.containsKey(venueName)){
-        //     if (kDebugMode) {
-        //         print("Data from DB");
-        //     }
-        //     BeaconAPIModel responseFromDatabase = DataBaseManager().getData(beaconDetail, venueName);
-        //     return beaconDetail.conversionFunction(responseFromDatabase.responseBody);
-        // }else {
-        //     Response dataFromAPI = await networkManager.api.request(beaconDetail);
-        //     if (kDebugMode) {
-        //         print("Data from API");
-        //     }
-        //     if(dataFromAPI.statusCode == 200) {
-        //         final beaconData = BeaconAPIModel(
-        //             responseBody: dataFromAPI.data);
-        //         DataBaseManager().saveData(beaconData, beaconDetail, venueName);
-        //         return dataFromAPI.data;
-        //     }else if(dataFromAPI.statusCode == 201){
-        //         return null;
-        //     }else{
-        //         return null;
-        //     }
-        //
-        // }
+        if(venueBeaconBox.containsKey(VenueManager().venueName)){
+            if (kDebugMode) {
+                print("Data from DB");
+            }
+            VenueBeaconAPIModel responseFromDatabase = DataBaseManager().getData(venueBeaconDetail, VenueManager().venueName);
+            return venueBeaconBox.conversionFunction(responseFromDatabase.responseBody);
+        }else {
+            Response dataFromAPI = await networkManager.api.request(venueBeaconDetail);
+            if (kDebugMode) {
+                print("Data from API");
+            }
+            if(dataFromAPI.statusCode == 200) {
+                final venueBeaconData = VenueBeaconAPIModel(responseBody: dataFromAPI.data);
+                DataBaseManager().saveData(venueBeaconData, venueBeaconDetail, VenueManager().venueName);
+                return dataFromAPI.data;
+            }else if(dataFromAPI.statusCode == 201){
+                return null;
+            }else{
+                return null;
+            }
+
+        }
     }
 
     Future<dynamic> getBuildingByVenue(String venueName) async {

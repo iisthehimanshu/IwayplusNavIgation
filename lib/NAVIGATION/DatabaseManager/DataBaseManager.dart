@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/VenueBeaconAPIModel.dart';
 import '../../IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import '../../IWAYPLUS/DATABASE/DATABASEMODEL/BuildingByVenueAPIModel.dart';
 import '../../IWAYPLUS/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
@@ -48,6 +49,8 @@ class DataBaseManager<T> implements DBManager<T>{
     await Hive.openBox<BuildingByVenueAPIModel>('BuildingByVenueModelFile');
     Hive.registerAdapter(GlobalAnnotationAPIModelAdapter());
     await Hive.openBox<GlobalAnnotationAPIModel>('GlobalAnnotationAPIModelFile');
+    Hive.registerAdapter(VenueBeaconAPIModelAdapter());
+    await Hive.openBox<VenueBeaconAPIModel>('VenueBeaconAPIModelFile');
 
     await Hive.openBox('Favourites');
     await Hive.openBox('UserInformation');

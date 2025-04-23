@@ -1,4 +1,6 @@
 import 'package:device_information/device_information.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/VenueBeaconAPIModelBOX.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/VenueBeaconAPIModel.dart';
 
 import '../APIMODELS/Buildingbyvenue.dart';
 import '../APIMODELS/DataVersion.dart';
@@ -85,7 +87,7 @@ class Apidetails {
         false,
         {"venueName": venueName},
         beacon.fromJsonToList,
-        BeaconAPIModelBOX.getData
+        VenueBeaconAPIModelBOX.getData
     );
   }
 

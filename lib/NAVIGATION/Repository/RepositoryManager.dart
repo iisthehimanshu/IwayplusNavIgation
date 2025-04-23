@@ -42,7 +42,8 @@ class RepositoryManager{
     Apidetails apiDetails = Apidetails();
 
     Future<void> loadBuildings() async {
-        VenueManager().buildings = await getBuildingByVenue(VenueManager().venueName);
+        List<dynamic> list = await getBuildingByVenue(VenueManager().venueName);
+        VenueManager().buildings = list.whereType<Buildingbyvenue>().toList();
     }
 
 

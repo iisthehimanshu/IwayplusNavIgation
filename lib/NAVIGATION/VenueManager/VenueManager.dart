@@ -2,7 +2,18 @@ import '../APIMODELS/Buildingbyvenue.dart';
 import '../APIMODELS/outdoormodel.dart';
 import '../Repository/RepositoryManager.dart';
 
-class Venuemanager{
+class VenueManager{
+
+  VenueManager._internal();
+
+  // Single instance - lazily initialized
+  static final VenueManager _instance = VenueManager._internal();
+
+  // Factory constructor returns the same instance
+  factory VenueManager() {
+    return _instance;
+  }
+
   RepositoryManager repository = RepositoryManager();
   String _venueName = "IIT Delhi";
   List<Buildingbyvenue> _buildings = [];

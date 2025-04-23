@@ -16,6 +16,7 @@ import '../DATABASE/BOXES/OutDoorModelBOX.dart';
 import '../DATABASE/BOXES/PatchAPIModelBox.dart';
 import '../DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import '../DATABASE/BOXES/WayPointModelBOX.dart';
+import '../DatabaseManager/DataBaseManager.dart';
 import '../Encryption/EncryptionService.dart';
 import '../config.dart';
 import '../waypoint.dart';
@@ -72,15 +73,16 @@ class Apidetails {
   }
 
   Detail venueBeacons(String accessToken, String venueName) {
+    print("venuename  = $venueName");
     return Detail(
         "${AppConfig.baseUrl}/secured/venue/beacons",
         "POST",
         {
           'Content-Type': 'application/json',
           'x-access-token': accessToken,
-          'Authorization': encryptionService.authorization
+
         },
-        true,
+        false,
         {"venueName": venueName},
         beacon.fromJsonToList,
         BeaconAPIModelBOX.getData
@@ -189,18 +191,16 @@ class Apidetails {
     );
   }
 
-  static Detail refreshToken(String refreshToken) {
-    Encryptionservice encryptionService = Encryptionservice();
+  static Detail refreshToken() {
     return Detail(
         "${AppConfig.baseUrl}/api/refreshToken",
         "POST",
         {
-          'Content-Type': 'application/json',
-          'x-access-token': encryptionService.authorization,
+          'Content-Type': 'application/json'
         },
-        true,
+        false,
         {
-          "refreshToken": refreshToken
+          "refreshToken": DataBaseManager().getRefreshToken()
         },
         refresh.fromJson,
       null

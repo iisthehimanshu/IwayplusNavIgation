@@ -164,11 +164,12 @@ class RepositoryManager{
         }
     }
 
-    Future<dynamic> getVenueBeaconData(String venueName) async {
-        Detail venueBeaconDetail = apiDetails.venueBeacons(dataBaseManager.getAccessToken(), venueName);
+    Future<dynamic> getVenueBeaconData() async {
+        Detail venueBeaconDetail = apiDetails.venueBeacons(dataBaseManager.getAccessToken(), VenueManager().venueName);
+        Response dataFromAPI = await networkManager.api.request(venueBeaconDetail);
 
-        print("venueBeaconDetail.conversionFunction(venueBeaconDetail.body)");
-        print(venueBeaconDetail.conversionFunction(venueBeaconDetail.body));
+
+        print("venueBeaconDetail.conversionFunction(venueBeaconDetail.body)  ${venueBeaconDetail.conversionFunction(dataFromAPI.data)}");
         // final beaconBox = beaconDetail.dataBaseGetData!();
         //
         // if(beaconBox.containsKey(venueName)){
@@ -198,24 +199,27 @@ class RepositoryManager{
 
     Future<dynamic> getBuildingByVenue(String venueName) async {
         Detail buildingByVenueDetail = apiDetails.buildingByVenueApi(dataBaseManager.getAccessToken(), venueName);
-        final buildingByVenueBox = buildingByVenueDetail.dataBaseGetData!();
 
-        if(buildingByVenueBox.containsKey(venueName)){
-            if (kDebugMode) {
-              print("Data from DB");
+        if(buildingByVenueDetail.dataBaseGetData != null) {
+            final buildingByVenueBox = buildingByVenueDetail.dataBaseGetData!();
+            if(buildingByVenueBox.containsKey(venueName)) {
+                if (kDebugMode) {
+                    print("Data from DB");
+                }
+                BuildingByVenueAPIModel responseFromDatabase = DataBaseManager()
+                    .getData(buildingByVenueDetail, venueName);
+                return buildingByVenueDetail.conversionFunction(responseFromDatabase.responseBody);
             }
-            BuildingByVenueAPIModel responseFromDatabase = DataBaseManager().getData(buildingByVenueDetail, venueName);
-            return buildingByVenueDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(buildingByVenueDetail);
             if (kDebugMode) {
               print("Data from API");
             }
             if(dataFromAPI.statusCode == 200) {
-                final buildingByVenueData = BuildingByVenueAPIModel(
-                    responseBody: dataFromAPI.data);
-                DataBaseManager().saveData(
-                    buildingByVenueData, buildingByVenueDetail, venueName);
+                // final buildingByVenueData = BuildingByVenueAPIModel(
+                //     responseBody: dataFromAPI.data);
+                // DataBaseManager().saveData(
+                //     buildingByVenueData, buildingByVenueDetail, venueName);
                 return dataFromAPI.data;
             }else if(dataFromAPI.statusCode == 201){
                 return null;

@@ -81,7 +81,7 @@ class beacon {
     doorY = json['doorY'];
   }
 
-  static List<beacon> fromJsonToList(dynamic beacons){
+  static List<dynamic> fromJsonToList(dynamic beacons){
     return beacons.map((data) => beacon.fromJson(data)).toList();
   }
 

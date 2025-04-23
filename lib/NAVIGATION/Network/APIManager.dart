@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:iwaymaps/NAVIGATION/Encryption/EncryptionService.dart';
 import 'package:http/http.dart' as http;
 
 import '../API/response.dart';
+import '../DatabaseManager/DataBaseManager.dart';
 import 'APIDetails.dart';
 
 class Apimanager{
@@ -14,16 +17,13 @@ class Apimanager{
     }
     try {
       http.Response response;
-      dynamic finalBody = apiDetail.body;
-      if(apiDetail.encryption && apiDetail.body != null){
-        finalBody = encryptionService.encrypt(apiDetail.body!);
-      }
 
       switch (apiDetail.method.toUpperCase()) {
         case 'POST':
+          print("apiDetail.headers ${apiDetail.headers}");
           response = await client.post(
             Uri.parse(apiDetail.url),
-            body: finalBody,
+            body: jsonEncode(apiDetail.body),
             headers: apiDetail.headers,
           );
           break;
@@ -35,19 +35,25 @@ class Apimanager{
         default:
           throw Exception('Unsupported HTTP method');
       }
-
+      print("response code ${response.statusCode}");
+      print("response body ${response.body}");
       if(response.statusCode == 200){
+
         String responseBody = response.body;
-        dynamic decryptedBody = responseBody;
+        dynamic decryptedBody = json.decode(responseBody);
         if(apiDetail.encryption){
-          decryptedBody = encryptionService.decrypt(responseBody);
+          decryptedBody = encryptionService.decrypt(decryptedBody['encryptedData']);
+          decryptedBody = json.decode(decryptedBody);
         }
+        print("decryptedBody  $decryptedBody");
         Response responseObject = Response(response.statusCode, decryptedBody);
 
         return responseObject;
       }else if(response.statusCode == 403){
-        Response refreshResponse = await request(Apidetails.refreshToken("refreshToken"));
-        apiDetail.updateAccessToken(refreshResponse.data.accessToken);
+        Response refreshResponse = await request(Apidetails.refreshToken());
+        apiDetail.updateAccessToken(Apidetails.refreshToken().conversionFunction(refreshResponse.data).accessToken);
+        DataBaseManager().updateAccessToken(Apidetails.refreshToken().conversionFunction(refreshResponse.data).accessToken);
+        DataBaseManager().updateRefreshToken(Apidetails.refreshToken().conversionFunction(refreshResponse.data).refreshToken);
         return await request(apiDetail);
       }
 

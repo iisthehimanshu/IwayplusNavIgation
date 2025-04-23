@@ -8,7 +8,9 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 import 'package:iwaymaps/NAVIGATION/Sensor/SensorManager.dart';
+import 'package:iwaymaps/NAVIGATION/VenueManager/VenueManager.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
 import 'package:iwaymaps/NAVIGATION/path.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
@@ -62,6 +64,7 @@ import 'BluetoothScanAndroidClass.dart';
 import 'BluetoothScanIOSClass.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
+import 'DatabaseManager/DataBaseManager.dart';
 import 'DebugToggle.dart';
 import 'ELEMENTS/DirectionHeader.dart';
 import 'ELEMENTS/DirectionInstruction.dart';
@@ -13198,6 +13201,7 @@ bool _isPlaying=false;
                   ) : Container(),
                   FloatingActionButton(
                     onPressed: () async {
+                      RepositoryManager().getVenueBeaconData();
                     },
                     child: Icon(Icons.bluetooth_audio),
                     shape: RoundedRectangleBorder(

@@ -57,6 +57,7 @@ import 'API/waypoint.dart';
 import 'APIMODELS/DataVersion.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/outdoormodel.dart';
+import 'BluetoothManager/BLEManager.dart';
 import 'BluetoothScanAndroidClass.dart';
 import 'BluetoothScanIOSClass.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
@@ -13195,18 +13196,17 @@ bool _isPlaying=false;
                       Colors.white, // Set the background color of the FAB
                     ),
                   ) : Container(),
-                  // FloatingActionButton(
-                  //   onPressed: () async {
-                  //     bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
-                  //   },
-                  //   child: Icon(Icons.pin_drop_rounded),
-                  //   shape: RoundedRectangleBorder(
-                  //     borderRadius:
-                  //     BorderRadius.circular(26.0), // Change radius here
-                  //   ),
-                  //   backgroundColor:
-                  //   Colors.white, // Set the background color of the FAB
-                  // ),
+                  FloatingActionButton(
+                    onPressed: () async {
+                    },
+                    child: Icon(Icons.bluetooth_audio),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                      BorderRadius.circular(26.0), // Change radius here
+                    ),
+                    backgroundColor:
+                    Colors.white, // Set the background color of the FAB
+                  ),
                   SizedBox(height: 28.0),
                   (!kIsWeb &&  Platform.isAndroid) && !user.isnavigating &&
                       (!_isLandmarkPanelOpen &&

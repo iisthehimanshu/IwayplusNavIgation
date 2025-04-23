@@ -55,7 +55,7 @@ class Apidetails {
     );
   }
 
-  Detail beacons(String accessToken, String bid) {
+  Detail buildingBeacons(String accessToken, String bid) {
     return Detail(
         "${AppConfig.baseUrl}/secured/building/beacons",
         "POST",
@@ -66,6 +66,22 @@ class Apidetails {
         },
         true,
         {"buildingId": bid},
+        beacon.fromJsonToList,
+        BeaconAPIModelBOX.getData
+    );
+  }
+
+  Detail venueBeacons(String accessToken, String venueName) {
+    return Detail(
+        "${AppConfig.baseUrl}/secured/venue/beacons",
+        "POST",
+        {
+          'Content-Type': 'application/json',
+          'x-access-token': accessToken,
+          'Authorization': encryptionService.authorization
+        },
+        true,
+        {"venueName": venueName},
         beacon.fromJsonToList,
         BeaconAPIModelBOX.getData
     );

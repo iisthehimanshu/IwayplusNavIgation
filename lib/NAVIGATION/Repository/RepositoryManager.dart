@@ -22,13 +22,33 @@ import '../APIMODELS/polylinedata.dart';
 import '../DATABASE/DATABASEMODEL/GlobalAnnotationAPIModel.dart';
 import '../DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import '../DATABASE/DATABASEMODEL/OutDoorModel.dart';
+import '../DatabaseManager/DataBaseManager.dart';
+import '../VenueManager/VenueManager.dart';
 
 class RepositoryManager{
+
+    static final RepositoryManager _instance = RepositoryManager._internal();
+
+    factory RepositoryManager() {
+        return _instance;
+    }
+
+    RepositoryManager._internal() {
+        // ✅ This block runs only ONCE, when the singleton is first created
+        loadBuildings();
+    }
+
     NetworkManager networkManager = NetworkManager();
     DataBaseManager dataBaseManager = DataBaseManager();
     Apidetails apiDetails = Apidetails();
 
-    Future getLandmarkData(String bID) async {
+    Future<void> loadBuildings() async {
+        VenueManager().buildings = await getBuildingByVenue(VenueManager().venueName);
+    }
+
+
+
+    Future<dynamic> getLandmarkData(String bID) async {
         if (bID.isEmpty) return null;
 
         Detail landmarkDetail = apiDetails.landmark(dataBaseManager.getAccessToken(), bID);
@@ -58,7 +78,7 @@ class RepositoryManager{
         }
     }
 
-    Future getPolylineData(String bID) async {
+    Future<dynamic> getPolylineData(String bID) async {
         if (bID.isEmpty) return null;
 
         Detail polylineDetail = apiDetails.polyline(dataBaseManager.getAccessToken(), bID);
@@ -115,8 +135,8 @@ class RepositoryManager{
         }
     }
 
-    Future<dynamic> getBeaconData(String bID) async {
-        Detail beaconDetail = apiDetails.beacons(dataBaseManager.getAccessToken(), bID);
+    Future<dynamic> getSingleBuildingBeaconData(String bID) async {
+        Detail beaconDetail = apiDetails.buildingBeacons(dataBaseManager.getAccessToken(), bID);
         final beaconBox = beaconDetail.dataBaseGetData!();
 
         if(beaconBox.containsKey(bID)){
@@ -144,15 +164,47 @@ class RepositoryManager{
         }
     }
 
-    Future<dynamic> getBuildingByVenue(String bID) async {
-        Detail buildingByVenueDetail = apiDetails.buildingByVenueApi(dataBaseManager.getAccessToken(), bID);
+    Future<dynamic> getVenueBeaconData(String venueName) async {
+        Detail venueBeaconDetail = apiDetails.venueBeacons(dataBaseManager.getAccessToken(), venueName);
+
+        print("venueBeaconDetail.conversionFunction(venueBeaconDetail.body)");
+        print(venueBeaconDetail.conversionFunction(venueBeaconDetail.body));
+        // final beaconBox = beaconDetail.dataBaseGetData!();
+        //
+        // if(beaconBox.containsKey(venueName)){
+        //     if (kDebugMode) {
+        //         print("Data from DB");
+        //     }
+        //     BeaconAPIModel responseFromDatabase = DataBaseManager().getData(beaconDetail, venueName);
+        //     return beaconDetail.conversionFunction(responseFromDatabase.responseBody);
+        // }else {
+        //     Response dataFromAPI = await networkManager.api.request(beaconDetail);
+        //     if (kDebugMode) {
+        //         print("Data from API");
+        //     }
+        //     if(dataFromAPI.statusCode == 200) {
+        //         final beaconData = BeaconAPIModel(
+        //             responseBody: dataFromAPI.data);
+        //         DataBaseManager().saveData(beaconData, beaconDetail, venueName);
+        //         return dataFromAPI.data;
+        //     }else if(dataFromAPI.statusCode == 201){
+        //         return null;
+        //     }else{
+        //         return null;
+        //     }
+        //
+        // }
+    }
+
+    Future<dynamic> getBuildingByVenue(String venueName) async {
+        Detail buildingByVenueDetail = apiDetails.buildingByVenueApi(dataBaseManager.getAccessToken(), venueName);
         final buildingByVenueBox = buildingByVenueDetail.dataBaseGetData!();
 
-        if(buildingByVenueBox.containsKey(bID)){
+        if(buildingByVenueBox.containsKey(venueName)){
             if (kDebugMode) {
               print("Data from DB");
             }
-            BuildingByVenueAPIModel responseFromDatabase = DataBaseManager().getData(buildingByVenueDetail, bID);
+            BuildingByVenueAPIModel responseFromDatabase = DataBaseManager().getData(buildingByVenueDetail, venueName);
             return buildingByVenueDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(buildingByVenueDetail);
@@ -163,7 +215,7 @@ class RepositoryManager{
                 final buildingByVenueData = BuildingByVenueAPIModel(
                     responseBody: dataFromAPI.data);
                 DataBaseManager().saveData(
-                    buildingByVenueData, buildingByVenueDetail, bID);
+                    buildingByVenueData, buildingByVenueDetail, venueName);
                 return dataFromAPI.data;
             }else if(dataFromAPI.statusCode == 201){
                 return null;

@@ -12,7 +12,7 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/IWAYPLUS/BuildingInfoScreen.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
-import 'package:iwaymaps/NAVIGATION/DataBaseManager/DBManager.dart';
+import 'package:iwaymaps/NAVIGATION/DatabaseManager/DataBaseManager.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
 import 'package:path_provider/path_provider.dart';

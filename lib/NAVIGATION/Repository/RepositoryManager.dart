@@ -3,11 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:iwaymaps/NAVIGATION/API/GlobalAnnotationapi.dart';
 import 'package:iwaymaps/NAVIGATION/APIMODELS/landmark.dart';
 import 'package:iwaymaps/NAVIGATION/APIMODELS/outbuildingmodel.dart';
+import '../DatabaseManager/DataBaseManager.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/WayPointModel.dart';
-import 'package:iwaymaps/NAVIGATION/DataBaseManager/DBManager.dart';
 import 'package:iwaymaps/NAVIGATION/Network/APIDetails.dart';
 import 'package:iwaymaps/NAVIGATION/Network/NetworkManager.dart';
 import 'package:iwaymaps/NAVIGATION/waypoint.dart';
@@ -22,7 +22,6 @@ import '../APIMODELS/polylinedata.dart';
 import '../DATABASE/DATABASEMODEL/GlobalAnnotationAPIModel.dart';
 import '../DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import '../DATABASE/DATABASEMODEL/OutDoorModel.dart';
-import '../DatabaseManager/DataBaseManager.dart';
 import '../VenueManager/VenueManager.dart';
 
 class RepositoryManager{

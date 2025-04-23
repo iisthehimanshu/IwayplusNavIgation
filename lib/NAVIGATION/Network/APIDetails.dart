@@ -82,9 +82,9 @@ class Apidetails {
         {
           'Content-Type': 'application/json',
           'x-access-token': accessToken,
-
+          'Authorization': encryptionService.authorization
         },
-        false,
+        true,
         {"venueName": venueName},
         beacon.fromJsonToList,
         VenueBeaconAPIModelBOX.getData

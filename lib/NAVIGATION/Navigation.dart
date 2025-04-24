@@ -227,7 +227,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   DateTime? _gyroscopeUpdateTime;
   DateTime? _magnetometerUpdateTime;
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
-  late StreamSubscription<AccelerometerEvent> pdr;
   Duration sensorInterval = Duration(milliseconds: 100);
   final pinLandmarkPannel PinLandmarkPannel = pinLandmarkPannel();
 
@@ -952,7 +951,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         isPdr = false;
       });
       PDRTimer!.cancel();
-      pdr.cancel();
     }
   }
 
@@ -979,9 +977,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
     sensorData.accelerometerStream.listen((event){
-      if (pdr == null) {
-        return; // Exit the event listener if subscription is canceled
-      }
       networkManager.ws.updateSensorStatus(activity: true);
       networkManager.ws.updatePermissions(activity: true);
       // Apply low-pass filter
@@ -13201,7 +13196,12 @@ bool _isPlaying=false;
                   ) : Container(),
                   FloatingActionButton(
                     onPressed: () async {
-                      RepositoryManager().getVenueBeaconData();
+                      // RepositoryManager().getVenueBeaconData();
+                      BLEManager().startScanning(bufferSize: 8, streamFrequency: 8,duration: 10);
+                      BLEManager().bufferedDeviceStream.listen((data) {
+                        print("🎯 Received buffer data: $data");
+                        // Example: Update UI / send to backend / calculate logic
+                      });
                     },
                     child: Icon(Icons.bluetooth_audio),
                     shape: RoundedRectangleBorder(

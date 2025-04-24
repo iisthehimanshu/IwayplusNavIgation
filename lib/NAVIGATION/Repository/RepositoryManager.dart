@@ -166,21 +166,18 @@ class RepositoryManager{
 
     Future<dynamic> getVenueBeaconData() async {
         Detail venueBeaconDetail = apiDetails.venueBeacons(dataBaseManager.getAccessToken(), VenueManager().venueName);
-        Response dataFromAPI = await networkManager.api.request(venueBeaconDetail);
-
-        print("venueBeaconDetail.conversionFunction(venueBeaconDetail.body)  ${venueBeaconDetail.conversionFunction(dataFromAPI.data)}");
         final venueBeaconBox = venueBeaconDetail.dataBaseGetData!();
-        //
+
         if(venueBeaconBox.containsKey(VenueManager().venueName)){
             if (kDebugMode) {
-                print("Data from DB");
+                print("VENUE BEACON DATA FROM DATABASE");
             }
             VenueBeaconAPIModel responseFromDatabase = DataBaseManager().getData(venueBeaconDetail, VenueManager().venueName);
-            return venueBeaconBox.conversionFunction(responseFromDatabase.responseBody);
+            return venueBeaconDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(venueBeaconDetail);
             if (kDebugMode) {
-                print("Data from API");
+                print("VENUE BEACON DATA FROM API");
             }
             if(dataFromAPI.statusCode == 200) {
                 final venueBeaconData = VenueBeaconAPIModel(responseBody: dataFromAPI.data);

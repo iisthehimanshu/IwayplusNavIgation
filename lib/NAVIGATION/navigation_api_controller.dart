@@ -10,6 +10,7 @@ import 'API/ladmarkApi.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
+import 'Repository/RepositoryManager.dart';
 import 'UserState.dart';
 import 'navigationTools.dart';
 
@@ -34,7 +35,8 @@ class NavigationAPIController {
       });
 
   Future<void> patchAPIController(String id, bool selected) async {
-    var patchData = await patchAPI().fetchPatchData(id: id);
+    print("patch for $id");
+    var patchData = await RepositoryManager().getPatchData(id) as patchDataModel;
     Building.buildingData ??= Map();
     Building.buildingData![patchData.patchData!.buildingID!] =
         patchData.patchData!.buildingName;
@@ -74,7 +76,7 @@ class NavigationAPIController {
   }
 
   Future<void> landmarkAPIController(String id, bool selected) async {
-    var landmarkData = await landmarkApi().fetchLandmarkData(id: id);
+    var landmarkData = await RepositoryManager().getLandmarkData(id) as land;
     if(selected){
       SingletonFunctionController.building.landmarkdata = Future.value(landmarkData);
     }else{
@@ -143,7 +145,7 @@ class NavigationAPIController {
 
   Future<void> ARPatch(String id, bool selected, {Map<int, geo.LatLng>? coordinates}) async {
     if(coordinates == null){
-      var landmarkData = await landmarkApi().fetchLandmarkData(id: id);
+      var landmarkData = await RepositoryManager().getLandmarkData(id) as land;
       coordinates = <int, geo.LatLng>{};
       for (var landmark in landmarkData.landmarks!) {
         if (landmark.element!.subType == "AR" &&
@@ -166,8 +168,7 @@ class NavigationAPIController {
     }
   }
   Future<polylinedata> polylineAPIController(String id, bool selected) async {
-    var polylineData = await PolyLineApi()
-        .fetchPolyData(id: id);
+    var polylineData = await RepositoryManager().getPolylineData(id) as polylinedata;
     SingletonFunctionController.building
         .polylinedatamap[id] = polylineData;
     SingletonFunctionController

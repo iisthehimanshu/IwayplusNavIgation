@@ -11,8 +11,8 @@ class patchDataModel {
         : null;
   }
 
-  Map<dynamic, dynamic> toJson() {
-    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
     data['patchExist'] = this.patchExist;
     if (this.patchData != null) {
       data['patchData'] = this.patchData!.toJson();
@@ -29,15 +29,18 @@ class PatchData {
   String? length;
   List<Coordinates>? coordinates;
   List<ParkingCoords>? parkingCoords;
-  List<PickupCoords>? pickupCoords;
+  List<ParkingCoords>? pickupCoords;
   String? createdAt;
   String? updatedAt;
-  String? buildingAngle;
-  String? pdrThreshold;
-  String? buildingName;
+  int? iV;
   String? corridorWidth;
   String? realtimeLocalisationThreshold;
-  int? iV;
+  List<ParkingCoords>? walkingCoords;
+  String? geoJsonMap;
+  String? buildingAngle;
+  String? buildingName;
+  String? pdrThreshold;
+  List<ArPatch>? arPatch;
 
   PatchData(
       {this.sId,
@@ -50,20 +53,22 @@ class PatchData {
         this.pickupCoords,
         this.createdAt,
         this.updatedAt,
-        this.buildingAngle,
-        this.pdrThreshold,
-        this.buildingName,
+        this.iV,
         this.corridorWidth,
         this.realtimeLocalisationThreshold,
-        this.iV});
+        this.walkingCoords,
+        this.geoJsonMap,
+        this.buildingAngle,
+        this.buildingName,
+        this.pdrThreshold,
+        this.arPatch});
 
-  PatchData.fromJson(Map<dynamic, dynamic> json) {
+  PatchData.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     buildingID = json['building_ID'];
     breadth = json['breadth'];
     fileName = json['fileName'];
     length = json['length'];
-    pdrThreshold = json['pdrThreshold'];
     if (json['coordinates'] != null) {
       coordinates = <Coordinates>[];
       json['coordinates'].forEach((v) {
@@ -77,28 +82,41 @@ class PatchData {
       });
     }
     if (json['pickupCoords'] != null) {
-      pickupCoords = <PickupCoords>[];
+      pickupCoords = <ParkingCoords>[];
       json['pickupCoords'].forEach((v) {
-        pickupCoords!.add(new PickupCoords.fromJson(v));
+        pickupCoords!.add(new ParkingCoords.fromJson(v));
       });
     }
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
-    buildingAngle = json['buildingAngle'];
-    buildingName = json['buildingName'];
+    iV = json['__v'];
     corridorWidth = json['corridorWidth'];
     realtimeLocalisationThreshold = json['realtimeLocalisationThreshold'];
-    iV = json['__v'];
+    if (json['walkingCoords'] != null) {
+      walkingCoords = <ParkingCoords>[];
+      json['walkingCoords'].forEach((v) {
+        walkingCoords!.add(new ParkingCoords.fromJson(v));
+      });
+    }
+    geoJsonMap = json['geoJsonMap'];
+    buildingAngle = json['buildingAngle'];
+    buildingName = json['buildingName'];
+    pdrThreshold = json['pdrThreshold'];
+    if (json['arPatch'] != null) {
+      arPatch = <ArPatch>[];
+      json['arPatch'].forEach((v) {
+        arPatch!.add(new ArPatch.fromJson(v));
+      });
+    }
   }
 
-  Map<dynamic, dynamic> toJson() {
-    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
     data['_id'] = this.sId;
     data['building_ID'] = this.buildingID;
     data['breadth'] = this.breadth;
     data['fileName'] = this.fileName;
     data['length'] = this.length;
-    data['pdrThreshold'] = this.pdrThreshold;
     if (this.coordinates != null) {
       data['coordinates'] = this.coordinates!.map((v) => v.toJson()).toList();
     }
@@ -111,11 +129,20 @@ class PatchData {
     }
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
-    data['buildingAngle'] = this.buildingAngle;
-    data['buildingName'] = this.buildingName;
     data['__v'] = this.iV;
     data['corridorWidth'] = this.corridorWidth;
     data['realtimeLocalisationThreshold'] = this.realtimeLocalisationThreshold;
+    if (this.walkingCoords != null) {
+      data['walkingCoords'] =
+          this.walkingCoords!.map((v) => v.toJson()).toList();
+    }
+    data['geoJsonMap'] = this.geoJsonMap;
+    data['buildingAngle'] = this.buildingAngle;
+    data['buildingName'] = this.buildingName;
+    data['pdrThreshold'] = this.pdrThreshold;
+    if (this.arPatch != null) {
+      data['arPatch'] = this.arPatch!.map((v) => v.toJson()).toList();
+    }
     return data;
   }
 }
@@ -126,7 +153,7 @@ class Coordinates {
 
   Coordinates({this.localRef, this.globalRef});
 
-  Coordinates.fromJson(Map<dynamic, dynamic> json) {
+  Coordinates.fromJson(Map<String, dynamic> json) {
     localRef = json['localRef'] != null
         ? new LocalRef.fromJson(json['localRef'])
         : null;
@@ -135,8 +162,8 @@ class Coordinates {
         : null;
   }
 
-  Map<dynamic, dynamic> toJson() {
-    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
     if (this.localRef != null) {
       data['localRef'] = this.localRef!.toJson();
     }
@@ -153,13 +180,13 @@ class LocalRef {
 
   LocalRef({this.lat, this.lng});
 
-  LocalRef.fromJson(Map<dynamic, dynamic> json) {
+  LocalRef.fromJson(Map<String, dynamic> json) {
     lat = json['lat'];
     lng = json['lng'];
   }
 
-  Map<dynamic, dynamic> toJson() {
-    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
     data['lat'] = this.lat;
     data['lng'] = this.lng;
     return data;
@@ -172,33 +199,67 @@ class ParkingCoords {
 
   ParkingCoords({this.lat, this.lon});
 
-  ParkingCoords.fromJson(Map<dynamic, dynamic> json) {
+  ParkingCoords.fromJson(Map<String, dynamic> json) {
     lat = json['lat'];
     lon = json['lon'];
   }
 
-  Map<dynamic, dynamic> toJson() {
-    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
     data['lat'] = this.lat;
     data['lon'] = this.lon;
     return data;
   }
 }
-class PickupCoords {
-  String? lat;
-  String? lon;
 
-  PickupCoords({this.lat, this.lon});
+class ArPatch {
+  Properties? properties;
+  String? sId;
+  int? coordinateX;
+  int? coordinateY;
 
-  PickupCoords.fromJson(Map<dynamic, dynamic> json) {
-    lat = json['lat'];
-    lon = json['lon'];
+  ArPatch({this.properties, this.sId, this.coordinateX, this.coordinateY});
+
+  ArPatch.fromJson(Map<String, dynamic> json) {
+    properties = json['properties'] != null
+        ? new Properties.fromJson(json['properties'])
+        : null;
+    sId = json['_id'];
+    coordinateX = json['coordinateX'];
+    coordinateY = json['coordinateY'];
   }
 
-  Map<dynamic, dynamic> toJson() {
-    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
-    data['lat'] = this.lat;
-    data['lon'] = this.lon;
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.properties != null) {
+      data['properties'] = this.properties!.toJson();
+    }
+    data['_id'] = this.sId;
+    data['coordinateX'] = this.coordinateX;
+    data['coordinateY'] = this.coordinateY;
     return data;
   }
 }
+
+class Properties {
+  String? latitude;
+  String? longitude;
+  String? arValue;
+
+  Properties({this.latitude, this.longitude, this.arValue});
+
+  Properties.fromJson(Map<String, dynamic> json) {
+    latitude = json['latitude'];
+    longitude = json['longitude'];
+    arValue = json['arValue'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['latitude'] = this.latitude;
+    data['longitude'] = this.longitude;
+    data['arValue'] = this.arValue;
+    return data;
+  }
+}
+

@@ -1,16 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../APIMODELS/patchDataModel.dart';
+import '../APIMODELS/polylinedata.dart' as polyline_model;
+import '../VenueManager/VenueManager.dart';
+import 'InteractionManager.dart';
+import 'RenderingElement/Polygon.dart';
+
 class RenderingManager extends ChangeNotifier {
-  final Set<Marker> _markers = {};
-  final Set<Polyline> _polylines = {};
-  final Set<Polygon> _polygons = {};
-  final Set<Circle> _circles = {};
+
+  Set<Marker> _markers = {};
+  Set<Polyline> _polylines = {};
+  Set<Polygon> _polygons = {};
+  Set<Circle> _circles = {};
 
   Set<Marker> get markers => _markers;
   Set<Polyline> get polylines => _polylines;
   Set<Polygon> get polygons => _polygons;
   Set<Circle> get circles => _circles;
+
+  Interactionmanager interactionmanager = Interactionmanager();
+
+  Polygons polygonController = Polygons();
+
+
+  RenderingManager(){
+    polygonController.polygonTap = interactionmanager.polygonTap;
+  }
 
   void addMarker(LatLng position, {String? id, String? title}) {
     _markers.add(Marker(
@@ -61,4 +77,26 @@ class RenderingManager extends ChangeNotifier {
     _circles.clear();
     notifyListeners();
   }
+
+
+  Future<void> createBuildings() async {
+    clearAll();
+    List<polyline_model.polylinedata>? polylineData = await VenueManager().getPolylinePolygonData();
+    List<patchDataModel>? patchData = await VenueManager().getPatchData();
+
+    print("createBuildings data $polylineData");
+    if(polylineData == null) return;
+    for (var buildingData in polylineData) {
+      Set<Polygon>? polygonsCreated = polygonController.createRooms(buildingData, 0);
+      if(polygonsCreated != null){
+        _polygons = polygonsCreated;
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<void> polygonTap(List<LatLng>? coordinates, String id) async {}
+
+
+
 }

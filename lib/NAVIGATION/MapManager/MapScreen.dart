@@ -9,7 +9,6 @@ class MapScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Reactive Map')),
       body: AnimatedBuilder(
         animation: mapManager.renderManager,
         builder: (context, _) {
@@ -31,7 +30,8 @@ class MapScreen extends StatelessWidget {
           FloatingActionButton(
             heroTag: 'marker',
             onPressed: () {
-              mapManager.renderManager.addMarker(LatLng(28.61, 77.20), title: 'Marker');
+             mapManager.renderManager.createBuildings();
+             mapManager.fitPolygonsInView(mapManager.renderManager.polygons);
             },
             child: Icon(Icons.add_location),
           ),

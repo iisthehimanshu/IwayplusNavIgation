@@ -17,6 +17,7 @@ import '../../IWAYPLUS/API/buildingAllApi.dart';
 import '../../IWAYPLUS/Elements/UserCredential.dart';
 import '../../IWAYPLUS/Elements/locales.dart';
 import '../../IWAYPLUS/FIREBASE NOTIFICATION API/PushNotifications.dart';
+import '../BluetoothManager/BLEManager.dart';
 import '../BluetoothScanAndroidClass.dart';
 
 import 'package:vibration/vibration.dart';
@@ -142,9 +143,17 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }
   }
 
+  late StreamSubscription<Map<String, dynamic>> _bufferSubscription;
+
+
   @override
   void initState() {
     super.initState();
+
+    _bufferSubscription = BLEManager().bufferedDeviceStream.listen((bufferedData) {
+      print("Received buffer: $bufferedData");
+
+    });
 
 
     // initTts();

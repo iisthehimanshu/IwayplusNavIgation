@@ -1,4 +1,6 @@
 import 'package:device_information/device_information.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/VenueBeaconAPIModelBOX.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/VenueBeaconAPIModel.dart';
 
 import '../APIMODELS/Buildingbyvenue.dart';
 import '../APIMODELS/DataVersion.dart';
@@ -16,6 +18,7 @@ import '../DATABASE/BOXES/OutDoorModelBOX.dart';
 import '../DATABASE/BOXES/PatchAPIModelBox.dart';
 import '../DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import '../DATABASE/BOXES/WayPointModelBOX.dart';
+import '../DatabaseManager/DataBaseManager.dart';
 import '../Encryption/EncryptionService.dart';
 import '../config.dart';
 import '../waypoint.dart';
@@ -41,7 +44,7 @@ class Apidetails {
   Encryptionservice encryptionService = Encryptionservice();
   Detail landmark(String accessToken, String bid) {
     return Detail(
-        "${AppConfig.baseUrl}/secured/landmarks",
+        "${AppConfig.baseUrl}/secured/landmarks?format=v2",
         "POST",
         {
           'Content-Type': 'application/json',
@@ -50,12 +53,12 @@ class Apidetails {
         },
         true,
         {"id": bid},
-        Landmarks.fromJson,
+        land.fromJson,
         LandMarkApiModelBox.getData
     );
   }
 
-  Detail beacons(String accessToken, String bid) {
+  Detail buildingBeacons(String accessToken, String bid) {
     return Detail(
         "${AppConfig.baseUrl}/secured/building/beacons",
         "POST",
@@ -68,6 +71,23 @@ class Apidetails {
         {"buildingId": bid},
         beacon.fromJsonToList,
         BeaconAPIModelBOX.getData
+    );
+  }
+
+  Detail venueBeacons(String accessToken, String venueName) {
+    print("venuename  = $venueName");
+    return Detail(
+        "${AppConfig.baseUrl}/secured/venue/beacons",
+        "POST",
+        {
+          'Content-Type': 'application/json',
+          'x-access-token': accessToken,
+          'Authorization': encryptionService.authorization
+        },
+        true,
+        {"venueName": venueName},
+        beacon.fromJsonToList,
+        VenueBeaconAPIModelBOX.getData
     );
   }
 
@@ -135,9 +155,9 @@ class Apidetails {
     );
   }
 
-  Detail patch(String accessToken, String bid) {
+  Future<Detail> patch(String accessToken, String bid) async {
     return Detail(
-        "${AppConfig.baseUrl}/secured/patch/get",
+        "${AppConfig.baseUrl}/secured/patch/get?format=v2",
         "POST",
         {
           'Content-Type': 'application/json',
@@ -147,8 +167,8 @@ class Apidetails {
         true,
         {
           "id": bid,
-          "manufacturer":DeviceInformation.deviceManufacturer,
-          "devicemodel": DeviceInformation.deviceModel
+          "manufacturer":await DeviceInformation.deviceManufacturer,
+          "devicemodel": await DeviceInformation.deviceModel
         },
         patchDataModel.fromJson,
         PatchAPIModelBox.getData
@@ -157,7 +177,7 @@ class Apidetails {
 
   Detail polyline(String accessToken, String bid) {
     return Detail(
-        "${AppConfig.baseUrl}/secured/polyline",
+        "${AppConfig.baseUrl}/secured/polyline?format=v2",
         "POST",
         {
           'Content-Type': 'application/json',
@@ -173,18 +193,16 @@ class Apidetails {
     );
   }
 
-  static Detail refreshToken(String refreshToken) {
-    Encryptionservice encryptionService = Encryptionservice();
+  static Detail refreshToken() {
     return Detail(
         "${AppConfig.baseUrl}/api/refreshToken",
         "POST",
         {
-          'Content-Type': 'application/json',
-          'x-access-token': encryptionService.authorization,
+          'Content-Type': 'application/json'
         },
-        true,
+        false,
         {
-          "refreshToken": refreshToken
+          "refreshToken": DataBaseManager().getRefreshToken()
         },
         refresh.fromJson,
       null

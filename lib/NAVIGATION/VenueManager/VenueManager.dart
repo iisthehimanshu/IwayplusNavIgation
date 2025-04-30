@@ -1,9 +1,20 @@
 import '../APIMODELS/Buildingbyvenue.dart';
-import '../APIMODELS/outdoormodel.dart';
+import '../APIMODELS/patchDataModel.dart';
+import '../APIMODELS/polylinedata.dart';
 import '../Repository/RepositoryManager.dart';
 
-class Venuemanager{
-  RepositoryManager repository = RepositoryManager();
+class VenueManager{
+
+  VenueManager._internal();
+
+  // Single instance - lazily initialized
+  static final VenueManager _instance = VenueManager._internal();
+
+  // Factory constructor returns the same instance
+  factory VenueManager() {
+    return _instance;
+  }
+
   String _venueName = "IIT Delhi";
   List<Buildingbyvenue> _buildings = [];
 
@@ -19,45 +30,26 @@ class Venuemanager{
     _buildings = value;
   }
 
-  Future<void> loadVenueData() async {
-    buildings = await repository.getBuildingByVenue(venueName);
-
-    for (final building in buildings) {
-      final bid = building.sId;
-      if (bid == null) continue;
-
-      await Future.wait([
-        repository.getPatchData(bid),
-        repository.getPolylineData(bid),
-        repository.getLandmarkData(bid),
-        repository.getWaypointData(bid),
-      ]);
+  Future<List<polylinedata>?> getPolylinePolygonData() async {
+    print("polylinedata buildings $buildings");
+    if(buildings.isEmpty) return null;
+    List<polylinedata> data = [];
+    for (var building in buildings) {
+      polylinedata buildingData = await RepositoryManager().getPolylineData(building.sId!);
+      data.add(buildingData);
     }
-
-    loadCampusData();
-
+    return data;
   }
 
-  Future<void> loadCampusData() async {
-    List<String> bids = buildings
-        .map((building) => building.sId)
-        .whereType<String>() // filters out nulls if any
-        .toList();
-
-    final campus = await repository.getCampusData(bids);
-    final campusId = campus?.data?.campusId;
-
-    if (campus != null) {
-      final hasGlobalAnnotation = campus.data?.globalAnnotation ?? false;
-
-      if (!hasGlobalAnnotation && campusId != null) {
-        await Future.wait([
-          repository.getPatchData(campusId),
-          repository.getPolylineData(campusId),
-          repository.getLandmarkData(campusId),
-          repository.getWaypointData(campusId),
-        ]);
-      }
+  Future<List<patchDataModel>?> getPatchData() async {
+    print("patchDataModel buildings $buildings");
+    if(buildings.isEmpty) return null;
+    List<patchDataModel> data = [];
+    for (var building in buildings) {
+      patchDataModel buildingData = await RepositoryManager().getPatchData(building.sId!);
+      data.add(buildingData);
     }
+    return data;
   }
+
 }

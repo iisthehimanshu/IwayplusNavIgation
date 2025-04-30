@@ -12,12 +12,12 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/IWAYPLUS/BuildingInfoScreen.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
-import 'package:iwaymaps/NAVIGATION/DataBaseManager/DBManager.dart';
+import 'package:iwaymaps/NAVIGATION/DatabaseManager/DataBaseManager.dart';
+import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import '/IWAYPLUS/DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '/NAVIGATION/DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import '/NAVIGATION/DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
@@ -76,9 +76,6 @@ Future<void> localDBInitialsation() async {
 }
 
 Future<void> mobileInitialization () async {
-  WakelockPlus.enable();
-
-
   // PushNotifications.init();
   PushNotifications.localNotiInit();
   PushNotifications.resetBadgeCount();
@@ -109,8 +106,7 @@ class _MobileAppState extends State<MobileApp> {
   void initState() {
     configureLocalization();
     super.initState();
-
-
+    RepositoryManager();
   }
   void configureLocalization(){
     localization.init(mapLocales: LOCALES, initLanguageCode: 'en');

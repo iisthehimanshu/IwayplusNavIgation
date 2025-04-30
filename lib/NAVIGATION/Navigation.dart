@@ -8,7 +8,9 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 import 'package:iwaymaps/NAVIGATION/Sensor/SensorManager.dart';
+import 'package:iwaymaps/NAVIGATION/VenueManager/VenueManager.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
 import 'package:iwaymaps/NAVIGATION/path.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
@@ -57,10 +59,12 @@ import 'API/waypoint.dart';
 import 'APIMODELS/DataVersion.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/outdoormodel.dart';
+import 'BluetoothManager/BLEManager.dart';
 import 'BluetoothScanAndroidClass.dart';
 import 'BluetoothScanIOSClass.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
+import 'DatabaseManager/DataBaseManager.dart';
 import 'DebugToggle.dart';
 import 'ELEMENTS/DirectionHeader.dart';
 import 'ELEMENTS/DirectionInstruction.dart';
@@ -952,8 +956,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
      await pdr?.cancel();
      pdr=null;
      print("pdrstate:${pdr}");
-
-
     }
   }
 
@@ -980,9 +982,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
    pdr=accData.accelerometerStream.listen((event){
-      if (pdr == null) {
-        return; // Exit the event listener if subscription is canceled
-      }
       networkManager.ws.updateSensorStatus(activity: true);
       networkManager.ws.updatePermissions(activity: true);
       // Apply low-pass filter
@@ -4561,7 +4560,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     floorData.forEach((Element) {
       if (Element.floor == floor) {
         Element.polyArray!.forEach((element) {
-          if (element.name!.toLowerCase().contains("lift")) {
+          if ((element.name??"").toLowerCase().contains("lift")) {
             lifts.add(element);
           }
         });
@@ -4771,7 +4770,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     width: 1,
                     onTap: () {}));
               }
-            } else if (polyArray.polygonType == 'Room' ) {
+            }
+            else if (polyArray.polygonType == 'Room' ) {
               print("polyArray.name");
               print(polyArray.name);
 
@@ -4931,7 +4931,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               }
             } else if (polyArray.polygonType == 'Cubicle') {
               if (polyArray.cubicleName == "Green Area" ||
-                  polyArray.cubicleName == "Green Area | Pots" || polyArray.name!.toLowerCase().contains('auditorium') || polyArray.name!.toLowerCase().contains('basketball') || polyArray.name!.toLowerCase().contains('cricket') || polyArray.name!.toLowerCase().contains('football') || polyArray.name!.toLowerCase().contains('gym') || polyArray.name!.toLowerCase().contains('swimming') || polyArray.name!.toLowerCase().contains('tennis')) {
+                  polyArray.cubicleName == "Green Area | Pots" || (polyArray.name??"").toLowerCase().contains('auditorium') ||(polyArray.name??"").toLowerCase().contains('basketball') || (polyArray.name??"").toLowerCase().contains('cricket') || (polyArray.name??"").toLowerCase().contains('football') || (polyArray.name??"").toLowerCase().contains('gym') || (polyArray.name??"").toLowerCase().contains('swimming') || (polyArray.name??"").toLowerCase().contains('tennis')) {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
@@ -13202,18 +13202,23 @@ bool _isPlaying=false;
                       Colors.white, // Set the background color of the FAB
                     ),
                   ) : Container(),
-                  // FloatingActionButton(
-                  //   onPressed: () async {
-                  //     bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
-                  //   },
-                  //   child: Icon(Icons.pin_drop_rounded),
-                  //   shape: RoundedRectangleBorder(
-                  //     borderRadius:
-                  //     BorderRadius.circular(26.0), // Change radius here
-                  //   ),
-                  //   backgroundColor:
-                  //   Colors.white, // Set the background color of the FAB
-                  // ),
+                  FloatingActionButton(
+                    onPressed: () async {
+                      // RepositoryManager().getVenueBeaconData();
+                      BLEManager().startScanning(bufferSize: 8, streamFrequency: 8,duration: 10);
+                      BLEManager().bufferedDeviceStream.listen((data) {
+                        print("🎯 Received buffer data: $data");
+                        // Example: Update UI / send to backend / calculate logic
+                      });
+                    },
+                    child: Icon(Icons.bluetooth_audio),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                      BorderRadius.circular(26.0), // Change radius here
+                    ),
+                    backgroundColor:
+                    Colors.white, // Set the background color of the FAB
+                  ),
                   SizedBox(height: 28.0),
                   (!kIsWeb &&  Platform.isAndroid) && !user.isnavigating &&
                       (!_isLandmarkPanelOpen &&

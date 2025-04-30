@@ -9,7 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 
 import 'APIMODELS/beaconData.dart';
-import 'ELEMENTS/BlurtoothDevice.dart';
+import 'ELEMENTS/BluetoothDevice.dart';
 import 'Network/NetworkManager.dart';
 
 class BluetoothScanAndroidClass{

@@ -86,7 +86,7 @@ class BLueToothClass {
     FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
 
     FlutterBluePlus.scanResults.listen((results) async {
-      print("resultsrun");
+      // print("resultsrun");
       for (ScanResult result in results) {
         if(result.device.platformName.length > 2){
           String MacId = "${result.device.platformName}";
@@ -96,7 +96,6 @@ class BLueToothClass {
           if (apibeaconmap.containsKey(MacId)) {
             if (result.timeStamp.difference(SourceTSP).inSeconds>=0 && result.timeStamp.difference(SourceTSP).inSeconds < 10) {
               if(kDebugMode) print("result.timeStamp.difference(SourceTSP) ${result.timeStamp.difference(SourceTSP)}  ${result.timeStamp.difference(SourceTSP).inSeconds}");
-
               latesILMap.putIfAbsent(MacId,() => []);
               latesILMapTimeStamp.putIfAbsent(MacId,() => []);
 
@@ -105,7 +104,6 @@ class BLueToothClass {
                 latesILMap[MacId]!.add(Rssi);
               }
               if(kDebugMode) print("Beacon $MacId $Rssi ${result.timeStamp.difference(SourceTSP)} ${result.timeStamp} ${SourceTSP}");
-
             }
             //print(MacId);
             //print("mac1 $MacId    rssi $Rssi");

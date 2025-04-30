@@ -227,6 +227,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   DateTime? _gyroscopeUpdateTime;
   DateTime? _magnetometerUpdateTime;
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
+  late StreamSubscription<AccelerometerEvent>? pdr;
   Duration sensorInterval = Duration(milliseconds: 100);
   final pinLandmarkPannel PinLandmarkPannel = pinLandmarkPannel();
 
@@ -442,14 +443,17 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   final double targetZoom = 22.0;
 
   late DateTime timerStartTime;
-  SensorManager sensorData = SensorManager();
+  SensorManager accData = SensorManager();
+  SensorManager magnetoData = SensorManager();
+  SensorManager gpsData = SensorManager();
   @override
   void initState() {
     super.initState();
     initializeMarkers();
     NavigationLogManager().initialize();
-    sensorData.startMagnetometer();
-    sensorData.startAccelerometer();
+    magnetoData.startMagnetometer();
+    accData.startAccelerometer();
+    gpsData.startGps();
     //add a timer of duration 5sec
     //PolylineTestClass.polylineSet.clear();
     // StartPDR();
@@ -832,30 +836,31 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
   void handleCompassEvents(){
-    sensorData.magnetometerStream.listen((event){
+    magnetoData.magnetometerStream.listen((event){
       if (!mounted) return; // Prevent setState if the widget is no longer in the tree
       networkManager.ws.updateSensorStatus(compass: true);
       networkManager.ws.updatePermissions(compass: true);
       double? compassHeading = event.heading;
-      setState(() {
-        user.theta = compassHeading!;
-        if (mapState.interaction2) {
-          mapState.bearing = compassHeading!;
-          _googleMapController.moveCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(
-                target: mapState.target,
-                zoom: mapState.zoom,
-                bearing: mapState.bearing!,
+      if(mounted || disposed) return;
+        setState(() {
+          user.theta = compassHeading!;
+          if (mapState.interaction2) {
+            mapState.bearing = compassHeading!;
+            _googleMapController.moveCamera(
+              CameraUpdate.newCameraPosition(
+                CameraPosition(
+                  target: mapState.target,
+                  zoom: mapState.zoom,
+                  bearing: mapState.bearing!,
+                ),
               ),
-            ),
-          );
-        }else{
-          if(markers.isNotEmpty && markers[user.bid] != null){
-            markers[user.bid]![0] = customMarker.rotate(compassHeading! - mapbearing, markers[user.bid]![0]);
+            );
+          }else{
+            if(markers.isNotEmpty && markers[user.bid] != null){
+              markers[user.bid]![0] = customMarker.rotate(compassHeading! - mapbearing, markers[user.bid]![0]);
+            }
           }
-        }
-      });
+        });
     }, onError: (error) {
       if (!mounted) return;
       networkManager.ws.updateSensorStatus(compass: false);
@@ -924,19 +929,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Future<void> enableBT() async {
     BluetoothEnable.enableBluetooth.then((value) {});
   }
-
   bool isPdr = false;
   // Function to start the timer
   void StartPDR() {
-    PDRTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
-      //
+    PDRTimer = Timer.periodic(Duration(milliseconds: 100),(timer){
       setState(() {
         isPdr = true;
       });
       if(isAppinForeground){
         pdrstepCount();
       }
-
       // onStepCount();
     });
   }
@@ -951,6 +953,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         isPdr = false;
       });
       PDRTimer!.cancel();
+     await pdr?.cancel();
+     pdr=null;
+     print("pdrstate:${pdr}");
     }
   }
 
@@ -976,7 +981,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
-    sensorData.accelerometerStream.listen((event){
+   pdr=accData.accelerometerStream.listen((event){
       networkManager.ws.updateSensorStatus(activity: true);
       networkManager.ws.updatePermissions(activity: true);
       // Apply low-pass filter
@@ -1925,12 +1930,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     KalmanFilter _kalmanFilter = KalmanFilter();
     try{
       StreamSubscription<Location>? _gpsSubscription;
-      _gpsSubscription = GPSService.locationStream.listen((Location location) {
+      _gpsSubscription = gpsData.gpsStream.listen((Location location) {
         _kalmanFilter.applyFilter(location.latitude, location.longitude);
-      }, onError: (error) {
+      }, onError:(error){
         print("Error receiving GPS data: $error");
       });
-
       await Future.delayed(const Duration(seconds: 9));
       _gpsSubscription?.cancel();
       _gpsSubscription = null;
@@ -1938,7 +1942,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       unableToFindLocation();
       return;
     }
-
     if(_kalmanFilter.latitudeEstimate != null && _kalmanFilter.longitudeEstimate != null) {
       UserState.geoLat = _kalmanFilter.latitudeEstimate;
       UserState.geoLng = _kalmanFilter.longitudeEstimate;
@@ -3151,11 +3154,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             zIndex: 2
         );
 
-        setState(() {
-          circles
-              .removeWhere((circle) => circle.circleId == CircleId("circle"));
-          circles.add(updatedCircle);
-        });
+        if(mounted || disposed){
+          setState(() {
+            circles
+                .removeWhere((circle) => circle.circleId == CircleId("circle"));
+            circles.add(updatedCircle);
+          });
+        }
+
       });
     // Start the animation
     _controller.forward(from: 0.0);
@@ -3338,7 +3344,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     print("callback");
     SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID).then((_){
       SingletonFunctionController.timer?.whenComplete((){
-        print("localizeUser 1 ${DateTime.now().difference(timerStartTime)}");
         localizeUserInCallback();
         SingletonFunctionController.timer = null;
       });
@@ -12534,7 +12539,9 @@ bool _isPlaying=false;
     for (var controller in _controllers) {
       controller.dispose();
     }
-    sensorData.stopMagnetometer();
+    accData.stopMagnetometer();
+    magnetoData.stopAccelerometer();
+    gpsData.stopGps();
     magnetometerSubscription.cancel();
     super.dispose();
   }

@@ -481,9 +481,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   String findNearestBeaconTaksForAndroid(){
     String beaconCalculate = "";
     candorAverageDH = bluetoothScanAndroidClass.candorAverage;
-    print("candorAverageDH $candorAverageDH");
     List<dynamic> receivedCandorValue = findLastAboveThresholdCandor(candorAverageDH,5.8)??[];
-    print("receivedCandorValue $receivedCandorValue");
     beaconCalculate = receivedCandorValue[0]??"";
     candorThreshold = receivedCandorValue[1]??0.0;
 
@@ -500,7 +498,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           highestKey = key;
         }
       } else {
-        print("else---");
       }
     });
     return beaconCalculate;
@@ -794,7 +791,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       if (pathObj.index < 3) {
         widget.direction = newUserDirection;
       }
-      print("userdirection $newUserDirection");
 
       if (UserCredentials().getUserPersonWithDisability() == 1 ||
           UserCredentials().getUserPersonWithDisability() == 2) {
@@ -803,8 +799,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
       final turnIndex = cellPath.indexOf(nextTurn);
       turnDirection = _calculateTurnDirection(user, turnIndex, newUserDirection);
-      print("turnDirection $turnDirection");
-      print("widget.direction ${widget.direction}");
+
 
       _handleDirectionChange(oldWidget);
 
@@ -879,7 +874,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     final currentFloor = user.floor;
     double a = 0;
     if (turnIndex + 1 == user.path.length) {
-      print("index+1");
       if (cellPath[turnIndex - 2].bid == cellPath[turnIndex - 1].bid &&
           cellPath[turnIndex - 1].bid == cellPath[turnIndex].bid) {
         a = tools.calculateAnglefifth(
@@ -889,7 +883,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             pathObj.numCols![currentBid]![currentFloor]!);
       }
     } else {
-      print("index");
       if (cellPath[turnIndex - 1].bid == cellPath[turnIndex].bid &&
           cellPath[turnIndex].bid == cellPath[turnIndex + 1].bid) {
         a = tools.calculateAnglefifth(

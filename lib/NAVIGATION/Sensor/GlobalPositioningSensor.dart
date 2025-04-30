@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/NAVIGATION/Sensor/baseSensorClass.dart';
 
 import '../GPSService.dart';
@@ -10,7 +11,6 @@ class GpsSensor extends BaseSensor{
   StreamSubscription<Location>? _subscription;
 
 
-
   static Stream<Location> get locationStream {
     return _eventChannel.receiveBroadcastStream().map((event) {
       final Map<dynamic, dynamic> location = event;
@@ -19,11 +19,30 @@ class GpsSensor extends BaseSensor{
     });
   }
 
+  Future<Position> getCurrentCoordinates() async {
+    return Geolocator.getCurrentPosition();
+  }
+
+  Future<bool> checkPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    return permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse;
+  }
 
 
 
  @override
- void startListening(){
+ Future<void> startListening() async {
+   bool isGranted = await checkPermission();
+   if (!isGranted) {
+     print("GPS permission not granted");
+     return;
+   }
+
    _subscription = GPSService.locationStream.listen((location) {
      _controller.add(location);
    });

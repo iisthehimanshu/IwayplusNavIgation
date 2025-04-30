@@ -377,7 +377,7 @@ class UserState {
     bool isAtLastTurnPoint =
         showcoordX == turnPoints.last.x && showcoordY == turnPoints.last.y;
 
-    print("destination is ${tools.calculateAerialDist(lat,lng, pathobj.destinationLat, pathobj.destinationLng)} m away");
+    // print("destination is ${tools.calculateAerialDist(lat,lng, pathobj.destinationLat, pathobj.destinationLng)} m away");
     bool isNearDestination = tools.calculateAerialDist(
         lat, lng, pathobj.destinationLat, pathobj.destinationLng) <
         ((bid == buildingAllApi.outdoorID) ? 5 : 2);
@@ -386,19 +386,19 @@ class UserState {
   }
 
   void initializeStepsArray(int index, List<int> array){
-    print("array changed to $array");
+    // print("array changed to $array");
     stepsArray = {"index":[index], "array":array};
   }
 
   void incrementSteps(){
-    print("index was ${stepsArray["index"]}");
+    // print("index was ${stepsArray["index"]}");
     int i = stepsArray["index"]!.first;
     stepsArray["index"] = [i+1];
     if(stepsArray["index"]!.first == stepsArray["array"]!.length){
       stepsArray["index"]!.first = 0;
     }
     stepSize = stepsArray["array"]![stepsArray["index"]!.first].toDouble();
-    print("changed step size to $stepSize on index ${stepsArray["index"]} and should have been ${stepsArray["array"]![stepsArray["index"]!.first].toDouble()}");
+    // print("changed step size to $stepSize on index ${stepsArray["index"]} and should have been ${stepsArray["array"]![stepsArray["index"]!.first].toDouble()}");
   }
 
   void updateCoordinatesAndPath(Cell previousPoint, double angle, {bool isFlying = false}) {
@@ -410,7 +410,7 @@ class UserState {
       try{
         int stepsRequired = tools.stepsToReachTarget(previousPoint.x, previousPoint.y, cellPath[pathobj.index].x, cellPath[pathobj.index].y, lineData);
         double d = tools.calculateDistance([previousPoint.x, previousPoint.y], [cellPath[pathobj.index].x, cellPath[pathobj.index].y]);
-        print("stepsRequired $stepsRequired d $d");
+        // print("stepsRequired $stepsRequired d $d");
         List<int> Array = tools.findIntegersWithMean((stepsRequired/d)*2);
         print("length of array ${stepsArray["array"]!.length}  ${Array.length}  ${ListEquality().equals(stepsArray["array"], Array)}");
         if(!const ListEquality().equals(stepsArray["array"], Array)){
@@ -421,14 +421,10 @@ class UserState {
         initializeStepsArray(0, [2]);
       }
     }
-
-
-
-
     List<int> nextTransition = tools.findPoint(showcoordX, showcoordY,
         cellPath[pathobj.index].x, cellPath[pathobj.index].y, lineData);
 
-    print("nextTransition $nextTransition");
+    // print("nextTransition $nextTransition");
 
     List<int>? correctedTransition = isFlying?nextTransition:getCorrectedTransition(angle);
 
@@ -466,7 +462,6 @@ class UserState {
     } else {
       transitionValues = tools.eightcelltransition(theta);
     }
-
     return [transitionValues[0] + coordX, transitionValues[1] + coordY];
   }
 
@@ -479,18 +474,18 @@ class UserState {
     if(calculateOffPathDistance() >2){
       List<Cell>? nextSegment = tools.findNextSegment(cellPath, pathobj.index);
       if(nextSegment == null){
-        print("calculateNextSegmentDistance nextSegment is null");
+        // print("calculateNextSegmentDistance nextSegment is null");
         return null;
       }
       double distance = tools.perpendicularDistance(nextSegment[0], nextSegment[1], [coordX, coordY]);
       if(distance == double.infinity || distance > 33){
-        print("calculateNextSegmentDistance distance for $coordX,$coordY is $distance for segment ${nextSegment[0].x},${nextSegment[0].y}   <>   ${nextSegment[1].x},${nextSegment[1].y}");
+        // print("calculateNextSegmentDistance distance for $coordX,$coordY is $distance for segment ${nextSegment[0].x},${nextSegment[0].y}   <>   ${nextSegment[1].x},${nextSegment[1].y}");
         return null;
       }
-      print("calculateNextSegmentDistance distance is $distance");
+      // print("calculateNextSegmentDistance distance is $distance");
       return distance;
     }else{
-      print("calculateNextSegmentDistance offPathDistance is 0");
+      // print("calculateNextSegmentDistance offPathDistance is 0");
       return null;
     }
   }

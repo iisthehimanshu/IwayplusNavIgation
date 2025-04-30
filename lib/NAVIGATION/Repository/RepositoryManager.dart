@@ -45,6 +45,8 @@ class RepositoryManager{
     Future<void> loadBuildings() async {
         List<dynamic> list = await getBuildingByVenue(VenueManager().venueName);
         VenueManager().buildings = list.whereType<Buildingbyvenue>().toList();
+        print("VenueManager().buildings $list");
+        print("VenueManager().buildings ${VenueManager().buildings}");
     }
 
 
@@ -110,7 +112,7 @@ class RepositoryManager{
     }
 
     Future<dynamic> getPatchData(String bID) async {
-        Detail patchDetail = apiDetails.patch(dataBaseManager.getAccessToken(), bID);
+        Detail patchDetail = await apiDetails.patch(dataBaseManager.getAccessToken(), bID);
         final patchBox = patchDetail.dataBaseGetData!();
 
         if(patchBox.containsKey(bID)){
@@ -215,7 +217,7 @@ class RepositoryManager{
                 //     responseBody: dataFromAPI.data);
                 // DataBaseManager().saveData(
                 //     buildingByVenueData, buildingByVenueDetail, venueName);
-                return dataFromAPI.data;
+                return buildingByVenueDetail.conversionFunction(dataFromAPI.data);
             }else if(dataFromAPI.statusCode == 201){
                 return null;
             }else{
@@ -311,3 +313,4 @@ class RepositoryManager{
     }
 
 }
+

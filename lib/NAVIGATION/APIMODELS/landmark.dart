@@ -8,7 +8,7 @@ class land {
 
   land({this.landmarkExist, this.landmarks, this.landmarksMap,this.landmarkNames, this.landmarksNameMap}); // Update the constructor
 
-  land.fromJson(Map<dynamic, dynamic> json) {
+  land.fromJson(dynamic json) {
     landmarkExist = json['landmarkExist'];
     if (json['landmarks'] != null) {
       landmarks = <Landmarks>[];

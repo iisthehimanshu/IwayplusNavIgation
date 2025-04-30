@@ -4765,7 +4765,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     width: 1,
                     onTap: () {}));
               }
-            } else if (polyArray.polygonType == 'Room' ) {
+            }
+            else if (polyArray.polygonType == 'Room' ) {
               print("polyArray.name");
               print(polyArray.name);
 

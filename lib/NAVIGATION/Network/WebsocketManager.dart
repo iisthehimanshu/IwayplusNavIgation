@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import '../config.dart';
@@ -93,6 +94,7 @@ class WebSocketManager {
     final lastString = _deepSortAndStringify(_lastSentMessage);
 
     if (socket.connected && dataString != lastString) {
+      print(data);
       socket.emit('user-log-socket', data);
       _lastSentMessage = _cloneDeep(data);
       print("socket data $data");
@@ -165,7 +167,7 @@ class WebSocketManager {
     final init = _message["AppInitialization"];
     if (bid != null) init["BID"] = bid;
     if (buildingName != null) init["buildingName"] = buildingName;
-    if (bleScanResults != null) init["bleScanResults"][bleScanResults.key] = bleScanResults;
+    if (bleScanResults != null) init["bleScanResults"][bleScanResults.key] = bleScanResults.value;
     if (nearByDevices != null) init["nearByDevices"][nearByDevices.key] = nearByDevices.value;
     if (localizedOn != null) init["localizedOn"] = localizedOn;
   }

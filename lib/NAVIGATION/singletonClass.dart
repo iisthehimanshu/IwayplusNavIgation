@@ -52,8 +52,6 @@ class SingletonFunctionController {
     _completer = Completer<void>();
 
 
-    var beaconData = await beaconapi().fetchBeaconData("65d9cacfdb333f8945861f0f");
-    building.beacondata = beaconData;
     print("building.beacondata.length");
     try {
       // Perform your task here

@@ -44,7 +44,7 @@ class Apidetails {
   Encryptionservice encryptionService = Encryptionservice();
   Detail landmark(String accessToken, String bid) {
     return Detail(
-        "${AppConfig.baseUrl}/secured/landmarks",
+        "${AppConfig.baseUrl}/secured/landmarks?format=v2",
         "POST",
         {
           'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ class Apidetails {
         },
         true,
         {"id": bid},
-        Landmarks.fromJson,
+        land.fromJson,
         LandMarkApiModelBox.getData
     );
   }
@@ -155,9 +155,9 @@ class Apidetails {
     );
   }
 
-  Detail patch(String accessToken, String bid) {
+  Future<Detail> patch(String accessToken, String bid) async {
     return Detail(
-        "${AppConfig.baseUrl}/secured/patch/get",
+        "${AppConfig.baseUrl}/secured/patch/get?format=v2",
         "POST",
         {
           'Content-Type': 'application/json',
@@ -167,8 +167,8 @@ class Apidetails {
         true,
         {
           "id": bid,
-          "manufacturer":DeviceInformation.deviceManufacturer,
-          "devicemodel": DeviceInformation.deviceModel
+          "manufacturer":await DeviceInformation.deviceManufacturer,
+          "devicemodel": await DeviceInformation.deviceModel
         },
         patchDataModel.fromJson,
         PatchAPIModelBox.getData
@@ -177,7 +177,7 @@ class Apidetails {
 
   Detail polyline(String accessToken, String bid) {
     return Detail(
-        "${AppConfig.baseUrl}/secured/polyline",
+        "${AppConfig.baseUrl}/secured/polyline?format=v2",
         "POST",
         {
           'Content-Type': 'application/json',

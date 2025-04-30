@@ -22,8 +22,7 @@ class BLEManager{
   static const methodChannel = MethodChannel('com.example.bluetooth/scan');
   static const eventChannel = EventChannel('com.example.bluetooth/scanUpdates');
   RepositoryManager networkManager = RepositoryManager();
-  final StreamController<Map<String, dynamic>> _bufferedDeviceStreamController =
-  StreamController<Map<String, dynamic>>.broadcast();
+  final StreamController<Map<String, dynamic>> _bufferedDeviceStreamController = StreamController<Map<String, dynamic>>.broadcast();
   Stream<Map<String, dynamic>> get bufferedDeviceStream => _bufferedDeviceStreamController.stream;
   static StreamSubscription? _scanSubscription;
 
@@ -60,9 +59,8 @@ class BLEManager{
     if(kDebugMode) print("startBufferEmission");
     _bufferEmitTimer?.cancel(); // cancel previous if any
     _bufferEmitTimer = Timer.periodic(Duration(seconds: bufferSizeInSeconds), (_) {
-
-      final dataToSend = buffer;
-      print("dataToSend}");
+      final dataToSend = Map<String, Map<DateTime, String>>.from(buffer); // Clone current buffer
+      print("dataToSend");
       printFull(dataToSend.toString());
       // _bufferedDeviceStreamController.
       _bufferedDeviceStreamController.add(dataToSend);

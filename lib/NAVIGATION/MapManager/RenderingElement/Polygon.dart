@@ -120,8 +120,56 @@ class Polygons {
     return fallback;
   }
 
-  Set<Polygon>? createPatchs(){
+  Set<Polygon>? createPatch(patchDataModel patchData){
+    Set<Polygon> patch = Set();
 
+    final coords = patchData.patchData?.coordinates;
+    if (coords == null || coords.length < 4) return null;
+
+    double latSum = 0.0;
+    double lngSum = 0.0;
+
+    // Calculate the center of the 4 coordinates
+    for (int i = 0; i < 4; i++) {
+      final lat = double.tryParse(coords[i].globalRef?.lat ?? '') ?? 0.0;
+      final lng = double.tryParse(coords[i].globalRef?.lng ?? '') ?? 0.0;
+      latSum += lat;
+      lngSum += lng;
+    }
+
+    final centerLat = latSum / 4;
+    final centerLng = lngSum / 4;
+
+    List<LatLng> polygonPoints = [];
+    Map<int, LatLng> adjustedCoordinates = {};
+
+    // Adjust each point slightly away from the center to enhance visibility
+    for (int i = 0; i < 4; i++) {
+      final lat = double.tryParse(coords[i].globalRef?.lat ?? '') ?? 0.0;
+      final lng = double.tryParse(coords[i].globalRef?.lng ?? '') ?? 0.0;
+
+      final adjustedLat = centerLat + 1.1 * (lat - centerLat);
+      final adjustedLng = centerLng + 1.1 * (lng - centerLng);
+      final adjustedPoint = LatLng(adjustedLat, adjustedLng);
+
+      polygonPoints.add(adjustedPoint);
+      adjustedCoordinates[i] = adjustedPoint;
+    }
+
+      patch.add(
+        Polygon(
+          polygonId: PolygonId('patch ${patchData.patchData?.buildingID}'),
+          points: polygonPoints,
+          strokeWidth: 1,
+          strokeColor: Color(0xffC0C0C0),
+          fillColor: Color(0xffffffff),
+          geodesic: false,
+          consumeTapEvents: true,
+          zIndex: -1,
+        ),
+      );
+
+    return patch;
   }
 
 }

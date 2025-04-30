@@ -11,8 +11,8 @@ class patchDataModel {
         : null;
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['patchExist'] = this.patchExist;
     if (this.patchData != null) {
       data['patchData'] = this.patchData!.toJson();
@@ -63,7 +63,7 @@ class PatchData {
         this.pdrThreshold,
         this.arPatch});
 
-  PatchData.fromJson(Map<String, dynamic> json) {
+  PatchData.fromJson(Map<dynamic, dynamic> json) {
     sId = json['_id'];
     buildingID = json['building_ID'];
     breadth = json['breadth'];
@@ -110,8 +110,8 @@ class PatchData {
     }
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['_id'] = this.sId;
     data['building_ID'] = this.buildingID;
     data['breadth'] = this.breadth;
@@ -153,7 +153,7 @@ class Coordinates {
 
   Coordinates({this.localRef, this.globalRef});
 
-  Coordinates.fromJson(Map<String, dynamic> json) {
+  Coordinates.fromJson(Map<dynamic, dynamic> json) {
     localRef = json['localRef'] != null
         ? new LocalRef.fromJson(json['localRef'])
         : null;
@@ -162,8 +162,8 @@ class Coordinates {
         : null;
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     if (this.localRef != null) {
       data['localRef'] = this.localRef!.toJson();
     }
@@ -180,13 +180,13 @@ class LocalRef {
 
   LocalRef({this.lat, this.lng});
 
-  LocalRef.fromJson(Map<String, dynamic> json) {
+  LocalRef.fromJson(Map<dynamic, dynamic> json) {
     lat = json['lat'];
     lng = json['lng'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['lat'] = this.lat;
     data['lng'] = this.lng;
     return data;
@@ -199,13 +199,13 @@ class ParkingCoords {
 
   ParkingCoords({this.lat, this.lon});
 
-  ParkingCoords.fromJson(Map<String, dynamic> json) {
+  ParkingCoords.fromJson(Map<dynamic, dynamic> json) {
     lat = json['lat'];
     lon = json['lon'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['lat'] = this.lat;
     data['lon'] = this.lon;
     return data;
@@ -220,7 +220,7 @@ class ArPatch {
 
   ArPatch({this.properties, this.sId, this.coordinateX, this.coordinateY});
 
-  ArPatch.fromJson(Map<String, dynamic> json) {
+  ArPatch.fromJson(Map<dynamic, dynamic> json) {
     properties = json['properties'] != null
         ? new Properties.fromJson(json['properties'])
         : null;
@@ -229,8 +229,8 @@ class ArPatch {
     coordinateY = json['coordinateY'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     if (this.properties != null) {
       data['properties'] = this.properties!.toJson();
     }
@@ -248,14 +248,14 @@ class Properties {
 
   Properties({this.latitude, this.longitude, this.arValue});
 
-  Properties.fromJson(Map<String, dynamic> json) {
+  Properties.fromJson(Map<dynamic, dynamic> json) {
     latitude = json['latitude'];
     longitude = json['longitude'];
     arValue = json['arValue'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['latitude'] = this.latitude;
     data['longitude'] = this.longitude;
     data['arValue'] = this.arValue;

@@ -5,6 +5,7 @@ import 'GoogleMapManager.dart';
 
 class MapScreen extends StatelessWidget {
   final GoogleMapManager mapManager = GoogleMapManager();
+  String maptheme = "";
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +14,9 @@ class MapScreen extends StatelessWidget {
         animation: mapManager.renderManager,
         builder: (context, _) {
           return GoogleMap(
-            onMapCreated: mapManager.onMapCreated,
+            onMapCreated: (controller){
+              mapManager.onMapCreated(controller, context);
+            },
             initialCameraPosition: mapManager.initialPosition,
             markers: mapManager.renderManager.markers,
             polylines: mapManager.renderManager.polylines,
@@ -29,8 +32,8 @@ class MapScreen extends StatelessWidget {
         children: [
           FloatingActionButton(
             heroTag: 'marker',
-            onPressed: () {
-             mapManager.renderManager.createBuildings();
+            onPressed: () async {
+             await mapManager.renderManager.createBuildings();
              mapManager.fitPolygonsInView(mapManager.renderManager.polygons);
             },
             child: Icon(Icons.add_location),

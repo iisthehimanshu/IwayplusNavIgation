@@ -86,13 +86,25 @@ class RenderingManager extends ChangeNotifier {
 
     print("createBuildings data $polylineData");
     if(polylineData == null) return;
-    for (var buildingData in polylineData) {
-      Set<Polygon>? polygonsCreated = polygonController.createRooms(buildingData, 0);
-      if(polygonsCreated != null){
-        _polygons = polygonsCreated;
+    if(patchData == null) return;
+
+    for(var buildingPatches in patchData){
+      Set<Polygon>? patchCreated = polygonController.createPatch(buildingPatches);
+      if(patchCreated != null){
+        _polygons.addAll(patchCreated);
         notifyListeners();
       }
     }
+
+    for (var buildingData in polylineData) {
+      Set<Polygon>? polygonsCreated = polygonController.createRooms(buildingData, 0);
+      if(polygonsCreated != null){
+        _polygons.addAll(polygonsCreated);
+        notifyListeners();
+      }
+    }
+
+    return;
   }
 
   Future<void> polygonTap(List<LatLng>? coordinates, String id) async {}

@@ -31,7 +31,7 @@ class VenueManager{
   }
 
   Future<List<polylinedata>?> getPolylinePolygonData() async {
-    print("buildings $buildings");
+    print("polylinedata buildings $buildings");
     if(buildings.isEmpty) return null;
     List<polylinedata> data = [];
     for (var building in buildings) {
@@ -42,7 +42,7 @@ class VenueManager{
   }
 
   Future<List<patchDataModel>?> getPatchData() async {
-    print("buildings $buildings");
+    print("patchDataModel buildings $buildings");
     if(buildings.isEmpty) return null;
     List<patchDataModel> data = [];
     for (var building in buildings) {

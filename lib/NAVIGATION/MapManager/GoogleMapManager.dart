@@ -1,5 +1,5 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
+import 'package:flutter/material.dart';
 import 'RenderingManager.dart';
 
 class GoogleMapManager {
@@ -15,7 +15,14 @@ class GoogleMapManager {
     zoom: 14,
   );
 
-  void onMapCreated(GoogleMapController controller) {
+  String maptheme = "";
+
+  void onMapCreated(GoogleMapController controller, BuildContext context) {
+    DefaultAssetBundle.of(context)
+        .loadString("assets/mapstyle.json")
+        .then((value) {
+      maptheme = value;
+    });
     _controller = controller;
   }
 

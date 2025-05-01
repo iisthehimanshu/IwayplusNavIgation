@@ -8,6 +8,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/NAVIGATION/PlayPreview/PlayPreviewManager.dart';
 import 'package:iwaymaps/NAVIGATION/Sensor/SensorManager.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
 import 'package:iwaymaps/NAVIGATION/path.dart';
@@ -224,7 +225,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   DateTime? _gyroscopeUpdateTime;
   DateTime? _magnetometerUpdateTime;
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
-  late StreamSubscription<AccelerometerEvent> pdr;
+  late StreamSubscription<AccelerometerEvent>? pdr;
   Duration sensorInterval = Duration(milliseconds: 100);
   final pinLandmarkPannel PinLandmarkPannel = pinLandmarkPannel();
 
@@ -440,14 +441,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   final double targetZoom = 22.0;
 
   late DateTime timerStartTime;
-  SensorManager sensorData = SensorManager();
+  SensorManager sensorDataAcc = SensorManager();
+  SensorManager sensorDataMag = SensorManager();
   @override
   void initState() {
     super.initState();
     initializeMarkers();
     NavigationLogManager().initialize();
-    sensorData.startMagnetometer();
-    sensorData.startAccelerometer();
+    sensorDataMag.startMagnetometer();
+    sensorDataAcc.startAccelerometer();
     //add a timer of duration 5sec
     //PolylineTestClass.polylineSet.clear();
     // StartPDR();
@@ -830,12 +832,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
   void handleCompassEvents(){
-    sensorData.magnetometerStream.listen((event){
+    sensorDataMag.magnetometerStream.listen((event){
       if (!mounted) return; // Prevent setState if the widget is no longer in the tree
       networkManager.ws.updateSensorStatus(compass: true);
       networkManager.ws.updatePermissions(compass: true);
-      double? compassHeading = event.heading;
-      setState(() {
+      double? compassHeading = event;
+      print("compass heading:${compassHeading}");
+      setState((){
         user.theta = compassHeading!;
         if (mapState.interaction2) {
           mapState.bearing = compassHeading!;
@@ -949,7 +952,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         isPdr = false;
       });
       PDRTimer!.cancel();
-      pdr.cancel();
+      if(pdr!=null){
+        pdr?.cancel();
+        pdr=null;
+      }
+
     }
   }
 
@@ -975,7 +982,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
-    sensorData.accelerometerStream.listen((event){
+   pdr=sensorDataAcc.accelerometerStream.listen((event){
       if (pdr == null) {
         return; // Exit the event listener if subscription is canceled
       }
@@ -8852,30 +8859,31 @@ bool _isPlaying=false;
                                               textAlign: TextAlign.left,
                                             ),
                                           ),
-                                          // !kIsWeb?Semantics(
-                                          //     excludeSemantics: true,
-                                          //     child: IconButton(
-                                          //       onPressed: () {
-                                          //         setState((){
-                                          //           _isPlaying=!_isPlaying;
-                                          //           singleroute.clear();
-                                          //           pathCovered.clear();
-                                          //         });
-                                          //         //currently using for play preview animation
-                                          //         callPreviewAnimation().then((value){
-                                          //           setState((){
-                                          //             _isPlaying=false;
-                                          //           });
-                                          //         });
-                                          //         // String msg=(pathState().sourceFloor!=pathState().destinationFloor)?tools.generateNarration(UserState.mapPathGuide,isMultiFloor: true):tools.generateNarration(UserState.mapPathGuide,isMultiFloor: false);
-                                          //         // print("narration ${msg}");
-                                          //         // speak(msg, _currentLocale).whenComplete((){
-                                          //         //   setState(() {
-                                          //         //     _isPlaying=false;
-                                          //         //   });
-                                          //         // });
-                                          //       },
-                                          //       icon:Icon(Icons.play_circle_outline_rounded),color: (_isPlaying)?Colors.blue:Colors.black,)):Container(),
+                                          !kIsWeb?Semantics(
+                                              excludeSemantics: true,
+                                              child: IconButton(
+                                                onPressed: () {
+                                                  PlayPreviewManager().playPreviewAnimation(pathList:PathState.singleCellListPath);
+                                                  // setState((){
+                                                  //   _isPlaying=!_isPlaying;
+                                                  //   singleroute.clear();
+                                                  //   pathCovered.clear();
+                                                  // });
+                                                  // //currently using for play preview animation
+                                                  // callPreviewAnimation().then((value){
+                                                  //   setState((){
+                                                  //     _isPlaying=false;
+                                                  //   });
+                                                  // });
+                                                  // String msg=(pathState().sourceFloor!=pathState().destinationFloor)?tools.generateNarration(UserState.mapPathGuide,isMultiFloor: true):tools.generateNarration(UserState.mapPathGuide,isMultiFloor: false);
+                                                  // print("narration ${msg}");
+                                                  // speak(msg, _currentLocale).whenComplete((){
+                                                  //   setState(() {
+                                                  //     _isPlaying=false;
+                                                  //   });
+                                                  // });
+                                                },
+                                                icon:Icon(Icons.play_circle_outline_rounded),color: (_isPlaying)?Colors.blue:Colors.black,)):Container(),
                                           Spacer(),
                                           Semantics(
                                             excludeSemantics: true,
@@ -11958,7 +11966,6 @@ bool _isPlaying=false;
         SingletonFunctionController.building.floor[key]]!);
       }
     });
-
     buildingAllApi.allBuildingID.forEach((key, value) {
       if (pathCovered[key] != null &&
           pathCovered[key]![SingletonFunctionController.building.floor[key]] !=
@@ -11967,6 +11974,12 @@ bool _isPlaying=false;
         SingletonFunctionController.building.floor[key]]!);
       }
     });
+    PlayPreviewManager().pathCovered.forEach((key,value){
+      value.forEach((key1,value1){
+        poly = poly.union(value1);
+      });
+    });
+    // print("pathCovered:${PlayPreviewManager().pathCovered}");
 
     return poly;
   }
@@ -12535,7 +12548,9 @@ bool _isPlaying=false;
     for (var controller in _controllers) {
       controller.dispose();
     }
-    sensorData.stopMagnetometer();
+    sensorDataMag.stopMagnetometer();
+    sensorDataAcc.stopAccelerometer();
+
     magnetometerSubscription.cancel();
     super.dispose();
   }
@@ -13385,22 +13400,12 @@ bool _isPlaying=false;
           SafeArea(child: PinLandmarkPannel.getPanelWidget(context,updateNearbyLandmarkMarkers, localizeOnPinedLandmark, closePinnedLandmarkPannel, nearbyLandmarks,PinedLandmark)),
           detected ? Semantics(child: SafeArea(child: nearestLandmarkpannel())) : Container(),
           SizedBox(height: 28.0), // Adjust the height as needed
-          // FloatingActionButton(
-          //     onPressed: (){
-          //
-          //       //SingletonFunctionController.building.floor == 0 ? 'G' : '${SingletonFunctionController.building.floor}',
-          //
-          //       int firstKey = SingletonFunctionController.building.floor.values.first;
-          //
-          //
-          //
-          //
-          //
-          //
-          //
-          //     },
-          //     child: Icon(Icons.add)
-          // ),
+          FloatingActionButton(
+              onPressed: (){
+                PlayPreviewManager().clearPreview();
+              },
+              child: Icon(Icons.add)
+          ),
 
           // FloatingActionButton(
           //   onPressed: () async {

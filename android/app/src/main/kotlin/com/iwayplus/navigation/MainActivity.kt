@@ -22,6 +22,13 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.os.SystemClock
+
+
 
 class MainActivity : FlutterActivity() {
 
@@ -29,10 +36,34 @@ class MainActivity : FlutterActivity() {
     private lateinit var bluetoothLeScanner: BluetoothLeScanner
     private val deviceDetailsList = mutableListOf<String>()
     private var isScanning = false
+    private var gravityValues = FloatArray(3)
+    private var magneticValues = FloatArray(3)
+    private var rotationVectorValue = FloatArray(5)
+
+    private var lastUpdateTime: Long = 0
+    private val COMPASS_UPDATE_RATE_MS:Long = 100L
+
 
     private val METHOD_CHANNEL = "com.example.bluetooth/scan"
     private val EVENT_CHANNEL = "com.example.bluetooth/scanUpdates"
+
+    //implemented magnetometere streams
+    private val COMPASS_CHANNEL = "com.example.navigation/compass"
+
+
     private var eventSink: EventChannel.EventSink? = null
+
+    private var eventSinkCompass: EventChannel.EventSink? = null
+
+    private fun lowPassFilter(input: FloatArray, output: FloatArray?): FloatArray {
+        val alpha = 0.25f
+        if (output == null) return input
+        for (i in input.indices) {
+            output[i] = output[i] + alpha * (input[i] - output[i])
+        }
+        return output
+    }
+
 
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
@@ -161,8 +192,7 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
-
-        EventChannel(flutterEngine.dartExecutor.binaryMessenger, EVENT_CHANNEL).setStreamHandler(object : EventChannel.StreamHandler {
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger,EVENT_CHANNEL).setStreamHandler(object : EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 eventSink = events
             }
@@ -171,7 +201,103 @@ class MainActivity : FlutterActivity() {
                 eventSink = null
             }
         })
+
+
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, COMPASS_CHANNEL).setStreamHandler(
+            object : EventChannel.StreamHandler {
+                private lateinit var sensorManager: SensorManager
+                private lateinit var sensorListener: SensorEventListener
+
+                override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                    eventSinkCompass = events
+                    sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+                    val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+                    val magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+                    val rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+
+                    sensorListener = object : SensorEventListener {
+                        override fun onSensorChanged(event: SensorEvent?) {
+                            if (event == null) return
+
+                            when (event.sensor.type) {
+                                Sensor.TYPE_ROTATION_VECTOR -> {
+                                    rotationVectorValue = lowPassFilter(event.values.clone(), rotationVectorValue)
+                                }
+
+                                Sensor.TYPE_ACCELEROMETER -> {
+                                    gravityValues = lowPassFilter(event.values.clone(), gravityValues)
+                                }
+
+                                Sensor.TYPE_MAGNETIC_FIELD -> {
+                                    magneticValues = lowPassFilter(event.values.clone(), magneticValues)
+                                }
+                            }
+
+                            val currentTime = SystemClock.elapsedRealtime()
+                            if (currentTime - lastUpdateTime > COMPASS_UPDATE_RATE_MS) {
+                                lastUpdateTime = currentTime
+                                val heading = updateHeading()
+                                heading?.let {
+//                                    Log.d("HeadingPlugin", "Heading: $it")
+                                    eventSinkCompass?.success(it)
+                                }
+                            }
+                        }
+
+                        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+                    }
+
+                    // ✅ Register all three sensors
+                    sensorManager.registerListener(sensorListener, accelerometer, SensorManager.SENSOR_DELAY_GAME)
+                    sensorManager.registerListener(sensorListener, magnetometer, SensorManager.SENSOR_DELAY_GAME)
+                    sensorManager.registerListener(sensorListener, rotationVectorSensor, SensorManager.SENSOR_DELAY_GAME)
+                }
+
+                override fun onCancel(arguments: Any?) {
+                    sensorManager.unregisterListener(sensorListener)
+                }
+            }
+        )
+
     }
+
+    private fun updateHeading(): Double? {
+        val rotationMatrix = FloatArray(9)
+        val orientation = FloatArray(3)
+        var heading: Float
+        if (rotationVectorValue != null) {
+            SensorManager.getRotationMatrixFromVector(rotationMatrix, rotationVectorValue)
+            SensorManager.getOrientation(rotationMatrix, orientation)
+            heading = Math.toDegrees(orientation[0].toDouble()).toFloat()
+            if (heading > 180) {
+                heading -= 360
+            }
+
+            // Log.d("Rotation", "Using rotation vector: $heading")
+            return heading.toDouble()
+        }
+        if (gravityValues != null && magneticValues != null &&
+            SensorManager.getRotationMatrix(rotationMatrix, null, gravityValues, magneticValues)) {
+
+            val remappedMatrix = FloatArray(9)
+            SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Z, remappedMatrix)
+            SensorManager.getOrientation(remappedMatrix, orientation)
+            heading = Math.toDegrees(orientation[0].toDouble()).toFloat()
+            if (heading > 180) {
+                heading -= 360
+            }
+
+            //  Log.d("Rotation", "Using accel + mag: $heading")
+            return heading.toDouble()
+        }
+
+        return null
+    }
+
+
+
+
 
     private fun startScan() {
         if (!isScanning) {
@@ -248,4 +374,8 @@ class MainActivity : FlutterActivity() {
         super.onDestroy()
         unregisterReceiver(discoveryReceiver)
     }
+
+
+
+
 }

@@ -66,6 +66,7 @@ class BluetoothScanAndroidClass{
 
 
   BluetoothDevice parseDeviceDetails(String response) {
+    print("parseDeviceDetails $response");
     final deviceRegex = RegExp(
       r'Device Name: (.+?)\n.*?Address: (.+?)\n.*?RSSI: (-?\d+).*?Raw Data: ([0-9A-Fa-f\-]+)',
       dotAll: true,
@@ -105,6 +106,7 @@ class BluetoothScanAndroidClass{
     try {
       // Listen to the stream continuously
       subscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
+
         BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
         if (apibeaconmap.containsKey(deviceDetails.DeviceName)) {
           if(int.parse(deviceDetails.DeviceRssi)<90) {
@@ -118,8 +120,6 @@ class BluetoothScanAndroidClass{
                 int.parse(deviceDetails.DeviceRssi));
             EM_RSSI_WEIGHT[deviceDetails.DeviceAddress]!.add(getWeight(
                 getBinNumber(int.parse(deviceDetails.DeviceRssi).abs())));
-            print("EM_RSSI_VALUES");
-            print(EM_RSSI_VALUES);
 
 
             if (EM_RSSI_VALUES[deviceDetails.DeviceAddress]!.length > 7) {
@@ -221,35 +221,35 @@ class BluetoothScanAndroidClass{
       print("Error starting scan or receiving updates: $e");
     }
     SingletonFunctionController.timer = Future.delayed(const Duration(seconds: 7));
-    await Future.delayed(Duration(seconds: 6)).then((_){
-      print("Processing scan results...future");
-      print("Device Names: $IL_DEVICE_NAME");
-      print("RSSI Values: $IL_RSSI_VALUES");
-      print("RSSI Weights: $IL_RSSI_WEIGHT");
-    });
+    // await Future.delayed(Duration(seconds: 6)).then((_){
+    //   print("Processing scan results...future");
+    //   print("Device Names: $IL_DEVICE_NAME");
+    //   print("RSSI Values: $IL_RSSI_VALUES");
+    //   print("RSSI Weights: $IL_RSSI_WEIGHT");
+    // });
 
-    print("Processing scan results...");
-    print("Device Names: $IL_DEVICE_NAME");
-    print("RSSI Values: $IL_RSSI_VALUES");
-    print("RSSI Weights: $IL_RSSI_WEIGHT");
+    // print("Processing scan results...");
+    // print("Device Names: $IL_DEVICE_NAME");
+    // print("RSSI Values: $IL_RSSI_VALUES");
+    // print("RSSI Weights: $IL_RSSI_WEIGHT");
 
     IL_RSSI_AVERAGE = calculateAverageFromRssi(IL_RSSI_VALUES, IL_DEVICE_NAME, IL_RSSI_WEIGHT);
     closestDeviceDetails = findLowestRssiDevice(IL_RSSI_AVERAGE);
 
-    print("RSSI_AVERAGE::${IL_RSSI_AVERAGE} for ${closestDeviceDetails}");
+    // print("RSSI_AVERAGE::${IL_RSSI_AVERAGE} for ${closestDeviceDetails}");
 
     if(IL_RSSI_AVERAGE.isNotEmpty){
       SingletonFunctionController.SC_IL_RSSI_AVERAGE = {};
       SingletonFunctionController.SC_IL_RSSI_AVERAGE = IL_RSSI_AVERAGE;
     }
 
-    print("Closest Device Details: $closestDeviceDetails");
+    // print("Closest Device Details: $closestDeviceDetails");
     // if(closestDeviceDetails != "No devices found"){
     //
     // }
     SingletonFunctionController.SC_LOCALIZED_BEACON = "";
     SingletonFunctionController.SC_LOCALIZED_BEACON = closestDeviceDetails;
-    print("SingletonFunctionController.SC_LOCALIZED_BEACON ${SingletonFunctionController.SC_LOCALIZED_BEACON}");
+    // print("SingletonFunctionController.SC_LOCALIZED_BEACON ${SingletonFunctionController.SC_LOCALIZED_BEACON}");
     // if(SingletonFunctionController.SC_LOCALIZED_BEACON.isEmpty){
     //   if(kDebugMode){
     //
@@ -268,24 +268,20 @@ class BluetoothScanAndroidClass{
   void listenToScanUpdates(HashMap<String, beacon> apibeaconmap) {
     startScan();
     startCleanupTimer();
-    print("listenToScanUpdates");
 
 
     String deviceMacId = "";
     // Start listening to the stream continuously
     _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
-      print("deviceDetail----- $deviceDetail");
-      BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
+      BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail.toString());
       // String dataaa = parseLog(deviceDetail);
-      networkManager.ws.updateInitialization(nearByDevices: MapEntry(deviceDetails.rawData, deviceDetails.DeviceRssi));
+     // networkManager.ws.updateInitialization(nearByDevices: MapEntry(deviceDetails.rawData, deviceDetails.DeviceRssi));
       // print("dataaa- $dataaa");
 
       if(apibeaconmap.containsKey(deviceDetails.DeviceName)) {
         DateTime currentTime = DateTime.now();
         //wsocket.message["AppInitialization"]["bleScanResults"][deviceDetails.DeviceName] = deviceDetails.DeviceRssi;
         deviceMacId = deviceDetails.DeviceAddress;
-        print("iffffff");
-        print(deviceDetails.DeviceName);
 
 
         slidingScan.putIfAbsent(deviceDetails.DeviceName, () => <String, DateTime>{});
@@ -299,8 +295,6 @@ class BluetoothScanAndroidClass{
 
 
         rssiValues[deviceDetails.DeviceAddress]!.add(int.parse(deviceDetails.DeviceRssi));
-        print("deviceDetails.DeviceRssi");
-        print(deviceDetails.DeviceRssi);
 
         rssiWeight[deviceDetails.DeviceAddress]!.add(getWeight(getBinNumber(int.parse(deviceDetails.DeviceRssi).abs())));
 
@@ -338,16 +332,12 @@ class BluetoothScanAndroidClass{
   Map<String, double> candorAverage = {};
 
   void startCleanupTimer(){
-    print("proofstartCleanupTimer");
+
     cleanupTimer = Timer.periodic(Duration(seconds: 2), (timer)  {
-      print("startCleanupTimer");
 
       slidingScan.forEach((beaconName,beaconRespVal){
-        print(beaconName);
         beaconRespVal.forEach((beaconRssi,beaconDateTime){
-          print("$beaconRssi $beaconDateTime");
         });
-        print("---------");
       });
       // DateTime currTime = DateTime.now();
       //

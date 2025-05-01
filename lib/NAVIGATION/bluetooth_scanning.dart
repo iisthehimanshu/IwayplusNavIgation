@@ -79,14 +79,13 @@ class BLueToothClass {
   void startScanning(HashMap<String, beacon> apibeaconmap) {
     latesILMap.clear();
     latesILMapTimeStamp.clear();
-    print("proof $latesILMap ${latesILMapTimeStamp}");
+    // print("proof $latesILMap ${latesILMapTimeStamp}");
     SourceTSP = DateTime.now();
-    print("SourceTSP set to : $SourceTSP");
+    // print("SourceTSP set to : $SourceTSP");
     startbin();
     FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
-
     FlutterBluePlus.scanResults.listen((results) async {
-      print("resultsrun");
+      // print("resultsrun");
       for (ScanResult result in results) {
         if(result.device.platformName.length > 2){
           String MacId = "${result.device.platformName}";
@@ -95,8 +94,7 @@ class BLueToothClass {
           // wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
           if (apibeaconmap.containsKey(MacId)) {
             if (result.timeStamp.difference(SourceTSP).inSeconds>=0 && result.timeStamp.difference(SourceTSP).inSeconds < 10) {
-              print("result.timeStamp.difference(SourceTSP) ${result.timeStamp.difference(SourceTSP)}  ${result.timeStamp.difference(SourceTSP).inSeconds}");
-
+             // print("result.timeStamp.difference(SourceTSP) ${result.timeStamp.difference(SourceTSP)}  ${result.timeStamp.difference(SourceTSP).inSeconds}");
               latesILMap.putIfAbsent(MacId,() => []);
               latesILMapTimeStamp.putIfAbsent(MacId,() => []);
 
@@ -104,8 +102,7 @@ class BLueToothClass {
                 latesILMapTimeStamp[MacId]!.add(result.timeStamp);
                 latesILMap[MacId]!.add(Rssi);
               }
-              print("Beacon $MacId $Rssi ${result.timeStamp.difference(SourceTSP)} ${result.timeStamp} ${SourceTSP}");
-
+              // print("Beacon $MacId $Rssi ${result.timeStamp.difference(SourceTSP)} ${result.timeStamp} ${SourceTSP}");
             }
             //print(MacId);
             //print("mac1 $MacId    rssi $Rssi");
@@ -115,11 +112,9 @@ class BLueToothClass {
           }
         }
       }
-      print("latesILMap $latesILMap");
-      print("latesILMapTimeStamp $latesILMapTimeStamp");
+      // print("latesILMap $latesILMap");
+      // print("latesILMapTimeStamp $latesILMapTimeStamp");
     });
-
-
     calculateAverage();
   }
 

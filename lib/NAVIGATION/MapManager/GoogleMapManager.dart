@@ -1,29 +1,38 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter/material.dart';
 import 'RenderingManager.dart';
 
-class GoogleMapManager {
+
+class GoogleMapManager extends RenderingManager with ChangeNotifier{
   static final GoogleMapManager _instance = GoogleMapManager._internal();
   factory GoogleMapManager() => _instance;
   GoogleMapManager._internal();
 
   GoogleMapController? _controller;
-  final RenderingManager _renderManager = RenderingManager();
+
+  GoogleMapController? get controller => _controller;
+  CameraPosition get initialPosition => _initialPosition;
 
   CameraPosition _initialPosition = CameraPosition(
     target: LatLng(28.6139, 77.2090),
     zoom: 14,
   );
 
-  String maptheme = "";
-
-  void onMapCreated(GoogleMapController controller, BuildContext context) {
-    DefaultAssetBundle.of(context)
-        .loadString("assets/mapstyle.json")
-        .then((value) {
-      maptheme = value;
-    });
+  Future<void> onMapCreated(GoogleMapController controller) async {
     _controller = controller;
+    final style = await rootBundle.loadString('assets/mapstyle.json');
+    _controller?.setMapStyle(style);
+    await createMap();
+    notifyListeners();
+    fitPolygonsInView(polygons);
+  }
+
+  void onCameraMove(CameraPosition position) {
+    print("zoom ${position.zoom}");
+    updateZoomLevel(position.zoom);
+    venueManager.changeFocusedBuilding(position);
+    notifyListeners();
   }
 
   Future<void> moveCameraTo(LatLng target, {double zoom = 17}) async {
@@ -75,7 +84,16 @@ class GoogleMapManager {
   }
 
 
-  GoogleMapController? get controller => _controller;
-  RenderingManager get renderManager => _renderManager;
-  CameraPosition get initialPosition => _initialPosition;
+  @override
+  void clearAll(){
+    super.clearAll();
+    notifyListeners();
+  }
+
+  @override
+  Future<void> changeFloorOfBuilding(String buildingID, int floor) async {
+    super.changeFloorOfBuilding(buildingID, floor);
+    notifyListeners();
+  }
+
 }

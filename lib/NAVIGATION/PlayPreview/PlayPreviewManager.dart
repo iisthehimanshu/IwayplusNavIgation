@@ -38,7 +38,6 @@ class PlayPreviewManager {
     _isPlaying = true;
     _isCancelled = false;
     _stopAnimation = false;
-
     try {
       List<gmap.LatLng> currentCoordinates = [];
       List<int> turnPoints = tools.getTurnpoints(pathList.map((e) => e.node).toList(), pathList.first.numCols);
@@ -52,15 +51,18 @@ class PlayPreviewManager {
         final current = pathList[i];
         final next = pathList[i + 2];
 
-        final latLng = gmap.LatLng(current.lat, current.lng);
+        int row = (current.node % pathList[i].numCols); //divide by floor length
+        int col = (current.node ~/ pathList[i].numCols);
+        List<double> value = tools.localtoglobal(
+            row, col, SingletonFunctionController.building.patchData[current.bid]);
+        final latLng = gmap.LatLng(value[0], value[1]);
         currentCoordinates.add(latLng);
-
         final buildingId = current.bid!;
         final floorId = current.floor;
 
         final polyline = gmap.Polyline(
           polylineId: gmap.PolylineId("preview_${floorId}_$i"),
-          points: List.from(currentCoordinates),
+          points: currentCoordinates,
           color: Colors.green,
           width: 8,
         );

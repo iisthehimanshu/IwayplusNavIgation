@@ -837,7 +837,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       networkManager.ws.updateSensorStatus(compass: true);
       networkManager.ws.updatePermissions(compass: true);
       double? compassHeading = event;
-      print("compass heading:${compassHeading}");
       setState((){
         user.theta = compassHeading!;
         if (mapState.interaction2) {
@@ -2043,10 +2042,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 .polyline!
                 .floors!);
         for (int i = 0; i < prevFloorLifts.length; i++) {}
-
         for (int i = 0; i < currFloorLifts.length; i++) {}
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
-
         UserState.xdiff = dvalue[0];
         UserState.ydiff = dvalue[1];
         values = tools.localtoglobal(
@@ -7934,7 +7931,6 @@ int currentCols=0;
       //         [LatLng(svalue[0],svalue[1]), LatLng(dvalue[0],dvalue[1])]);
       //   }
       // }
-
       List<LatLng> coordinates = [];
       if (PathState.sourceBid == bid && floor == PathState.sourceFloor) {
         for (var node in path) {
@@ -7956,13 +7952,13 @@ int currentCols=0;
               color: oldPolyline.color,
               width: oldPolyline.width,
             );
-            setState(() {
+            setState((){
               // Remove the old polyline and add the updated polyline
               singleroute[bid]![floor]!.remove(oldPolyline);
               singleroute[bid]![floor]!.add(updatedPolyline);
             });
-          } else {
-            setState(() {
+          }else{
+            setState((){
               singleroute[bid]!.putIfAbsent(floor, () => Set());
               singleroute[bid]![floor]?.add(gmap.Polyline(
                 polylineId: PolylineId("$bid"),
@@ -7981,10 +7977,8 @@ int currentCols=0;
         for (var node in path) {
           int row = (node % numCols); //divide by floor length
           int col = (node ~/ numCols); //divide by floor length
-
           List<double> value = tools.localtoglobal(
               row, col, SingletonFunctionController.building.patchData[bid]);
-
           coordinates.add(LatLng(value[0], value[1]));
         }
 
@@ -8522,7 +8516,9 @@ bool _isPlaying=false;
                               PathState.path.clear();
                               PathState.sourcePolyID = "";
                               PathState.destinationPolyID = "";
-                              singleroute.clear(); pathCovered.clear();
+                              singleroute.clear();
+                              pathCovered.clear();
+                              PlayPreviewManager().pathCovered.clear();
                               //realWorldPath.clear();
                               _isBuildingPannelOpen = true;
                               if (user.isnavigating == false) {
@@ -8960,6 +8956,7 @@ bool _isPlaying=false;
                                                     PathState.sourceBid = "";
                                                     PathState.destinationBid = "";
                                                     singleroute.clear();
+                                                    PlayPreviewManager().pathCovered.clear();
                                                     //realWorldPath.clear();
                                                     PathState.directions = [];
                                                     interBuildingPath.clear();
@@ -11943,7 +11940,7 @@ bool _isPlaying=false;
     }
     return cachedPolygon.union(patch).union(otherpatch).union(blurPatch);
   }
-
+  bool hasRun = false;
   Set<gmap.Polyline> getCombinedPolylines() {
     Set<gmap.Polyline> poly = Set();
 
@@ -11974,9 +11971,14 @@ bool _isPlaying=false;
         SingletonFunctionController.building.floor[key]]!);
       }
     });
+
     PlayPreviewManager().pathCovered.forEach((key,value){
       value.forEach((key1,value1){
-        poly = poly.union(value1);
+       if(!hasRun && key1==PathState.destinationFloor){
+         hasRun=true;
+          createRooms(SingletonFunctionController.building.polylinedatamap[buildingAllApi.selectedBuildingID]!, PathState.destinationFloor);
+       }
+        poly = poly.union(value1).union(focusturn);
       });
     });
     // print("pathCovered:${PlayPreviewManager().pathCovered}");
@@ -13037,15 +13039,12 @@ bool _isPlaying=false;
                               }else{
                                 _polygon.clear();
                               }
-
-
                               //_polygon.clear();
                               print("_polygon.length");
                               print(_polygon.length);
 
                               cachedPolygon.clear();
                               circles.clear();
-
                               _markers.clear();
                               _markerLocationsMap.clear();
                               _markerLocationsMapLanName.clear();
@@ -13401,7 +13400,7 @@ bool _isPlaying=false;
           detected ? Semantics(child: SafeArea(child: nearestLandmarkpannel())) : Container(),
           SizedBox(height: 28.0), // Adjust the height as needed
           FloatingActionButton(
-              onPressed: (){
+              onPressed:(){
                 PlayPreviewManager().clearPreview();
               },
               child: Icon(Icons.add)

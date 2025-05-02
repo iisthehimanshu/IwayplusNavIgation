@@ -18,7 +18,6 @@ class MagnetometerSensor implements BaseSensor {
   @override
   void startListening() {
     headingStream.listen((onData){
-      print("events added");
       _controller.add(onData);
     });
   }

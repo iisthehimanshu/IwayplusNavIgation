@@ -68,7 +68,7 @@ class UserState {
   static Map<String, Map<int, List<int>>> nonWalkable = {};
   static Function reroute = () {};
   static Function closeNavigation = () {};
-  static Function speak = (String lngcode) {};
+  static Function speak = () {};
   static Function alignMapToPath = () {};
   static Function changeBuilding = () {};
   static Function startOnPath = () {};
@@ -501,17 +501,14 @@ class UserState {
   void announceLiftUsage(BuildContext context) {
     onConnection = true;
     createCircle(lat, lng);
-    speak(
-        convertTolng(
+    speak(convertTolng(
             "Use this ${pathobj.accessiblePath} and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor",
             "",
             0.0,
             context,
             0.0,
             "",
-            ""),
-        lngCode,
-        prevpause: true);
+            ""),prevpause: true);
   }
 
   void handleNearbyLandmarks(BuildContext context) {
@@ -551,8 +548,7 @@ class UserState {
   void _speakPassingBy(BuildContext context, String? name) {
     if (!UserState.ttsOnlyTurns) {
       speak(
-          convertTolng("Passing by $name", name, 0.0, context, 0.0, "", ""),
-          lngCode
+          convertTolng("Passing by $name", name, 0.0, context, 0.0, "", "")
       );
     }
   }
@@ -567,12 +563,10 @@ class UserState {
     if (!UserState.ttsOnlyTurns) {
       String direction = tools.angleToClocks(angle, context);
       if (direction == "Straight") {
-        speak("${element.name} door ahead", lngCode);
+        speak("${element.name} door ahead");
       } else {
         speak(
-            "${element.name} door is on your ${LocaleData.getProperty5(direction, context)}",
-            lngCode
-        );
+            "${element.name} door is on your ${LocaleData.getProperty5(direction, context)}");
       }
     }
   }
@@ -581,7 +575,7 @@ class UserState {
     if (!UserState.ttsOnlyTurns) {
       speak(
           convertTolng("Alert, $name ahead ", name, 0.0, context, 0.0, "", ""),
-          lngCode
+
       );
     }
   }
@@ -604,7 +598,7 @@ class UserState {
               "",
               ""
           ),
-          lngCode
+
       );
     }
   }

@@ -149,9 +149,6 @@ mixin LocaleData {
     'on your Back':onyourleft,
     'on your Right':onyourright,
     'None':none
-
-
-
   };
 
 
@@ -218,7 +215,6 @@ mixin LocaleData {
     'Sharp Left':ttssharpleft,
     'Sharp Right':ttssharpright,
     'U Turn':ttsuturn,
-
   };
 
 
@@ -361,11 +357,6 @@ mixin LocaleData {
     'Scan nearby QR to know your location':'Scan nearby QR to know your location',
     'You are going away from the path. Rerouting you to the destination':'You are going away from the path. Rerouting you to the destination',
     'Calculating new path.':'Calculating new path.'
-
-
-
-
-
   };
 
   static const Map<String, dynamic> HI = {
@@ -470,7 +461,6 @@ mixin LocaleData {
     'Turn from':'से मुड़ो',
     'Approaching': 'पास आ रहे हैं',
     'Location':'लोकेशन',
-
     'ttsRight':'राइट',
     'ttsLeft':'लेफ्ट',
     'ttsBack':'बैक',

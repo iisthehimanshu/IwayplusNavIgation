@@ -39,11 +39,14 @@ import '/NAVIGATION/Navigation.dart';
 import 'dart:io' show Platform;
 
 import 'IWAYPLUS/websocket/navigationLogManager.dart';
+import 'NAVIGATION/Tts/ttsManager.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
 
 final navigationManager=NavigationLogManager();
+
+final tts = TTSManager.instance;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -17,6 +17,7 @@ import '../../IWAYPLUS/API/buildingAllApi.dart';
 import '../../IWAYPLUS/Elements/UserCredential.dart';
 import '../../IWAYPLUS/Elements/locales.dart';
 import '../../IWAYPLUS/FIREBASE NOTIFICATION API/PushNotifications.dart';
+import '../../main.dart';
 import '../BluetoothManager/BLEManager.dart';
 import '../BluetoothScanAndroidClass.dart';
 
@@ -109,39 +110,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
 
 
-  void initTts() {
-    flutterTts.setCompletionHandler(() {
-      setState(() {
-        isSpeaking = false;
-      });
-    });
-  }
 
-  void setTTSParams(String lngcode)async{
-    try{
-      print("get ios voices ${await flutterTts.getVoices}");
-      if (lngcode == "hi") {
-        if (Platform.isAndroid) {
-          await flutterTts.setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
-        } else {
-          await flutterTts.setVoice({"name": "Lekha", "locale": "hi-IN"});
-        }
-      } else {
-        await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
-      }
-
-      await flutterTts.stop();
-      if (Platform.isAndroid) {
-        await flutterTts.setSpeechRate(0.7);
-      } else {
-        await flutterTts.setSpeechRate(0.55);
-      }
-
-      await flutterTts.setPitch(1.0);
-    }catch(e){
-
-    }
-  }
 
   late StreamSubscription<Map<String, dynamic>> _bufferSubscription;
 
@@ -159,8 +128,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     // initTts();
 
     _flutterLocalization = FlutterLocalization.instance;
-    _currentLocale = _flutterLocalization.currentLocale!.languageCode;
-    setTTSParams(_currentLocale);
+    tts.setLanguageCode(_flutterLocalization.currentLocale!.languageCode);
 
     for (int i = 0; i < widget.user.pathobj.directions.length; i++) {
       direction element = widget.user.pathobj.directions[i];
@@ -223,7 +191,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         widget.user.pathobj.connections[widget.user.bid]?[widget.user.floor] ==
             (widget.user.showcoordY * UserState.cols +
                 widget.user.showcoordX)) {
-      speak(
+      tts.speak(
           convertTolng(
               "Use this lift and go to ${tools.numericalToAlphabetical(widget.user.pathobj.destinationFloor)} floor",
               _currentLocale,
@@ -231,8 +199,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               "",
               0,
               ""),
-          _currentLocale,
-          prevpause: true);
+          prevPause: true);
     } else if (widget
             .user.pathobj.numCols![widget.user.bid]![widget.user.floor] !=
         null) {
@@ -269,10 +236,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         if (widget.direction == "Straight") {
           widget.direction = "Go Straight";
           if (!UserState.ttsOnlyTurns) {
-            speak(
+           tts.speak(
                 "${LocaleData.getProperty6('Go Straight', widget.context)} ${tools.convertFeet(widget.distance, widget.context)}}",
-                _currentLocale,
-                prevpause: true);
+                prevPause: true);
           }
         } else {
           widget.direction = convertTolng(
@@ -283,7 +249,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               0,
               "");
           if (!UserState.ttsOnlyTurns) {
-            speak("${widget.direction}", _currentLocale, prevpause: true);
+           tts.speak("${widget.direction}", prevPause: true);
           }
           widget.getSemanticValue =
               "Turn ${widget.direction}, and Go Straight ${tools.convertFeet(widget.distance, widget.context)}";
@@ -310,7 +276,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }
     Device_timer.cancel();
     disposed = true;
-    flutterTts.stop();
+    tts.dispose();
     _timer.cancel();
     super.dispose();
   }
@@ -526,7 +492,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     widget.user.onConnection = false;
     widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
     UserState.createCircle(widget.user.lat, widget.user.lng);
-    speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor", _currentLocale);
+    tts.speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor",);
     DirectionIndex = nextTurnIndex;
     //need to render on beacon for aiims jammu
     widget.paint(nearestBeacon, null, null, render: false);
@@ -535,7 +501,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   void moveOnPathEssentials(String nearestBeacon,int? indexOnPath){
     widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
     if (!UserState.ttsOnlyTurns) {
-      speak("${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}", _currentLocale);
+      tts.speak("${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}",);
     }
     widget.user.moveToPointOnPath(indexOnPath!, context);
     widget.moveUser();
@@ -622,26 +588,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     // Convert projected lat/lng back to x/y for the Cell object
 
     return [projLat, projLng];
-  }
-  FlutterTts flutterTts = FlutterTts();
-  Future<void> speak(String msg, String lngcode, {bool prevpause = false}) async {
-    print("checkspeak");
-    if (!UserState.ttsAllStop) {
-      if (disposed) return;
-      if (false) {
-        await flutterTts.pause();
-      }
-      try {
-        // Check if Semantic Mode is enabled
-        if (isSemanticEnabled) {
-          PushNotifications.showSimpleNotification(body: "", payload: "", title: msg);
-        } else {
-          await flutterTts.speak(msg);
-        }
-      } catch (e) {
-        print("Error during TTS: $e");
-      }
-    }
   }
   Cell findNextTurn(List<Cell> turns, List<Cell> path) {
     // Iterate through the sorted list
@@ -899,7 +845,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if (oldWidget.direction != widget.direction) {
       if (oldWidget.direction == "Straight") {
         Vibration.vibrate();
-        speak(
+        tts.speak(
             convertTolng(
                 "Turn ${LocaleData.getProperty5(widget.direction, context)}",
                 _currentLocale,
@@ -907,16 +853,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 "",
                 0,
                 ""),
-            _currentLocale,
-            prevpause: true);
+            prevPause: true);
       } else if (widget.direction == "Straight") {
         Vibration.vibrate();
         UserState.isTurn = false;
         if (!UserState.ttsOnlyTurns) {
-          speak(
+          tts.speak(
               "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}}",
-              _currentLocale,
-              prevpause: true);
+              prevPause: true);
         }
       }
     }
@@ -938,9 +882,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         print("problem to be solved later $e");
       }
       if (!UserState.ttsOnlyTurns) {
-        speak(
+        tts.speak(
             "${widget.direction} ${widget.distance} steps. ${pathObj.destinationName} will be ${tools.angleToClocks2(angle, widget.context)}",
-            _currentLocale);
+        );
       }
       user.move(context);
     } else if (nextTurn != turnPoints.last &&
@@ -953,23 +897,21 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         final landmark = pathObj.associateTurnWithLandmark[nextTurn];
         if (landmark != null) {
           if (!UserState.ttsOnlyTurns) {
-            speak(
+            tts.speak(
                 convertTolng(
                     "You are approaching ${turnDirection} turn from ${landmark.name!}",
                     _currentLocale,
                     '',
                     turnDirection,
                     nextTurn!.node,
-                    ""),
-                _currentLocale);
+                    ""),);
           }
           return;
         } else {
           if (!UserState.ttsOnlyTurns) {
-            speak(
+            tts.speak(
                 convertTolng("You are approaching ${turnDirection} turn",
-                    _currentLocale, '', turnDirection, nextTurn!.node, ""),
-                _currentLocale);
+                    _currentLocale, '', turnDirection, nextTurn!.node, ""),);
           }
           user.move(widget.context);
           return;

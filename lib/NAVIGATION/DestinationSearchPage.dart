@@ -21,6 +21,7 @@ import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
 import '../IWAYPLUS/Elements/HelperClass.dart';
+import '../main.dart';
 import 'API/ladmarkApi.dart';
 import 'APIMODELS/landmark.dart';
 import 'Elements/DestinationPageChipsWidget.dart';
@@ -358,13 +359,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   }
   Set<String> optionListItemBuildingName = {};
   List<Widget> searcCategoryhResults = [];
-  FlutterTts flutterTts  = FlutterTts();
 
-  Future<void> speak(String msg) async {
-    await flutterTts.setSpeechRate(0.8);
-    await flutterTts.setPitch(1.0);
-    await flutterTts.speak(msg);
-  }
 
   void search(String searchText,{String wantToFilter=''}) {
     setState(() {
@@ -821,7 +816,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     value: vall,
                     onChanged: (val) {
                       if(HelperClass.SemanticEnabled) {
-                        speak("${optionListForUI[val]} selected");
+                        tts.speak("${optionListForUI[val]} selected");
                       }
                       selectedButton = optionListForUI[val];
                       setState(() => vall = val);

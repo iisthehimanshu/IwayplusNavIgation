@@ -47,12 +47,10 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   String wordsSpoken = "";
   String searchHintString = "";
   bool topBarIsEmptyOrNot = false;
-  FlutterTts flutterTts = FlutterTts();
-  Future<void> speak(String msg) async {
-    await flutterTts.setSpeechRate(0.8);
-    await flutterTts.setPitch(1.0);
-    await flutterTts.speak(msg);
-  }
+
+
+
+
   @override
   void initState() {
     super.initState();

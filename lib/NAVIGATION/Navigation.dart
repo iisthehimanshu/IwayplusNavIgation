@@ -50,6 +50,7 @@ import '../IWAYPLUS/MODELS/FilterInfoModel.dart';
 import '../IWAYPLUS/VenueSelectionScreen.dart';
 import '../IWAYPLUS/websocket/navigationLogManager.dart';
 import '../IWAYPLUS/websocket/navigationLogModel.dart';
+import '../main.dart';
 import '../newSearchPage.dart';
 import 'API/DataVersionApi.dart';
 import 'API/GlobalAnnotationapi.dart';
@@ -313,7 +314,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               mapController: _googleMapController,
             ),
           );
-        } else if (values == 'Entry') {
+        }else if (values == 'Entry'){
           Uint8List iconMarker =
           await getImagesFromMarker('assets/MapEntry.png', 85);
           try {
@@ -446,6 +447,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   SensorManager accData = SensorManager();
   SensorManager magnetoData = SensorManager();
   SensorManager gpsData = SensorManager();
+
   @override
   void initState() {
     super.initState();
@@ -459,7 +461,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     // StartPDR();
     WidgetsBinding.instance.addObserver(this);
     _flutterLocalization = FlutterLocalization.instance;
-    _currentLocale = _flutterLocalization.currentLocale!.languageCode;
+    tts.setLanguageCode(_flutterLocalization.currentLocale!.languageCode);
 
     if (UserCredentials().getUserOrentationSetting() == 'Focus Mode') {
       UserState.ttsOnlyTurns = true;
@@ -490,12 +492,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       duration: Duration(milliseconds: 800), // Adjust for smoother animation
       vsync: this,
     );
-
     _animationController1 = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 5), // Adjust as needed
     );
-
     _zoomAnimation = CurvedAnimation(
       parent: _animationController1!,
       curve: Curves.easeInOut,
@@ -530,7 +530,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     //SingletonFunctionController.btadapter.strtScanningIos(SingletonFunctionController.apibeaconmap);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      speak("${LocaleData.loadingMaps.getString(context)}", _currentLocale);
+      tts.speak("${LocaleData.loadingMaps.getString(context)}");
       apiCalls(context);
     });
 
@@ -882,43 +882,43 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   bool disposed = false;
-  Future<void> speak(String msg, String lngcode, {bool prevpause = false}) async {
-    if (!UserState.ttsAllStop) {
-      if (disposed) return;
-      if (prevpause) {
-        await flutterTts.pause();
-      }
-      try {
-        if (lngcode == "hi") {
-          if (Platform.isAndroid) {
-            await flutterTts.setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
-          } else {
-            await flutterTts.setVoice({"name": "Lekha", "locale": "hi-IN"});
-          }
-        } else {
-          await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
-        }
-
-        await flutterTts.stop();
-        if (Platform.isAndroid) {
-          await flutterTts.setSpeechRate(0.7);
-        } else {
-          await flutterTts.setSpeechRate(0.55);
-        }
-
-        await flutterTts.setPitch(1.0);
-
-        // Check if Semantic Mode is enabled
-        if (isSemanticEnabled) {
-          PushNotifications.showSimpleNotification(body: "", payload: "", title: msg);
-        } else {
-          await flutterTts.speak(msg);
-        }
-      } catch (e) {
-        print("Error during TTS: $e");
-      }
-    }
-  }
+  // Future<void> speak(String msg, String lngcode, {bool prevpause = false}) async {
+  //   if (!UserState.ttsAllStop) {
+  //     if (disposed) return;
+  //     if (prevpause) {
+  //       await flutterTts.pause();
+  //     }
+  //     try {
+  //       if (lngcode == "hi") {
+  //         if (Platform.isAndroid) {
+  //           await flutterTts.setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
+  //         } else {
+  //           await flutterTts.setVoice({"name": "Lekha", "locale": "hi-IN"});
+  //         }
+  //       } else {
+  //         await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
+  //       }
+  //
+  //       await flutterTts.stop();
+  //       if (Platform.isAndroid) {
+  //         await flutterTts.setSpeechRate(0.7);
+  //       } else {
+  //         await flutterTts.setSpeechRate(0.55);
+  //       }
+  //
+  //       await flutterTts.setPitch(1.0);
+  //
+  //       // Check if Semantic Mode is enabled
+  //       if (isSemanticEnabled) {
+  //         PushNotifications.showSimpleNotification(body: "", payload: "", title: msg);
+  //       } else {
+  //         await flutterTts.speak(msg);
+  //       }
+  //     } catch (e) {
+  //       print("Error during TTS: $e");
+  //     }
+  //   }
+  // }
 
   void checkPermissions() async {
     await requestLocationPermission();
@@ -1962,8 +1962,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
   void unableToFindLocation(){
-    speak("Unable to find your location. Scan nearby QR to know your location",
-        _currentLocale);
+   tts.speak("Unable to find your location. Scan nearby QR to know your location");
     showLocationDialog(context);
     SingletonFunctionController.building.qrOpened = true;
   }
@@ -1972,7 +1971,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     SingletonFunctionController.building.floor[landmarks.first.buildingID!] = landmarks.first.floor??0;
     await createRooms(SingletonFunctionController.building.polylinedatamap[landmarks.first.buildingID]!, landmarks.first.floor??0);
     await Future.delayed(Duration(milliseconds: 1000));
-    speak(convertTolng("Confirm Your Location Amongst Below Given List", _currentLocale, ''), _currentLocale);
+    tts.speak(convertTolng("Confirm Your Location Amongst Below Given List", _currentLocale, ''),);
     focusOnPinLandmark(LatLng(double.parse(landmarks.first.properties!.latitude!), double.parse(landmarks.first.properties!.longitude!)));
     for (var landmark in landmarks){
       addNearbyLandmarkMarkers(LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),landmark.sId??"", landmark.name??"", !landmark.properties!.isWaypoint);
@@ -2119,7 +2118,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     UserState.closeNavigation = closeNavigation;
     UserState.alignMapToPath = alignMapToPath;
     UserState.startOnPath = startOnPath;
-    UserState.speak = speak;
+    UserState.speak = tts.speak;
     UserState.paintMarker = paintMarker;
     UserState.createCircle = updateCircle;
     UserState.addDebugMarkers = addDebugMarkers;
@@ -2274,24 +2273,21 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       fitPolygonInScreen(patch.first);
       if (speakTTS) {
         if (finalvalue == null) {
-          speak(
+          tts.speak(
               convertTolng(
                   "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}",
                   _currentLocale,
-                  ''),
-              _currentLocale);
+                  ''));
         } else {
           if(getallnearbylandmark.length>2 && distBetweenLandmarks<=20 && finalvalue2!=null){
-            speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
-                _currentLocale);
+            tts.speak(
+                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}");
           }else{
-            speak(
+            tts.speak(
                 convertTolng(
                     "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
                     _currentLocale,
-                    finalvalue),
-                _currentLocale);
+                    finalvalue),);
           }
 
         }
@@ -2299,24 +2295,24 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     } else {
       if (speakTTS) {
         if (finalvalue == null) {
-          speak(
+          tts.speak(
               convertTolng(
                   "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}",
                   _currentLocale,
                   ''),
-              _currentLocale);
+              );
         } else {
           if(getallnearbylandmark.length>2 && distBetweenLandmarks<=20 && finalvalue2!=null){
-            speak(
+           tts.speak(
                 "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
-                _currentLocale);
+                );
           }else{
-            speak(
+            tts.speak(
                 convertTolng(
                     "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
                     _currentLocale,
                     finalvalue),
-                _currentLocale);
+                );
           }
         }
       }
@@ -2373,9 +2369,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     Future.delayed(Duration(milliseconds: 5000)).then((value){
       if(isCalibrationNeeded(magneticValues) && UserState.lowCompassAccuracy==false){
         UserState.lowCompassAccuracy=true;
-        speak(
+        tts.speak(
             "low accuracy found.Please calibrate your device",
-            _currentLocale);
+            );
         showLowAccuracyDialog();
       }
     });
@@ -2806,11 +2802,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               double angle = tools.calculateAngleBWUserandPath(
                   user, PathState.path[PathState.sourceFloor]![1], numCols);
               if (angle != 0) {
-                speak(
+                tts.speak(
                     "${LocaleData.turn.getString(context)} " +
                         LocaleData.getProperty5(
                             tools.angleToClocks(angle, context), context),
-                    _currentLocale);
+                    );
               } else {}
 
               mapState.tilt = 50;
@@ -2872,9 +2868,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     });
     FlutterBeep.beep();
     if(acc!= null){
-      speak("${LocaleData.changingaccessiblepath.getString(context)}", _currentLocale);
+      tts.speak("${LocaleData.changingaccessiblepath.getString(context)}",);
     }else{
-      speak("${LocaleData.reroute.getString(context)}", _currentLocale);
+     tts.speak("${LocaleData.reroute.getString(context)}",);
     }
     if(acc != null){
       PathState.accessiblePath = acc;
@@ -3224,7 +3220,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
   Future<void> localizeUser({bool speakTTS = true,bool pinSelectionMarker=false}) async {
     //----------
-    speak("${LocaleData.searchingyourlocation.getString(context)}", _currentLocale);
+    tts.speak("${LocaleData.searchingyourlocation.getString(context)}",);
     // setState(() {
     //   isBlueToothLoading = true;
     // });
@@ -7194,13 +7190,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
         if (PathState.destinationName ==
             "${LocaleData.yourcurrentloc.getString(context)}") {
-          speak(
+          tts.speak(
               " ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
-              _currentLocale);
+              );
         } else {
-          speak(
+          tts.speak(
               "${PathState.destinationName} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
-              _currentLocale);
+              );
         }
       }
     } else {
@@ -9277,7 +9273,7 @@ bool _isPlaying=false;
       UserState.alignMapToPath = alignMapToPath;
       UserState.startOnPath =
           startOnPath;
-      UserState.speak = speak;
+      UserState.speak = tts.speak;
       UserState.paintMarker =
           paintMarker;
       UserState.createCircle =
@@ -9327,7 +9323,7 @@ bool _isPlaying=false;
           alignMapToPath;
       UserState.startOnPath =
           startOnPath;
-      UserState.speak = speak;
+      UserState.speak = tts.speak;
       UserState.paintMarker =
           paintMarker;
       UserState.createCircle =
@@ -12120,11 +12116,11 @@ bool _isPlaying=false;
     finalDestinationDirection=direction;
     //isSemanticEnabled? showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname)): ();
     flutterTts.pause().then((value) {
-      speak(
+      tts.speak(
           user.convertTolng("You have reached ${destname}. It is ${direction}",
               "", 0.0, context, angle, "", "",
               destname: destname),
-          _currentLocale);
+      );
     });
     // if(isSemanticEnabled) {
     //   showFeedback = true;
@@ -13244,8 +13240,8 @@ bool _isPlaying=false;
                             _isBuildingPannelOpen = true;
                             lastBeaconValue = "";
                           } else {
-                            speak(
-                                "${LocaleData.exploremodenabled.getString(context)}", _currentLocale);
+                            tts.speak(
+                                "${LocaleData.exploremodenabled.getString(context)}",);
                             exploremodeLandmarkTimer = Timer.periodic(Duration(seconds: 5), (Timer t) => identifyFrontLandmark());
                             isLiveLocalizing = true;
                             HelperClass.showToast("Explore mode enabled");

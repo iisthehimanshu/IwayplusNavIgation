@@ -13,5 +13,6 @@ class NetworkManager {
     ws = WebSocketManager();
     ws.init();
     ws.connect();
+
   }
 }

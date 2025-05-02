@@ -16,6 +16,7 @@ import '../DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
 import '../DATABASE/DATABASEMODEL/WayPointModel.dart';
 import '../DataBaseManager/DBManager.dart';
 import '../Network/APIDetails.dart';
+import '../Network/NetworkManager.dart';
 
 
 class DataBaseManager<T> implements DBManager<T>{
@@ -58,7 +59,6 @@ class DataBaseManager<T> implements DBManager<T>{
     await Hive.openBox('SignInDatabase');
     await Hive.openBox('LocationPermission');
     await Hive.openBox('VersionData');
-
   }
 
   @override

@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
+import 'package:iwaymaps/NAVIGATION/Screens/NearestLandmarkScreen.dart';
 import 'package:iwaymaps/NAVIGATION/Sensor/SensorManager.dart';
 import 'package:iwaymaps/NAVIGATION/VenueManager/VenueManager.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
@@ -78,6 +79,7 @@ import 'Network/NetworkManager.dart';
 import 'UserState.dart';
 import 'VersioInfo.dart';
 import 'ViewModel/DirectionInstructionViewModel.dart';
+import 'Widgets/customModelBottomSheet.dart';
 import 'centeroid.dart';
 import 'dijkastra.dart';
 import 'directionClass.dart';
@@ -446,10 +448,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   SensorManager accData = SensorManager();
   SensorManager magnetoData = SensorManager();
   SensorManager gpsData = SensorManager();
+  RepositoryManager repos = RepositoryManager();
+
   @override
   void initState() {
     super.initState();
     initializeMarkers();
+
+
     NavigationLogManager().initialize();
     magnetoData.startMagnetometer();
     accData.startAccelerometer();
@@ -2110,10 +2116,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     user.showcoordX = user.coordX;
     user.showcoordY = user.coordY;
-    UserState.cols = SingletonFunctionController.building.floorDimenssion[
-    userSetLocation.buildingID]![userSetLocation.floor]![0];
-    UserState.rows = SingletonFunctionController.building.floorDimenssion[
-    userSetLocation.buildingID]![userSetLocation.floor]![1];
+
+    UserState.cols = SingletonFunctionController.building.floorDimenssion[userSetLocation.buildingID]![userSetLocation.floor]![0];
+    UserState.rows = SingletonFunctionController.building.floorDimenssion[userSetLocation.buildingID]![userSetLocation.floor]![1];
     UserState.lngCode = _currentLocale;
     UserState.reroute = reroute;
     UserState.closeNavigation = closeNavigation;
@@ -2247,6 +2252,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     //
     if (user.isnavigating == false && speakTTS) {
       detected = true;
+      print("reachedhere");
+      customModalBottomSheet(
+        context,
+        height: MediaQuery.of(context).size.height * 0.92,
+        child: const NearestLandmarkScreen(),
+      );
       if (!_isExploreModePannelOpen && speakTTS) {
         _isBuildingPannelOpen = true;
       }
@@ -3268,6 +3279,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       //lastBeaconValue = nearestBeacon;
     });
 
+    nearestBeacon = "IW25030975";
     // nearestLandmarkToBeacon = nearestBeacon;
     // nearestLandmarkToMacid = highestweight.toString();
 

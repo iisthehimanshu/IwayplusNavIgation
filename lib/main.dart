@@ -80,12 +80,13 @@ Future<void> mobileInitialization () async {
   PushNotifications.localNotiInit();
   PushNotifications.resetBadgeCount();
 
-
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 }
+
+
 
 
 
@@ -106,7 +107,6 @@ class _MobileAppState extends State<MobileApp> {
   void initState() {
     configureLocalization();
     super.initState();
-    RepositoryManager();
   }
   void configureLocalization(){
     localization.init(mapLocales: LOCALES, initLanguageCode: 'en');
@@ -156,7 +156,7 @@ class _MobileAppState extends State<MobileApp> {
     }else if(isAndroid){
       print("Android");
     }
-requestLocationPermission();
+    requestLocationPermission();
     return MaterialApp(
       title: "IWAYPLUS",
       home: FutureBuilder<bool>(

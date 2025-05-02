@@ -114,9 +114,8 @@ class Apidetails {
         {
           'Content-Type': 'application/json',
           'x-access-token': accessToken,
-          'Authorization': encryptionService.authorization
         },
-        true,
+        false,
         {"building_ID": bid},
         DataVersion.fromJson,
         DataVersionLocalModelBOX.getData

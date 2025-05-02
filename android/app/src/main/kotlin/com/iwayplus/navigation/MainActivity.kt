@@ -124,7 +124,7 @@ class MainActivity : FlutterActivity() {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothAdapter = bluetoothManager.adapter
         bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-
+        Log.d("bluetooth adapter","valuees${bluetoothAdapter},${bluetoothLeScanner}")
         if (bluetoothAdapter != null && bluetoothAdapter.isEnabled) {
             bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
         } else {

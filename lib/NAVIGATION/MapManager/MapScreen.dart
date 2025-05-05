@@ -1,57 +1,67 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:iwaymaps/NAVIGATION/BluetoothManager/BLEManager.dart';
-
 import 'GoogleMapManager.dart';
 
 
 class MapScreen extends StatelessWidget {
   final GoogleMapManager mapManager = GoogleMapManager();
-  String maptheme = "";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: AnimatedBuilder(
-        animation: mapManager.renderManager,
+        animation: mapManager,
         builder: (context, _) {
           return GoogleMap(
-            onMapCreated: (controller){
-              mapManager.onMapCreated(controller, context);
-            },
+            onMapCreated: mapManager.onMapCreated,
+            onCameraMove: mapManager.onCameraMove,
             initialCameraPosition: mapManager.initialPosition,
-            markers: mapManager.renderManager.markers,
-            polylines: mapManager.renderManager.polylines,
-            polygons: mapManager.renderManager.polygons,
-            circles: mapManager.renderManager.circles,
+            markers: mapManager.markers,
+            polylines: mapManager.polylines,
+            polygons: mapManager.polygons,
+            circles: mapManager.circles,
             myLocationEnabled: true,
-            myLocationButtonEnabled: true,
+            myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
           );
         },
-      ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton(
-            heroTag: 'marker',
-            onPressed: () async {
-             await mapManager.renderManager.createBuildings();
-             mapManager.fitPolygonsInView(mapManager.renderManager.polygons);
-            },
-            child: Icon(Icons.add_location),
-          ),
-          SizedBox(height: 10),
-          FloatingActionButton(
-            heroTag: 'cam',
-            onPressed: () {
-              mapManager.moveCameraTo(LatLng(28.61, 77.20));
-            },
-            child: Icon(Icons.camera_alt),
-          ),
-        ],
-      ),
+      ), 
+        floatingActionButton: AnimatedBuilder(
+          animation: mapManager.venueManager,
+          builder: (context, _){
+            return SpeedDial(
+              activeIcon: Icons.close,
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+              children: List.generate(mapManager.venueManager.focusedBuildingFloors.length,
+                    (int i) {
+                  return SpeedDialChild(
+                    child: Semantics(
+                      label: "$i",
+                      child: Text(
+                        i == 0
+                            ? 'G'
+                            : '$i',
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          height: 19 / 16,
+                        ),
+                      ),
+                    ),
+                    backgroundColor: Color(0xff24b9b0),
+                    onTap: () {
+                        mapManager.changeFloorOfBuilding(mapManager.venueManager.focusedBuilding!, i);
+                    },
+                  );
+                },
+              ),
+              child: Text("${mapManager.venueManager.focusedBuildingCurrentFloor}"),
+            );
+          },
+        )
     );
   }
 }

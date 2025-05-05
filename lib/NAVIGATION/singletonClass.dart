@@ -107,10 +107,12 @@ class SingletonFunctionController {
         //   //await btadapter.startScanningIOS(apibeaconmap);
         // }
         //-------------
-        if(Platform.isAndroid){
-          btadapter.startScanning(apibeaconmap);
-        }else{
-          btadapter.startScanning(apibeaconmap);
+        if(!kIsWeb){
+          if(Platform.isAndroid){
+            btadapter.startScanning(apibeaconmap);
+          }else{
+            btadapter.startScanning(apibeaconmap);
+          }
         }
         timer= Future.delayed((await FlutterBluePlus.isOn==true)?Duration(seconds:9):Duration(seconds:0));
         //timer= Future.delayed((await FlutterBluePlus.isOn==true)?Duration(seconds:9):Duration(seconds:0));

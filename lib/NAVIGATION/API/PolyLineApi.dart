@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
@@ -76,6 +77,11 @@ class PolyLineApi {
         print("POLYLINE API DATA FROM API");
         PolyLineBox.put(polylinedata.fromJson(responseBody).polyline!.buildingID,polyLineData);
         polyLineData.save();
+
+        Map<String, dynamic> JSONresponseBody = json.decode(response.body);
+        String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
+        HelperClass().saveJsonToAndroidDownloads("Polyline$id", formattedJson);
+
         return polylinedata.fromJson(responseBody);
       }catch(e){
         String finalResponse=getDecryptedData(response.body);
@@ -84,6 +90,11 @@ class PolyLineApi {
         print("POLYLINE API DATA FROM API for id $id");
         PolyLineBox.put(polylinedata.fromJson(responseBody).polyline!.buildingID,polyLineData);
         polyLineData.save();
+
+        Map<String, dynamic> JSONresponseBody = json.decode(response.body);
+        String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
+        HelperClass().saveJsonToAndroidDownloads("Polyline$id", formattedJson);
+
         return polylinedata.fromJson(responseBody);
       }
     }
@@ -107,6 +118,7 @@ class PolyLineApi {
         print("POLYLINE API DATA FROM API AFTER 403");
         PolyLineBox.put(polylinedata.fromJson(responseBody).polyline!.buildingID,polyLineData);
         polyLineData.save();
+
         return polylinedata.fromJson(responseBody);
       }else{
         print("POLYLINE API EMPTY DATA FROM API AFTER 403");

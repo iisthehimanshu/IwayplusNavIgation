@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
@@ -76,6 +77,11 @@ class waypointapi {
         if(wayPointList.isNotEmpty){
           WayPointBox.put(wayPointList[0].buildingID, wayPointData);
           wayPointData.save();
+
+          Map<String, dynamic> JSONresponseBody = json.decode(response.body);
+          String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
+          HelperClass().saveJsonToAndroidDownloads("Waypoint$id", formattedJson);
+
         }
         return jsonData.map((data) => PathModel.fromJson(data as Map<String, dynamic>)).toList();
       }catch(e){
@@ -86,6 +92,11 @@ class waypointapi {
         if(wayPointList.isNotEmpty){
           WayPointBox.put(wayPointList[0].buildingID, wayPointData);
           wayPointData.save();
+
+          Map<String, dynamic> JSONresponseBody = json.decode(response.body);
+          String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
+          HelperClass().saveJsonToAndroidDownloads("Waypoint$id", formattedJson);
+
         }
         return jsonData.map((data) => PathModel.fromJson(data as Map<String, dynamic>)).toList();
       }

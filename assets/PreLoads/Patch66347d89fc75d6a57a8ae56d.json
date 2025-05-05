@@ -1,0 +1,90 @@
+{
+  "patchData": {
+    "_id": "66347d97fc75d6a57a8b3974",
+    "building_ID": "66347d89fc75d6a57a8ae56d",
+    "breadth": "104",
+    "fileName": "004ef3cf-9294-4171-adc0-1554759d5400_IITCampus-ANSKSIT-ground_FloorPlanZero.png",
+    "length": "104",
+    "coordinates": [
+      {
+        "localRef": {
+          "lat": "0",
+          "lng": "0"
+        },
+        "globalRef": {
+          "lat": "28.545265736544494",
+          "lng": "77.19014218997943"
+        }
+      },
+      {
+        "localRef": {
+          "lat": "104",
+          "lng": "0"
+        },
+        "globalRef": {
+          "lat": "28.545359966914983",
+          "lng": "77.19043161392186"
+        }
+      },
+      {
+        "localRef": {
+          "lat": "104",
+          "lng": "104"
+        },
+        "globalRef": {
+          "lat": "28.545654436279403",
+          "lng": "77.19031102061253"
+        }
+      },
+      {
+        "localRef": {
+          "lat": "0",
+          "lng": "104"
+        },
+        "globalRef": {
+          "lat": "28.545562561926065",
+          "lng": "77.19002159667004"
+        }
+      }
+    ],
+    "parkingCoords": [
+      {
+        "lat": "28.545235111655934",
+        "lon": "77.19016094893864"
+      },
+      {
+        "lat": "28.54526338078415",
+        "lon": "77.19025742358615"
+      },
+      {
+        "lat": "28.545296361424143",
+        "lon": "77.19023866462689"
+      }
+    ],
+    "pickupCoords": [
+      {
+        "lat": "28.545235111655934",
+        "lon": "77.19016094893864"
+      },
+      {
+        "lat": "28.54526338078415",
+        "lon": "77.19025742358615"
+      },
+      {
+        "lat": "28.545296361424143",
+        "lon": "77.19023866462689"
+      }
+    ],
+    "createdAt": "2024-05-03T06:00:55.268Z",
+    "updatedAt": "2025-01-13T09:17:39.317Z",
+    "__v": 0,
+    "corridorWidth": null,
+    "realtimeLocalisationThreshold": null,
+    "walkingCoords": [],
+    "geoJsonMap": null,
+    "buildingAngle": "160.36",
+    "buildingName": "ANSKSIT",
+    "pdrThreshold": null,
+    "arPatch": []
+  }
+}

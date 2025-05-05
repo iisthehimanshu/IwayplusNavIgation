@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:iwaymaps/NAVIGATION/API/GlobalAnnotationapi.dart';
 import 'package:iwaymaps/NAVIGATION/APIMODELS/landmark.dart';
 import 'package:iwaymaps/NAVIGATION/APIMODELS/outbuildingmodel.dart';
+import '../../IWAYPLUS/Elements/HelperClass.dart';
 import '../APIMODELS/DataVersion.dart';
 import '../DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
 import '../DatabaseManager/DataBaseManager.dart';
@@ -68,27 +69,44 @@ class RepositoryManager{
         final landmarkBox = landmarkDetail.dataBaseGetData!();
         if(dataBaseManager.isGreenDataBaseActive()){
             return getPreLoadedData(landmarkDetail,bID);
-        }
-        if(landmarkBox.containsKey(bID)){
-            if(kDebugMode){
-                print("Data from DB");
-            }
-            LandMarkApiModel responseFromDatabase = DataBaseManager().getData(landmarkDetail, bID);
-            return landmarkDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
-            Response dataFromAPI = await networkManager.api.request(landmarkDetail);
-            if (kDebugMode) {
-                print("Data from API");
-            }
-            if(dataFromAPI.statusCode == 200){
-                final landmarkData = LandMarkApiModel(responseBody: dataFromAPI.data);
-                DataBaseManager().saveData(landmarkData,landmarkDetail,bID);
-                return landmarkDetail.conversionFunction(dataFromAPI.data);
-            }else if(dataFromAPI.statusCode == 201){
-                return null;
-            }else{
-                return null;
-                //open new screen
+            return;
+            if (landmarkBox.containsKey(bID)) {
+                if (kDebugMode) {
+                    print("Data from DB");
+                }
+                LandMarkApiModel responseFromDatabase = DataBaseManager()
+                    .getData(landmarkDetail, bID);
+                return landmarkDetail.conversionFunction(
+                    responseFromDatabase.responseBody);
+            } else {
+                Response dataFromAPI = await networkManager.api.request(
+                    landmarkDetail);
+                if (kDebugMode) {
+                    print("Data from API");
+                }
+                if (dataFromAPI.statusCode == 200) {
+                    final landmarkData = LandMarkApiModel(
+                        responseBody: dataFromAPI.data);
+                    DataBaseManager().saveData(
+                        landmarkData, landmarkDetail, bID);
+
+                    if(bID == "65d887a5db333f89457145f6") {
+                        print("65d887a5db333f89457145f6");
+                        print(dataFromAPI.data);
+                        Map<String, dynamic> JSONresponseBody = dataFromAPI.data;
+                        String formattedJson = JsonEncoder.withIndent('  ')
+                            .convert(JSONresponseBody);
+                        HelperClass().saveJsonToAndroidDownloads(
+                            "Landmark$bID", formattedJson);
+                    }
+                    return landmarkDetail.conversionFunction(dataFromAPI.data);
+                } else if (dataFromAPI.statusCode == 201) {
+                    return null;
+                } else {
+                    return null;
+                    //open new screen
+                }
             }
         }
     }
@@ -99,26 +117,35 @@ class RepositoryManager{
         Detail polylineDetail = apiDetails.polyline(dataBaseManager.getAccessToken(), bID);
         final polylineBox = polylineDetail.dataBaseGetData!();
 
-        if(polylineBox.containsKey(bID)){
-            if (kDebugMode) {
-              print("Data from DB");
-            }
-            PolyLineAPIModel responseFromDatabase = DataBaseManager().getData(polylineDetail, bID);
-            return polylineDetail.conversionFunction(responseFromDatabase.responseBody);
+        if(dataBaseManager.isGreenDataBaseActive()){
+            return getPreLoadedData(polylineDetail,bID);
         }else {
-            Response dataFromAPI = await networkManager.api.request(polylineDetail);
-            if (kDebugMode) {
-              print("Data from API");
-            }
-            if(dataFromAPI.statusCode == 200) {
-                final polyLineData = PolyLineAPIModel(
-                    responseBody: dataFromAPI.data);
-                DataBaseManager().saveData(polyLineData, polylineDetail, bID);
-                return polylineDetail.conversionFunction(dataFromAPI.data);
-            }else if(dataFromAPI.statusCode == 201){
-                return null;
-            }else{
-                return null;
+            return;
+            if (polylineBox.containsKey(bID)) {
+                if (kDebugMode) {
+                    print("POLYLINE DATA FROM DATABASE");
+                }
+                PolyLineAPIModel responseFromDatabase = DataBaseManager()
+                    .getData(polylineDetail, bID);
+                return polylineDetail.conversionFunction(
+                    responseFromDatabase.responseBody);
+            } else {
+                Response dataFromAPI = await networkManager.api.request(
+                    polylineDetail);
+                if (kDebugMode) {
+                    print("POLYLINE DATA FROM API");
+                }
+                if (dataFromAPI.statusCode == 200) {
+                    final polyLineData = PolyLineAPIModel(
+                        responseBody: dataFromAPI.data);
+                    DataBaseManager().saveData(
+                        polyLineData, polylineDetail, bID);
+                    return polylineDetail.conversionFunction(dataFromAPI.data);
+                } else if (dataFromAPI.statusCode == 201) {
+                    return null;
+                } else {
+                    return null;
+                }
             }
         }
     }
@@ -134,8 +161,7 @@ class RepositoryManager{
             if (DataBox.containsKey(apiData.versionData!.buildingID)) {
                 print('DATA ALREADY PRESENT');
                 final databaseData = DataVersion.fromJson(DataBox.get(apiData.versionData!.buildingID)!.responseBody);
-                if (apiData.versionData!.buildingDataVersion !=
-                    databaseData.versionData!.buildingDataVersion) {
+                if (apiData.versionData!.buildingDataVersion != databaseData.versionData!.buildingDataVersion) {
                     print("match ${apiData.versionData!.buildingID!} and $bID");
                     VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!.buildingID!] = true;
                     shouldBeInjected = true;
@@ -244,25 +270,37 @@ class RepositoryManager{
         Detail patchDetail = await apiDetails.patch(dataBaseManager.getAccessToken(), bID);
         final patchBox = patchDetail.dataBaseGetData!();
 
-        if(patchBox.containsKey(bID)){
-            if (kDebugMode) {
-              print("Data from DB");
-            }
-            PatchAPIModel responseFromDatabase = DataBaseManager().getData(patchDetail, bID);
-            return patchDetail.conversionFunction(responseFromDatabase.responseBody);
+
+        print("GREEN DATABASE IS ACTIVE : ${dataBaseManager.isGreenDataBaseActive()}");
+        if(dataBaseManager.isGreenDataBaseActive()){
+            return getPreLoadedData(patchDetail,bID);
         }else {
-            Response dataFromAPI = await networkManager.api.request(patchDetail);
-            if (kDebugMode) {
-              print("Data from API");
-            }
-            if(dataFromAPI.statusCode == 200) {
-                final patchData = PatchAPIModel(responseBody: dataFromAPI.data);
-                DataBaseManager().saveData(patchData, patchDetail, bID);
-                return patchDetail.conversionFunction(dataFromAPI.data);
-            }else if(dataFromAPI.statusCode == 201){
-                return null;
-            }else{
-                return null;
+            print("2nd iteration patch return");
+            return;
+            if (patchBox.containsKey(bID)) {
+                if (kDebugMode) {
+                    print("PATCH DATA FROM DATABASE");
+                }
+                PatchAPIModel responseFromDatabase = DataBaseManager().getData(
+                    patchDetail, bID);
+                return patchDetail.conversionFunction(
+                    responseFromDatabase.responseBody);
+            } else {
+                Response dataFromAPI = await networkManager.api.request(
+                    patchDetail);
+                if (kDebugMode) {
+                    print("PATCH DATA FROM DATABASE API");
+                }
+                if (dataFromAPI.statusCode == 200) {
+                    final patchData = PatchAPIModel(
+                        responseBody: dataFromAPI.data);
+                    DataBaseManager().saveData(patchData, patchDetail, bID);
+                    return patchDetail.conversionFunction(dataFromAPI.data);
+                } else if (dataFromAPI.statusCode == 201) {
+                    return null;
+                } else {
+                    return null;
+                }
             }
         }
     }
@@ -271,27 +309,35 @@ class RepositoryManager{
         Detail beaconDetail = apiDetails.buildingBeacons(dataBaseManager.getAccessToken(), bID);
         final beaconBox = beaconDetail.dataBaseGetData!();
 
-        if(beaconBox.containsKey(bID)){
-            if (kDebugMode) {
-              print("Data from DB");
-            }
-            BeaconAPIModel responseFromDatabase = DataBaseManager().getData(beaconDetail, bID);
-            return beaconDetail.conversionFunction(responseFromDatabase.responseBody);
+        if(dataBaseManager.isGreenDataBaseActive()){
+            return getPreLoadedData(beaconDetail,bID);
         }else {
-            Response dataFromAPI = await networkManager.api.request(beaconDetail);
-            if (kDebugMode) {
-              print("Data from API");
+            return;
+            if (beaconBox.containsKey(bID)) {
+                if (kDebugMode) {
+                    print("BEACON DATA FROM DATABASE");
+                }
+                BeaconAPIModel responseFromDatabase = DataBaseManager().getData(
+                    beaconDetail, bID);
+                return beaconDetail.conversionFunction(
+                    responseFromDatabase.responseBody);
+            } else {
+                Response dataFromAPI = await networkManager.api.request(
+                    beaconDetail);
+                if (kDebugMode) {
+                    print("POLYLINE DATA FROM API");
+                }
+                if (dataFromAPI.statusCode == 200) {
+                    final beaconData = BeaconAPIModel(
+                        responseBody: dataFromAPI.data);
+                    DataBaseManager().saveData(beaconData, beaconDetail, bID);
+                    return dataFromAPI.data;
+                } else if (dataFromAPI.statusCode == 201) {
+                    return null;
+                } else {
+                    return null;
+                }
             }
-            if(dataFromAPI.statusCode == 200) {
-                final beaconData = BeaconAPIModel(responseBody: dataFromAPI.data);
-                DataBaseManager().saveData(beaconData, beaconDetail, bID);
-                return dataFromAPI.data;
-            }else if(dataFromAPI.statusCode == 201){
-                return null;
-            }else{
-                return null;
-            }
-
         }
     }
 
@@ -386,29 +432,33 @@ class RepositoryManager{
     Future<dynamic> getWaypointData(String bID) async {
         Detail waypointDetails = apiDetails.waypoint(dataBaseManager.getAccessToken(), bID);
         final waypointBox = waypointDetails.dataBaseGetData!();
-
-        if(waypointBox.containsKey(bID)){
+        if (waypointBox.containsKey(bID)) {
             if (kDebugMode) {
-              print("Data from DB");
+                print("WAYPOINT DATA FROM DATABASE");
             }
             WayPointModel responseFromDatabase = DataBaseManager().getData(waypointDetails, bID);
             return waypointDetails.conversionFunction(responseFromDatabase.responseBody);
-        }else {
-            Response dataFromAPI = await networkManager.api.request(waypointDetails);
+        } else {
+
+            Response dataFromAPI = await networkManager.api.request(
+                waypointDetails);
             if (kDebugMode) {
-              print("Data from API");
+                print("POLYLINE DATA FROM API");
             }
-            if(dataFromAPI.statusCode == 200) {
+            if (dataFromAPI.statusCode == 200) {
                 final wayPointData = WayPointModel(
                     responseBody: dataFromAPI.data);
-                DataBaseManager().saveData(wayPointData, waypointDetails, bID);
+                DataBaseManager().saveData(
+                    wayPointData, waypointDetails, bID);
                 return dataFromAPI.data;
-            }else if(dataFromAPI.statusCode == 201){
+            } else if (dataFromAPI.statusCode == 201) {
                 return null;
-            }else{
+            } else {
                 return null;
             }
         }
+
+
     }
 
     Future<dynamic> getCampusData(List<String> bIDS) async {
@@ -442,8 +492,7 @@ class RepositoryManager{
     }
 
     dynamic getPreLoadedData(Detail details,String bID) async {
-        print("StackTrace ${StackTrace.current}");
-        if(kDebugMode) print("GOING GREEN");
+        if(kDebugMode) print("GOING GREEN ${details.getPreLoadPrefix}$bID");
         String jsonString = await rootBundle.loadString('assets/PreLoads/${details.getPreLoadPrefix}$bID.json');
         final data = json.decode(jsonString);
         print("details.conversionFunction(data)");

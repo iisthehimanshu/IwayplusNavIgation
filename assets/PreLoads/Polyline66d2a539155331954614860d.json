@@ -1,0 +1,249 @@
+{
+  "polyline": {
+    "_id": "66d2a55a1553319546148684",
+    "building_ID": "66d2a539155331954614860d",
+    "floors": [
+      {
+        "floor": "ground",
+        "poly_array": [
+          {
+            "tactileAvailibility": "not available",
+            "contact": "undefined",
+            "cubicleContact": "undefined",
+            "cubicleName": "undefined",
+            "blockName": "undefined",
+            "floor": "ground",
+            "floorElement": "Nonwalkables",
+            "id": "877002-d412-0421-e63c-8ef7765ed8e8",
+            "name": "LHC Building",
+            "nodes": [
+              {
+                "coordx": 4323,
+                "coordy": 1663,
+                "lat": 28.54320835407509,
+                "lon": 77.19214021305031,
+                "indexNode": "11352635",
+                "_id": "677e2cd040dfc75c5753cb49"
+              },
+              {
+                "coordx": 4430,
+                "coordy": 1776,
+                "lat": 28.54280906729286,
+                "lon": 77.19230955488919,
+                "indexNode": "12123854",
+                "_id": "677e2cd040dfc75c5753cb4a"
+              },
+              {
+                "coordx": 4510,
+                "coordy": 1703,
+                "lat": 28.54290745440816,
+                "lon": 77.19262797350784,
+                "indexNode": "11625782",
+                "_id": "677e2cd040dfc75c5753cb4b"
+              },
+              {
+                "coordx": 4612,
+                "coordy": 1725,
+                "lat": 28.54274286907223,
+                "lon": 77.19289380322353,
+                "indexNode": "11776012",
+                "_id": "677e2cd040dfc75c5753cb4c"
+              },
+              {
+                "coordx": 4693,
+                "coordy": 1671,
+                "lat": 28.54279229962083,
+                "lon": 77.19319194991775,
+                "indexNode": "11407597",
+                "_id": "677e2cd040dfc75c5753cb4d"
+              },
+              {
+                "coordx": 4730,
+                "coordy": 1588,
+                "lat": 28.542961899237188,
+                "lon": 77.19339918666888,
+                "indexNode": "10841242",
+                "_id": "677e2cd040dfc75c5753cb4e"
+              },
+              {
+                "coordx": 4706,
+                "coordy": 1494,
+                "lat": 28.54322449129664,
+                "lon": 77.19344481990385,
+                "indexNode": "10199762",
+                "_id": "677e2cd040dfc75c5753cb4f"
+              },
+              {
+                "coordx": 4674,
+                "coordy": 1454,
+                "lat": 28.543359544449036,
+                "lon": 77.19340173365038,
+                "indexNode": "9926770",
+                "_id": "677e2cd040dfc75c5753cb50"
+              },
+              {
+                "coordx": 4741,
+                "coordy": 1406,
+                "lat": 28.543408832602022,
+                "lon": 77.19365240860496,
+                "indexNode": "9599285",
+                "_id": "677e2cd040dfc75c5753cb51"
+              },
+              {
+                "coordx": 4770,
+                "coordy": 1387,
+                "lat": 28.54342568984333,
+                "lon": 77.19375874650436,
+                "indexNode": "9469658",
+                "_id": "677e2cd040dfc75c5753cb52"
+              },
+              {
+                "coordx": 4693,
+                "coordy": 1320,
+                "lat": 28.543676941347396,
+                "lon": 77.19361944556931,
+                "indexNode": "9012373",
+                "_id": "677e2cd040dfc75c5753cb53"
+              },
+              {
+                "coordx": 4323,
+                "coordy": 1663,
+                "lat": 28.54320835407509,
+                "lon": 77.19214021305031,
+                "indexNode": "11352635",
+                "_id": "677e2cd040dfc75c5753cb54"
+              }
+            ],
+            "centroid": [
+              28.54317220078791,
+              77.19294525092576
+            ],
+            "polygonType": "Room",
+            "wallNature": "undefined",
+            "cubicleHeight": "undefined",
+            "cubicleColor": "undefined",
+            "walkableType": "non-walkable",
+            "visibilityType": "visible",
+            "directionType": "bidirectional",
+            "_id": "677e2cd040dfc75c5753cb48"
+          },
+          {
+            "tactileAvailibility": "not available",
+            "contact": "undefined",
+            "cubicleContact": "undefined",
+            "cubicleName": "undefined",
+            "blockName": "undefined",
+            "floor": "ground",
+            "floorElement": "Nonwalkables",
+            "id": "431d087-c56-b1ae-ae3a-001b8bdb72da",
+            "name": "Library Building",
+            "nodes": [
+              {
+                "coordx": 3766,
+                "coordy": 1272,
+                "lat": 28.544789787148456,
+                "lon": 77.19101846788627,
+                "indexNode": "8683894",
+                "_id": "677e2cd040dfc75c5753cb56"
+              },
+              {
+                "coordx": 3868,
+                "coordy": 1387,
+                "lat": 28.54439080956019,
+                "lon": 77.19117102952333,
+                "indexNode": "9468756",
+                "_id": "677e2cd040dfc75c5753cb57"
+              },
+              {
+                "coordx": 3975,
+                "coordy": 1288,
+                "lat": 28.544525836299417,
+                "lon": 77.19159857386401,
+                "indexNode": "8793287",
+                "_id": "677e2cd040dfc75c5753cb58"
+              },
+              {
+                "coordx": 3873,
+                "coordy": 1176,
+                "lat": 28.544917252847284,
+                "lon": 77.19144235841796,
+                "indexNode": "8028897",
+                "_id": "677e2cd040dfc75c5753cb59"
+              },
+              {
+                "coordx": 3766,
+                "coordy": 1272,
+                "lat": 28.544789787148456,
+                "lon": 77.19101846788627,
+                "indexNode": "8683894",
+                "_id": "677e2cd040dfc75c5753cb5a"
+              }
+            ],
+            "centroid": [
+              28.54465530631358,
+              77.19130727011179
+            ],
+            "polygonType": "Room",
+            "wallNature": "undefined",
+            "cubicleHeight": "undefined",
+            "cubicleColor": "undefined",
+            "walkableType": "non-walkable",
+            "visibilityType": "visible",
+            "directionType": "bidirectional",
+            "_id": "677e2cd040dfc75c5753cb55"
+          },
+          {
+            "tactileAvailibility": "not available",
+            "contact": "undefined",
+            "cubicleContact": "undefined",
+            "cubicleName": "undefined",
+            "blockName": "undefined",
+            "floor": "ground",
+            "floorElement": "Nonwalkables",
+            "id": "cb3a4cb-5c74-6dff-bb7-cecf48254e2f",
+            "name": "undefined",
+            "nodes": [
+              {
+                "coordx": 3122,
+                "coordy": 2014,
+                "lat": 28.543608755341825,
+                "lon": 77.18826720953375,
+                "indexNode": "13746658",
+                "_id": "677e2cd040dfc75c5753cb5c"
+              },
+              {
+                "coordx": 3122,
+                "coordy": 2117,
+                "lat": 28.543349159621496,
+                "lon": 77.18814176209185,
+                "indexNode": "14449530",
+                "_id": "677e2cd040dfc75c5753cb5d"
+              },
+              {
+                "coordx": 3122,
+                "coordy": 2117,
+                "lat": 28.543349159621496,
+                "lon": 77.18814176209185,
+                "indexNode": "14449530",
+                "_id": "677e2cd040dfc75c5753cb5e"
+              }
+            ],
+            "centroid": [],
+            "polygonType": "Waypoints",
+            "wallNature": "undefined",
+            "cubicleHeight": "undefined",
+            "cubicleColor": "undefined",
+            "walkableType": "walkable",
+            "visibilityType": "visible",
+            "directionType": "bidirectional",
+            "_id": "677e2cd040dfc75c5753cb5b"
+          }
+        ],
+        "_id": "677e2cd040dfc75c5753cb47"
+      }
+    ],
+    "createdAt": "2024-08-31T05:08:42.885Z",
+    "updatedAt": "2025-01-08T07:44:16.711Z",
+    "__v": 0
+  }
+}

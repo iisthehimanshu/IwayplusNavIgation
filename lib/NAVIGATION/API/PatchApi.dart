@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:device_information/device_information.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../../IWAYPLUS/API/buildingAllApi.dart';
+import '../../IWAYPLUS/Elements/HelperClass.dart';
 import '../config.dart';
 import '/NAVIGATION/APIMODELS/patchDataModel.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
@@ -56,12 +58,12 @@ class patchAPI {
 
     final PatchBox = PatchAPIModelBox.getData();
     print("Patch getting for $id");
-    if(PatchBox.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingPatchDataVersionUpdate.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingPatchDataVersionUpdate[id??buildingAllApi.getStoredString()]! == false){
-      print("PATCH API DATA FROM DATABASE");
-      print(PatchBox.get(id?? buildingAllApi.getStoredString())!.responseBody);
-      Map<String, dynamic> responseBody = PatchBox.get(id??buildingAllApi.getStoredString())!.responseBody;
-      return patchDataModel.fromJson(responseBody);
-    }
+    // if(PatchBox.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingPatchDataVersionUpdate.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingPatchDataVersionUpdate[id??buildingAllApi.getStoredString()]! == false){
+    //   print("PATCH API DATA FROM DATABASE");
+    //   print(PatchBox.get(id?? buildingAllApi.getStoredString())!.responseBody);
+    //   Map<String, dynamic> responseBody = PatchBox.get(id??buildingAllApi.getStoredString())!.responseBody;
+    //   return patchDataModel.fromJson(responseBody);
+    // }
 
 
 
@@ -88,6 +90,11 @@ class patchAPI {
         PatchBox.put(patchDataModel.fromJson(responseBody).patchData!.buildingID,patchData);
         patchData.save();
         print("PATCH API DATA FROM API");
+
+        Map<String, dynamic> JSONresponseBody = json.decode(response.body);
+        String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
+        HelperClass().saveJsonToAndroidDownloads("Patch$id", formattedJson);
+
         return patchDataModel.fromJson(responseBody);
       }catch(e){
         String finalResponse=getDecryptedData(response.body);
@@ -97,6 +104,11 @@ class patchAPI {
         PatchBox.put(patchDataModel.fromJson(responseBody).patchData!.buildingID,patchData);
         patchData.save();
         print("PATCH API DATA FROM API");
+
+        Map<String, dynamic> JSONresponseBody = json.decode(response.body);
+        String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
+        HelperClass().saveJsonToAndroidDownloads("Patch$id", formattedJson);
+
         return patchDataModel.fromJson(responseBody);
       }
 

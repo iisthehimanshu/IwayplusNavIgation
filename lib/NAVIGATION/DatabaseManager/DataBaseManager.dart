@@ -125,4 +125,10 @@ class DataBaseManager<T> implements DBManager<T>{
   bool isGreenDataBaseActive(){
     return greenDataBase;
   }
+
+  void switchGreenDataBase(bool value){
+    greenDataBase = value;
+    print("greenDataBase $greenDataBase");
+    print(isGreenDataBaseActive());
+  }
 }

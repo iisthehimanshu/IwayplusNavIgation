@@ -1,5 +1,10 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/VenueBeaconAPIModel.dart';
+import 'package:upgrader/upgrader.dart';
 import '../../IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import '../../IWAYPLUS/DATABASE/DATABASEMODEL/BuildingByVenueAPIModel.dart';
 import '../../IWAYPLUS/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
@@ -20,6 +25,8 @@ import '../Network/NetworkManager.dart';
 
 
 class DataBaseManager<T> implements DBManager<T>{
+
+  bool greenDataBase = true;
 
   static void init() async {
     Hive.registerAdapter(LandMarkApiModelAdapter());
@@ -59,6 +66,7 @@ class DataBaseManager<T> implements DBManager<T>{
     await Hive.openBox('SignInDatabase');
     await Hive.openBox('LocationPermission');
     await Hive.openBox('VersionData');
+
   }
 
   @override
@@ -112,5 +120,9 @@ class DataBaseManager<T> implements DBManager<T>{
     var signInBox = Hive.box('SignInDatabase');
     signInBox.delete("refreshToken");
     signInBox.put("refreshToken", newRefreshToken);
+  }
+
+  bool isGreenDataBaseActive(){
+    return greenDataBase;
   }
 }

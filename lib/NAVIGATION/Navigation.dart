@@ -448,7 +448,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   SensorManager accData = SensorManager();
   SensorManager magnetoData = SensorManager();
   SensorManager gpsData = SensorManager();
-  RepositoryManager repos = RepositoryManager();
 
   @override
   void initState() {
@@ -13409,22 +13408,15 @@ bool _isPlaying=false;
           SafeArea(child: PinLandmarkPannel.getPanelWidget(context,updateNearbyLandmarkMarkers, localizeOnPinedLandmark, closePinnedLandmarkPannel, nearbyLandmarks,PinedLandmark)),
           detected ? Semantics(child: SafeArea(child: nearestLandmarkpannel())) : Container(),
           SizedBox(height: 28.0), // Adjust the height as needed
-          // FloatingActionButton(
-          //     onPressed: (){
-          //
-          //       //SingletonFunctionController.building.floor == 0 ? 'G' : '${SingletonFunctionController.building.floor}',
-          //
-          //       int firstKey = SingletonFunctionController.building.floor.values.first;
-          //
-          //
-          //
-          //
-          //
-          //
-          //
-          //     },
-          //     child: Icon(Icons.add)
-          // ),
+          FloatingActionButton(
+              onPressed: (){
+                RepositoryManager().getLandmarkData("65d887a5db333f89457145f6");
+                RepositoryManager().getSingleBuildingBeaconData("65d887a5db333f89457145f6");
+
+
+              },
+              child: Icon(Icons.account_tree_rounded)
+          ),
 
           // FloatingActionButton(
           //   onPressed: () async {

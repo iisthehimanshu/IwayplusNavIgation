@@ -1,5 +1,8 @@
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:iwaymaps/NAVIGATION/API/GlobalAnnotationapi.dart';
 import 'package:iwaymaps/NAVIGATION/APIMODELS/landmark.dart';
 import 'package:iwaymaps/NAVIGATION/APIMODELS/outbuildingmodel.dart';
@@ -63,9 +66,11 @@ class RepositoryManager{
 
         Detail landmarkDetail = apiDetails.landmark(dataBaseManager.getAccessToken(), bID);
         final landmarkBox = landmarkDetail.dataBaseGetData!();
-
+        if(dataBaseManager.isGreenDataBaseActive()){
+            return getPreLoadedData(landmarkDetail,bID);
+        }
         if(landmarkBox.containsKey(bID)){
-            if (kDebugMode) {
+            if(kDebugMode){
                 print("Data from DB");
             }
             LandMarkApiModel responseFromDatabase = DataBaseManager().getData(landmarkDetail, bID);
@@ -434,6 +439,17 @@ class RepositoryManager{
             return null;
         }
 
+    }
+
+    dynamic getPreLoadedData(Detail details,String bID) async {
+        print("StackTrace ${StackTrace.current}");
+        if(kDebugMode) print("GOING GREEN");
+        String jsonString = await rootBundle.loadString('assets/PreLoads/${details.getPreLoadPrefix}$bID.json');
+        final data = json.decode(jsonString);
+        print("details.conversionFunction(data)");
+        print(details.conversionFunction(data));
+        details.method;
+        return details.conversionFunction(data);
     }
 
 }

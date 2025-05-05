@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/LandMarkApiModelBox.dart';
@@ -37,18 +38,18 @@ String getDecryptedData(String encryptedData){
   return jsonEncode(wrappedResponse);
 }
   Future<land> fetchLandmarkData({String? id = null, bool outdoor = false}) async {
-    print("landmark");
+    print("landmark---");
     accessToken = signInBox.get("accessToken");
     final LandMarkBox = LandMarkApiModelBox.getData();
     print("version check${VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id)}");
     print("landmark version check${id}");
-    if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingLandmarkDataVersionUpdate[id??buildingAllApi.getStoredString()]! == false){
-      print("LANDMARK DATA FORM DATABASE ");
-      print(id??buildingAllApi.getStoredString());
-      Map<String, dynamic> responseBody = LandMarkBox.get(id??buildingAllApi.getStoredString())!.responseBody;
-      print("Himanshuch ${land.fromJson(responseBody).landmarks![0].buildingName}");
-      return land.fromJson(responseBody);
-    }
+    // if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingLandmarkDataVersionUpdate[id??buildingAllApi.getStoredString()]! == false){
+    //   print("LANDMARK DATA FORM DATABASE ");
+    //   print(id??buildingAllApi.getStoredString());
+    //   Map<String, dynamic> responseBody = LandMarkBox.get(id??buildingAllApi.getStoredString())!.responseBody;
+    //   print("Himanshuch ${land.fromJson(responseBody).landmarks![0].buildingName}");
+    //   return land.fromJson(responseBody);
+    // }
     print("outdoor boolean $outdoor");
     final Map<String, dynamic> data = {
       "id": id??buildingAllApi.getStoredString(),
@@ -81,6 +82,15 @@ String getDecryptedData(String encryptedData){
         landmarkData.save();
 
 
+
+        if(kDebugMode && Platform.isAndroid) {
+          print("JSONresponseBody");
+          List<dynamic> JSONresponseBody = json.decode(response.body);
+          String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
+          HelperClass().saveJsonToAndroidDownloads("Landmark$id", formattedJson);
+        }
+
+
         //print("object ${responseBody['landmarks'][0].runtimeType}");
         return land.fromJson(responseBody);
 
@@ -101,8 +111,10 @@ String getDecryptedData(String encryptedData){
         // print(LandMarkBox.length);
         // print('TESTING LANDMARK API DATABASE OVER');
         landmarkData.save();
-
-
+        print("JSONresponseBody");
+        Map<String, dynamic> JSONresponseBody = json.decode(response.body);
+        String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
+        HelperClass().saveJsonToAndroidDownloads("Landmark$id", formattedJson);
         //print("object ${responseBody['landmarks'][0].runtimeType}");
         return land.fromJson(responseBody);
 

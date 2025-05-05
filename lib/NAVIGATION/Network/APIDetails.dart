@@ -31,8 +31,9 @@ class Detail {
   Map<String, dynamic>? body;
   Function(dynamic) conversionFunction;
   Function()? dataBaseGetData;
+  String? getPreLoadPrefix;
 
-  Detail(this.url, this.method, this.headers, this.encryption, this.body, this.conversionFunction , this.dataBaseGetData);
+  Detail(this.url, this.method, this.headers, this.encryption, this.body, this.conversionFunction , this.dataBaseGetData,this.getPreLoadPrefix);
 
   updateAccessToken(String newAccessToken){
     headers?['x-access-token'] = newAccessToken;
@@ -54,7 +55,8 @@ class Apidetails {
         true,
         {"id": bid},
         land.fromJson,
-        LandMarkApiModelBox.getData
+        LandMarkApiModelBox.getData,
+        "Landmark"
     );
   }
 
@@ -70,7 +72,8 @@ class Apidetails {
         true,
         {"buildingId": bid},
         beacon.fromJsonToList,
-        BeaconAPIModelBOX.getData
+        BeaconAPIModelBOX.getData,
+        "Beacon"
     );
   }
 
@@ -87,7 +90,8 @@ class Apidetails {
         true,
         {"venueName": venueName},
         beacon.fromJsonToList,
-        VenueBeaconAPIModelBOX.getData
+        VenueBeaconAPIModelBOX.getData,
+        "VenueBeacon"
     );
   }
 
@@ -103,7 +107,8 @@ class Apidetails {
         true,
         {"venueName": venueName},
         Buildingbyvenue.fromJsonToList,
-      null
+      null,
+      "BuildingByVenue"
     );
   }
 
@@ -118,7 +123,8 @@ class Apidetails {
         false,
         {"building_ID": bid},
         DataVersion.fromJson,
-        DataVersionLocalModelBOX.getData
+        DataVersionLocalModelBOX.getData,
+        "DataVersion"
     );
   }
 
@@ -134,7 +140,8 @@ class Apidetails {
         true,
         null,
         GlobalModel.fromJson,
-      null
+      null,
+      "GlobalAnnotation"
     );
   }
 
@@ -150,7 +157,8 @@ class Apidetails {
         true,
         {"buildingIds": bids},
         outdoormodel.fromJson,
-        OutDoorModeBOX.getData
+        OutDoorModeBOX.getData,
+        "OutBuilding"
     );
   }
 
@@ -170,7 +178,8 @@ class Apidetails {
           "devicemodel": await DeviceInformation.deviceModel
         },
         patchDataModel.fromJson,
-        PatchAPIModelBox.getData
+        PatchAPIModelBox.getData,
+        "Patch"
     );
   }
 
@@ -188,7 +197,8 @@ class Apidetails {
           "id": bid
         },
         polylinedata.fromJson,
-        PolylineAPIModelBOX.getData
+        PolylineAPIModelBOX.getData,
+        "Polyline"
     );
   }
 
@@ -204,7 +214,8 @@ class Apidetails {
           "refreshToken": DataBaseManager().getRefreshToken()
         },
         refresh.fromJson,
-      null
+      null,
+        null
     );
   }
 
@@ -222,7 +233,9 @@ class Apidetails {
           "building_ID": bid
         },
         PathModel.fromJsonToList,
-        WayPointModeBOX.getData);
+        WayPointModeBOX.getData,
+        "WayPoint"
+    );
   }
 
 }

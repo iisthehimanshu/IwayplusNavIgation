@@ -96,7 +96,7 @@ class beaconapi {
         if(kDebugMode && Platform.isAndroid) {
           List<dynamic> JSONresponseBody = json.decode(response.body);
           String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
-          saveJsonToAndroidDownloads("beacon$id", formattedJson);
+          HelperClass().saveJsonToAndroidDownloads("beacon$id", formattedJson);
         }
         return beaconList;
     }
@@ -144,28 +144,6 @@ class beaconapi {
       // HelperClass.showToast("MishorError in BuildingAll API");
       HelperClass.showToast("Error Code ${response.statusCode.toString()}");
       throw Exception('Failed to load data');
-    }
-  }
-  Future<void> saveJsonToAndroidDownloads(String fileName, String jsonString) async {
-
-    Directory? downloadsDir;
-    if (Platform.isAndroid) {
-      downloadsDir = Directory('/storage/emulated/0/Download');
-    }
-
-    if (downloadsDir == null || !downloadsDir.existsSync()) {
-      print("❌ Could not access Downloads folder.");
-      return;
-    }
-
-    final filePath = '${downloadsDir.path}/$fileName.json';
-    final file = File(filePath);
-
-    try {
-      await file.writeAsString(jsonString, flush: true);
-      print("✅ JSON file saved at: $filePath");
-    } catch (e) {
-      print("❌ Error writing JSON file: $e");
     }
   }
 

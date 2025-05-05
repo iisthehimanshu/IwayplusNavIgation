@@ -846,7 +846,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       if (!mounted) return; // Prevent setState if the widget is no longer in the tree
       networkManager.ws.updateSensorStatus(compass: true);
       networkManager.ws.updatePermissions(compass: true);
-      double? compassHeading = event.heading;
+      double? compassHeading = event;
       if(mounted || disposed) return;
         setState(() {
           user.theta = compassHeading!;
@@ -2072,15 +2072,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     });
 
     mapState.target = LatLng(values[0], values[1]);
-
     user.bid = userSetLocation.buildingID!;
     print("setting userbid ${user.bid}");
     user.locationName = userSetLocation.name;
-
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
-
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.longitude!);
-
     //did this change over here UDIT...
     user.coordX = userSetLocation.coordinateX!;
     user.coordY = userSetLocation.coordinateY!;

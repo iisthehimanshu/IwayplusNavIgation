@@ -79,7 +79,7 @@ class HelperClass{
 
 
 
-  static Future<void> shareContent(String text) async {
+  static Future<void> shareContent(String text, String name) async {
     try {
       final qrValidationResult = QrValidator.validate(
         data: text,
@@ -113,22 +113,16 @@ class HelperClass{
 
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder);
-
       canvas.drawColor(Colors.white, BlendMode.src);
-
       canvas.translate(padding.toDouble(), padding.toDouble());
       painter.paint(canvas, Size(qrSize.toDouble(), qrSize.toDouble()));
-
       final picture = recorder.endRecording();
       final img = await picture.toImage(totalSize, totalSize);
       final pngBytes = await img.toByteData(format: ui.ImageByteFormat.png);
-
       final buffer = pngBytes!.buffer.asUint8List();
-
       final tempDir = await getTemporaryDirectory();
-      final tempPath = '${tempDir.path}/doctor_share.png';
+      final tempPath = '${tempDir.path}/$name.png';
       final file = await File(tempPath).writeAsBytes(buffer);
-
       await Share.shareXFiles([XFile(file.path)], text: text);
     } catch (e) {
       print('Error sharing content: $e');

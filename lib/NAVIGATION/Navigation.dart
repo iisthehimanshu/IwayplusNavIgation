@@ -81,6 +81,7 @@ import 'VersioInfo.dart';
 import 'ViewModel/DirectionInstructionViewModel.dart';
 import 'Widgets/customModelBottomSheet.dart';
 import 'centeroid.dart';
+import 'config.dart';
 import 'dijkastra.dart';
 import 'directionClass.dart';
 import 'package:chips_choice/chips_choice.dart';
@@ -231,7 +232,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
   late StreamSubscription<AccelerometerEvent>? pdr;
   Duration sensorInterval = Duration(milliseconds: 100);
-  final pinLandmarkPannel PinLandmarkPannel = pinLandmarkPannel();
+  late final pinLandmarkPannel PinLandmarkPannel;
 
 
   late StreamSubscription<CompassEvent> compassSubscription;
@@ -452,9 +453,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   @override
   void initState() {
     super.initState();
+    initializePannels();
     initializeMarkers();
-
-
     NavigationLogManager().initialize();
     magnetoData.startMagnetometer();
     accData.startAccelerometer();
@@ -614,6 +614,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
   bool isAppinForeground=true;
+
+  void initializePannels(){
+    PinLandmarkPannel = pinLandmarkPannel(
+      update: updateNearbyLandmarkMarkers,
+      localize: localizeOnPinedLandmark,
+      nearbyLandmarks: nearbyLandmarks,
+      pinedLandmark: PinedLandmark, closePanel: closePinnedLandmarkPannel,
+    );
+  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -6479,7 +6488,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                   child: IconButton(
                                       onPressed: () {
                                         HelperClass.shareContent(
-                                            "https://maps.iwayplus.in/#/iway-apps/${CONSTANTS().prefix}/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=${CONSTANTS().appStore}&playStore=${CONSTANTS().playStore}");
+                                            "${AppConfig.baseUrl}/#/landmarkId/${SingletonFunctionController.building.selectedLandmarkID!}",
+                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.name??"landmark");
                                       },
                                       icon: Semantics(
                                           label: "Share route information",
@@ -13406,7 +13416,7 @@ bool _isPlaying=false;
           navigationPannel(),
           SafeArea(child: reroutePannel(context)),
           SafeArea(child: ExploreModePannel()),
-          SafeArea(child: PinLandmarkPannel.getPanelWidget(context,updateNearbyLandmarkMarkers, localizeOnPinedLandmark, closePinnedLandmarkPannel, nearbyLandmarks,PinedLandmark)),
+          SafeArea(child: PinLandmarkPannel.getPanelWidget(context)),
           detected ? Semantics(child: SafeArea(child: nearestLandmarkpannel())) : Container(),
           SizedBox(height: 28.0), // Adjust the height as needed
           FloatingActionButton(

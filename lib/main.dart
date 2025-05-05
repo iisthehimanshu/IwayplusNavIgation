@@ -48,6 +48,7 @@ final navigationManager=NavigationLogManager();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await localDBInitialsation();
+  RepositoryManager().loadBuildings();
   if(!kIsWeb){
     mobileInitialization();
     runApp(const MobileApp());

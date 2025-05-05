@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/NAVIGATION/Sensor/baseSensorClass.dart';
@@ -37,6 +38,9 @@ class GpsSensor extends BaseSensor{
 
  @override
  Future<void> startListening() async {
+    if(kIsWeb){
+      return;
+    }
    bool isGranted = await checkPermission();
    if (!isGranted) {
      print("GPS permission not granted");

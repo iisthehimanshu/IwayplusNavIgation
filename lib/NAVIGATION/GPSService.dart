@@ -6,6 +6,8 @@ class GPSService {
   static const EventChannel _eventChannel = EventChannel('gps_scan');
 
   static Stream<Location> get locationStream {
+    final stackTrace = StackTrace.current;
+    print("locationStream Stack: \n$stackTrace");
     return _eventChannel.receiveBroadcastStream().map((event) {
       final Map<dynamic, dynamic> location = event;
       print("sending gps location");

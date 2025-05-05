@@ -4,7 +4,7 @@ import '../../navigationTools.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 
-class Polygons {
+class ElementPolygons {
   late Function(List<LatLng>? coordinates, String id) _polygonTap;
 
   Function(List<LatLng>? coordinates, String id) get polygonTap => _polygonTap;
@@ -161,7 +161,7 @@ class Polygons {
           polygonId: PolygonId('patch ${patchData.patchData?.buildingID}'),
           points: polygonPoints,
           strokeWidth: 1,
-          strokeColor: Color(0xffC0C0C0),
+          strokeColor: Color(0xffffffff),
           fillColor: Color(0xffffffff),
           geodesic: false,
           consumeTapEvents: true,

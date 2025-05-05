@@ -1,114 +1,136 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../APIMODELS/landmark.dart';
 import '../APIMODELS/patchDataModel.dart';
 import '../APIMODELS/polylinedata.dart' as polyline_model;
 import '../VenueManager/VenueManager.dart';
 import 'InteractionManager.dart';
+import 'RenderingElement/Marker.dart';
 import 'RenderingElement/Polygon.dart';
 
-class RenderingManager extends ChangeNotifier {
+class RenderingManager {
 
-  Set<Marker> _markers = {};
+  Map<String,Set<Marker>> _lowPriorityMarkers = {};
+  Map<String,Set<Marker>> _midPriorityMarkers = {};
+  Map<String,Set<Marker>> _highPriorityMarkers = {};
+  Map<String,Set<Polygon>> _buildingSpecificPolygons = Map();
+  Set<Polygon> _patch = {};
   Set<Polyline> _polylines = {};
-  Set<Polygon> _polygons = {};
   Set<Circle> _circles = {};
 
-  Set<Marker> get markers => _markers;
+
   Set<Polyline> get polylines => _polylines;
-  Set<Polygon> get polygons => _polygons;
   Set<Circle> get circles => _circles;
+  Set<Marker> get markers {
+    if (_zoomLevel >= 20) {
+      Set<Marker> lowMarker = _lowPriorityMarkers.values.expand((set) => set).toSet();
+      Set<Marker> midMarker = _midPriorityMarkers.values.expand((set) => set).toSet();
+      Set<Marker> highMarker = _highPriorityMarkers.values.expand((set) => set).toSet();
+      return lowMarker.union(midMarker).union(highMarker);
+    } else if (_zoomLevel >= 19) {
+      Set<Marker> midMarker = _midPriorityMarkers.values.expand((set) => set).toSet();
+      Set<Marker> highMarker = _highPriorityMarkers.values.expand((set) => set).toSet();
+      return midMarker.union(highMarker);
+    } else if (_zoomLevel >= 17) {
+      Set<Marker> highMarker = _highPriorityMarkers.values.expand((set) => set).toSet();
+      return highMarker;
+    } else {
+      return {};
+    }
+  }
+  Set<Polygon> get polygons {
+    return _buildingSpecificPolygons.values.expand((set) => set).toSet().union(_patch);
+  }
 
+  VenueManager venueManager = VenueManager();
   Interactionmanager interactionmanager = Interactionmanager();
-
-  Polygons polygonController = Polygons();
-
+  ElementPolygons polygonController = ElementPolygons();
+  ElementMarker markerController = ElementMarker();
 
   RenderingManager(){
     polygonController.polygonTap = interactionmanager.polygonTap;
   }
 
-  void addMarker(LatLng position, {String? id, String? title}) {
-    _markers.add(Marker(
-      markerId: MarkerId(id ?? position.toString()),
-      position: position,
-      infoWindow: InfoWindow(title: title),
-    ));
-    notifyListeners();
-  }
 
-  void addPolyline(List<LatLng> points, {String? id, Color color = const Color(0xFF0000FF)}) {
-    _polylines.add(Polyline(
-      polylineId: PolylineId(id ?? points.first.toString()),
-      points: points,
-      color: color,
-      width: 4,
-    ));
-    notifyListeners();
-  }
 
-  void addPolygon(List<LatLng> points, {String? id, Color fillColor = const Color(0x2200FF00)}) {
-    _polygons.add(Polygon(
-      polygonId: PolygonId(id ?? points.first.toString()),
-      points: points,
-      fillColor: fillColor,
-      strokeWidth: 2,
-      strokeColor: const Color(0xFF00AA00),
-    ));
-    notifyListeners();
-  }
+  double _zoomLevel = 17.0;
 
-  void addCircle(LatLng center, double radius, {String? id, Color fillColor = const Color(0x220000FF)}) {
-    _circles.add(Circle(
-      circleId: CircleId(id ?? center.toString()),
-      center: center,
-      radius: radius,
-      fillColor: fillColor,
-      strokeColor: const Color(0xFF0000FF),
-      strokeWidth: 2,
-    ));
-    notifyListeners();
+  void updateZoomLevel(double newZoom) {
+    if ((newZoom - _zoomLevel).abs() >= 0.5) {
+      _zoomLevel = newZoom;
+    }
   }
 
   void clearAll() {
-    _markers.clear();
+    _lowPriorityMarkers.clear();
+    _midPriorityMarkers.clear();
+    _highPriorityMarkers.clear();
     _polylines.clear();
-    _polygons.clear();
+    _buildingSpecificPolygons.clear();
     _circles.clear();
-    notifyListeners();
   }
 
 
-  Future<void> createBuildings() async {
+  Future<void> createMap() async {
     clearAll();
-    List<polyline_model.polylinedata>? polylineData = await VenueManager().getPolylinePolygonData();
-    List<patchDataModel>? patchData = await VenueManager().getPatchData();
+    List<polyline_model.polylinedata>? polylineData = await venueManager.getPolylinePolygonDataAllBuildings();
+    List<patchDataModel>? patchData = await venueManager.getPatchDataAllBuildings();
+    List<land>? landmarkData = await venueManager.getLandmarkDataAllBuildings();
 
     print("createBuildings data $polylineData");
     if(polylineData == null) return;
     if(patchData == null) return;
+    if(landmarkData == null) return;
 
     for(var buildingPatches in patchData){
       Set<Polygon>? patchCreated = polygonController.createPatch(buildingPatches);
       if(patchCreated != null){
-        _polygons.addAll(patchCreated);
-        notifyListeners();
+        _patch.addAll(patchCreated);
       }
     }
 
     for (var buildingData in polylineData) {
       Set<Polygon>? polygonsCreated = polygonController.createRooms(buildingData, 0);
+      venueManager.switchFloor(0,buildingID: buildingData.polyline!.buildingID);
       if(polygonsCreated != null){
-        _polygons.addAll(polygonsCreated);
-        notifyListeners();
+        _buildingSpecificPolygons[buildingData.polyline!.buildingID!] = polygonsCreated;
+      }
+    }
+
+    for (var buildingData in landmarkData) {
+      Map<String,Set<Marker>>? markerMap = await markerController.createMarkers(buildingData, 0);
+      if (markerMap != null) {
+        _lowPriorityMarkers[buildingData.landmarks!.first.buildingID!] = markerMap["low"] ?? {};
+        _midPriorityMarkers[buildingData.landmarks!.first.buildingID!] = markerMap["mid"] ?? {};
+        _highPriorityMarkers[buildingData.landmarks!.first.buildingID!] = markerMap["high"] ?? {};
       }
     }
 
     return;
   }
+  
+  Future<void> changeFloorOfBuilding(String buildingID, int floor) async {
+    polyline_model.polylinedata? polylineData = await venueManager.getPolylinePolygonData(buildingID);
+    land? landmarkData = await venueManager.getLandmarkData(buildingID);
+    if(polylineData == null) return;
+    if(landmarkData == null) return;
 
-  Future<void> polygonTap(List<LatLng>? coordinates, String id) async {}
+    Set<Polygon>? polygonsCreated = polygonController.createRooms(polylineData, floor);
+    venueManager.switchFloor(floor,buildingID: buildingID);
+    if(polygonsCreated != null){
+      _buildingSpecificPolygons[buildingID] = polygonsCreated;
+    }
 
-
-
+    Map<String,Set<Marker>>? markerMap = await markerController.createMarkers(landmarkData, floor);
+    if (markerMap != null) {
+      _lowPriorityMarkers[buildingID] = markerMap["low"] ??{};
+      _midPriorityMarkers[buildingID] = markerMap["mid"] ?? {};
+      _highPriorityMarkers[buildingID] = markerMap["high"] ?? {};
+    }
+    venueManager.switchFloor(floor);
+  }
+  
 }

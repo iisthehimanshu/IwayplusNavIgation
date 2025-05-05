@@ -1,9 +1,13 @@
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwaymaps/NAVIGATION/VenueManager/BuildingStore.dart';
 import '../APIMODELS/Buildingbyvenue.dart';
+import '../APIMODELS/landmark.dart';
 import '../APIMODELS/patchDataModel.dart';
 import '../APIMODELS/polylinedata.dart';
 import '../Repository/RepositoryManager.dart';
+import '../navigationTools.dart';
 
-class VenueManager{
+class VenueManager extends BuildingStore{
 
   VenueManager._internal();
 
@@ -30,26 +34,76 @@ class VenueManager{
     _buildings = value;
   }
 
-  Future<List<polylinedata>?> getPolylinePolygonData() async {
+  void changeFocusedBuilding(CameraPosition position){
+    String? bid;
+    double minimumDistance = double.infinity;
+    for (var building in _buildings) {
+      double distance = tools.calculateAerialDist(position.target.latitude, position.target.longitude, building.coordinates![0], building.coordinates![1]);
+      if(distance < minimumDistance){
+        minimumDistance = distance;
+        bid = building.sId;
+      }
+    }
+    if(focusedBuilding != bid){
+      focusedBuilding = bid;
+      notifyListeners();
+    }
+  }
+
+  Future<polylinedata?> getPolylinePolygonData(String buildingID) async {
+      polylinedata? buildingData = await RepositoryManager().getPolylineData(buildingID);
+      return buildingData;
+  }
+
+  Future<List<polylinedata>?> getPolylinePolygonDataAllBuildings() async {
     print("polylinedata buildings $buildings");
     if(buildings.isEmpty) return null;
     List<polylinedata> data = [];
     for (var building in buildings) {
-      polylinedata buildingData = await RepositoryManager().getPolylineData(building.sId!);
-      data.add(buildingData);
+      polylinedata? buildingData = await getPolylinePolygonData(building.sId!);
+      if(buildingData != null) {
+        data.add(buildingData);
+      }
     }
+    processAvailableFloors(data);
     return data;
   }
 
-  Future<List<patchDataModel>?> getPatchData() async {
+  Future<patchDataModel?> getPatchData(String buildingID) async {
+      patchDataModel? buildingData = await RepositoryManager().getPatchData(buildingID);
+      return buildingData;
+  }
+
+  Future<List<patchDataModel>?> getPatchDataAllBuildings() async {
     print("patchDataModel buildings $buildings");
     if(buildings.isEmpty) return null;
     List<patchDataModel> data = [];
     for (var building in buildings) {
-      patchDataModel buildingData = await RepositoryManager().getPatchData(building.sId!);
-      data.add(buildingData);
+      patchDataModel? buildingData = await getPatchData(building.sId!);
+      if(buildingData != null){
+        data.add(buildingData);
+      }
     }
     return data;
   }
+
+  Future<land?> getLandmarkData(String buildingID) async {
+      land? buildingData = await RepositoryManager().getLandmarkData(buildingID);
+      return buildingData;
+  }
+
+  Future<List<land>?> getLandmarkDataAllBuildings() async {
+    print("land buildings $buildings");
+    if(buildings.isEmpty) return null;
+    List<land> data = [];
+    for (var building in buildings) {
+      land? buildingData = await getLandmarkData(building.sId!);
+      if(buildingData != null){
+        data.add(buildingData);
+      }
+    }
+    return data;
+  }
+
 
 }

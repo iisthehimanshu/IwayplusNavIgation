@@ -546,8 +546,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         .then((value) {
       maptheme = value;
     });
-    checkPermissions();
+
     if(!kIsWeb){
+      checkPermissions();
       setPdrThreshold();
       getDeviceManufacturer();
     }
@@ -888,6 +889,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   bool disposed = false;
   Future<void> speak(String msg, String lngcode, {bool prevpause = false}) async {
+    if(kIsWeb){
+      return;
+    }
     if (!UserState.ttsAllStop) {
       if (disposed) return;
       if (prevpause) {
@@ -1932,6 +1936,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       bool providePinSelection
       ) async {
     print("got into GPS localization");
+    if(kIsWeb){
+      unableToFindLocation();
+    }
     KalmanFilter _kalmanFilter = KalmanFilter();
     try{
       StreamSubscription<Location>? _gpsSubscription;
@@ -5382,9 +5389,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     List<Landmarks> landmarks = _landData.landmarks!;
     try {
       for (int i = 0; i < landmarks.length; i++) {
-        if (landmarks[i].floor == floor &&
-            landmarks[i].buildingID ==
-                (bid ?? buildingAllApi.selectedBuildingID)) {
+        if (landmarks[i].floor == floor && landmarks[i].buildingID == (bid ?? buildingAllApi.selectedBuildingID)) {
           if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType == "Classroom" &&
               landmarks[i].coordinateX != null &&

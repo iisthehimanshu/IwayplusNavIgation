@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -41,6 +43,7 @@ class _MainScreenState extends State<MainScreen> {
     setIDforWebSocket();
   }
   checkPermission()async{
+
     await requestBluetoothConnectPermission();
   }
   void setIDforWebSocket()async{
@@ -68,6 +71,7 @@ class _MainScreenState extends State<MainScreen> {
         print("location permission is granted");
     }
   }
+
 
   Future<Position> getUsersCurrentLatLng()async{
 

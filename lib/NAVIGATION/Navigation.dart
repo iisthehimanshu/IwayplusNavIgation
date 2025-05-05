@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
+import 'package:iwaymaps/NAVIGATION/Screens/NearestLandmarkScreen.dart';
 import 'package:iwaymaps/NAVIGATION/Sensor/SensorManager.dart';
 import 'package:iwaymaps/NAVIGATION/VenueManager/VenueManager.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
@@ -78,6 +79,7 @@ import 'Network/NetworkManager.dart';
 import 'UserState.dart';
 import 'VersioInfo.dart';
 import 'ViewModel/DirectionInstructionViewModel.dart';
+import 'Widgets/customModelBottomSheet.dart';
 import 'centeroid.dart';
 import 'dijkastra.dart';
 import 'directionClass.dart';
@@ -446,10 +448,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   SensorManager accData = SensorManager();
   SensorManager magnetoData = SensorManager();
   SensorManager gpsData = SensorManager();
+
   @override
   void initState() {
     super.initState();
     initializeMarkers();
+
+
     NavigationLogManager().initialize();
     magnetoData.startMagnetometer();
     accData.startAccelerometer();
@@ -2117,10 +2122,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     user.showcoordX = user.coordX;
     user.showcoordY = user.coordY;
-    UserState.cols = SingletonFunctionController.building.floorDimenssion[
-    userSetLocation.buildingID]![userSetLocation.floor]![0];
-    UserState.rows = SingletonFunctionController.building.floorDimenssion[
-    userSetLocation.buildingID]![userSetLocation.floor]![1];
+
+    UserState.cols = SingletonFunctionController.building.floorDimenssion[userSetLocation.buildingID]![userSetLocation.floor]![0];
+    UserState.rows = SingletonFunctionController.building.floorDimenssion[userSetLocation.buildingID]![userSetLocation.floor]![1];
     UserState.lngCode = _currentLocale;
     UserState.reroute = reroute;
     UserState.closeNavigation = closeNavigation;
@@ -2254,6 +2258,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     //
     if (user.isnavigating == false && speakTTS) {
       detected = true;
+      print("reachedhere");
+      customModalBottomSheet(
+        context,
+        height: MediaQuery.of(context).size.height * 0.92,
+        child: const NearestLandmarkScreen(),
+      );
       if (!_isExploreModePannelOpen && speakTTS) {
         _isBuildingPannelOpen = true;
       }
@@ -3275,6 +3285,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       //lastBeaconValue = nearestBeacon;
     });
 
+    nearestBeacon = "IW25030975";
     // nearestLandmarkToBeacon = nearestBeacon;
     // nearestLandmarkToMacid = highestweight.toString();
 
@@ -13402,22 +13413,15 @@ bool _isPlaying=false;
           SafeArea(child: PinLandmarkPannel.getPanelWidget(context,updateNearbyLandmarkMarkers, localizeOnPinedLandmark, closePinnedLandmarkPannel, nearbyLandmarks,PinedLandmark)),
           detected ? Semantics(child: SafeArea(child: nearestLandmarkpannel())) : Container(),
           SizedBox(height: 28.0), // Adjust the height as needed
-          // FloatingActionButton(
-          //     onPressed: (){
-          //
-          //       //SingletonFunctionController.building.floor == 0 ? 'G' : '${SingletonFunctionController.building.floor}',
-          //
-          //       int firstKey = SingletonFunctionController.building.floor.values.first;
-          //
-          //
-          //
-          //
-          //
-          //
-          //
-          //     },
-          //     child: Icon(Icons.add)
-          // ),
+          FloatingActionButton(
+              onPressed: (){
+                RepositoryManager().getLandmarkData("65d887a5db333f89457145f6");
+                RepositoryManager().getSingleBuildingBeaconData("65d887a5db333f89457145f6");
+
+
+              },
+              child: Icon(Icons.account_tree_rounded)
+          ),
 
           // FloatingActionButton(
           //   onPressed: () async {

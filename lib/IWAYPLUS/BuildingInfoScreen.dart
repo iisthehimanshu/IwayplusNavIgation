@@ -1,6 +1,7 @@
 
 import 'dart:collection';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
@@ -15,6 +16,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '/IWAYPLUS/Elements/HelperClass.dart';
 import '/IWAYPLUS/Elements/buildingCard.dart';
 import 'package:iwaymaps/NAVIGATION/Navigation.dart';
@@ -114,6 +116,9 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     }
     print(dd.length);
   }
+
+
+
   var currentData;
 
   Future<void> customEnableBT(BuildContext context) async {
@@ -143,6 +148,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     BluetoothEnable.enableBluetooth.then((value) {
       print(value);
     });
+
   }
   @override
   Widget build(BuildContext context) {

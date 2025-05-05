@@ -1,5 +1,6 @@
 
 import 'dart:collection';
+import 'dart:io';
 
 import 'dart:math';
 import 'package:easter_egg_trigger/easter_egg_trigger.dart';
@@ -16,6 +17,7 @@ import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
 import 'package:iwaymaps/NAVIGATION/API/RefreshTokenAPI.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/WayPointModelBOX.dart';
+import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 import '../NAVIGATION/BluetoothScanAndroid.dart';
 import '../NAVIGATION/Network/NetworkManager.dart';
 import '/IWAYPLUS/Elements/HelperClass.dart';
@@ -76,7 +78,22 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     apiCall();
     print("venueHashMap");
     print(venueHashMap);
+    requestStoragePermission();
   }
+  Future<void> requestStoragePermission() async {
+    // Ask for regular storage permission (Android <11)
+    var status = await Permission.manageExternalStorage.request();
+
+    if (status.isGranted) {
+      print("✅ Storage permission granted");
+    } else if (status.isDenied) {
+      print("❌ Storage permission denied");
+    } else if (status.isPermanentlyDenied) {
+      print("❌ Permission permanently denied, please enable from settings");
+      await openAppSettings();
+    }
+  }
+
 
   bool _updateAvailable = false;
   bool _checkingForUpdate = true;

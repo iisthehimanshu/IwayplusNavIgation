@@ -222,8 +222,7 @@ class HelperClass{
      // print(value);
      venueHashMap=createVenueHashMap(value);
      venueList = createVenueList(venueHashMap);
-     for(int i=0;i<venueList.length;i++)
-     {
+     for(int i=0;i<venueList.length;i++) {
        buildingsPos.add(venueList[i]);
      }
     });
@@ -269,6 +268,30 @@ class HelperClass{
       return 0.1;
     }
   }
+
+  Future<void> saveJsonToAndroidDownloads(String fileName, String jsonString) async {
+
+    Directory? downloadsDir;
+    if (Platform.isAndroid) {
+      downloadsDir = Directory('/storage/emulated/0/Download');
+    }
+
+    if (downloadsDir == null || !downloadsDir.existsSync()) {
+      print("❌ Could not access Downloads folder.");
+      return;
+    }
+
+    final filePath = '${downloadsDir.path}/$fileName.json';
+    final file = File(filePath);
+
+    try {
+      await file.writeAsString(jsonString, flush: true);
+      print("✅ JSON file saved at: $filePath");
+    } catch (e) {
+      print("❌ Error writing JSON file: $e");
+    }
+  }
+
 
 
 

@@ -476,7 +476,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
 
     if(!kIsWeb){
-      print("kIsWeb");
       if (SingletonFunctionController.timer == null) {
         SingletonFunctionController.timer = Future.delayed(const Duration(seconds: 7));
         timerStartTime = DateTime.now();

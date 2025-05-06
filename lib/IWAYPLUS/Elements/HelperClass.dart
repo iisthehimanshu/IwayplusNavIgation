@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -264,25 +265,26 @@ class HelperClass{
   }
 
   Future<void> saveJsonToAndroidDownloads(String fileName, String jsonString) async {
+    if(!kIsWeb){
+      Directory? downloadsDir;
+      if (Platform.isAndroid) {
+        downloadsDir = Directory('/storage/emulated/0/Download');
+      }
 
-    Directory? downloadsDir;
-    if (Platform.isAndroid) {
-      downloadsDir = Directory('/storage/emulated/0/Download');
-    }
+      if (downloadsDir == null || !downloadsDir.existsSync()) {
+        print("❌ Could not access Downloads folder.");
+        return;
+      }
 
-    if (downloadsDir == null || !downloadsDir.existsSync()) {
-      print("❌ Could not access Downloads folder.");
-      return;
-    }
+      final filePath = '${downloadsDir.path}/$fileName.json';
+      final file = File(filePath);
 
-    final filePath = '${downloadsDir.path}/$fileName.json';
-    final file = File(filePath);
-
-    try {
-      await file.writeAsString(jsonString, flush: true);
-      print("✅ JSON file saved at: $filePath");
-    } catch (e) {
-      print("❌ Error writing JSON file: $e");
+      try {
+        await file.writeAsString(jsonString, flush: true);
+        print("✅ JSON file saved at: $filePath");
+      } catch (e) {
+        print("❌ Error writing JSON file: $e");
+      }
     }
   }
 

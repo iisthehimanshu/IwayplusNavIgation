@@ -384,11 +384,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         //     icon: BitmapDescriptor.fromBytes(values=='Lift'? await getImagesFromMarker('assets/lift.png', 45) : await getImagesFromMarker('assets/user.png', 45)),
         //   ),
         // );
+        _clusterManager = await MapHelper.initClusterManager(
+            markers, _minClusterZoom, _maxClusterZoom, _googleMapController);
+        await _updateMarkers11();
       }
     }catch (e){}
-    _clusterManager = await MapHelper.initClusterManager(
-        markers, _minClusterZoom, _maxClusterZoom, _googleMapController);
-    await _updateMarkers11();
+
   }
   Future<void> _updateMarkers11([double? updatedZoom]) async {
     if (updatedZoom != null && updatedZoom! > 15.5) {
@@ -13224,23 +13225,6 @@ bool _isPlaying=false;
                       Colors.white, // Set the background color of the FAB
                     ),
                   ) : Container(),
-                  FloatingActionButton(
-                    onPressed: () async {
-                      // RepositoryManager().getVenueBeaconData();
-                      BLEManager().startScanning(bufferSize: 8, streamFrequency: 8,duration: 10);
-                      BLEManager().bufferedDeviceStream.listen((data) {
-                        print("🎯 Received buffer data: $data");
-                        // Example: Update UI / send to backend / calculate logic
-                      });
-                    },
-                    child: Icon(Icons.bluetooth_audio),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                      BorderRadius.circular(26.0), // Change radius here
-                    ),
-                    backgroundColor:
-                    Colors.white, // Set the background color of the FAB
-                  ),
                   SizedBox(height: 28.0),
                   (!kIsWeb &&  Platform.isAndroid) && !user.isnavigating &&
                       (!_isLandmarkPanelOpen &&
@@ -13419,65 +13403,6 @@ bool _isPlaying=false;
           SafeArea(child: PinLandmarkPannel.getPanelWidget(context)),
           detected ? Semantics(child: SafeArea(child: nearestLandmarkpannel())) : Container(),
           SizedBox(height: 28.0), // Adjust the height as needed
-          FloatingActionButton(
-              onPressed: (){
-                RepositoryManager().getLandmarkData("65d887a5db333f89457145f6");
-                RepositoryManager().getSingleBuildingBeaconData("65d887a5db333f89457145f6");
-
-
-              },
-              child: Icon(Icons.account_tree_rounded)
-          ),
-
-          // FloatingActionButton(
-          //   onPressed: () async {
-          //
-          //     //StopPDR();
-          //
-          //     if (user.initialallyLocalised) {
-          //       setState(() {
-          //         isLiveLocalizing = !isLiveLocalizing;
-          //       });
-          //       HelperClass.showToast("realTimeReLocalizeUser started");
-          //
-          //       Timer.periodic(
-          //           Duration(milliseconds: 5000),
-          //               (timer) async {
-          //
-          //             SingletonFunctionController.btadapter.startScanning(resBeacons);
-          //
-          //
-          //             // setState(() {
-          //             //   sumMap=  SingletonFunctionController.btadapter.calculateAverage();
-          //             // });
-          //
-          //
-          //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
-          //               realTimeReLocalizeUser(resBeacons)
-          //               // listenToBin()
-          //
-          //
-          //             });
-          //
-          //             setState(() {
-          //               debugPQ = SingletonFunctionController.btadapter.returnPQ();
-          //
-          //             });
-          //
-          //           });
-          //
-          //     }
-          //
-          //   },
-          //   child: Icon(
-          //     Icons.location_history_sharp,
-          //     color: (isLiveLocalizing)
-          //         ? Colors.cyan
-          //         : Colors.black,
-          //   ),
-          //   backgroundColor: Colors
-          //       .white, // Set the background color of the FAB
-          // ),
           (SingletonFunctionController.building.buildingsLoaded || SingletonFunctionController.building.destinationQr || user.initialallyLocalised || SingletonFunctionController.building.qrOpened || PinLandmarkPannel.isPanelOpened())
               ?Container(): Container(
             height: screenHeight,

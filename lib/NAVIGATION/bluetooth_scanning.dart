@@ -239,7 +239,7 @@ class BLueToothClass {
   void stopScanning() async{
     await FlutterBluePlus.stopScan();
     emptyBin();
-    if(Platform.isIOS) _scanResultsSubscription.cancel();
+    if(!kIsWeb && Platform.isIOS) _scanResultsSubscription.cancel();
     _scanResults.clear();
     // _systemDevices.clear();
     priorityQueue.clear();

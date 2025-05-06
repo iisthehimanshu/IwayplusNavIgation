@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
@@ -22,6 +23,7 @@ class DataVersionApi {
   bool shouldBeInjected = false;
 
   Future<void> fetchDataVersionApiData(String id) async {
+    print(StackTrace.current);
     accessToken = signInBox.get("accessToken");
 
     final Map<String, dynamic> data = {

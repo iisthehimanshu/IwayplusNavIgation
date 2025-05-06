@@ -29,6 +29,7 @@ class DataBaseManager<T> implements DBManager<T>{
   bool greenDataBase = true;
 
   static void init() async {
+    print("Called DataBaseManager init");
     Hive.registerAdapter(LandMarkApiModelAdapter());
     await Hive.openBox<LandMarkApiModel>('LandMarkApiModelFile');
     Hive.registerAdapter(PatchAPIModelAdapter());
@@ -122,13 +123,5 @@ class DataBaseManager<T> implements DBManager<T>{
     signInBox.put("refreshToken", newRefreshToken);
   }
 
-  bool isGreenDataBaseActive(){
-    return greenDataBase;
-  }
 
-  void switchGreenDataBase(bool value){
-    greenDataBase = value;
-    print("greenDataBase $greenDataBase");
-    print(isGreenDataBaseActive());
-  }
 }

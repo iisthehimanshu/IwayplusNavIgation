@@ -8,6 +8,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/NAVIGATION/DatabaseManager/SwitchDataBase.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 import 'package:iwaymaps/NAVIGATION/Screens/NearestLandmarkScreen.dart';
 import 'package:iwaymaps/NAVIGATION/Sensor/SensorManager.dart';
@@ -2989,8 +2990,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     List<String> itterated = [];
     NavigationAPIController apiController = NavigationAPIController(createPatch: createPatch, findCentroid: findCentroid, createotherPatch: createotherPatch, createRooms: createRooms, createARPatch: createARPatch, createotherARPatch: createotherARPatch, createMarkers: createMarkers);
     try{
-      await DataVersionApi()
-          .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
+      await DataVersionApi().fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
     }catch(e){
       print(" APICALLS DataVersionApi API TRY-CATCH");
     }
@@ -3068,7 +3068,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         print("forKeys $key");
 
         try {
-          await DataVersionApi().fetchDataVersionApiData(key);
+          await RepositoryManager().getDataVersionData(key);
+          // await DataVersionApi().fetchDataVersionApiData(key);
         } catch (e) {}
 
         await apiController.patchAPIController(key, false);
@@ -3113,6 +3114,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     Future.delayed(Duration(seconds: 5));
     SingletonFunctionController.building.buildingsLoaded = true;
+    // SwitchDataBase().switchGreenDataBase(false);
   }
   var versionBox = Hive.box('VersionData');
   final DataVersionLocalModelBox = DataVersionLocalModelBOX.getData();

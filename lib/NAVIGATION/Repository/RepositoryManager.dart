@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:iwaymaps/NAVIGATION/API/GlobalAnnotationapi.dart';
 import 'package:iwaymaps/NAVIGATION/APIMODELS/landmark.dart';
 import 'package:iwaymaps/NAVIGATION/APIMODELS/outbuildingmodel.dart';
+import 'package:iwaymaps/NAVIGATION/DatabaseManager/SwitchDataBase.dart';
 import '../../IWAYPLUS/Elements/HelperClass.dart';
 import '../APIMODELS/DataVersion.dart';
 import '../DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
@@ -47,6 +48,7 @@ class RepositoryManager{
 
     NetworkManager networkManager = NetworkManager();
     DataBaseManager dataBaseManager = DataBaseManager();
+    SwitchDataBase switchDataBase = SwitchDataBase();
     Apidetails apiDetails = Apidetails();
     bool shouldBeInjected = false;
 
@@ -67,7 +69,7 @@ class RepositoryManager{
 
         Detail landmarkDetail = apiDetails.landmark(dataBaseManager.getAccessToken(), bID);
         final landmarkBox = landmarkDetail.dataBaseGetData!();
-        if(dataBaseManager.isGreenDataBaseActive()){
+        if(switchDataBase.isGreenDataBaseActive()){
             return getPreLoadedData(landmarkDetail,bID);
         }else {
             return;
@@ -112,12 +114,16 @@ class RepositoryManager{
     }
 
     Future<dynamic> getPolylineData(String bID) async {
-        if (bID.isEmpty) return null;
+
+        if (bID.isEmpty) {
+            print("getPolylineData bID was null $bID");
+            return null;
+        }
 
         Detail polylineDetail = apiDetails.polyline(dataBaseManager.getAccessToken(), bID);
         final polylineBox = polylineDetail.dataBaseGetData!();
 
-        if(dataBaseManager.isGreenDataBaseActive()){
+        if(switchDataBase.isGreenDataBaseActive()){
             return getPreLoadedData(polylineDetail,bID);
         }else {
             return;
@@ -271,12 +277,11 @@ class RepositoryManager{
         final patchBox = patchDetail.dataBaseGetData!();
 
 
-        print("GREEN DATABASE IS ACTIVE : ${dataBaseManager.isGreenDataBaseActive()}");
-        if(dataBaseManager.isGreenDataBaseActive()){
+        print("GREEN DATABASE IS ACTIVE : ${switchDataBase.isGreenDataBaseActive()}");
+        if(switchDataBase.isGreenDataBaseActive()){
             return getPreLoadedData(patchDetail,bID);
         }else {
             print("2nd iteration patch return");
-            return;
             if (patchBox.containsKey(bID)) {
                 if (kDebugMode) {
                     print("PATCH DATA FROM DATABASE");
@@ -309,7 +314,7 @@ class RepositoryManager{
         Detail beaconDetail = apiDetails.buildingBeacons(dataBaseManager.getAccessToken(), bID);
         final beaconBox = beaconDetail.dataBaseGetData!();
 
-        if(dataBaseManager.isGreenDataBaseActive()){
+        if(switchDataBase.isGreenDataBaseActive()){
             return getPreLoadedData(beaconDetail,bID);
         }else {
             return;
@@ -492,7 +497,7 @@ class RepositoryManager{
     }
 
     dynamic getPreLoadedData(Detail details,String bID) async {
-        if(kDebugMode) print("GOING GREEN ${details.getPreLoadPrefix}$bID");
+        if(kDebugMode) print("${details.getPreLoadPrefix} DATA FROM GREEN DATABASE");
         String jsonString = await rootBundle.loadString('assets/PreLoads/${details.getPreLoadPrefix}$bID.json');
         final data = json.decode(jsonString);
         print("details.conversionFunction(data)");

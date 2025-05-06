@@ -18,6 +18,7 @@ import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
 import 'package:iwaymaps/NAVIGATION/API/RefreshTokenAPI.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/WayPointModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/DataBaseManager.dart';
+import 'package:iwaymaps/NAVIGATION/DatabaseManager/SwitchDataBase.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 import '../NAVIGATION/BluetoothScanAndroid.dart';
 import '../NAVIGATION/Network/NetworkManager.dart';
@@ -75,10 +76,8 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     // checkForUpdate();
     //startScan();
     getLocs();
-    // DataBaseManager().switchGreenDataBase(true);
-    // print("GREEN DATABASE IS ACTIVE venueselectionscreen : ${DataBaseManager().isGreenDataBaseActive()}");
-    // DataBaseManager().switchGreenDataBase(false);
-    // print("GREEN DATABASE IS ACTIVE venueselectionscreen : ${DataBaseManager().isGreenDataBaseActive()}");
+    SwitchDataBase().switchGreenDataBase(true);
+    print("GREEN DATABASE IS ACTIVE venueselectionscreen : ${SwitchDataBase().isGreenDataBaseActive()}");
 
     apiCall();
     print("venueHashMap");

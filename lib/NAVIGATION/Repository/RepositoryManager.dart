@@ -51,6 +51,7 @@ class RepositoryManager{
 
 
     Future<void> loadBuildings() async {
+        print("loadBuildings");
         List<dynamic> list = await getBuildingByVenue(VenueManager().venueName);
         VenueManager().buildings = list.whereType<Buildingbyvenue>().toList();
         print("VenueManager().buildings ${VenueManager().buildings}");
@@ -66,23 +67,26 @@ class RepositoryManager{
 
         Detail landmarkDetail = apiDetails.landmark(dataBaseManager.getAccessToken(), bID);
         final landmarkBox = landmarkDetail.dataBaseGetData!();
-        if(dataBaseManager.isGreenDataBaseActive()){
-            return getPreLoadedData(landmarkDetail,bID);
-        }
+        // if(dataBaseManager.isGreenDataBaseActive()){
+        //     return getPreLoadedData(landmarkDetail,bID);
+        // }
         if(landmarkBox.containsKey(bID)){
             if(kDebugMode){
-                print("Data from DB");
+                print("Data from DB for ID $bID");
             }
             LandMarkApiModel responseFromDatabase = DataBaseManager().getData(landmarkDetail, bID);
             return landmarkDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(landmarkDetail);
             if (kDebugMode) {
-                print("Data from API");
+                print("Data from API for ID $bID");
             }
             if(dataFromAPI.statusCode == 200){
                 final landmarkData = LandMarkApiModel(responseBody: dataFromAPI.data);
                 DataBaseManager().saveData(landmarkData,landmarkDetail,bID);
+                if (kDebugMode) {
+                    print("Data recieved from API for ${landmarkDetail.conversionFunction(dataFromAPI.data).landmarks.first.buildingName}");
+                }
                 return landmarkDetail.conversionFunction(dataFromAPI.data);
             }else if(dataFromAPI.statusCode == 201){
                 return null;

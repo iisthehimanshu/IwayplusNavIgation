@@ -22,7 +22,6 @@ class NavigationAPIController {
   Function createARPatch = (Map<int, geo.LatLng> coordinates){};
   Function createotherARPatch = (Map<int, geo.LatLng> coordinates, String bid){};
   Function createMarkers = (land landData, int floor, {String? bid}){};
-  List<String> LandmarkPool = [];
 
   NavigationAPIController(
       {required this.createPatch,
@@ -76,6 +75,8 @@ class NavigationAPIController {
   }
 
   Future<void> landmarkAPIController(String id, bool selected) async {
+    final stackTrace = StackTrace.current;
+    print("landmarkAPIController Stack: \n$stackTrace");
     var landmarkData = await RepositoryManager().getLandmarkData(id) as land;
     if(selected){
       SingletonFunctionController.building.landmarkdata = Future.value(landmarkData);
@@ -83,7 +84,8 @@ class NavigationAPIController {
       var otherLandmarkdata = await SingletonFunctionController.building.landmarkdata;
       otherLandmarkdata?.mergeLandmarks(landmarkData.landmarks);
     }
-    LandmarkPool.add(id);
+
+    print("data recieved for ${landmarkData.landmarks!.first.buildingName}");
 
     var coordinates = <int, geo.LatLng>{};
 
@@ -116,13 +118,9 @@ class NavigationAPIController {
         }
 
 
-        var currentFloorDimensions = SingletonFunctionController
-            .building.floorDimenssion[id] ??
-            {};
-        currentFloorDimensions[landmark.floor!] = [
-          landmark.properties!.floorLength!,
-          landmark.properties!.floorBreadth!
-        ];
+        var currentFloorDimensions = SingletonFunctionController.building.floorDimenssion[id] ?? {};
+        currentFloorDimensions[landmark.floor!] = [landmark.properties!.floorLength!, landmark.properties!.floorBreadth!];
+        print("adding dimensions ${[landmark.properties!.floorLength!, landmark.properties!.floorBreadth!]} for ${landmark.floor} in ${landmark.buildingName} ${landmark.buildingID}");
 
         SingletonFunctionController
             .building.floorDimenssion[id] =

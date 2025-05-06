@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +20,14 @@ import '../MODELS/VenueModel.dart';
 
 class HelperClass{
   static bool SemanticEnabled = false;
+
+  static Future<bool> checkInternetConnectivity() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult.contains(ConnectivityResult.mobile) || connectivityResult.contains(ConnectivityResult.wifi)) {
+      return true;
+    }
+    return false;
+  }
 
   static Future<void> launchURL(String url) async {
     if (await canLaunch(url)) {

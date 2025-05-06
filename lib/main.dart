@@ -1,44 +1,22 @@
-
-import 'dart:convert';
-
-
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localization/flutter_localization.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:iwaymaps/IWAYPLUS/BuildingInfoScreen.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
-import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/DataBaseManager.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
-import '/IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
-import '/IWAYPLUS/DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-
-import '/NAVIGATION/DATABASE/BOXES/BeaconAPIModelBOX.dart';
-import '/NAVIGATION/DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
-import '/NAVIGATION/DATABASE/DATABASEMODEL/OutDoorModel.dart';
-import '/NAVIGATION/DATABASE/DATABASEMODEL/WayPointModel.dart';
-
-import '/NAVIGATION/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
-import '/NAVIGATION/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
-import '/NAVIGATION/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
-import '/NAVIGATION/DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
-import 'IWAYPLUS/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
-import 'IWAYPLUS/DATABASE/DATABASEMODEL/SignINAPIModel.dart';
-import 'IWAYPLUS/Elements/deeplinks.dart';
 import 'IWAYPLUS/Elements/locales.dart';
 import 'IWAYPLUS/FIREBASE NOTIFICATION API/PushNotifications.dart';
 import 'IWAYPLUS/LOGIN SIGNUP/SignIn.dart';
 import 'IWAYPLUS/MainScreen.dart';
-import '/NAVIGATION/Navigation.dart';
 import 'dart:io' show Platform;
-
 import 'IWAYPLUS/websocket/navigationLogManager.dart';
+import 'NAVIGATION/webHome.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -218,25 +196,73 @@ class WebApp extends StatefulWidget {
 
 class _WebAppState extends State<WebApp> {
   final FlutterLocalization localization = FlutterLocalization.instance;
-  var SignInDatabasebox = Hive.box('SignInDatabase');
+  final SignInDatabasebox = Hive.box('SignInDatabase');
+
+  late final GoRouter _router;
 
   @override
   void initState() {
     configureLocalization();
+
+    _router = GoRouter(
+      initialLocation: '/web',
+      routes: [
+        GoRoute(
+          path: '/web',
+          builder: (context, state) {
+            // If no ID is given, show a screen to input the ID
+            if(!SignInDatabasebox.containsKey("accessToken")){
+              return SignIn();
+            }else{
+              return AskForIdPage(); // Create this screen
+            }
+          },
+        ),
+        GoRoute(
+          path: '/web/:id',
+          builder: (context, state) {
+            if(!SignInDatabasebox.containsKey("accessToken")){
+              return SignIn();
+            }else{
+              final id = state.pathParameters['id']!;
+              return webHome(Venue: id,source: null,); // Create this screen
+            }
+
+          },
+        ),
+        GoRoute(
+          path: '/web/:id/:source',
+          builder: (context, state) {
+            if(!SignInDatabasebox.containsKey("accessToken")){
+              return SignIn();
+            }else{
+              final id = state.pathParameters['id']!;
+              final source = state.pathParameters['source']!;
+              return webHome(Venue: id,source: source,); // Create this screen
+            }
+          },
+        ),
+      ],
+    );
+
     super.initState();
   }
 
-  void configureLocalization(){
+  void configureLocalization() {
     localization.init(mapLocales: LOCALES, initLanguageCode: 'en');
     localization.onTranslatedLanguage = ontranslatedLanguage;
   }
-  void ontranslatedLanguage(Locale? locale){
+
+  void ontranslatedLanguage(Locale? locale) {
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: SignInDatabasebox.containsKey("accessToken")?MainScreen(initialIndex: 0):SignIn());
+    return MaterialApp.router(
+      routerConfig: _router,
+    );
   }
 }
+
 

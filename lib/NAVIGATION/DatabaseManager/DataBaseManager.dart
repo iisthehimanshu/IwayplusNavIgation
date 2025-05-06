@@ -24,11 +24,20 @@ import '../Network/APIDetails.dart';
 import '../Network/NetworkManager.dart';
 
 
-class DataBaseManager<T> implements DBManager<T>{
-
+class DataBaseManager implements DBManager {
   bool greenDataBase = true;
 
-  static void init() async {
+  // Singleton instance
+  static final DataBaseManager _instance = DataBaseManager._internal();
+
+  // Private constructor
+  DataBaseManager._internal();
+
+  // Factory constructor returning the singleton
+  factory DataBaseManager() => _instance;
+
+  // Static init method
+  static Future<void> init() async {
     Hive.registerAdapter(LandMarkApiModelAdapter());
     await Hive.openBox<LandMarkApiModel>('LandMarkApiModelFile');
     Hive.registerAdapter(PatchAPIModelAdapter());
@@ -66,63 +75,57 @@ class DataBaseManager<T> implements DBManager<T>{
     await Hive.openBox('SignInDatabase');
     await Hive.openBox('LocationPermission');
     await Hive.openBox('VersionData');
-
   }
 
   @override
   Future<void> delete(int id) {
-    // TODO: implement delete
     throw UnimplementedError();
   }
 
   @override
-  Future<T> updateData() {
-    // TODO: implement getData
+  Future<dynamic> updateData() {
     throw UnimplementedError();
   }
 
   @override
-  Future<void> saveData(T dataModel,Detail details,String bID) async {
+  Future<void> saveData(dynamic dataModel, Detail details, String bID) async {
     final databaseBox = details.dataBaseGetData!();
-    databaseBox.put(bID,dataModel);
+    databaseBox.put(bID, dataModel);
   }
 
   @override
-  T getData(Detail details,String bID) {
+  dynamic getData(Detail details, String bID) {
     final databaseBox = details.dataBaseGetData!();
     final data = databaseBox.get(bID);
     return data;
   }
 
   @override
-  String getAccessToken(){
+  String getAccessToken() {
     var signInBox = Hive.box('SignInDatabase');
-    String accessToken = signInBox.get("accessToken");
-    return accessToken;
+    return signInBox.get("accessToken");
   }
 
   @override
-  void updateAccessToken(String newAccessToken){
+  void updateAccessToken(String newAccessToken) {
     var signInBox = Hive.box('SignInDatabase');
-    signInBox.delete("accessToken");
     signInBox.put("accessToken", newAccessToken);
   }
 
   @override
-  String getRefreshToken(){
+  String getRefreshToken() {
     var signInBox = Hive.box('SignInDatabase');
-    String refreshToken = signInBox.get("refreshToken");
-    return refreshToken;
+    return signInBox.get("refreshToken");
   }
 
   @override
-  void updateRefreshToken(String newRefreshToken){
+  void updateRefreshToken(String newRefreshToken) {
     var signInBox = Hive.box('SignInDatabase');
-    signInBox.delete("refreshToken");
     signInBox.put("refreshToken", newRefreshToken);
   }
 
-  bool isGreenDataBaseActive(){
+  bool isGreenDataBaseActive() {
     return greenDataBase;
   }
 }
+

@@ -70,10 +70,12 @@ class RepositoryManager{
 
         Detail landmarkDetail = apiDetails.landmark(dataBaseManager.getAccessToken(), bID);
         final landmarkBox = landmarkDetail.dataBaseGetData!();
+        print("switchDataBase.isGreenDataBaseActive()");
+        print(switchDataBase.isGreenDataBaseActive());
         if(switchDataBase.isGreenDataBaseActive()){
             return getPreLoadedData(landmarkDetail,bID);
         }else {
-            return;
+            print("getLandmarkData");
             if (landmarkBox.containsKey(bID)) {
                 if (kDebugMode) {
                     print("Data from DB");
@@ -110,7 +112,6 @@ class RepositoryManager{
                     return null;
                     //open new screen
                 }
-
             }
         }
     }
@@ -128,7 +129,6 @@ class RepositoryManager{
         if(switchDataBase.isGreenDataBaseActive()){
             return getPreLoadedData(polylineDetail,bID);
         }else {
-            return;
             if (polylineBox.containsKey(bID)) {
                 if (kDebugMode) {
                     print("POLYLINE DATA FROM DATABASE");

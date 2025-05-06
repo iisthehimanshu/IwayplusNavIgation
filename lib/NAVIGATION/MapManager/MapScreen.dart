@@ -14,6 +14,7 @@ class MapScreen extends StatelessWidget {
         animation: mapManager,
         builder: (context, _) {
           return GoogleMap(
+            buildingsEnabled: false,
             onMapCreated: mapManager.onMapCreated,
             onCameraMove: mapManager.onCameraMove,
             initialCameraPosition: mapManager.initialPosition,

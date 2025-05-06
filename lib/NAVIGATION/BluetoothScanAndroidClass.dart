@@ -268,7 +268,6 @@ class BluetoothScanAndroidClass{
     startCleanupTimer();
     print("listenToScanUpdates");
 
-
     String deviceMacId = "";
     // Start listening to the stream continuously
     _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {

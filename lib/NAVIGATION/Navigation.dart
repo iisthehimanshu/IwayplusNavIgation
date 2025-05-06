@@ -3215,6 +3215,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       SingletonFunctionController.currentBeacon = nearestBeacon;
     }
   }
+
   Future<void> localizeUser({bool speakTTS = true,bool pinSelectionMarker=false}) async {
     //----------
     speak("${LocaleData.searchingyourlocation.getString(context)}", _currentLocale);
@@ -3232,6 +3233,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     //   });
     // });
     //------------
+    SwitchDataBase().switchGreenDataBase(false);
     double highestweight = 0;
     String nearestBeacon = "";
 

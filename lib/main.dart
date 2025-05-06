@@ -68,8 +68,6 @@ Future<void> mobileInitialization () async {
 
 
 
-
-
 class MobileApp extends StatefulWidget {
   const MobileApp({super.key});
 

@@ -3261,6 +3261,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       //lastBeaconValue = nearestBeacon;
     });
 
+
+    nearestBeacon = "";
     // nearestLandmarkToBeacon = nearestBeacon;
     // nearestLandmarkToMacid = highestweight.toString();
 

@@ -274,9 +274,13 @@ class BluetoothScanAndroidClass{
     _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
       // print("deviceDetail----- $deviceDetail");
       BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
-      // String dataaa = parseLog(deviceDetail);
+      String dataaa = parseLog(deviceDetail);
+      print("dataaa- $dataaa");
+      if(deviceDetails.rawData.contains("0B-09")){
+        print("Contains");
+      }
+
       networkManager.ws.updateInitialization(nearByDevices: MapEntry(deviceDetails.rawData, deviceDetails.DeviceRssi));
-      // print("dataaa- $dataaa");
 
       if(apibeaconmap.containsKey(deviceDetails.DeviceName)) {
         DateTime currentTime = DateTime.now();

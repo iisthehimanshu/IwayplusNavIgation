@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:chips_choice/chips_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -10,7 +9,6 @@ import 'package:iwaymaps/IWAYPLUS/API/buildingAllApi.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-
 import '../IWAYPLUS/Elements/HelperClass.dart';
 import 'API/ladmarkApi.dart';
 import 'APIMODELS/landmark.dart';

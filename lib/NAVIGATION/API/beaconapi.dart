@@ -93,7 +93,7 @@ class beaconapi {
         BeaconBox.put(i,beaconData);
         beaconData.save();
         print(BeaconBox.keys);
-        if(kDebugMode && Platform.isAndroid) {
+        if(!kIsWeb && kDebugMode && Platform.isAndroid) {
           List<dynamic> JSONresponseBody = json.decode(response.body);
           String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
           HelperClass().saveJsonToAndroidDownloads("beacon$id", formattedJson);

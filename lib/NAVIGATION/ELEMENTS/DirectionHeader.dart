@@ -1,36 +1,26 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:collection/collection.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
-
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
+import 'package:vibration/vibration.dart';
+
 import '../../IWAYPLUS/API/buildingAllApi.dart';
 import '../../IWAYPLUS/Elements/UserCredential.dart';
 import '../../IWAYPLUS/Elements/locales.dart';
 import '../../IWAYPLUS/FIREBASE NOTIFICATION API/PushNotifications.dart';
 import '../BluetoothManager/BLEManager.dart';
 import '../BluetoothScanAndroidClass.dart';
-
-import 'package:vibration/vibration.dart';
-
 import '../BluetoothScanIOSClass.dart';
 import '../Cell.dart';
 import '../UserState.dart';
 import '../bluetooth_scanning.dart';
 import '../buildingState.dart';
-import '../directionClass.dart';
 import '../directionClass.dart' as dc;
 import '../directionClass.dart';
-import '../Navigation.dart';
 import '../navigationTools.dart';
 import '../singletonClass.dart';
 

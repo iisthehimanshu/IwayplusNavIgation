@@ -7,16 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import '../IWAYPLUS/API/buildingAllApi.dart';
+import 'API/beaconapi.dart';
+import 'APIMODELS/beaconData.dart';
 import 'BluetoothScanAndroidClass.dart';
 import 'BluetoothScanIOSClass.dart';
-import 'buildingState.dart';
-
-import 'API/beaconapi.dart';
-
-import 'APIMODELS/beaconData.dart';
-import 'VersioInfo.dart';
 import 'bluetooth_scanning.dart';
+import 'buildingState.dart';
 
 class SingletonFunctionController {
   bool _isRunning = false;

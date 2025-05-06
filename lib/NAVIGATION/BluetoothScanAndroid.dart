@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'APIMODELS/Building.dart';
 import 'ELEMENTS/BluetoothDevice.dart';
 
 class BluetoothScanAndroid extends StatefulWidget {

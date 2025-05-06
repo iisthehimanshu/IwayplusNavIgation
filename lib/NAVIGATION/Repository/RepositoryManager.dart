@@ -54,6 +54,7 @@ class RepositoryManager{
 
 
     Future<void> loadBuildings() async {
+        print("loadBuildings");
         List<dynamic> list = await getBuildingByVenue(VenueManager().venueName);
         VenueManager().buildings = list.whereType<Buildingbyvenue>().toList();
         print("VenueManager().buildings ${VenueManager().buildings}");
@@ -109,6 +110,7 @@ class RepositoryManager{
                     return null;
                     //open new screen
                 }
+
             }
         }
     }

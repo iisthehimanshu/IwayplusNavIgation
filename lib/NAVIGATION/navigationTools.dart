@@ -1,25 +1,24 @@
-import 'dart:collection';
 import 'dart:math';
-import 'package:geolocator/geolocator.dart';
-import 'package:intl/intl.dart';
+
 import 'package:collection/collection.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:iwaymaps/NAVIGATION/UserState.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
+
 import '../IWAYPLUS/API/buildingAllApi.dart';
 import '../IWAYPLUS/Elements/UserCredential.dart';
 import '../IWAYPLUS/Elements/locales.dart';
+import 'API/PatchApi.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
-import 'API/PatchApi.dart';
 import 'APIMODELS/patchDataModel.dart';
-import 'APIMODELS/polylinedata.dart';
 import 'Cell.dart';
 import 'Navigation.dart';
 import 'directionClass.dart';
-import 'package:iwaymaps/NAVIGATION/UserState.dart';
 
 
 class tools {

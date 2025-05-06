@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+
 import 'APIMODELS/beaconData.dart';
 import 'Network/NetworkManager.dart';
 
@@ -239,7 +240,7 @@ class BLueToothClass {
   void stopScanning() async{
     await FlutterBluePlus.stopScan();
     emptyBin();
-    if(Platform.isIOS) _scanResultsSubscription.cancel();
+    if(!kIsWeb && Platform.isIOS) _scanResultsSubscription.cancel();
     _scanResults.clear();
     // _systemDevices.clear();
     priorityQueue.clear();

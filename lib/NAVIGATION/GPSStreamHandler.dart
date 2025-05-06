@@ -1,5 +1,6 @@
-import 'package:geolocator/geolocator.dart';
 import 'dart:async';
+
+import 'package:geolocator/geolocator.dart';
 
 class GPSStreamHandler {
   StreamSubscription<Position>? _positionStreamSubscription;

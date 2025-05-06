@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../DestinationSearchPage.dart';
-
 class HomepageLandmarkClickedSearchBar extends StatefulWidget {
   final searchText;
   final VoidCallback onToggle;

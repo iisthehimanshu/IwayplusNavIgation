@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iwaymaps/newSearchPage.dart';
-
-import '../DestinationSearchPage.dart';
-import '../SourceAndDestinationPage.dart';
 
 class HomepageFilter extends StatefulWidget {
   final Function(String ID) onClicked;

@@ -1,23 +1,20 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
 import 'package:iwaymaps/NAVIGATION/path_snapper.dart';
 import 'package:ml_linalg/matrix.dart';
+
 import '../IWAYPLUS/API/buildingAllApi.dart';
 import '../IWAYPLUS/Elements/locales.dart';
-import 'DebugToggle.dart';
+import 'Cell.dart';
 import 'GPSService.dart';
 import 'GPSStreamHandler.dart';
 import 'MotionModel.dart';
 import 'Network/NetworkManager.dart';
 import 'buildingState.dart' as b;
-
-import 'Cell.dart';
 import 'navigationTools.dart';
 
 

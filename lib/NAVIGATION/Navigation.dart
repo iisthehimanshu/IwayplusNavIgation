@@ -1,18 +1,39 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
-import 'dart:isolate';
+import 'dart:math' as math;
 import 'dart:math';
-import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'dart:ui';
+
+import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
+import 'package:chips_choice/chips_choice.dart';
+import 'package:collection/collection.dart' as pac;
+import 'package:device_information/device_information.dart';
+import 'package:fluster/fluster.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_beep/flutter_beep.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_compass/flutter_compass.dart';
+import 'package:flutter_localization/flutter_localization.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geodesy/geodesy.dart' as geo;
 import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/SwitchDataBase.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
+
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/NAVIGATION/Screens/NearestLandmarkScreen.dart';
 import 'package:iwaymaps/NAVIGATION/Sensor/SensorManager.dart';
-import 'package:iwaymaps/NAVIGATION/VenueManager/VenueManager.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
 import 'package:iwaymaps/NAVIGATION/path.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
@@ -21,26 +42,18 @@ import 'package:iwaymaps/NAVIGATION/realWorldModel.dart';
 import 'package:iwaymaps/NAVIGATION/routeOption.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 import 'package:iwaymaps/NAVIGATION/waypoint.dart';
-import 'package:vibration/vibration.dart';
+import 'package:lottie/lottie.dart' as lott;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:sensors_plus/sensors_plus.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
-import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
-import 'package:collection/collection.dart';
-import 'package:collection/collection.dart' as pac;
-import 'package:fluster/fluster.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter_animator/flutter_animator.dart';
-import 'package:flutter_beep/flutter_beep.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:flutter_localization/flutter_localization.dart';
-import 'package:http/http.dart';
+
 import '../IWAYPLUS/API/RatingsaveAPI.dart';
 import '../IWAYPLUS/API/buildingAllApi.dart';
 import '../IWAYPLUS/APIMODELS/buildingAll.dart';
 import '../IWAYPLUS/CLUSTERING/InitMarkerModel.dart';
 import '../IWAYPLUS/CLUSTERING/MapHelper.dart';
 import '../IWAYPLUS/CLUSTERING/MapMarkers.dart';
-import '../IWAYPLUS/CONSTANTS.dart';
 import '../IWAYPLUS/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import '../IWAYPLUS/Elements/HelperClass.dart';
 import '../IWAYPLUS/Elements/QRLandmarkScreen.dart';
@@ -55,86 +68,43 @@ import '../IWAYPLUS/websocket/navigationLogModel.dart';
 import '../newSearchPage.dart';
 import 'API/DataVersionApi.dart';
 import 'API/GlobalAnnotationapi.dart';
-import 'API/PolyLineApi.dart';
+import 'API/ladmarkApi.dart';
 import 'API/outBuilding.dart';
+import 'API/outbuildingapi.dart';
 import 'API/waypoint.dart';
-import 'APIMODELS/DataVersion.dart';
+import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/landmark.dart';
-import 'APIMODELS/outdoormodel.dart';
-import 'BluetoothManager/BLEManager.dart';
+import 'APIMODELS/outbuildingmodel.dart';
+import 'APIMODELS/patchDataModel.dart';
+import 'APIMODELS/polylinedata.dart';
 import 'BluetoothScanAndroidClass.dart';
-import 'BluetoothScanIOSClass.dart';
+import 'Cell.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
-import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
-import 'DatabaseManager/DataBaseManager.dart';
 import 'DebugToggle.dart';
+import 'DestinationSearchPage.dart';
 import 'ELEMENTS/DirectionHeader.dart';
 import 'ELEMENTS/DirectionInstruction.dart';
 import 'ELEMENTS/ExploreModeWidget.dart';
 import 'ELEMENTS/PickupLocationPin.dart';
 import 'Elements/AccessiblePathButton.dart';
-import 'GPSService.dart';
-import 'GlobalAnnotation/global_annotation_controller.dart';
-import 'GlobalAnnotation/global_rendering.dart';
-import 'Network/NetworkManager.dart';
-import 'UserState.dart';
-import 'VersioInfo.dart';
-import 'ViewModel/DirectionInstructionViewModel.dart';
-import 'Widgets/customModelBottomSheet.dart';
-import 'centeroid.dart';
-import 'dijkastra.dart';
-import 'directionClass.dart';
-import 'package:chips_choice/chips_choice.dart';
-import 'package:device_information/device_information.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/semantics.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_compass/flutter_compass.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/adapters.dart';
-import 'package:sensors_plus/sensors_plus.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'API/PatchApi.dart';
-import 'API/beaconapi.dart';
-import 'API/ladmarkApi.dart';
-import 'API/outbuildingapi.dart';
-import 'APIMODELS/beaconData.dart';
-import 'APIMODELS/outbuildingmodel.dart';
-import 'APIMODELS/patchDataModel.dart';
-import 'APIMODELS/polylinedata.dart';
-import 'Cell.dart';
-import 'DestinationSearchPage.dart';
 import 'Elements/HomepageSearch.dart';
 import 'Elements/NavigationFilterCard.dart';
-import 'Elements/SearchNearby.dart';
+import 'GPSService.dart';
+import 'GlobalAnnotation/global_annotation_controller.dart';
 import 'MapState.dart';
 import 'MotionModel.dart';
+import 'Network/NetworkManager.dart';
 import 'SourceAndDestinationPage.dart';
-import 'bluetooth_scanning.dart';
+import 'UserState.dart';
+import 'ViewModel/DirectionInstructionViewModel.dart';
+import 'Widgets/customModelBottomSheet.dart';
 import 'buildingState.dart';
-import 'buildingState.dart';
-import 'buildingState.dart';
+import 'config.dart';
 import 'cutommarker.dart';
-import 'dart:math' as math;
-import 'APIMODELS/landmark.dart' as la;
-import 'dart:ui' as ui;
-import 'package:geodesy/geodesy.dart' as geo;
-import 'package:lottie/lottie.dart' as lott;
-
+import 'dijkastra.dart';
+import 'directionClass.dart';
 import 'fetchrouteParams.dart';
 import 'navigationTools.dart';
-
 import 'navigation_api_controller.dart';
 
 
@@ -232,7 +202,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
   late StreamSubscription<AccelerometerEvent>? pdr;
   Duration sensorInterval = Duration(milliseconds: 100);
-  final pinLandmarkPannel PinLandmarkPannel = pinLandmarkPannel();
+  late final pinLandmarkPannel PinLandmarkPannel;
 
 
   late StreamSubscription<CompassEvent> compassSubscription;
@@ -384,11 +354,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         //     icon: BitmapDescriptor.fromBytes(values=='Lift'? await getImagesFromMarker('assets/lift.png', 45) : await getImagesFromMarker('assets/user.png', 45)),
         //   ),
         // );
+        _clusterManager = await MapHelper.initClusterManager(
+            markers, _minClusterZoom, _maxClusterZoom, _googleMapController);
+        await _updateMarkers11();
       }
     }catch (e){}
-    _clusterManager = await MapHelper.initClusterManager(
-        markers, _minClusterZoom, _maxClusterZoom, _googleMapController);
-    await _updateMarkers11();
+
   }
   Future<void> _updateMarkers11([double? updatedZoom]) async {
     if (updatedZoom != null && updatedZoom! > 15.5) {
@@ -453,9 +424,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   @override
   void initState() {
     super.initState();
+    initializePannels();
     initializeMarkers();
-
-
     NavigationLogManager().initialize();
     magnetoData.startMagnetometer();
     accData.startAccelerometer();
@@ -476,7 +446,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
 
     if(!kIsWeb){
-      print("kIsWeb");
       if (SingletonFunctionController.timer == null) {
         SingletonFunctionController.timer = Future.delayed(const Duration(seconds: 7));
         timerStartTime = DateTime.now();
@@ -615,6 +584,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
   bool isAppinForeground=true;
+
+  void initializePannels(){
+    PinLandmarkPannel = pinLandmarkPannel(
+      update: updateNearbyLandmarkMarkers,
+      localize: localizeOnPinedLandmark,
+      nearbyLandmarks: nearbyLandmarks,
+      pinedLandmark: PinedLandmark, closePanel: closePinnedLandmarkPannel,
+    );
+  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -847,7 +825,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       if (!mounted) return; // Prevent setState if the widget is no longer in the tree
       networkManager.ws.updateSensorStatus(compass: true);
       networkManager.ws.updatePermissions(compass: true);
-      double? compassHeading = event.heading;
+      double? compassHeading = event;
       if(mounted || disposed) return;
         setState(() {
           user.theta = compassHeading!;
@@ -2073,15 +2051,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     });
 
     mapState.target = LatLng(values[0], values[1]);
-
     user.bid = userSetLocation.buildingID!;
     print("setting userbid ${user.bid}");
     user.locationName = userSetLocation.name;
-
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
-
     //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.longitude!);
-
     //did this change over here UDIT...
     user.coordX = userSetLocation.coordinateX!;
     user.coordY = userSetLocation.coordinateY!;
@@ -6485,7 +6459,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                   child: IconButton(
                                       onPressed: () {
                                         HelperClass.shareContent(
-                                            "https://maps.iwayplus.in/#/iway-apps/${CONSTANTS().prefix}/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=${CONSTANTS().appStore}&playStore=${CONSTANTS().playStore}");
+                                            "${AppConfig.baseUrl}/#/landmarkId/${SingletonFunctionController.building.selectedLandmarkID!}",
+                                            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.name??"landmark");
                                       },
                                       icon: Semantics(
                                           label: "Share route information",
@@ -13220,23 +13195,6 @@ bool _isPlaying=false;
                       Colors.white, // Set the background color of the FAB
                     ),
                   ) : Container(),
-                  FloatingActionButton(
-                    onPressed: () async {
-                      // RepositoryManager().getVenueBeaconData();
-                      BLEManager().startScanning(bufferSize: 8, streamFrequency: 8,duration: 10);
-                      BLEManager().bufferedDeviceStream.listen((data) {
-                        print("🎯 Received buffer data: $data");
-                        // Example: Update UI / send to backend / calculate logic
-                      });
-                    },
-                    child: Icon(Icons.bluetooth_audio),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                      BorderRadius.circular(26.0), // Change radius here
-                    ),
-                    backgroundColor:
-                    Colors.white, // Set the background color of the FAB
-                  ),
                   SizedBox(height: 28.0),
                   (!kIsWeb &&  Platform.isAndroid) && !user.isnavigating &&
                       (!_isLandmarkPanelOpen &&
@@ -13412,68 +13370,9 @@ bool _isPlaying=false;
           navigationPannel(),
           SafeArea(child: reroutePannel(context)),
           SafeArea(child: ExploreModePannel()),
-          SafeArea(child: PinLandmarkPannel.getPanelWidget(context,updateNearbyLandmarkMarkers, localizeOnPinedLandmark, closePinnedLandmarkPannel, nearbyLandmarks,PinedLandmark)),
+          SafeArea(child: PinLandmarkPannel.getPanelWidget(context)),
           detected ? Semantics(child: SafeArea(child: nearestLandmarkpannel())) : Container(),
           SizedBox(height: 28.0), // Adjust the height as needed
-          FloatingActionButton(
-              onPressed: (){
-                RepositoryManager().getLandmarkData("65d887a5db333f89457145f6");
-                RepositoryManager().getSingleBuildingBeaconData("65d887a5db333f89457145f6");
-
-
-              },
-              child: Icon(Icons.account_tree_rounded)
-          ),
-
-          // FloatingActionButton(
-          //   onPressed: () async {
-          //
-          //     //StopPDR();
-          //
-          //     if (user.initialallyLocalised) {
-          //       setState(() {
-          //         isLiveLocalizing = !isLiveLocalizing;
-          //       });
-          //       HelperClass.showToast("realTimeReLocalizeUser started");
-          //
-          //       Timer.periodic(
-          //           Duration(milliseconds: 5000),
-          //               (timer) async {
-          //
-          //             SingletonFunctionController.btadapter.startScanning(resBeacons);
-          //
-          //
-          //             // setState(() {
-          //             //   sumMap=  SingletonFunctionController.btadapter.calculateAverage();
-          //             // });
-          //
-          //
-          //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
-          //               realTimeReLocalizeUser(resBeacons)
-          //               // listenToBin()
-          //
-          //
-          //             });
-          //
-          //             setState(() {
-          //               debugPQ = SingletonFunctionController.btadapter.returnPQ();
-          //
-          //             });
-          //
-          //           });
-          //
-          //     }
-          //
-          //   },
-          //   child: Icon(
-          //     Icons.location_history_sharp,
-          //     color: (isLiveLocalizing)
-          //         ? Colors.cyan
-          //         : Colors.black,
-          //   ),
-          //   backgroundColor: Colors
-          //       .white, // Set the background color of the FAB
-          // ),
           (SingletonFunctionController.building.buildingsLoaded || SingletonFunctionController.building.destinationQr || user.initialallyLocalised || SingletonFunctionController.building.qrOpened || PinLandmarkPannel.isPanelOpened())
               ?Container(): Container(
             height: screenHeight,

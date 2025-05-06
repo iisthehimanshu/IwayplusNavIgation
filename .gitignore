@@ -32,7 +32,20 @@ migrate_working_dir/
 .packages
 .pub-cache/
 .pub/
-/build/
+# Ignore all build files
+build/
+
+# But keep web build output
+!build/web/
+!build/web/**
+
+# Optional: prevent cluttering with other platform builds
+build/app/
+build/linux/
+build/macos/
+build/windows/
+build/ios/
+build/android/
 
 # Symbolication related
 app.*.symbols

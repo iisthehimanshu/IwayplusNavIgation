@@ -1,4 +1,5 @@
 import 'package:device_information/device_information.dart';
+import 'package:flutter/foundation.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/VenueBeaconAPIModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/VenueBeaconAPIModel.dart';
 
@@ -174,8 +175,8 @@ class Apidetails {
         true,
         {
           "id": bid,
-          "manufacturer":await DeviceInformation.deviceManufacturer,
-          "devicemodel": await DeviceInformation.deviceModel
+          "manufacturer":kIsWeb?"WEB":await DeviceInformation.deviceManufacturer,
+          "devicemodel": kIsWeb?"WEB":await DeviceInformation.deviceModel
         },
         patchDataModel.fromJson,
         PatchAPIModelBox.getData,

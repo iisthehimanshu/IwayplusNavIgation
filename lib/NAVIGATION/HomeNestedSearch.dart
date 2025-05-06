@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '/IWAYPLUS/APIMODELS/buildingAll.dart';
 import '../IWAYPLUS/API/buildingAllApi.dart';
 import '../IWAYPLUS/Elements/buildingCard.dart';
-import '/IWAYPLUS/APIMODELS/buildingAll.dart';
 import 'Navigation.dart';
 
 class HomeNestedSearch extends SearchDelegate{

@@ -3,9 +3,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 
 import 'APIMODELS/beaconData.dart';

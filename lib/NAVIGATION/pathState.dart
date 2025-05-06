@@ -1,5 +1,5 @@
-import 'package:geodesy/geodesy.dart';
 import 'package:google_maps_flutter_platform_interface/src/types/marker.dart';
+
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'Cell.dart';

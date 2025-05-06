@@ -1,10 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-
-import '../DestinationSearchPage.dart';
-import '../SourceAndDestinationPage.dart';
 
 class DestinationPageChipsWidget extends StatefulWidget {
   final String svgPath;

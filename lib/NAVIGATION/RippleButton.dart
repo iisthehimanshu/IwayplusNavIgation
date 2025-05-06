@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:math' show atan2, sqrt;
+
+import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
 class RippleButton extends StatefulWidget {

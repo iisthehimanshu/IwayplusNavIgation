@@ -1,12 +1,10 @@
 import 'dart:math' as math;
+
+import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
 import 'package:iwaymaps/NAVIGATION/buildingState.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 
 import '../IWAYPLUS/API/slackApi.dart';
-import 'API/PatchApi.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
-import 'API/PolyLineApi.dart';
-import 'API/ladmarkApi.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';

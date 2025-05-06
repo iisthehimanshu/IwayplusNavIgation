@@ -1,6 +1,5 @@
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class GPSService {
   static const EventChannel _eventChannel = EventChannel('gps_scan');

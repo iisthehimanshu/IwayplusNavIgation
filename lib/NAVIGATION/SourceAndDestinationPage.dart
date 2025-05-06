@@ -1,10 +1,6 @@
 import 'dart:convert';
 
-import 'package:easter_egg_trigger/easter_egg_trigger.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:iwaymaps/NAVIGATION/API/ladmarkApi.dart';
 import 'package:iwaymaps/NAVIGATION/ELEMENTS/SearchpageRecents.dart';
@@ -14,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../IWAYPLUS/API/buildingAllApi.dart';
 import 'APIMODELS/landmark.dart';
 import 'DestinationSearchPage.dart';
-import 'ELEMENTS/SearchpageResults.dart';
 import 'UserState.dart';
 class SourceAndDestinationPage extends StatefulWidget {
   String SourceID ;

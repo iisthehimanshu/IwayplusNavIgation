@@ -1,14 +1,13 @@
 import 'dart:collection';
 
-import 'package:geodesy/geodesy.dart';
-import 'package:iwaymaps/NAVIGATION/waypoint.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
+import 'package:iwaymaps/NAVIGATION/waypoint.dart';
+
 import 'APIMODELS/GlobalAnnotationModel.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
-import 'APIMODELS/polylinedata.dart' as poly;
 
 class Building{
   bool buildingsLoaded = false;

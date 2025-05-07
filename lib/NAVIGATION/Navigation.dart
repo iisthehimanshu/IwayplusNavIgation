@@ -84,6 +84,48 @@ import 'ELEMENTS/DirectionInstruction.dart';
 import 'ELEMENTS/ExploreModeWidget.dart';
 import 'ELEMENTS/PickupLocationPin.dart';
 import 'Elements/AccessiblePathButton.dart';
+import 'GlobalAnnotation/global_annotation_controller.dart';
+import 'GlobalAnnotation/global_rendering.dart';
+import 'LatLngTween.dart';
+import 'UserState.dart';
+import 'VersioInfo.dart';
+import 'ViewModel/DirectionInstructionViewModel.dart';
+import 'centeroid.dart';
+import 'customMarker.dart';
+import 'dijkastra.dart';
+import 'directionClass.dart';
+import 'package:chips_choice/chips_choice.dart';
+import 'package:device_information/device_information.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_compass/flutter_compass.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:sensors_plus/sensors_plus.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'API/PatchApi.dart';
+import 'API/beaconapi.dart';
+import 'API/ladmarkApi.dart';
+import 'API/outbuildingapi.dart';
+import 'APIMODELS/beaconData.dart';
+import 'APIMODELS/outbuildingmodel.dart';
+import 'APIMODELS/patchDataModel.dart';
+import 'APIMODELS/polylinedata.dart';
+import 'Cell.dart';
+import '/IWAYPLUS/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
+import 'DestinationSearchPage.dart';
 import 'Elements/HomepageSearch.dart';
 import 'Elements/NavigationFilterCard.dart';
 import 'GPSService.dart';
@@ -101,24 +143,12 @@ import 'cutommarker.dart';
 import 'dijkastra.dart';
 import 'directionClass.dart';
 import 'fetchrouteParams.dart';
+import 'low_fedility/homepage.dart';
+import 'low_fedility/lowFedility.dart';
 import 'navigationTools.dart';
 import 'navigation_api_controller.dart';
 
 
-
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Navigation(),
-    );
-  }
-}
 
 class Navigation extends StatefulWidget {
   String directLandID = "";
@@ -126,6 +156,7 @@ class Navigation extends StatefulWidget {
   static bool bluetoothGranted = false;
 
   Navigation({this.directLandID = '', this.directsourceID = ''});
+
 
   @override
   State<Navigation> createState() => _NavigationState();
@@ -421,6 +452,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   @override
   void initState() {
     super.initState();
+    Homepage.relocalize = relocalizeUser;
+    Homepage.onVenueClicked = onLandmarkVenueClicked;
     initializePannels();
     initializeMarkers();
     NavigationLogManager().initialize();
@@ -1148,37 +1181,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         .building.patchData[newBid]!.patchData!.buildingAngle!);
   }
 
-  // void renderHere() {
-  //   setState(() {
-  //     if (markers.length > 0) {
-  //       List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(),
-  //           user.showcoordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
-  //       markers[user.Bid]?[0] = customMarker.move(
-  //           LatLng(user.lat, user.lng), markers[user.Bid]![0]);
-  //
-  //       print("insideee thiss");
-  //
-  //       mapState.target = LatLng(lvalue[0], lvalue[1]);
-  //       _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
-  //         CameraPosition(
-  //             target: mapState.target,
-  //             zoom: mapState.zoom,
-  //             bearing: mapState.bearing!,
-  //             tilt: mapState.tilt),
-  //       ));
-  //
-  //       List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(),
-  //           user.coordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
-  //       markers[user.Bid]?[1] = customMarker.move(
-  //           LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
-  //     }
-  //   });
-  // }
   Animation<LatLng>? _markerAnimation;
 
   void renderHere() async {
-    double screenHeight = MediaQuery.of(context).size.height;
-    double pixelRatio = MediaQuery.of(context).devicePixelRatio;
 
     if (markers.isNotEmpty) {
       List<double> lvalue = tools.localtoglobal(
@@ -1211,16 +1216,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       });
 
       mapState.target = newMarkerPosition;
-
-      // ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
-      //
-      // int newY = Platform.isAndroid
-      //     ? screenCenter.y - (screenHeight * 0.58).toInt()
-      //     : screenCenter.y - (screenHeight * 0.58).toInt();
-      //
-      // LatLng newCameraTarget = await _googleMapController.getLatLng(
-      //     ScreenCoordinate(x: screenCenter.x, y: newY)
-      // );
 
       _googleMapController.animateCamera(
         CameraUpdate.newCameraPosition(
@@ -1797,6 +1792,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     widget.directLandID = '';
     widget.directsourceID = '';
     _recenterMap();
+    Homepage.homePageKey.currentState?.hideLoading();
     setState(() {
       isLocalized = false;
     });
@@ -1991,6 +1987,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   void initializeUser(Landmarks userSetLocation,beacon? localizedBeacon,{bool speakTTS = true, bool render = true})async{
+    Homepage.homePageKey.currentState?.locationDetected(userSetLocation);
     tools.setBuildingAngle(SingletonFunctionController.building
         .patchData[userSetLocation.buildingID]!.patchData!.buildingAngle!);
 
@@ -3234,7 +3231,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     if (await FlutterBluePlus.isOn) {
       nearestBeacon = findMaxWeightKey(SingletonFunctionController.btadapter.latesILMap);
 
-
       // for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
       //
       //   if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
@@ -3479,6 +3475,46 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       } else {
         //HelperClass.showToast("Beacon Already scanned");
       }
+    }
+  }
+
+  void relocalizeUser(){
+    print("relocalizeUser");
+    SingletonFunctionController.btadapter.emptyBin();
+    if (!user.isnavigating && !isLocalized) {
+      SingletonFunctionController.btadapter.stopScanning();
+      if (Platform.isAndroid) {
+        bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap).then((value){
+          setState(() {
+            isLocalized = false;
+          });
+          localizeUser(beacon: value, providePinSelection: false);
+        });
+      } else {
+        //SingletonFunctionController.btadapter.startScanningIOS(SingletonFunctionController.apibeaconmap);
+        BluetoothScanIOSClass.getInitialLocalizedDevice().then((value){
+          print("localized--");
+          print(value);
+          if(value != null){
+            localizeUser(beacon: value);
+          }
+
+        });
+      }
+      setState(() {
+        isLocalized = true;
+        resBeacons =
+            SingletonFunctionController.apibeaconmap;
+      });
+      late Timer _timer;
+      _timer = Timer.periodic(
+          Duration(milliseconds: 5000), (timer) {
+        //localizeUser();
+        _timer.cancel();
+      });
+
+    } else {
+      _recenterMap();
     }
   }
 
@@ -12370,28 +12406,9 @@ bool _isPlaying=false;
         i--;
       }
 
-      //List<LatLng> coordinates = [];
       final Uint8List greytorch =
       await getImagesFromMarker('assets/previewarrow.png', 75);
-      // BitmapDescriptor greytorch = await BitmapDescriptor.fromAssetImage(
-      //   ImageConfiguration(size: Size(15, 15)),
-      //   'assets/previewarrow.png',
-      // );
-      // for(int a = i;a>i-5;a--){
-      //   if(a!=i && tools.isTurn([user.path[a-1]%turn.numCols!,user.path[a-1]~/turn.numCols!], [user.path[a]%turn.numCols!,user.path[a]~/turn.numCols!], [user.path[a+1]%turn.numCols!,user.path[a+1]~/turn.numCols!])){
-      //     break;
-      //   }
-      //   List<double> ltln = tools.localtoglobal(user.path[a]%turn.numCols!, user.path[a]~/turn.numCols!);
-      //   coordinates.insert(0,LatLng(ltln[0], ltln[1]));
-      // }
-      //
-      // for(int a = i+1;a<i+6;a++){
-      //   // if(a!=i && tools.isTurn([user.path[a-1]%turn.numCols!,user.path[a-1]~/turn.numCols!], [user.path[a]%turn.numCols!,user.path[a]~/turn.numCols!], [user.path[a+1]%turn.numCols!,user.path[a+1]~/turn.numCols!])){
-      //   //   break;
-      //   // }
-      //   List<double> ltln = tools.localtoglobal(user.path[a]%turn.numCols!, user.path[a]~/turn.numCols!);
-      //   coordinates.add(LatLng(ltln[0], ltln[1]));
-      // }
+
 
       if (turn.floor != null &&
           SingletonFunctionController
@@ -12441,29 +12458,7 @@ bool _isPlaying=false;
     }
   }
 
-  // void turnMarkersVisible(int node){
-  //   Set<Marker> tempSet=Set();
-  //
-  //   if (pathMarkers[user.Bid] != null && pathMarkers[user.Bid]![user.floor]!= null) {
-  //
-  //     for(var marker in pathMarkers[user.Bid]![user.floor]!){
-  //
-  //       if(marker.markerId.value.contains(node.toString())){
-  //         tempSet.add(customMarker.visibility(true, marker));
-  //       }else{
-  //         tempSet.add(marker);
-  //       }
-  //     }
-  //     pathMarkers[user.Bid]![user.floor]!=tempSet;
-  //   }
-  //
-  //   for (var marker in pathMarkers[user.Bid]![user.floor]!) {
-  //     if(marker.visible == true){
-  //
-  //     }
-  //   }
-  //
-  // }
+
 
   Timer? exploremodeLandmarkTimer;
 
@@ -12599,69 +12594,15 @@ bool _isPlaying=false;
     return BitmapDescriptor.fromBytes(pngBytes);
   }
 
-  // Future<void> addCustomMarker(LatLng position, String bid, int floor) async {
-  //
-  //   pathMarkers.putIfAbsent(bid, ()=>Map());
-  //   pathMarkers[bid]!.putIfAbsent(floor, ()=>Set());
-  //   pathMarkers[bid]![floor]!.add(Marker(
-  //       markerId: MarkerId("destination${bid}"),
-  //       position: position,
-  //       icon: await  CustomMarker(text: "hello").toBitmapDescriptor(
-  //           logicalSize: const Size(150, 150), imageSize: const Size(300, 400))
-  //   ));
-  //   setState(() {
-  //
-  //   });
-  // }
 
-  Future<RenderRepaintBoundary> _capturePngFromWidget(
-      BuildContext context, Widget widget, GlobalKey key) async {
-    final RenderRepaintBoundary boundary =
-    key.currentContext!.findRenderObject() as RenderRepaintBoundary;
-    return await Future.delayed(Duration(milliseconds: 20), () {
-      return boundary;
-    });
+  Map<String, double> sortMapByValue(Map<String, double> map) {
+    var sortedEntries = map.entries.toList()
+      ..sort(
+              (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
+
+    return Map.fromEntries(sortedEntries);
   }
 
-  // Future<RenderRepaintBoundary> _capturePngFromWidget(BuildContext context, Widget widget) async {
-  //   final RenderRepaintBoundary boundary = RenderRepaintBoundary();
-  //   final RenderView renderView = RenderView(
-  //     child: RenderProxyBox(boundary),
-  //     configuration: ViewConfiguration(devicePixelRatio: MediaQuery.of(context).devicePixelRatio),
-  //     view: WidgetsBinding.instance.window,
-  //   );
-  //   final PipelineOwner pipelineOwner = PipelineOwner()..rootNode = renderView;
-  //   renderView.prepareInitialFrame();
-  //   final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());
-  //   final RenderObjectToWidgetElement<RenderBox> rootElement =
-  //   RenderObjectToWidgetAdapter<RenderBox>(
-  //     container: boundary,
-  //     child: widget,
-  //   ).attachToRenderTree(buildOwner);
-  //   buildOwner.buildScope(rootElement);
-  //   buildOwner.finalizeTree();
-  //   await Future.delayed(Duration(milliseconds: 20)); // wait for widget to build
-  //   pipelineOwner.flushLayout();
-  //   pipelineOwner.flushCompositingBits();
-  //   pipelineOwner.flushPaint();
-  //   return boundary;
-  // }
-
-  // void _addCustomMarker(String bid, int floor, LatLng position) async {
-  //
-  //   final customMarker = await createCustomMarkerBitmap(context, 'Your Text', Icons.location_on);
-  //   pathMarkers.putIfAbsent(bid, ()=>Map());
-  //   pathMarkers[bid]!.putIfAbsent(floor, ()=>Set());
-  //   pathMarkers[bid]![floor]!.add(Marker(
-  //     markerId: MarkerId('custom_marker'),
-  //     position: position, // Your desired position
-  //     icon: BitmapDescriptor.defaultMarker,
-  //     onTap: () {
-  //
-  //       // Handle tap functionality here
-  //     },
-  //   ));
-  // }
 
   late Timer EM_TIMER;
   String EM_LastBeacon = "";
@@ -12672,13 +12613,10 @@ bool _isPlaying=false;
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     double statusBarHeight = MediaQuery.of(context).padding.top;
-    double screenWidthPixels = MediaQuery.of(context).size.width *
-        MediaQuery.of(context).devicePixelRatio;
-    double screenHeightPixel = MediaQuery.of(context).size.height *
-        MediaQuery.of(context).devicePixelRatio;
     isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
     HelperClass.SemanticEnabled = MediaQuery.of(context).accessibleNavigation;
-    return Scaffold(
+    return Lowfedility.LFDesign?Homepage(key: Homepage.homePageKey):
+    Scaffold(
       body: Stack(
         children: [
           detected
@@ -12696,18 +12634,6 @@ bool _isPlaying=false;
                 zoomControlsEnabled: false,
                 zoomGesturesEnabled: true,
                 mapToolbarEnabled: false,
-                // circles: _userLocation != null && _accuracy != null
-                //     ? {
-                //   Circle(
-                //     circleId: CircleId('accuracyCircle'),
-                //     center: _userLocation!,
-                //     radius: _accuracy!,  // Draw accuracy circle
-                //     strokeColor: Colors.blueAccent,
-                //     fillColor: Colors.blueAccent.withOpacity(0.2),
-                //     strokeWidth: 1,
-                //   )
-                // }
-                //     : {},
 
                 polygons: getCombinedPolygons().union(_polygon).union(globalCampus),
 
@@ -12813,8 +12739,6 @@ bool _isPlaying=false;
               excludeSemantics: false,
               child: Column(
                 children: [
-                  //
-                  // // Text(Building.thresh),
 
                   isSemanticEnabled || PinLandmarkPannel.isPanelOpened()
                       ? Container()
@@ -12906,8 +12830,6 @@ bool _isPlaying=false;
 
                   SizedBox(height: 28.0),
                   DebugToggle.Slider ? Text("${user.theta}") : Container(),
-                  // Text(SingletonFunctionController.SC_IL_RSSI_AVERAGE.toString()),
-
 
                   // Text("coord [${user.coordX},${user.coordY}] \n"
                   //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
@@ -12982,10 +12904,7 @@ bool _isPlaying=false;
                               [0];
                           List<int> revfloorList = floorList;
                           revfloorList.sort();
-                          // SingletonFunctionController.building.numberOfFloors[buildingAllApi
-                          //     .getStoredString()];
-                          //
-                          //
+
                           return SpeedDialChild(
                             child: Semantics(
                               label: "${revfloorList[i]}",
@@ -13269,37 +13188,7 @@ bool _isPlaying=false;
               ),
             ),
           ),
-          //-------
-          // (user.isnavigating && recenter)? Positioned(
-          //   bottom: 145,
-          //   right: 220,
-          //   child: Container(
-          //     height: 50,
-          //     width: 150, // Adjust width as needed
-          //     child: ElevatedButton(
-          //       onPressed: () {
-          //         // Implement recenter logic here
-          //         _recenterMap();
-          //       },
-          //       style: ElevatedButton.styleFrom(
-          //         foregroundColor: Colors.white, // Background color
-          //         backgroundColor: Colors.blueGrey.withOpacity(0.5), // Text color
-          //         shape: RoundedRectangleBorder(
-          //           borderRadius: BorderRadius.circular(30), // Rounded corners
-          //         ),
-          //       ),
-          //       child: Row(
-          //         mainAxisSize: MainAxisSize.min,
-          //         mainAxisAlignment: MainAxisAlignment.center,
-          //         children: [
-          //           Icon(Icons.my_location, size: 24),
-          //           SizedBox(width: 8), // Space between icon and text
-          //           Text('Recenter', style: TextStyle(fontSize: 16)),
-          //         ],
-          //       ),
-          //     ),
-          //   ),
-          // ):Container(),
+
           SafeArea(
             child: Stack(
               children:[
@@ -13650,3 +13539,4 @@ class IntPoint {
 
   IntPoint(this.x, this.y);
 }
+

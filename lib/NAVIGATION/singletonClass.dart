@@ -2,18 +2,19 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import '../IWAYPLUS/API/buildingAllApi.dart';
-import 'BluetoothScanAndroidClass.dart';
-import 'buildingState.dart';
-
 import 'API/beaconapi.dart';
-
 import 'APIMODELS/beaconData.dart';
-import 'VersioInfo.dart';
+import 'BluetoothScanAndroidClass.dart';
+import 'BluetoothScanIOSClass.dart';
 import 'bluetooth_scanning.dart';
-import 'package:iwaymaps/NAVIGATION/BluetoothScanIOSClass.dart';
+import 'buildingState.dart';
 
 class SingletonFunctionController {
   bool _isRunning = false;
@@ -24,12 +25,9 @@ class SingletonFunctionController {
   static Future<void>? timer;
   static String currentBeacon = "";
   static String SC_LOCALIZED_BEACON = "";
-
   BluetoothScanAndroidClass bluetoothScanAndroidClass = BluetoothScanAndroidClass();
   static Map<String, double> SC_IL_RSSI_AVERAGE = {};
-
   BluetoothScanIOSClass bluetoothScanIOSClass = BluetoothScanIOSClass();
-
   bool isBinEmpty() {
     for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
       if (SingletonFunctionController.btadapter.BIN[i] != null &&
@@ -52,8 +50,6 @@ class SingletonFunctionController {
     _completer = Completer<void>();
 
 
-    var beaconData = await beaconapi().fetchBeaconData("65d9cacfdb333f8945861f0f");
-    building.beacondata = beaconData;
     print("building.beacondata.length");
     try {
       // Perform your task here
@@ -83,26 +79,40 @@ class SingletonFunctionController {
         print(buildingAllApi.allBuildingID);
         print(apibeaconmap);
       })).then((value) async {
-        print("blue statusssss");
-        print(await FlutterBluePlus.isOn);
-        if(Platform.isAndroid){
-          // print("apibeaconmap");
-          // print(apibeaconmap);
-          // blueToothAndroid.listenToScanUpdates(apibeaconmap);
-          await bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap).then((value) {
-            SC_LOCALIZED_BEACON = value;
-            bluetoothScanAndroidClass.stopScan();
-          });
-
-          // bluetoothScanAndroidClass.stopScan();
-          // btadapter.startScanning(apibeaconmap);
-
-        }else if(Platform.isIOS){
-          print("isIOS");
-          String resp = await BluetoothScanIOSClass.getInitialLocalizedDevice();
-
-          //await btadapter.startScanningIOS(apibeaconmap);
+        //-------------
+        // print("blue statusssss");
+        // print(await FlutterBluePlus.isOn);
+        // if(Platform.isAndroid){
+        //   // print("apibeaconmap");
+        //   // print(apibeaconmap);
+        //   // blueToothAndroid.listenToScanUpdates(apibeaconmap);
+        //
+        //   await bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap).then((value) {
+        //     SC_LOCALIZED_BEACON = value;
+        //     if(kDebugMode){
+        //       showToast("SC_LOCALIZED_BEACON:${value}");
+        //     }
+        //     print("SC_LOCALIZED_BEACON $SC_LOCALIZED_BEACON");
+        //   });
+        //
+        //   // bluetoothScanAndroidClass.stopScan();
+        //   // btadapter.startScanning(apibeaconmap);
+        //
+        // }else if(Platform.isIOS){
+        //   print("isIOS");
+        //   String resp = await BluetoothScanIOSClass.getInitialLocalizedDevice();
+        //
+        //   //await btadapter.startScanningIOS(apibeaconmap);
+        // }
+        //-------------
+        if(!kIsWeb){
+          if(Platform.isAndroid){
+            btadapter.startScanning(apibeaconmap);
+          }else{
+            btadapter.startScanning(apibeaconmap);
+          }
         }
+        timer= Future.delayed((await FlutterBluePlus.isOn==true)?Duration(seconds:9):Duration(seconds:0));
         //timer= Future.delayed((await FlutterBluePlus.isOn==true)?Duration(seconds:9):Duration(seconds:0));
       });
 
@@ -124,4 +134,16 @@ class SingletonFunctionController {
 
     return (SingletonFunctionController.currentBeacon!="")?Building.apibeaconmap[SingletonFunctionController.currentBeacon]:null;
   }
+}
+
+void showToast(String mssg) {
+  Fluttertoast.showToast(
+    msg: mssg,
+    toastLength: Toast.LENGTH_SHORT,
+    gravity: ToastGravity.BOTTOM,
+    timeInSecForIosWeb: 1,
+    backgroundColor: Colors.grey,
+    textColor: Colors.white,
+    fontSize: 16.0,
+  );
 }

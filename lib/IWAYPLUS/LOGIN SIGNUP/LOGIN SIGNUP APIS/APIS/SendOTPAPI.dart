@@ -3,32 +3,30 @@ import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../NAVIGATION/Encryption/EncryptionService.dart';
 import '../../../../NAVIGATION/config.dart';
 
-
 class SendOTPAPI{
-
+  Encryptionservice encryptionService = Encryptionservice();
   final String baseUrl = "${AppConfig.baseUrl}/auth/otp/send";
-  final String xaccesstoken = AppConfig.xaccesstoken;
   Future<bool> sendOTP(String username) async {
     final Map<String, dynamic> data = {
       "username": username,
       "digits":4,
-      "appName":"IWAYMAPS"
+      "appName":"Speja"
     };
 
     final response = await http.post(
       Uri.parse(baseUrl),
-      body: json.encode(data),
+      body: encryptionService.encrypt(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token':xaccesstoken
+        'x-access-token':encryptionService.authorization
       },
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return true;
-      // return HelperClass.showToast("OTP sent successfully");
     } else {
       print("SendOTPAPI--response.statusCode${response.statusCode} ${response.body}");
       return false;

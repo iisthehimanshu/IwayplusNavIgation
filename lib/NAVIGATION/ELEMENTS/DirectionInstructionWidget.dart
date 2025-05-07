@@ -1,9 +1,9 @@
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_svg/svg.dart';
+
 import '../../IWAYPLUS/Elements/locales.dart';
 import '../directionClass.dart';
 
@@ -67,23 +67,11 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    print("widget.IsMultiFloor");
-    print(widget.IsMultiFloor);
-    print(widget.IsMultiBuilding);
-
-
     return Semantics(
     label: "",
       child: GestureDetector(
         onTap: (){
           ListExpand = !ListExpand;
-          print("widget.StartName");
-          print(widget.StartName);
-          print(widget.StartBuildingName);
-          print(widget.EndName);
-          print(widget.EndBuildingName);
-
-
         },
         child: Container(
           margin: EdgeInsets.only(top: !widget.IsMultiBuilding? 20:10,),
@@ -104,7 +92,14 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
+                    widget.reverse? Container(
+                      width: 12, // Width of the circle
+                      height: 12, // Height of the circle
+                      decoration: BoxDecoration(
+                        color: Color(0xff132F59), // Color of the circle
+                        shape: BoxShape.circle, // Makes the container a circle
+                      ),
+                    ) : Container(
                       child: SvgPicture.asset(
                         "assets/DirectionInstruction_sourceIcon.svg",height: 25,),
                     ),
@@ -115,18 +110,25 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
                     ),
                     Container(height:ListExpand? widget.SecondHeight : screenHeight*0.055,width: 2, color: Color(0xff132F59)),
                     ListExpand && widget.IsMultiFloor? Container(
-                      width: 20, // Width of the circle
-                      height: 20, // Height of the circle
+                      width: 12, // Width of the circle
+                      height: 12, // Height of the circle
                       decoration: BoxDecoration(
                         color: Color(0xff132F59), // Color of the circle
                         shape: BoxShape.circle, // Makes the container a circle
                       ),
                     ): Container(),
                     //single floor ke liye ye destination icon
-                    !widget.IsMultiFloor? Container(
+                    widget.IsMultiBuilding && !widget.reverse? Container(
+                      width: 12, // Width of the circle
+                      height: 12, // Height of the circle
+                      decoration: BoxDecoration(
+                        color: Color(0xff132F59), // Color of the circle
+                        shape: BoxShape.circle, // Makes the container a circle
+                      ),
+                    ): Container(
                       child: SvgPicture.asset(
                         "assets/DirectionInstruction_locationPin.svg",height: 25,),
-                    ) : Container(),
+                    ),
                     ListExpand && widget.IsMultiFloor? Container(height:30,width: 5, color: Color(0xffFB6B00)): Container(),
                     ListExpand && widget.IsMultiFloor? Container(
                       child: SvgPicture.asset(
@@ -167,7 +169,7 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
                     children: [
                       widget.reverse? ExcludeSemantics(
                         child: Text(
-                          "Entering ${widget.StartName}",
+                          "Entering ${widget.EndBuildingName}",
                           style: const TextStyle(
                             fontFamily: "Roboto",
                             fontSize: 18,
@@ -497,7 +499,7 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
                               borderRadius: BorderRadius.circular(5),
                               color: Color(0xffF9D2D3),
                             ),
-                            child:Text("${widget.StartBuildingName} - Floor ${widget.StartFloor.toString()}", style: const TextStyle(fontSize: 14,color:Colors.black))),
+                            child:Text("${widget.EndBuildingName} - Floor ${widget.StartFloor.toString()}", style: const TextStyle(fontSize: 14,color:Colors.black))),
                       ): Container(),
 
                     ],

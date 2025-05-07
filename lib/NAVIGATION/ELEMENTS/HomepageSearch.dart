@@ -4,18 +4,11 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-//import 'package:fuzzy/fuzzy.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/adapters.dart';
+import 'package:iwaymaps/NAVIGATION/SourceAndDestinationPage.dart';
 import 'package:iwaymaps/newSearchPage.dart';
+
 import '/IWAYPLUS/Elements/HelperClass.dart';
 import '/IWAYPLUS/Elements/locales.dart';
-import 'package:iwaymaps/NAVIGATION/SourceAndDestinationPage.dart';
-
-import '/NAVIGATION/APIMODELS/landmark.dart';
-import '../DestinationSearchPage.dart';
-import 'package:animated_checkmark/animated_checkmark.dart';
-
 import '../UserState.dart';
 import 'HomepageFilter.dart';
 

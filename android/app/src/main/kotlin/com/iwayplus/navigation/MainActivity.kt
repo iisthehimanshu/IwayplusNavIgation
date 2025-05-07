@@ -22,6 +22,13 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.os.SystemClock
+
+
 
 class MainActivity : FlutterActivity() {
 
@@ -29,10 +36,34 @@ class MainActivity : FlutterActivity() {
     private lateinit var bluetoothLeScanner: BluetoothLeScanner
     private val deviceDetailsList = mutableListOf<String>()
     private var isScanning = false
+    private var gravityValues = FloatArray(3)
+    private var magneticValues = FloatArray(3)
+    private var rotationVectorValue = FloatArray(5)
+
+    private var lastUpdateTime: Long = 0
+    private val COMPASS_UPDATE_RATE_MS:Long = 100L
+
 
     private val METHOD_CHANNEL = "com.example.bluetooth/scan"
     private val EVENT_CHANNEL = "com.example.bluetooth/scanUpdates"
+
+    //implemented magnetometere streams
+    private val COMPASS_CHANNEL = "com.example.navigation/compass"
+
+
     private var eventSink: EventChannel.EventSink? = null
+
+    private var eventSinkCompass: EventChannel.EventSink? = null
+
+    private fun lowPassFilter(input: FloatArray, output: FloatArray?): FloatArray {
+        val alpha = 0.25f
+        if (output == null) return input
+        for (i in input.indices) {
+            output[i] = output[i] + alpha * (input[i] - output[i])
+        }
+        return output
+    }
+
 
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
@@ -53,13 +84,47 @@ class MainActivity : FlutterActivity() {
                 // for ActivityCompat#requestPermissions for more details.
                 return
             }
+
+            // Extract device name
             if (device.name != null && device.name.contains("IW")) {
-                val deviceDetails = "Device Name: ${device.name}\nAddress: ${device.address}\nRSSI: $rssi"
-                if (!deviceDetailsList.contains(deviceDetails)) {
-                    deviceDetailsList.add(deviceDetails)
-                    Log.d("BluetoothScan", "New Device Found: $deviceDetails")
-                    eventSink?.success(deviceDetails)
+//                Log.d("BluetoothScan","Device Info $result");
+                val scanRecord = result.scanRecord
+
+                val scanRecord1 = result.scanRecord
+                val deviceName1 = device.name ?: scanRecord1?.deviceName ?: "Unknown"
+                val address = device.address
+                val timestampNanos = result.timestampNanos
+                val advBytes = scanRecord1?.bytes
+                val manufacturerData1 = scanRecord1?.manufacturerSpecificData
+
+//                Log.d("BluetoothScan", "Device Name: $deviceName1")
+//                Log.d("BluetoothScan", "Address: $address")
+//                Log.d("BluetoothScan", "RSSI: $rssi dBm")
+//                Log.d("BluetoothScan", "Timestamp: $timestampNanos") // You can convert it to time if needed
+
+                // Extract Manufacturer ID and Data
+                for (i in 0 until (manufacturerData1?.size() ?: 0)) {
+                    val id = manufacturerData1?.keyAt(i)
+                    val data = id?.let { manufacturerData1?.get(it) }
+                    val hexData = data?.joinToString("-") { "%02X".format(it) }
+                    //Log.d("BluetoothScan", "Manufacturer ID: ${String.format("%04X", id)}")
+                    //Log.d("BluetoothScan", "Manufacturer Data: $hexData")
                 }
+
+                // Get Raw Bytes
+                val rawData = advBytes?.joinToString("-") { String.format("%02X", it) }
+                //Log.d("BluetoothScan", "Raw Data: $rawData")
+
+                val deviceDetails = """
+                Device Name: $deviceName1
+                Address: ${address}
+                RSSI: $rssi
+                Manufacturer Data: $manufacturerData1
+                Raw Data: $rawData""".trimIndent()
+
+
+                Log.d("BluetoothScan--", "New Device Found: $deviceDetails")
+                eventSink?.success(deviceDetails)
             }
         }
 
@@ -92,6 +157,13 @@ class MainActivity : FlutterActivity() {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothAdapter = bluetoothManager.adapter
         bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+        Log.d("bluetooth adapter","valuees${bluetoothAdapter},${bluetoothLeScanner}")
+        if (bluetoothAdapter != null && bluetoothAdapter.isEnabled) {
+            bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+        } else {
+            // Handle gracefully — maybe prompt to enable Bluetooth
+            Log.w("BLE", "Bluetooth is OFF or unavailable")
+        }
 
         if (!hasPermissions()) {
             requestPermissions()
@@ -120,8 +192,7 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
-
-        EventChannel(flutterEngine.dartExecutor.binaryMessenger, EVENT_CHANNEL).setStreamHandler(object : EventChannel.StreamHandler {
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger,EVENT_CHANNEL).setStreamHandler(object : EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 eventSink = events
             }
@@ -130,7 +201,103 @@ class MainActivity : FlutterActivity() {
                 eventSink = null
             }
         })
+
+
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, COMPASS_CHANNEL).setStreamHandler(
+            object : EventChannel.StreamHandler {
+                private lateinit var sensorManager: SensorManager
+                private lateinit var sensorListener: SensorEventListener
+
+                override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                    eventSinkCompass = events
+                    sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+                    val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+                    val magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+                    val rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+
+                    sensorListener = object : SensorEventListener {
+                        override fun onSensorChanged(event: SensorEvent?) {
+                            if (event == null) return
+
+                            when (event.sensor.type) {
+                                Sensor.TYPE_ROTATION_VECTOR -> {
+                                    rotationVectorValue = lowPassFilter(event.values.clone(), rotationVectorValue)
+                                }
+
+                                Sensor.TYPE_ACCELEROMETER -> {
+                                    gravityValues = lowPassFilter(event.values.clone(), gravityValues)
+                                }
+
+                                Sensor.TYPE_MAGNETIC_FIELD -> {
+                                    magneticValues = lowPassFilter(event.values.clone(), magneticValues)
+                                }
+                            }
+
+                            val currentTime = SystemClock.elapsedRealtime()
+                            if (currentTime - lastUpdateTime > COMPASS_UPDATE_RATE_MS) {
+                                lastUpdateTime = currentTime
+                                val heading = updateHeading()
+                                heading?.let {
+//                                    Log.d("HeadingPlugin", "Heading: $it")
+                                    eventSinkCompass?.success(it)
+                                }
+                            }
+                        }
+
+                        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+                    }
+
+                    // ✅ Register all three sensors
+                    sensorManager.registerListener(sensorListener, accelerometer, SensorManager.SENSOR_DELAY_GAME)
+                    sensorManager.registerListener(sensorListener, magnetometer, SensorManager.SENSOR_DELAY_GAME)
+                    sensorManager.registerListener(sensorListener, rotationVectorSensor, SensorManager.SENSOR_DELAY_GAME)
+                }
+
+                override fun onCancel(arguments: Any?) {
+                    sensorManager.unregisterListener(sensorListener)
+                }
+            }
+        )
+
     }
+
+    private fun updateHeading(): Double? {
+        val rotationMatrix = FloatArray(9)
+        val orientation = FloatArray(3)
+        var heading: Float
+        if (rotationVectorValue != null) {
+            SensorManager.getRotationMatrixFromVector(rotationMatrix, rotationVectorValue)
+            SensorManager.getOrientation(rotationMatrix, orientation)
+            heading = Math.toDegrees(orientation[0].toDouble()).toFloat()
+            if (heading > 180) {
+                heading -= 360
+            }
+
+            // Log.d("Rotation", "Using rotation vector: $heading")
+            return heading.toDouble()
+        }
+        if (gravityValues != null && magneticValues != null &&
+            SensorManager.getRotationMatrix(rotationMatrix, null, gravityValues, magneticValues)) {
+
+            val remappedMatrix = FloatArray(9)
+            SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Z, remappedMatrix)
+            SensorManager.getOrientation(remappedMatrix, orientation)
+            heading = Math.toDegrees(orientation[0].toDouble()).toFloat()
+            if (heading > 180) {
+                heading -= 360
+            }
+
+            //  Log.d("Rotation", "Using accel + mag: $heading")
+            return heading.toDouble()
+        }
+
+        return null
+    }
+
+
+
+
 
     private fun startScan() {
         if (!isScanning) {
@@ -207,4 +374,8 @@ class MainActivity : FlutterActivity() {
         super.onDestroy()
         unregisterReceiver(discoveryReceiver)
     }
+
+
+
+
 }

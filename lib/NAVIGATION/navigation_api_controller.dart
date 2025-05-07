@@ -1,15 +1,14 @@
-import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 import 'dart:math' as math;
-import '../IWAYPLUS/API/buildingAllApi.dart';
-import '../IWAYPLUS/API/slackApi.dart';
-import 'API/PatchApi.dart';
-import 'package:iwaymaps/NAVIGATION/buildingState.dart';
+
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
-import 'API/PolyLineApi.dart';
-import 'API/ladmarkApi.dart';
+import 'package:iwaymaps/NAVIGATION/buildingState.dart';
+import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
+
+import '../IWAYPLUS/API/slackApi.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
+import 'Repository/RepositoryManager.dart';
 import 'UserState.dart';
 import 'navigationTools.dart';
 
@@ -17,9 +16,7 @@ class NavigationAPIController {
   Function createPatch = (patchDataModel value) {};
   Function createotherPatch = (String key, patchDataModel value) {};
   Function findCentroid = (List<Coordinates> vertices, String bid) {};
-
   Function createRooms = (polylinedata value, int floor){};
-
   Function createARPatch = (Map<int, geo.LatLng> coordinates){};
   Function createotherARPatch = (Map<int, geo.LatLng> coordinates, String bid){};
   Function createMarkers = (land landData, int floor, {String? bid}){};
@@ -35,7 +32,8 @@ class NavigationAPIController {
       });
 
   Future<void> patchAPIController(String id, bool selected) async {
-    var patchData = await patchAPI().fetchPatchData(id: id);
+    print("patch for $id");
+    var patchData = await RepositoryManager().getPatchData(id) as patchDataModel;
     Building.buildingData ??= Map();
     Building.buildingData![patchData.patchData!.buildingID!] =
         patchData.patchData!.buildingName;
@@ -75,13 +73,17 @@ class NavigationAPIController {
   }
 
   Future<void> landmarkAPIController(String id, bool selected) async {
-    var landmarkData = await landmarkApi().fetchLandmarkData(id: id);
+    final stackTrace = StackTrace.current;
+    print("landmarkAPIController Stack: \n$stackTrace");
+    var landmarkData = await RepositoryManager().getLandmarkData(id) as land;
     if(selected){
       SingletonFunctionController.building.landmarkdata = Future.value(landmarkData);
     }else{
       var otherLandmarkdata = await SingletonFunctionController.building.landmarkdata;
       otherLandmarkdata?.mergeLandmarks(landmarkData.landmarks);
     }
+
+    print("data recieved for ${landmarkData.landmarks!.first.buildingName}");
 
     var coordinates = <int, geo.LatLng>{};
 
@@ -114,13 +116,9 @@ class NavigationAPIController {
         }
 
 
-        var currentFloorDimensions = SingletonFunctionController
-            .building.floorDimenssion[id] ??
-            {};
-        currentFloorDimensions[landmark.floor!] = [
-          landmark.properties!.floorLength!,
-          landmark.properties!.floorBreadth!
-        ];
+        var currentFloorDimensions = SingletonFunctionController.building.floorDimenssion[id] ?? {};
+        currentFloorDimensions[landmark.floor!] = [landmark.properties!.floorLength!, landmark.properties!.floorBreadth!];
+        print("adding dimensions ${[landmark.properties!.floorLength!, landmark.properties!.floorBreadth!]} for ${landmark.floor} in ${landmark.buildingName} ${landmark.buildingID}");
 
         SingletonFunctionController
             .building.floorDimenssion[id] =
@@ -143,7 +141,7 @@ class NavigationAPIController {
 
   Future<void> ARPatch(String id, bool selected, {Map<int, geo.LatLng>? coordinates}) async {
     if(coordinates == null){
-      var landmarkData = await landmarkApi().fetchLandmarkData(id: id);
+      var landmarkData = await RepositoryManager().getLandmarkData(id) as land;
       coordinates = <int, geo.LatLng>{};
       for (var landmark in landmarkData.landmarks!) {
         if (landmark.element!.subType == "AR" &&
@@ -165,23 +163,21 @@ class NavigationAPIController {
       createotherARPatch(coordinates, id);
     }
   }
-
   Future<polylinedata> polylineAPIController(String id, bool selected) async {
-    var polylineData = await PolyLineApi()
-        .fetchPolyData(id: id);
+    var polylineData = await RepositoryManager().getPolylineData(id) as polylinedata;
     SingletonFunctionController.building
         .polylinedatamap[id] = polylineData;
     SingletonFunctionController
         .building.numberOfFloors[id] =
         polylineData.polyline!.floors!.length;
-
     Building.numberOfFloorsDelhi[id] =
         polylineData.polyline!.floors!.map((element) {
           return tools.alphabeticalToNumerical(element.floor!);
         }).toList();
-    if(selected) {
+    if(selected){
       SingletonFunctionController.building.polyLineData = polylineData;
     }
+    print("createroomscalledfor${id} ${polylineData.polylineExist}");
     createRooms(polylineData, 0);
     SingletonFunctionController.building.floor[id] = 0;
     return polylineData;

@@ -1,13 +1,17 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import '../IWAYPLUS/websocket/UserLog.dart';
+
 import 'APIMODELS/beaconData.dart';
+import 'Network/NetworkManager.dart';
+
 
 class BLueToothClass {
+  NetworkManager networkManager = NetworkManager();
   HashMap<int, HashMap<String, double>> BIN = HashMap();
   HashMap<String,int> numberOfSample = HashMap();
   HashMap<String,List<int>> rs = HashMap();
@@ -59,33 +63,49 @@ class BLueToothClass {
     weight[3] = 0.5;
     weight[4] = 0.25;
     weight[5] = 0.15;
-    weight[6] = 0.1;
+    weight[6] = 0.0;
   }
 
-  Stream<HashMap<int, HashMap<String, double>>> get binStream =>
-      _binController.stream;
+  Stream<HashMap<int, HashMap<String, double>>> get binStream => _binController.stream;
+
+  Map<String, List<int>> latesILMap = {};
+  Map<String, List<DateTime>> latesILMapTimeStamp = {};
 
 
   bool isScanningOn(){
     return FlutterBluePlus.isScanningNow ?? false;
   }
+  late DateTime SourceTSP;
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
-    wsocket.message["AppInitialization"]["bleScanResults"] = {};
-    // print("himanshu 1");
+    latesILMap.clear();
+    latesILMapTimeStamp.clear();
+    if(kDebugMode) print("proof $latesILMap ${latesILMapTimeStamp}");
+    SourceTSP = DateTime.now();
+    if(kDebugMode) print("SourceTSP set to : $SourceTSP");
     startbin();
-    // print("himanshu 2");
     FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
-    //  print("himanshu 3");
+
     FlutterBluePlus.scanResults.listen((results) async {
-      // print("himanshu 4 $apibeaconmap");
+      // print("resultsrun");
       for (ScanResult result in results) {
         if(result.device.platformName.length > 2){
-        //  print("himanshu 5 ${result}");
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
-          wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
+          networkManager.ws.updateInitialization(bleScanResults: MapEntry(MacId, Rssi));
+          // wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
           if (apibeaconmap.containsKey(MacId)) {
+            if (result.timeStamp.difference(SourceTSP).inSeconds>=0 && result.timeStamp.difference(SourceTSP).inSeconds < 10) {
+              if(kDebugMode) print("result.timeStamp.difference(SourceTSP) ${result.timeStamp.difference(SourceTSP)}  ${result.timeStamp.difference(SourceTSP).inSeconds}");
+              latesILMap.putIfAbsent(MacId,() => []);
+              latesILMapTimeStamp.putIfAbsent(MacId,() => []);
+
+              if(!latesILMapTimeStamp[MacId]!.contains(result.timeStamp)) {
+                latesILMapTimeStamp[MacId]!.add(result.timeStamp);
+                latesILMap[MacId]!.add(Rssi);
+              }
+              if(kDebugMode) print("Beacon $MacId $Rssi ${result.timeStamp.difference(SourceTSP)} ${result.timeStamp} ${SourceTSP}");
+            }
             //print(MacId);
             //print("mac1 $MacId    rssi $Rssi");
             beacondetail[MacId] = Rssi * -1;
@@ -94,7 +114,10 @@ class BLueToothClass {
           }
         }
       }
+      if(kDebugMode) print("latesILMap $latesILMap");
+      if(kDebugMode) print("latesILMapTimeStamp $latesILMapTimeStamp");
     });
+
 
     calculateAverage();
   }
@@ -170,7 +193,7 @@ class BLueToothClass {
     startbin();
 
     try {
-       // _systemDevices = FlutterBluePlus.systemDevices;
+      // _systemDevices = FlutterBluePlus.systemDevices;
     } catch (e) {
 
     }
@@ -217,7 +240,7 @@ class BLueToothClass {
   void stopScanning() async{
     await FlutterBluePlus.stopScan();
     emptyBin();
-    _scanResultsSubscription.cancel();
+    if(!kIsWeb && Platform.isIOS) _scanResultsSubscription.cancel();
     _scanResults.clear();
     // _systemDevices.clear();
     priorityQueue.clear();
@@ -249,20 +272,20 @@ class BLueToothClass {
 
     if (Rssi <= 65) {
       binnumber = 0;
-    } else if (Rssi <= 70) {
-      binnumber = 1;
     } else if (Rssi <= 75) {
-      binnumber = 2;
+      binnumber = 1;
     } else if (Rssi <= 80) {
-      binnumber = 3;
+      binnumber = 2;
     } else if (Rssi <= 85) {
-      binnumber = 4;
+      binnumber = 3;
     } else if (Rssi <= 90) {
+      binnumber = 4;
+    } else if (Rssi <= 95) {
       binnumber = 5;
     } else {
       binnumber = 6;
     }
-    
+
     if(BIN[binnumber]==null){
       startbin();
     }
@@ -272,19 +295,29 @@ class BLueToothClass {
     } else {
       BIN[binnumber]![MacId] = 1 * weight[binnumber]!;
     }
-    //print("number of sample---${numberOfSample[MacId]}");
-  }
 
+
+    //print("number of sample---${numberOfSample[MacId]}");
+
+  }
   Map<String, double> calculateAverage(){
+
+
     //HelperClass.showToast("Bin ${BIN} \n number $numberOfSample");
+
     Map<String, double> sumMap = {};
+
     // Iterate over each inner map and accumulate the values for each string key
+
     BIN.values.forEach((innerMap) {
       innerMap.forEach((key, value) {
         sumMap[key] = (sumMap[key] ?? 0.0) + value;
       });
     });
+
+
     // Divide the sum by the number of values for each string key
+
     sumMap.forEach((key, sum) {
       int count = numberOfSample[key]!;
       sumMap[key] = sum / count;
@@ -307,4 +340,10 @@ class BLueToothClass {
   void dispose() {
     _binController.close();
   }
+}
+
+class RssiSTP{
+  int RSSI;
+  DateTime TIMESTAMP;
+  RssiSTP({required this.RSSI, required this.TIMESTAMP});
 }

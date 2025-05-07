@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
 import 'package:iwaymaps/NAVIGATION/config.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../APIMODELS/beaconData.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
@@ -48,17 +50,17 @@ class beaconapi {
     print(BeaconBox.containsKey(id));
     print(VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id));
     // print(VersionInfo.buildingLandmarkDataVersionUpdate[id]!);
-    if(VersionInfo.buildingLandmarkDataVersionUpdate.isEmpty || (BeaconBox.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate[id]! == false)){
-      print("BEACON DATA FROM DATABASE");
-      print(BeaconBox.keys);
-      print(BeaconBox.values);
-      if(BeaconBox.get(id) != null ){
-        List<dynamic> responseBody = BeaconBox.get(id)!.responseBody;
-        List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
-        return beaconList;
-      }
-
-    }
+    // if(VersionInfo.buildingLandmarkDataVersionUpdate.isEmpty || (BeaconBox.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate[id]! == false)){
+    //   print("BEACON DATA FROM DATABASE");
+    //   print(BeaconBox.keys);
+    //   print(BeaconBox.values);
+    //   if(BeaconBox.get(id) != null ){
+    //     List<dynamic> responseBody = BeaconBox.get(id)!.responseBody;
+    //     List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
+    //     return beaconList;
+    //   }
+    //
+    // }
 
     final Map<String, dynamic> data = {
       "buildingId": id,
@@ -77,8 +79,7 @@ class beaconapi {
 
     if (response.statusCode == 200) {
       print("BEACON DATA FROM API");
-      try{
-      print("beaconapiresponse ${response.body}");
+        print("beaconapiresponse ${response.body}");
         List<dynamic> responseBody = json.decode(response.body);
         List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
         print("response.statusCode");
@@ -92,13 +93,14 @@ class beaconapi {
         BeaconBox.put(i,beaconData);
         beaconData.save();
         print(BeaconBox.keys);
+        if(!kIsWeb && kDebugMode && Platform.isAndroid) {
+          List<dynamic> JSONresponseBody = json.decode(response.body);
+          String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
+          HelperClass().saveJsonToAndroidDownloads("beacon$id", formattedJson);
+        }
         return beaconList;
-      }catch(e){
-          return [];
-     }
-
-
-    }else if (response.statusCode == 403) {
+    }
+    else if (response.statusCode == 403) {
       print("BEACON API in error 403");
       String newAccessToken = await RefreshTokenAPI.refresh();
       print('Refresh done');
@@ -116,6 +118,9 @@ class beaconapi {
         List<dynamic> responseBody = json.decode(response.body);
         List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
         print("response.statusCode");
+        beaconList.forEach((beacon){
+          print(beacon.name);
+        });
         print("beaconList $beaconList");
         final beaconData = BeaconAPIModel(responseBody: responseBody);
         String i = id;
@@ -141,4 +146,5 @@ class beaconapi {
       throw Exception('Failed to load data');
     }
   }
+
 }

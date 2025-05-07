@@ -55,7 +55,7 @@ class Buildingbyvenue {
         this.ownerId});
 
   Buildingbyvenue.fromJson(Map<String, dynamic> json) {
-    adminIds = json['adminIds'].cast<String>();
+    adminIds = json['adminIds']?.cast<String>();
     sId = json['_id'];
     initialBuildingName = json['initialBuildingName'];
     initialVenueName = json['initialVenueName'];
@@ -69,18 +69,22 @@ class Buildingbyvenue {
     liveStatus = json['liveStatus'];
     geofencing = json['geofencing'];
     description = json['description'];
-    features = json['features'].cast<String>();
+    features = json['features']?.cast<String>();
     phone = json['phone'];
     website = json['website'];
     venuePhoto = json['venuePhoto'];
     buildingPhoto = json['buildingPhoto'];
-    workingDays = json['workingDays'].cast<String>();
+    workingDays = json['workingDays']?.cast<String>();
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
     locked = json['locked'];
-    contributorIds = json['contributorIds'].cast<String>();
+    contributorIds = json['contributorIds']?.cast<String>();
     ownerId = json['ownerId'];
+  }
+
+  static List<dynamic> fromJsonToList(dynamic responseBody){
+    return responseBody.map((data) => Buildingbyvenue.fromJson(data)).toList();
   }
 
   Map<String, dynamic> toJson() {

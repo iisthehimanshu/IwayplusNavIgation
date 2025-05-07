@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'APIMODELS/Building.dart';
-import 'ELEMENTS/BlurtoothDevice.dart';
+import 'ELEMENTS/BluetoothDevice.dart';
 
 class BluetoothScanAndroid extends StatefulWidget {
   @override
@@ -66,7 +64,7 @@ class _BluetoothScanAndroidState extends State<BluetoothScanAndroid> {
 
   BluetoothDevice parseDeviceDetails(String response) {
     final deviceRegex = RegExp(
-      r'Device Name: (.+?)\n.*?Address: (.+?)\n.*?RSSI: (-?\d+)',
+      r'Device Name: (.+?)\n.*?Address: (.+?)\n.*?RSSI: (-?\d+).*?Raw Data: ([0-9A-Fa-f\-]+)',
       dotAll: true,
     );
 
@@ -76,11 +74,13 @@ class _BluetoothScanAndroidState extends State<BluetoothScanAndroid> {
       final deviceName = match.group(1) ?? 'Unknown';
       final deviceAddress = match.group(2) ?? 'Unknown';
       final deviceRssi = match.group(3) ?? '0';
+      final rawData = match.group(4) ?? '';
 
       return BluetoothDevice(
         DeviceName: deviceName,
         DeviceAddress: deviceAddress,
         DeviceRssi: deviceRssi,
+        rawData: rawData,
       );
     } else {
       throw Exception('Invalid device details string');

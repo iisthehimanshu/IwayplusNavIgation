@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:iwaymaps/NAVIGATION/BluetoothScanIOSClass.dart';
-import 'dart:async';  // Import for Timer
+
+import 'BluetoothScanIOSClass.dart';  // Import for Timer
 
 
 class IOSScannerScreen extends StatefulWidget {

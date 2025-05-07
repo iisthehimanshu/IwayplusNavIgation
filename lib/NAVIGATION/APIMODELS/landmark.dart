@@ -8,7 +8,7 @@ class land {
 
   land({this.landmarkExist, this.landmarks, this.landmarksMap,this.landmarkNames, this.landmarksNameMap}); // Update the constructor
 
-  land.fromJson(Map<dynamic, dynamic> json) {
+  land.fromJson(dynamic json) {
     landmarkExist = json['landmarkExist'];
     if (json['landmarks'] != null) {
       landmarks = <Landmarks>[];
@@ -21,7 +21,7 @@ class land {
         if(landmark.properties!.polyId != null){
           landmarksMap![landmark.properties!.polyId!] = landmark; // Add to the map using polyID as the key
         }else{
-          landmarksMap![landmark.sId!] = landmark;
+          landmarksMap![landmark.sId!] = landmark; // Add to the map using polyID as the key
         }
         if(landmark.name != null){
           landmarkNames!.add(landmark.name!);
@@ -126,7 +126,7 @@ class Landmarks {
         this.wasPolyIdNull});
 
 
-  Landmarks.fromJson(Map<dynamic, dynamic> json) {
+  Landmarks.fromJson(dynamic json) {
     element =
     json['element'] != null ? new Element.fromJson(json['element']) : null;
     properties = json['properties'] != null
@@ -134,9 +134,11 @@ class Landmarks {
         : null;
     sId = json['_id'];
     wasPolyIdNull = false;
-    if(properties!.polyId == null){
-      wasPolyIdNull = true;
-      properties!.polyId = json['_id'];
+    if(properties != null) {
+      if (properties!.polyId == null) {
+        wasPolyIdNull = true;
+        properties!.polyId = json['_id'];
+      }
     }
       buildingID = json['building_ID'];
     coordinateX = json['coordinateX']!=null?json['coordinateX'].toInt():json['coordinateX'];
@@ -148,8 +150,11 @@ class Landmarks {
     floor = json['floor'];
     geometryType = json['geometryType'];
     name = json['name'];
-    if(name == null && element!.subType!=null && element!.type != "Floor" && element!.subType != "beacons"){
-      name = element!.subType;
+    if(element != null) {
+      if (name == null && element!.subType != null &&
+          element!.type != "Floor" && element!.subType != "beacons") {
+        name = element!.subType;
+      }
     }
     if (json['lifts'] != null) {
       lifts = <Lifts>[];
@@ -446,14 +451,14 @@ class Properties {
     polygonExist = json['polygonExist'];
     polyId = json['polyId'];
     filename = json['filename'];
-    nonWalkableGrids = json['nonWalkableGrids'].cast<String>();
+    nonWalkableGrids = json['nonWalkableGrids']?.cast<String>();
     floorLength = json['floorLength'];
     floorBreadth = json['floorBreadth'];
-    flrDistMatrix = json['flr_dist_matrix'].cast<String>();
-    frConn = json['frConn'].cast<String>();
-    clickedPoints = json['clickedPoints'].cast<String>();
+    flrDistMatrix = json['flr_dist_matrix']?.cast<String>();
+    frConn = json['frConn']?.cast<String>();
+    clickedPoints = json['clickedPoints']?.cast<String>();
     floorAngle = json['floorAngle'];
-    polygonId = json['polygonId'].cast<String>();
+    polygonId = json['polygonId']?.cast<String>();
   }
 
   Map<dynamic, dynamic> toJson() {

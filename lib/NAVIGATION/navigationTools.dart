@@ -1,22 +1,21 @@
-import 'dart:collection';
 import 'dart:math';
-import 'package:geolocator/geolocator.dart';
-import 'package:intl/intl.dart';
+
 import 'package:collection/collection.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
-import '../IWAYPLUS/API/buildingAllApi.dart';
-import '../IWAYPLUS/Elements/locales.dart';
-import '/IWAYPLUS/Elements/UserCredential.dart';
+import 'package:intl/intl.dart';
 import 'package:iwaymaps/NAVIGATION/UserState.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
+import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
+
+import '../IWAYPLUS/API/buildingAllApi.dart';
+import '../IWAYPLUS/Elements/UserCredential.dart';
+import '../IWAYPLUS/Elements/locales.dart';
+import 'API/PatchApi.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
-import 'API/PatchApi.dart';
 import 'APIMODELS/patchDataModel.dart';
-import 'APIMODELS/polylinedata.dart';
 import 'Cell.dart';
 import 'Navigation.dart';
 import 'directionClass.dart';
@@ -713,10 +712,12 @@ class tools {
 
 
 
-  static double PathDistance(List<Cell> mergedList) {
+  static double PathDistance(List<Cell> mergedList, {int index = 0}) {
     double totalDistance = 0.0;
 
     if (mergedList.isEmpty) return totalDistance;
+
+    mergedList = mergedList.sublist(index);
 
     if (mergedList.every((item) => (item.bid == buildingAllApi.outdoorID && item.floor == mergedList.first.floor))) {
       for (int i = 1; i < mergedList.length; i++) {
@@ -847,13 +848,190 @@ class tools {
 
 
   static Cell findingprevpoint(List<Cell> path, int index){
+
     for(int i = index-1; i>=0; i--){
       if(!path[i].imaginedCell){
+        print("found point without imagined Cell ${path[i].x},${path[i].y}");
+         return path[i];
+      }
+    }
+    print("did not found and returning same point $index ");
+    return path[index];
+  }
+
+  static Cell findingnextpoint(List<Cell> path, int index){
+
+    for(int i = index+1; i<=path.length; i++){
+      if(!path[i].imaginedCell){
+        print("found point without imagined Cell ${path[i].x},${path[i].y}");
         return path[i];
       }
     }
+    print("did not found and returning same point $index ");
     return path[index];
   }
+
+  static bool findSegmentLength(List<int> user, List<List<Cell>> segments){
+    bool between = false;
+    for (var segment in segments) {
+      if(perpendicularDistance(segment[0], segment[1], user) < 5){
+        print("found segment ${segment[0].x},${segment[0].y}   and    ${segment[1].x},${segment[1].y}");
+        between = true;
+      }
+    }
+    return between;
+  }
+
+
+  static double perpendicularDistance(Cell A, Cell B, List<int> C) {
+    int x1 = A.x, y1 = A.y;
+    int x2 = B.x, y2 = B.y;
+    int x3 = C[0], y3 = C[1];
+
+    // Check if C is within the bounding box of A and B
+    bool withinBounds = false;
+    if(x1 == x2){
+      withinBounds = true;
+    }else if(y1 == y2){
+      withinBounds = (x3 >= min(x1, x2) && x3 <= max(x1, x2));
+    }else{
+      withinBounds = (x3 >= min(x1, x2) && x3 <= max(x1, x2)) && (y3 >= min(y1, y2) && y3 <= max(y1, y2));
+    }
+
+    if (!withinBounds) return double.infinity; // C is not between A and B
+
+    int numerator = ((y2 - y1) * x3 - (x2 - x1) * y3 + x2 * y1 - y2 * x1).abs();
+    double denominator = sqrt(pow(y2 - y1, 2) + pow(x2 - x1, 2));
+
+    return denominator == 0 ? 0 : numerator / denominator;
+  }
+
+  static double angle(Cell a, Cell b, Cell c) {
+    int abx = b.x - a.x, aby = b.y - a.y;
+    int bcx = c.x - b.x, bcy = c.y - b.y;
+
+    int dot = abx * bcx + aby * bcy;
+    double magAB = sqrt(abx * abx + aby * aby);
+    double magBC = sqrt(bcx * bcx + bcy * bcy);
+
+    double cosTheta = dot / (magAB * magBC);
+    return acos(cosTheta) * (180 / pi);
+  }
+
+  static List<List<Cell>> findStraightSegments(List<Cell> points) {
+    List<List<Cell>> segments = [];
+    int? start;
+
+    for (int i = 0; i < points.length; i++) {
+      if (points[i].imaginedCell) continue;
+
+      if (start == null) {
+        start = i;
+        continue;
+      }
+
+      int? nextIndex;
+      for (int j = i + 1; j < points.length; j++) {
+        if (!points[j].imaginedCell) {
+          nextIndex = j;
+          break;
+        }
+      }
+
+      if (nextIndex == null) break;
+
+      double turnAngle = angle(points[start], points[i], points[nextIndex]);
+
+      if (turnAngle > 22.5) {
+        segments.add([points[start], points[i]]);
+        start = i;
+      }
+    }
+
+    if (start != null && !points.last.imaginedCell) {
+      segments.add([points[start], points.last]);
+    }
+
+    return segments;
+  }
+
+  static List<List<Cell>> filterLongSegments(List<List<Cell>> segments) {
+    return segments.where((segment) {
+      double segmentLength = calculateDistance(
+        [segment[0].x, segment[0].y],
+        [segment[1].x, segment[1].y],
+      );
+      return segmentLength > 60;
+    }).toList();
+  }
+
+
+  static List<Cell>? findSegmentContainingPoint(List<Cell> points, int index) {
+    List<List<Cell>> segments = findStraightSegments(points);
+    segments = filterLongSegments(segments);
+
+    for (List<Cell> segment in segments) {
+      if (segment.first == points[index] || segment.last == points[index] ||
+          (points.indexOf(segment.first) < index && points.indexOf(segment.last) > index)) {
+
+        print("user is in between [${segment.first.x}, ${segment.first.y}]  and  [${segment.last.x}, ${segment.last.y}]");
+
+        return segment;
+      }
+    }
+    return null; // If the index is not part of any valid segment
+  }
+
+  static List<Cell>? findNextSegment(List<Cell> path, int index){
+    List<List<Cell>> segments = findStraightSegments(path);
+
+    for(int i = 0; i<segments.length; i++){
+      List<Cell> segment = segments[i];
+      if (segment.first == path[index] || segment.last == path[index] ||
+          (path.indexOf(segment.first) < index && path.indexOf(segment.last) > index)) {
+        if(i+1 == segments.length){
+          return null;
+        }else {
+          return segments[i + 1];
+        }
+      }
+    }
+    return null; // If the index is not part of any valid segment
+  }
+
+
+  static List<Cell> findAllPointsOfSegment(List<Cell> path, List<Cell> segment){
+    List<Cell> points = [];
+    int startIndex = path.indexWhere((cell)=>cell.x == segment[0].x && cell.y == segment[0].y && cell.bid == segment[0].bid);
+    int endIndex = path.indexWhere((cell)=>cell.x == segment[1].x && cell.y == segment[1].y && cell.bid == segment[1].bid);
+    for(int i = startIndex; i<= endIndex; i++){
+      points.add(path[i]);
+    }
+    return points;
+  }
+
+  static int? findIndexOnPath(List<Cell> segment, List<int> point){
+    for(int i = 0; i<segment.length-1; i++){
+      if(canProjectOntoSegment(point[0], point[1], segment[i], segment[i+1])){
+        return i+1;
+      }
+    }
+    return null;
+  }
+
+  static bool canProjectOntoSegment(int px, int py, Cell a, Cell b) {
+    int ax = px - a.x;
+    int ay = py - a.y;
+    int bx = b.x - a.x;
+    int by = b.y - a.y;
+
+    double t = (ax * bx + ay * by) / (bx * bx + by * by);
+
+    return t >= 0 && t <= 1; // Returns true if the projection lies within the segment
+  }
+
+
+
 
   static List<int> findIntegersWithMean(double d) {
     print("Desired mean is $d -----> ${double.parse(d.toStringAsFixed(1))}");
@@ -1109,6 +1287,9 @@ class tools {
     List<int> tval = user.move(theta);
     if(user.move == tools.eightcelltransitionforTurns){
       tval = tools.eightcelltransition(theta);
+    }
+    if(user.move == tools.eightcelltransition){
+      tval = tools.fourcelltransition(theta);
     }
     List<int> b = [user.x+tval[0], user.y+tval[1]];
     List<int> c = [node.x , node.y];
@@ -1367,6 +1548,31 @@ class tools {
     return navPoints(pointZ.latitude, pointZ.longitude, xZ, yZ);
   }
 
+  static List<Cell> sortCollinearPoints(List<Cell> points) {
+    if (points.length < 2) throw ArgumentError("At least 2 points required");
+
+    var firstPoint = points[0]; // Keep the first point fixed
+
+    // Sort the remaining points based on their projection
+    var remainingPoints = points.sublist(1);
+
+    // Use firstPoint as reference, choose the farthest point as second reference
+    var farthestPoint = remainingPoints.reduce((a, b) =>
+    ((a.x - firstPoint.x).abs() + (a.y - firstPoint.y).abs()) >
+        ((b.x - firstPoint.x).abs() + (b.y - firstPoint.y).abs()) ? a : b);
+
+    // Compute projection scalar t for sorting
+    num t(Cell p) =>
+        (p.x - firstPoint.x) * (farthestPoint.x - firstPoint.x) +
+            (p.y - firstPoint.y) * (farthestPoint.y - firstPoint.y);
+
+    // Sort remaining points based on t values
+    remainingPoints.sort((a, b) => t(a).compareTo(t(b)));
+
+    // Keep the first point at the start and append sorted points
+    return [firstPoint, ...remainingPoints];
+  }
+
   static IntPoint findCoordinatesOfWaypoint(LatLng waypoint){
     final polylineData = SingletonFunctionController.building.polylinedatamap;
     IntPoint point = IntPoint(0, 0);
@@ -1432,37 +1638,19 @@ class tools {
 
       if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.coordinateX!=null){
         if (Beacon.floor! == value.floor) {
-
           double d = 0.0;
-
           if (value.doorX != null) {
             d = calculateDistance(
                 pCoord, [value.doorX!, value.doorY!]);
-
           }else{
-
-
             d = calculateDistance(
                 pCoord, [value.coordinateX!, value.coordinateY!]);
-            // if (d<distance) {
-            //   nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-            //     doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
-            //   priorityQueue.add(MapEntry(currentLandInfo, d));
-            // }
-
-
           }
           if (d<distance) {
-
             Landmarks currentLandInfo = value;
-
             priorityQueue.add(MapEntry(currentLandInfo, d));
-
-            //
           }
-
         }
-
       }
     });
 
@@ -1474,103 +1662,111 @@ class tools {
       //
     }
 
+    if(nearestLandmark == null){
+      landmarksMap.forEach((key,value){
+        if(Beacon.sId == value.sId){
+          nearestLandmark = value;
+        }
+      });
+    }
 
     return nearestLandmark;
   }
 
-  static List<Landmarks>? findListOfNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
+  static List<Landmarks>? findListOfNearbyLandmark(
+      beacon beacon, Map<String, Landmarks> landmarksMap) {
 
     List<Landmarks> queue = [];
     List<Landmarks> nodesQueue = [];
-    int distance=10;
-    List<int> pCoord = [];
-    pCoord.add(Beacon.coordinateX!);
-    pCoord.add(Beacon.coordinateY!);
-    landmarksMap.forEach((key, value) {
+    Set<String> visitedNodes = {}; // Stores visited coordinates
+    int maxDistance = 10;
+    List<int> beaconCoords = [beacon.coordinateX!, beacon.coordinateY!];
 
-      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.coordinateX!=null){
-        if (Beacon.floor! == value.floor) {
-          double d = 0.0;
-          if (value.doorX != null) {
-            d = calculateDistance(
-                pCoord, [value.doorX!, value.doorY!]);
-          }else{
-            d = calculateDistance(
-                pCoord, [value.coordinateX!, value.coordinateY!]);
-          }
-          if (d<distance) {
-            queue.add(value);
-          }
-        }
-      }
-    });
-
-    bool isAlreadyPresent(int x, int y){
-      bool v = false;
-      nodesQueue.forEach((node){
-        if(node.coordinateX == x && node.coordinateY == y){
-          v = true;
-        }
-      });
-      return v;
+    // Helper function to check if a node is already present
+    bool isAlreadyPresent(int x, int y) {
+      return visitedNodes.contains('$x,$y');
     }
 
-    final polylineData = SingletonFunctionController.building.polylinedatamap;
-    polylineData.forEach((key,value){
-      if(key == Beacon.buildingID ){
-        value.polyline!.floors!.forEach((floor){
-          floor.polyArray!.forEach((polyline){
-            if(polyline.polygonType == "Waypoints" && polyline.floor == tools.numericalToAlphabetical(Beacon.floor ?? 0)){
-              polyline.nodes!.forEach((node){
-                double d = calculateDistance(pCoord, [node.coordx!, node.coordy!]);
-                print("waypoint distance is $d");
-                if (d < distance && !isAlreadyPresent(node.coordx!,node.coordy!)) {
-                  print("foundwaypoint to option");
-                  var closestLandmark = queue[0];
-                  double minDistance = calculateDistance([node.coordx!, node.coordy!], [closestLandmark.coordinateX!,closestLandmark.coordinateY!]);
-                  for (var landmark in queue) {
-                    double distance = calculateDistance([node.coordx!, node.coordy!], [landmark.coordinateX!,landmark.coordinateY!]);
-                    if (distance < minDistance) {
-                      minDistance = distance;
-                      closestLandmark = landmark;
-                    }
-                  }
-                  Map<String, dynamic> data = closestLandmark.toJson();
-                  var duplicateLandmark = Landmarks.fromJson(data);
-                  duplicateLandmark.coordinateX = node.coordx;
-                  duplicateLandmark.coordinateY = node.coordy;
-                  duplicateLandmark.doorX = node.coordx;
-                  duplicateLandmark.doorY = node.coordy;
-                  duplicateLandmark.properties!.latitude = node.lat.toString();
-                  duplicateLandmark.properties!.longitude = node.lon.toString();
-                  duplicateLandmark.properties!.isWaypoint = true;
-                  duplicateLandmark.sId = node.sId;
-                  nodesQueue.add(duplicateLandmark);
-                }
-              });
-            }
-          });
-        });
-      }
-    });
+    // Find nearby landmarks
+    for (var landmark in landmarksMap.values) {
+      if (beacon.buildingID == landmark.buildingID &&
+          landmark.element?.subType != "beacons" &&
+          landmark.coordinateX != null &&
+          beacon.floor == landmark.floor) {
 
-    queue.forEach((value){
-      print("queue id ${value.sId}");
-    });
-    nodesQueue.forEach((value){
-      print("nodesQueue id ${value.sId}  [${value.coordinateX},${value.coordinateY}]");
-    });
+        double distance = landmark.doorX != null
+            ? calculateDistance(beaconCoords, [landmark.doorX!, landmark.doorY!])
+            : calculateDistance(beaconCoords, [landmark.coordinateX!, landmark.coordinateY!]);
+
+        if (distance < maxDistance) {
+          queue.add(landmark);
+        }
+      }
+    }
+
+    // // If beacon is on floor 0, include "main entry" landmarks
+    // if (beacon.floor == 0) {
+    //   for (var landmark in landmarksMap.values) {
+    //     if (beacon.buildingID == landmark.buildingID &&
+    //         beacon.floor == landmark.floor &&
+    //         landmark.element?.subType?.toLowerCase() == "main entry") {
+    //       queue.add(landmark);
+    //     }
+    //   }
+    // }
+
+    // Process waypoints
+    var polylineData = SingletonFunctionController.building.polylinedatamap;
+    if (polylineData.containsKey(beacon.buildingID) && queue.isNotEmpty) {
+      for (var floor in polylineData[beacon.buildingID]!.polyline!.floors!) {
+        for (var polyline in floor.polyArray!) {
+          if (polyline.polygonType == "Waypoints" &&
+              polyline.floor == tools.numericalToAlphabetical(beacon.floor ?? 0)) {
+
+            for (var node in polyline.nodes!) {
+              double distance = calculateDistance(beaconCoords, [node.coordx!, node.coordy!]);
+              if (distance < maxDistance && !isAlreadyPresent(node.coordx!, node.coordy!)) {
+
+                print("Found waypoint close to beacon");
+
+                // Find the closest landmark
+                var closestLandmark = queue.reduce((a, b) =>
+                calculateDistance([node.coordx!, node.coordy!], [a.coordinateX!, a.coordinateY!]) <
+                    calculateDistance([node.coordx!, node.coordy!], [b.coordinateX!, b.coordinateY!])
+                    ? a
+                    : b);
+
+                // Create a duplicate landmark with waypoint coordinates
+                var duplicateLandmark = Landmarks.fromJson(closestLandmark.toJson());
+                duplicateLandmark
+                  ..coordinateX = node.coordx
+                  ..coordinateY = node.coordy
+                  ..doorX = node.coordx
+                  ..doorY = node.coordy
+                  ..properties!.latitude = node.lat.toString()
+                  ..properties!.longitude = node.lon.toString()
+                  ..properties!.isWaypoint = true
+                  ..sId = node.sId;
+
+                nodesQueue.add(duplicateLandmark);
+                visitedNodes.add('${node.coordx},${node.coordy}');
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Debugging output
+    queue.forEach((value) => print("Queue ID: ${value.sId}"));
+    nodesQueue.forEach((value) =>
+        print("NodeQueue ID: ${value.sId} [${value.coordinateX},${value.coordinateY}]"));
+
     queue.addAll(nodesQueue);
 
-
-
-
-    if(queue.isNotEmpty){
-     return queue;
-    }else{
-      return null;
-    }
+    return queue.isNotEmpty ? queue : null;
   }
+
 
   static Landmarks? localizefindNearbyLandmarkSecond(UserState user, Map<String, Landmarks> landmarksMap,{bool increaserange = false}) {
 
@@ -1680,7 +1876,7 @@ class tools {
   static List<nearestLandInfo> localizefindAllNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
-    int distance=10;
+    int distance=15;
     landmarksMap.forEach((key, value) {
       if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.name != null && Beacon.floor! == value.floor){
         List<int> pCoord = [];

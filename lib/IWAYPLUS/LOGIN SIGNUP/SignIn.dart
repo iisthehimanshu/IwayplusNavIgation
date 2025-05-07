@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'dart:math';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
@@ -174,13 +175,17 @@ class _SignInState extends State<SignIn> {
       });
       HelperClass.showToast("Invalid Username or Password");
     } else {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MainScreen(initialIndex: 0),
-        ),
-            (route) => false,
-      );
+      try{
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainScreen(initialIndex: 0),
+          ),
+              (route) => false,
+        );
+      }catch(e){
+        context.go('/web');
+      }
       HelperClass.showToast("Sign in successful");
     }
   }

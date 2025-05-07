@@ -1,48 +1,32 @@
-
-import 'dart:convert';
-
-
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localization/flutter_localization.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:iwaymaps/IWAYPLUS/BuildingInfoScreen.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
-import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
-import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
-import '/IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
-import '/IWAYPLUS/DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
+import 'package:iwaymaps/NAVIGATION/DatabaseManager/DataBaseManager.dart';
+import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
-
-import '/NAVIGATION/DATABASE/BOXES/BeaconAPIModelBOX.dart';
-import '/NAVIGATION/DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
-import '/NAVIGATION/DATABASE/DATABASEMODEL/OutDoorModel.dart';
-import '/NAVIGATION/DATABASE/DATABASEMODEL/WayPointModel.dart';
-
-import '/NAVIGATION/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
-import '/NAVIGATION/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
-import '/NAVIGATION/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
-import '/NAVIGATION/DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
-import 'IWAYPLUS/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
-import 'IWAYPLUS/DATABASE/DATABASEMODEL/SignINAPIModel.dart';
-import 'IWAYPLUS/Elements/deeplinks.dart';
 import 'IWAYPLUS/Elements/locales.dart';
 import 'IWAYPLUS/FIREBASE NOTIFICATION API/PushNotifications.dart';
 import 'IWAYPLUS/LOGIN SIGNUP/SignIn.dart';
 import 'IWAYPLUS/MainScreen.dart';
-import '/NAVIGATION/Navigation.dart';
 import 'dart:io' show Platform;
+import 'IWAYPLUS/websocket/navigationLogManager.dart';
+import 'NAVIGATION/webHome.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
+
+
+final navigationManager=NavigationLogManager();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await localDBInitialsation();
+  RepositoryManager().loadBuildings();
   if(!kIsWeb){
     mobileInitialization();
     runApp(const MobileApp());
@@ -58,52 +42,30 @@ Future<void> localDBInitialsation() async {
     var directory = await getApplicationDocumentsDirectory();
     Hive.init(directory.path);
   }
-  Hive.registerAdapter(LandMarkApiModelAdapter());
-  await Hive.openBox<LandMarkApiModel>('LandMarkApiModelFile');
-  Hive.registerAdapter(PatchAPIModelAdapter());
-  await Hive.openBox<PatchAPIModel>('PatchAPIModelFile');
-  Hive.registerAdapter(PolyLineAPIModelAdapter());
-  await Hive.openBox<PolyLineAPIModel>("PolyLineAPIModelFile");
-  Hive.registerAdapter(BuildingAllAPIModelAdapter());
-  await Hive.openBox<BuildingAllAPIModel>("BuildingAllAPIModelFile");
-  Hive.registerAdapter(FavouriteDataBaseModelAdapter());
-  await Hive.openBox<FavouriteDataBaseModel>("FavouriteDataBaseModelFile");
-  Hive.registerAdapter(BeaconAPIModelAdapter());
-  await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
-  Hive.registerAdapter(BuildingAPIModelAdapter());
-  await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
-  Hive.registerAdapter(SignINAPIModelAdapter());
-  await Hive.openBox<SignINAPIModel>('SignINAPIModelFile');
-  Hive.registerAdapter(OutDoorModelAdapter());
-  await Hive.openBox<OutDoorModel>('OutDoorModelFile');
-  Hive.registerAdapter(WayPointModelAdapter());
-  await Hive.openBox<WayPointModel>('WayPointModelFile');
-  Hive.registerAdapter(DataVersionLocalModelAdapter());
-  await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
-  Hive.registerAdapter(LocalNotificationAPIDatabaseModelAdapter());
-  await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
+  DataBaseManager.init();
+  await navigationManager.initialize();
+
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');
   await Hive.openBox('Filters');
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('LocationPermission');
   await Hive.openBox('VersionData');
+
 }
 
 Future<void> mobileInitialization () async {
-  WidgetsFlutterBinding.ensureInitialized();
-  WakelockPlus.enable();
-
   // PushNotifications.init();
   PushNotifications.localNotiInit();
   PushNotifications.resetBadgeCount();
-
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 }
+
+
 
 
 
@@ -118,14 +80,12 @@ class MobileApp extends StatefulWidget {
 class _MobileAppState extends State<MobileApp> {
   late String googleSignInUserName='';
   final FlutterLocalization localization = FlutterLocalization.instance;
-  wsocket soc = wsocket('com.iwaypus.navigation');
   NotificationSocket notificationSocket = NotificationSocket();
 
   @override
   void initState() {
     configureLocalization();
     super.initState();
-
   }
   void configureLocalization(){
     localization.init(mapLocales: LOCALES, initLanguageCode: 'en');
@@ -175,7 +135,7 @@ class _MobileAppState extends State<MobileApp> {
     }else if(isAndroid){
       print("Android");
     }
-requestLocationPermission();
+    requestLocationPermission();
     return MaterialApp(
       title: "IWAYPLUS",
       home: FutureBuilder<bool>(
@@ -236,25 +196,73 @@ class WebApp extends StatefulWidget {
 
 class _WebAppState extends State<WebApp> {
   final FlutterLocalization localization = FlutterLocalization.instance;
-  var SignInDatabasebox = Hive.box('SignInDatabase');
+  final SignInDatabasebox = Hive.box('SignInDatabase');
+
+  late final GoRouter _router;
 
   @override
   void initState() {
     configureLocalization();
+
+    _router = GoRouter(
+      initialLocation: '/web',
+      routes: [
+        GoRoute(
+          path: '/web',
+          builder: (context, state) {
+            // If no ID is given, show a screen to input the ID
+            if(!SignInDatabasebox.containsKey("accessToken")){
+              return SignIn();
+            }else{
+              return AskForIdPage(); // Create this screen
+            }
+          },
+        ),
+        GoRoute(
+          path: '/web/:id',
+          builder: (context, state) {
+            if(!SignInDatabasebox.containsKey("accessToken")){
+              return SignIn();
+            }else{
+              final id = state.pathParameters['id']!;
+              return webHome(Venue: id,source: null,); // Create this screen
+            }
+
+          },
+        ),
+        GoRoute(
+          path: '/web/:id/:source',
+          builder: (context, state) {
+            if(!SignInDatabasebox.containsKey("accessToken")){
+              return SignIn();
+            }else{
+              final id = state.pathParameters['id']!;
+              final source = state.pathParameters['source']!;
+              return webHome(Venue: id,source: source,); // Create this screen
+            }
+          },
+        ),
+      ],
+    );
+
     super.initState();
   }
 
-  void configureLocalization(){
+  void configureLocalization() {
     localization.init(mapLocales: LOCALES, initLanguageCode: 'en');
     localization.onTranslatedLanguage = ontranslatedLanguage;
   }
-  void ontranslatedLanguage(Locale? locale){
+
+  void ontranslatedLanguage(Locale? locale) {
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: SignInDatabasebox.containsKey("accessToken")?MainScreen(initialIndex: 0):SignIn());
+    return MaterialApp.router(
+      routerConfig: _router,
+    );
   }
 }
+
 

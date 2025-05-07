@@ -50,10 +50,10 @@ class Data {
     sId = json['_id'];
     name = json['name'];
     paidUser = json['paidUser'];
-    accessibilitySettings = json['accessibilitySettings'].cast<String>();
-    filters = json['filters'].cast<String>();
-    categories = json['categories'].cast<String>();
-    roles = json['roles'].cast<String>();
+    accessibilitySettings = json['accessibilitySettings']?.cast<String>();
+    filters = json['filters']?.cast<String>();
+    categories = json['categories']?.cast<String>();
+    roles = json['roles']?.cast<String>();
     iV = json['__v'];
   }
 

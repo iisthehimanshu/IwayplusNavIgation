@@ -1,8 +1,8 @@
-import 'package:geodesy/geodesy.dart';
-import 'package:iwaymaps/NAVIGATION/Cell.dart';
 import 'package:google_maps_flutter_platform_interface/src/types/marker.dart';
+
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
+import 'Cell.dart';
 import 'directionClass.dart';
 
 class pathState {
@@ -104,5 +104,45 @@ class pathState {
     directions.clear();
     connections.clear();
     noPathFound = false;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'sourcePolyID': sourcePolyID,
+      'destinationPolyID': destinationPolyID,
+      'sourceName': sourceName,
+      'destinationName': destinationName,
+      'sourceX': sourceX,
+      'sourceY': sourceY,
+      'sourceLat': sourceLat,
+      'sourceLng': sourceLng,
+      'destinationX': destinationX,
+      'destinationY': destinationY,
+      'destinationLat': destinationLat,
+      'destinationLng': destinationLng,
+      'sourceFloor': sourceFloor,
+      'destinationFloor': destinationFloor,
+      'accessiblePath': accessiblePath,
+      'realWorldCoordinates': realWorldCoordinates,
+      'path': path,
+      'noPathFound': noPathFound,
+      'Cellpath': Cellpath,
+      'singleListPath': singleListPath,
+      'singleCellListPath': singleCellListPath,
+      'listofPaths': listofPaths,
+      'patchData': patchData.map((key, value) => MapEntry(key, value.toString())),
+      'directions': directions.map((d) => d.toString()).toList(),
+      'numCols': numCols,
+      'index': index,
+      'sourceBid': sourceBid,
+      'destinationBid': destinationBid,
+      'connections': connections,
+      'beaconCords': beaconCords,
+      'associateTurnWithLandmark': associateTurnWithLandmark.map((key, value) => MapEntry(key, value.toString())),
+      'SourceExitPolyid': SourceExitPolyid,
+      'DestinationEntryPolyid': DestinationEntryPolyid,
+      'innerMarker': innerMarker.map((key, value) => MapEntry(key, value.toString())),
+      'didPathStart': didPathStart,
+    };
   }
 }

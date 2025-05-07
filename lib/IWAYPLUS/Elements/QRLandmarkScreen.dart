@@ -26,13 +26,8 @@ class _QRViewExampleState extends State<QRViewExample> {
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  Map<String,g.LatLng> allBuildingID = {
-    "65d8835adb333f89456e687f": g.LatLng( 28.947238, 77.100917),
-       "65d8833adb333f89456e6519": g.LatLng(28.947236, 77.101992),
-       "65d8825cdb333f89456d0562": g.LatLng( 28.945987, 77.10206),
-    "66af7fcd858b7c576deb378b":g.LatLng(28.556050000000027,77.21693000000005),
-    "6715cd7e9e8473b3ff515797":g.LatLng(28.6885,77.20953),
-  };
+  bool _isDeepLinkHandled = false;
+
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
   @override
@@ -158,54 +153,65 @@ class _QRViewExampleState extends State<QRViewExample> {
   }
 
   void _onQRViewCreated(QRViewController controller) {
-    setState(() {
-      this.controller = controller;
-    });
+    this.controller = controller;
     controller.scannedDataStream.listen((scanData) async {
-      setState(() {
-        result = scanData;
-      });
-      print("result");
-      print(result!.code);
-      if(result != null && result!.code != null){
-        await controller.stopCamera();
-        final uri = Uri.parse(result!.code ?? '');
-        String qrCode = uri.fragment.split('/').last;
-        List<QRDataAPIModel>? qrData = await QRDataAPI().fetchQRData((widget.frmMainPage)?allBuildingID.keys.toList():buildingAllApi.allBuildingID.keys.toList());
-        print("fetchQRData ${qrData}");
-        qrData?.forEach((e){
-          if(e.code == qrCode){
-            if(e.landmarkId == null){
-              HelperClass.launchURL(result!.code!);
-            }else{
-              if(widget.frmMainPage){
-                HashMap<String,g.LatLng> map=new HashMap();
-                buildingAllApi.setStoredString(e.buildingID!);
-                buildingAllApi.setSelectedBuildingID(e.buildingID!);
-                allBuildingID.forEach((key, value) {
-                 if(key==e.buildingID){
-                   map[key]=value;
-                 }
-                });
-                print("map : $map");
-                buildingAllApi.setStoredAllBuildingID(map);
-                Navigator.push(context, MaterialPageRoute<void>(
-                  builder: (BuildContext context) => Navigation(directsourceID: e.landmarkId!,),
-                ),);
-              }else{
-                 Navigator.pop(context,e.landmarkId);
-              }
+      if (_isDeepLinkHandled) return;
+      _isDeepLinkHandled = true;
+      try {
+        final scannedUrl = scanData.code ?? '';
+        print("Scanned QR code: $scannedUrl");
 
+        final landmarkId = extractLandmarkId(scannedUrl);
+        if (landmarkId != null) {
+          print("Navigating via landmarkId: $landmarkId");
+          Navigator.pop(context, landmarkId);
+          return;
+        }
 
+        final qrCode = getQrCodeFromUrl(scannedUrl);
+        print("CMS QR Code: $qrCode");
 
+        final qrDataList = await QRDataAPI().fetchQRData(buildingAllApi.allBuildingID.keys.toList());
 
-
-
-            }
+        for(int i = 0; i<qrDataList!.length; i++){
+          if(qrDataList[i].code == qrCode){
+            print("Navigating via CMS: ${qrDataList[i].landmarkId!}");
+            Navigator.pop(context, qrDataList[i].landmarkId!);
+            return;
           }
-        });
+        }
+
+        controller.stopCamera();
+        HelperClass.showToast("Invalid/Unassigned QR");
+        print("qr pop");
+        Navigator.pop(context);
+        return;
+      } catch (e) {
+        print('Error while handling QR scan: $e');
       }
     });
+  }
+
+  String? extractLandmarkId(String url) {
+    try {
+      final uri = Uri.parse(url);
+      final parts = uri.fragment.split('/');
+
+      final index = parts.indexOf('landmarkId');
+      if (index != -1 && index + 1 < parts.length) {
+        return parts[index + 1];
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  String getQrCodeFromUrl(String url) {
+    try {
+      final uri = Uri.parse(url);
+      return uri.fragment.split('/').last;
+    } catch (_) {
+      return '';
+    }
   }
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {

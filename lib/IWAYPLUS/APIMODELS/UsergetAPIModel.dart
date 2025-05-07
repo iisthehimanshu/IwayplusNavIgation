@@ -14,7 +14,7 @@ class UsergetAPIModel {
   Null? googleId;
   String? appId;
   List<String>? roles;
-  List<Null>? favourites;
+  List<Map<String, dynamic>>? favourites;
   String? createdAt;
   String? updatedAt;
   int? iV;
@@ -60,7 +60,7 @@ class UsergetAPIModel {
     language = json['language'];
     googleId = json['googleId'];
     appId = json['appId'];
-    roles = json['roles'].cast<String>();
+    roles = json['roles']?.cast<String>();
     if (json['favourites'] != null) {
       favourites = [];
       json['favourites'].forEach((v) {

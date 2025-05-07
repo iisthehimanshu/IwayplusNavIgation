@@ -36,7 +36,7 @@ class Payload {
 
   Payload.fromJson(Map<String, dynamic> json) {
     userId = json['userId'];
-    roles = json['roles'].cast<String>();
+    roles = json['roles']?.cast<String>();
   }
 
   Map<String, dynamic> toJson() {

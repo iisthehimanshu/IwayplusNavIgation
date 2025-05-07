@@ -1,6 +1,8 @@
 import 'dart:collection';
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -11,12 +13,21 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:url_launcher/url_launcher.dart';
+import '../../NAVIGATION/ELEMENTS/BluetoothDevice.dart';
 import '../API/buildingAllApi.dart';
 import '/IWAYPLUS/APIMODELS/buildingAll.dart';
 import '../MODELS/VenueModel.dart';
 
 class HelperClass{
   static bool SemanticEnabled = false;
+
+  static Future<bool> checkInternetConnectivity() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult.contains(ConnectivityResult.mobile) || connectivityResult.contains(ConnectivityResult.wifi)) {
+      return true;
+    }
+    return false;
+  }
 
   static Future<void> launchURL(String url) async {
     if (await canLaunch(url)) {
@@ -78,7 +89,7 @@ class HelperClass{
 
 
 
-  static Future<void> shareContent(String text) async {
+  static Future<void> shareContent(String text, String name) async {
     try {
       final qrValidationResult = QrValidator.validate(
         data: text,
@@ -112,22 +123,16 @@ class HelperClass{
 
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder);
-
       canvas.drawColor(Colors.white, BlendMode.src);
-
       canvas.translate(padding.toDouble(), padding.toDouble());
       painter.paint(canvas, Size(qrSize.toDouble(), qrSize.toDouble()));
-
       final picture = recorder.endRecording();
       final img = await picture.toImage(totalSize, totalSize);
       final pngBytes = await img.toByteData(format: ui.ImageByteFormat.png);
-
       final buffer = pngBytes!.buffer.asUint8List();
-
       final tempDir = await getTemporaryDirectory();
-      final tempPath = '${tempDir.path}/doctor_share.png';
+      final tempPath = '${tempDir.path}/$name.png';
       final file = await File(tempPath).writeAsBytes(buffer);
-
       await Share.shareXFiles([XFile(file.path)], text: text);
     } catch (e) {
       print('Error sharing content: $e');
@@ -159,6 +164,31 @@ class HelperClass{
       return match.group(1)!;
     } else {
       return '';
+    }
+  }
+
+  BluetoothDevice parseDeviceDetails(String response) {
+    final deviceRegex = RegExp(
+      r'Device Name: (.+?)\n.*?Address: (.+?)\n.*?RSSI: (-?\d+).*?Raw Data: ([0-9A-Fa-f\-]+)',
+      dotAll: true,
+    );
+
+    final match = deviceRegex.firstMatch(response);
+
+    if (match != null) {
+      final deviceName = match.group(1) ?? 'Unknown';
+      final deviceAddress = match.group(2) ?? 'Unknown';
+      final deviceRssi = match.group(3) ?? '0';
+      final rawData = match.group(4) ?? '';
+
+      return BluetoothDevice(
+        DeviceName: deviceName,
+        DeviceAddress: deviceAddress,
+        DeviceRssi: deviceRssi,
+        rawData: rawData,
+      );
+    } else {
+      throw Exception('Invalid device details string');
     }
   }
 
@@ -196,8 +226,7 @@ class HelperClass{
      // print(value);
      venueHashMap=createVenueHashMap(value);
      venueList = createVenueList(venueHashMap);
-     for(int i=0;i<venueList.length;i++)
-     {
+     for(int i=0;i<venueList.length;i++) {
        buildingsPos.add(venueList[i]);
      }
     });
@@ -222,6 +251,53 @@ class HelperClass{
   return 2;
 
   }
+
+
+  double getBinWeight(int rssi){
+    if (rssi <= 55) {
+      return 25.0;
+    }else if (rssi <= 65) {
+      return 12.0;
+    } else if (rssi <= 75) {
+      return 6.0;
+    } else if (rssi <= 80) {
+      return 4.0;
+    } else if (rssi <= 85) {
+      return 0.5;
+    } else if (rssi <= 90) {
+      return 0.25;
+    } else if (rssi <= 95) {
+      return 0.15;
+    } else {
+      return 0.1;
+    }
+  }
+
+  Future<void> saveJsonToAndroidDownloads(String fileName, String jsonString) async {
+    if(!kIsWeb){
+      Directory? downloadsDir;
+      if (Platform.isAndroid) {
+        downloadsDir = Directory('/storage/emulated/0/Download');
+      }
+
+      if (downloadsDir == null || !downloadsDir.existsSync()) {
+        print("❌ Could not access Downloads folder.");
+        return;
+      }
+
+      final filePath = '${downloadsDir.path}/$fileName.json';
+      final file = File(filePath);
+
+      try {
+        await file.writeAsString(jsonString, flush: true);
+        print("✅ JSON file saved at: $filePath");
+      } catch (e) {
+        print("❌ Error writing JSON file: $e");
+      }
+    }
+  }
+
+
 
 
 }

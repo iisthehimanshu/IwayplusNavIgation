@@ -4,7 +4,7 @@ class outdoormodel {
 
   outdoormodel({this.status, this.data});
 
-  outdoormodel.fromJson(Map<dynamic, dynamic> json) {
+  outdoormodel.fromJson(dynamic json) {
     status = json['status'];
     data = json['data'] != null ? new Data.fromJson(json['data']) : null;
   }
@@ -44,7 +44,7 @@ class Data {
   Data.fromJson(Map<dynamic, dynamic> json) {
     sId = json['_id'];
     campusId = json['campusId'];
-    buildingIds = json['buildingIds'].cast<String>();
+    buildingIds = json['buildingIds']?.cast<String>();
     globalAnnotation = json['globalAnnotation'] ?? false;
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];

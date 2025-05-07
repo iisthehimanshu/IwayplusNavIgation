@@ -1,6 +1,7 @@
 
 import 'dart:collection';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
@@ -14,8 +15,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:iwaymaps/IWAYPLUS/websocket/UserLog.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '/IWAYPLUS/Elements/HelperClass.dart';
 import '/IWAYPLUS/Elements/buildingCard.dart';
 import 'package:iwaymaps/NAVIGATION/Navigation.dart';
@@ -115,6 +116,9 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     }
     print(dd.length);
   }
+
+
+
   var currentData;
 
   Future<void> customEnableBT(BuildContext context) async {
@@ -144,6 +148,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     BluetoothEnable.enableBluetooth.then((value) {
       print(value);
     });
+
   }
   @override
   Widget build(BuildContext context) {
@@ -319,8 +324,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                               child: ListTile(
                                 onTap: (){
                                  //if((widget.currentLatLng!.latitude.toStringAsFixed(2)==(28.544277333724025).toStringAsFixed(2) && widget.currentLatLng!.longitude.toStringAsFixed(2)==(77.18803031572772).toStringAsFixed(2)) ){
-                                    wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;
-                                    wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;
+
                                     buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setStoredAllBuildingID(allBuildingID);

@@ -23,7 +23,7 @@ class MappingElement {
     this.updatedBy,
   });
 
-  factory MappingElement.fromJson(Map<String, dynamic> json) {
+  factory MappingElement.fromJson(Map<dynamic, dynamic> json) {
     return MappingElement(
       id: json['id'],
       sId: json['_id'],
@@ -38,7 +38,7 @@ class MappingElement {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<dynamic, dynamic> toJson() {
     return {
       'id': id,
       'building_ID': buildingID,
@@ -64,7 +64,7 @@ class Properties {
     required this.fillColor,
   });
 
-  factory Properties.fromJson(Map<String, dynamic> json) {
+  factory Properties.fromJson(Map<dynamic, dynamic> json) {
     return Properties(
       name: json['name'],
       strokeColor: json['strokeColor'],
@@ -72,7 +72,7 @@ class Properties {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<dynamic, dynamic> toJson() {
     return {
       'name': name,
       'strokeColor': strokeColor,
@@ -93,7 +93,7 @@ class Geometry {
     this.coordinatesLocal,
   });
 
-  factory Geometry.fromJson(Map<String, dynamic> json) {
+  factory Geometry.fromJson(Map<dynamic, dynamic> json) {
     return Geometry(
       coordinates: json['coordinates'],
       type: json['type'],
@@ -101,7 +101,7 @@ class Geometry {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<dynamic, dynamic> toJson() {
     return {
       'coordinates': coordinates,
       'type': type,
@@ -119,7 +119,7 @@ class PathNetwork {
     required this.pathNetwork,
   });
 
-  factory PathNetwork.fromJson(Map<String, dynamic> json) {
+  factory PathNetwork.fromJson(Map<dynamic, dynamic> json) {
     return PathNetwork(
       pathNetworkGlobal: Map<String, List<dynamic>>.from(
         json['pathNetworkGlobal']??{}.map(
@@ -134,7 +134,7 @@ class PathNetwork {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<dynamic, dynamic> toJson() {
     return {
       'pathNetworkGlobal': pathNetworkGlobal,
       'pathNetwork': pathNetwork,
@@ -155,7 +155,7 @@ class GlobalModel {
     required this.venueName,
   });
 
-  factory GlobalModel.fromJson(Map<String, dynamic> json) {
+  factory GlobalModel.fromJson(dynamic json) {
     return GlobalModel(
       mappingElements: (json['mappingElements'] as List<dynamic>)
           .map((e) => MappingElement.fromJson(e))
@@ -169,8 +169,8 @@ class GlobalModel {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['mappingElements'] =this.mappingElements;
     data['pathNetwork'] = this.pathNetwork;
     data['buildingName'] = this.buildingName;

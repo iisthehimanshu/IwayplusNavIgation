@@ -9,6 +9,7 @@ import 'package:iwaymaps/NAVIGATION/APIMODELS/outbuildingmodel.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/SwitchDataBase.dart';
 import '../../IWAYPLUS/Elements/HelperClass.dart';
 import '../APIMODELS/DataVersion.dart';
+import '../DATABASE/DATABASEMODEL/DB2DataVersionLocalModel.dart';
 import '../DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
 import '../DatabaseManager/DataBaseManager.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
@@ -51,6 +52,7 @@ class RepositoryManager{
     SwitchDataBase switchDataBase = SwitchDataBase();
     Apidetails apiDetails = Apidetails();
     bool shouldBeInjected = false;
+    bool preLoadDataBaseCreated = false;
 
 
     Future<void> loadBuildings() async {
@@ -62,18 +64,63 @@ class RepositoryManager{
             getDataVersionData(buildingData.sId!);
         });
 
+
+
     }
+
+    void loadPreLoadedDataBase(){
+        if(!preLoadDataBaseCreated) {
+            VenueManager().buildings.forEach((buildingByVenue) async {
+                Detail dataVersionDetails = await apiDetails.dataVersion(dataBaseManager.getAccessToken(), buildingByVenue.sId!);
+                Response dataVersionDataFromAPI = await networkManager.api.request(dataVersionDetails);
+                if(dataVersionDataFromAPI.statusCode == 200) {
+                    final apiData = dataVersionDetails.conversionFunction(dataVersionDataFromAPI.data);
+                    print("dataVersion ${apiData.versionData!.buildingID}");
+                    final dataVersionData = DataVersionLocalModel(responseBody: dataVersionDataFromAPI.data);
+                    DataBaseManager().saveData(dataVersionData, dataVersionDetails, buildingByVenue.sId!);
+                }
+
+                print("CREATING PRELOADED DATABASE");
+                Detail landmarkDetail = apiDetails.landmark(dataBaseManager.getAccessToken(), buildingByVenue.sId!);
+                if (kDebugMode) print("${landmarkDetail.getPreLoadPrefix} DATA FROM GREEN DATABASE");
+                String jsonString = await rootBundle.loadString('assets/PreLoads/${landmarkDetail.getPreLoadPrefix}${buildingByVenue.sId!}.json');
+                final data = json.decode(jsonString);
+                final landmarkData = LandMarkApiModel(responseBody: data);
+                DataBaseManager().saveData(landmarkData, landmarkDetail, buildingByVenue.sId!);
+
+                Detail polylineDetail = apiDetails.polyline(dataBaseManager.getAccessToken(), buildingByVenue.sId!);
+                if (kDebugMode) print("${polylineDetail.getPreLoadPrefix} DATA FROM GREEN DATABASE");
+                String jsonStringPolyline = await rootBundle.loadString('assets/PreLoads/${polylineDetail.getPreLoadPrefix}${buildingByVenue.sId!}.json');
+                final dataPolyline = json.decode(jsonStringPolyline);
+                final polyLineData = PolyLineAPIModel(responseBody: dataPolyline);
+                DataBaseManager().saveData(polyLineData, polylineDetail, buildingByVenue.sId!);
+
+                Detail patchDetail = await apiDetails.patch(dataBaseManager.getAccessToken(), buildingByVenue.sId!);
+                if (kDebugMode) print("${patchDetail.getPreLoadPrefix} DATA FROM GREEN DATABASE");
+                String jsonStringPatch = await rootBundle.loadString('assets/PreLoads/${patchDetail.getPreLoadPrefix}${buildingByVenue.sId!}.json');
+                final dataPatch = json.decode(jsonStringPatch);
+                final patchData = PatchAPIModel(responseBody: dataPatch);
+                DataBaseManager().saveData(patchData, patchDetail, buildingByVenue.sId!);
+                preLoadDataBaseCreated = true;
+            });
+        }
+
+    }
+
+
 
 
     Future<dynamic> getLandmarkData(String bID) async {
         if (bID.isEmpty) return null;
-
         Detail landmarkDetail = apiDetails.landmark(dataBaseManager.getAccessToken(), bID);
         final landmarkBox = landmarkDetail.dataBaseGetData!();
-        print("switchDataBase.isGreenDataBaseActive()");
-        print(switchDataBase.isGreenDataBaseActive());
+
         if(switchDataBase.isGreenDataBaseActive()){
-            return getPreLoadedData(landmarkDetail,bID);
+            if(kDebugMode) print("${landmarkDetail.getPreLoadPrefix} DATA FROM GREEN DATABASE");
+            String jsonString = await rootBundle.loadString('assets/PreLoads/${landmarkDetail.getPreLoadPrefix}$bID.json');
+            final data = json.decode(jsonString);
+            final landmarkData = LandMarkApiModel(responseBody: data);
+            DataBaseManager().saveData(landmarkData, landmarkDetail, bID);
         }else {
             print("getLandmarkData");
             if (landmarkBox.containsKey(bID)) {
@@ -91,20 +138,8 @@ class RepositoryManager{
                     print("Data from API");
                 }
                 if (dataFromAPI.statusCode == 200) {
-                    final landmarkData = LandMarkApiModel(
-                        responseBody: dataFromAPI.data);
-                    DataBaseManager().saveData(
-                        landmarkData, landmarkDetail, bID);
-
-                    if(bID == "65d887a5db333f89457145f6") {
-                        print("65d887a5db333f89457145f6");
-                        print(dataFromAPI.data);
-                        Map<String, dynamic> JSONresponseBody = dataFromAPI.data;
-                        String formattedJson = JsonEncoder.withIndent('  ')
-                            .convert(JSONresponseBody);
-                        HelperClass().saveJsonToAndroidDownloads(
-                            "Landmark$bID", formattedJson);
-                    }
+                    final landmarkData = LandMarkApiModel(responseBody: dataFromAPI.data);
+                    DataBaseManager().saveData(landmarkData, landmarkDetail, bID);
                     return landmarkDetail.conversionFunction(dataFromAPI.data);
                 } else if (dataFromAPI.statusCode == 201) {
                     return null;
@@ -117,7 +152,6 @@ class RepositoryManager{
     }
 
     Future<dynamic> getPolylineData(String bID) async {
-
         if (bID.isEmpty) {
             print("getPolylineData bID was null $bID");
             return null;
@@ -127,7 +161,11 @@ class RepositoryManager{
         final polylineBox = polylineDetail.dataBaseGetData!();
 
         if(switchDataBase.isGreenDataBaseActive()){
-            return getPreLoadedData(polylineDetail,bID);
+            if(kDebugMode) print("${polylineDetail.getPreLoadPrefix} DATA FROM GREEN DATABASE");
+            String jsonString = await rootBundle.loadString('assets/PreLoads/${polylineDetail.getPreLoadPrefix}$bID.json');
+            final data = json.decode(jsonString);
+            final polyLineData = PolyLineAPIModel(responseBody: data);
+            DataBaseManager().saveData(polyLineData, polylineDetail, bID);
         }else {
             if (polylineBox.containsKey(bID)) {
                 if (kDebugMode) {
@@ -160,15 +198,16 @@ class RepositoryManager{
 
     Future<dynamic> getDataVersionData(String bID) async {
         Detail dataVersionDetails = await apiDetails.dataVersion(dataBaseManager.getAccessToken(), bID);
-        final DataBox = dataVersionDetails.dataBaseGetData!();
+        final DataBox = dataVersionDetails.dataBaseGetDataDB2!();
+        final preLoadedDataBox = dataVersionDetails.dataBaseGetData!();
 
         Response dataVersionDataFromAPI = await networkManager.api.request(dataVersionDetails);
         if(dataVersionDataFromAPI.statusCode == 200){
             final apiData = dataVersionDetails.conversionFunction(dataVersionDataFromAPI.data);
             print("dataVersion ${apiData.versionData!.buildingID}");
-            if (DataBox.containsKey(apiData.versionData!.buildingID)) {
+            if (preLoadedDataBox.containsKey(apiData.versionData!.buildingID)) {
                 print('DATA ALREADY PRESENT');
-                final databaseData = DataVersion.fromJson(DataBox.get(apiData.versionData!.buildingID)!.responseBody);
+                final databaseData = DataVersion.fromJson(preLoadedDataBox.get(apiData.versionData!.buildingID)!.responseBody);
                 if (apiData.versionData!.buildingDataVersion != databaseData.versionData!.buildingDataVersion) {
                     print("match ${apiData.versionData!.buildingID!} and $bID");
                     VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!.buildingID!] = true;
@@ -231,7 +270,7 @@ class RepositoryManager{
                     print("Polyline Version Change = false");
                 }
                 if (shouldBeInjected) {
-                    final dataVersionData = DataVersionLocalModel(
+                    final dataVersionData = DB2DataVersionLocalModel(
                         responseBody: dataVersionDataFromAPI.data);
                     DataBox.delete(DataVersion
                         .fromJson(dataVersionDataFromAPI.data)
@@ -241,10 +280,7 @@ class RepositoryManager{
                         .fromJson(dataVersionDataFromAPI.data)
                         .versionData!
                         .buildingID)}");
-                    DataBox.put(DataVersion
-                        .fromJson(dataVersionDataFromAPI.data)
-                        .versionData!
-                        .buildingID, dataVersionData);
+                    DataBaseManager().saveData(dataVersionData, dataVersionDetails, bID);
                     print("New Data ${DataVersion
                         .fromJson(dataVersionDataFromAPI.data)
                         .versionData!
@@ -254,21 +290,14 @@ class RepositoryManager{
             } else {
                 print('DATA NOT PRESENT');
                 VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!.buildingID!] = false;
-                VersionInfo.buildingPatchDataVersionUpdate[apiData.versionData!
-                    .buildingID!] = false;
-                VersionInfo.buildingLandmarkDataVersionUpdate[apiData.versionData!
-                    .buildingID!] = false;
-                VersionInfo.buildingPolylineDataVersionUpdate[apiData.versionData!
-                    .buildingID!] = false;
+                VersionInfo.buildingPatchDataVersionUpdate[apiData.versionData!.buildingID!] = false;
+                VersionInfo.buildingLandmarkDataVersionUpdate[apiData.versionData!.buildingID!] = false;
+                VersionInfo.buildingPolylineDataVersionUpdate[apiData.versionData!.buildingID!] = false;
                 if (!shouldBeInjected) {
                     print('DATA INJECTED');
-                    final dataVersionData = DataVersionLocalModel(
-                        responseBody: dataVersionDataFromAPI.data);
-                    DataBox.put(DataVersion
-                        .fromJson(dataVersionDataFromAPI.data)
-                        .versionData!
-                        .buildingID, dataVersionData);
-                    dataVersionData.save();
+                    final dataVersionData = DB2DataVersionLocalModel(responseBody: dataVersionDataFromAPI.data);
+
+                    DataBaseManager().saveData(dataVersionData, dataVersionDetails, bID);
                 }
             }
         }
@@ -279,9 +308,12 @@ class RepositoryManager{
         final patchBox = patchDetail.dataBaseGetData!();
 
 
-        print("GREEN DATABASE IS ACTIVE : ${switchDataBase.isGreenDataBaseActive()}");
         if(switchDataBase.isGreenDataBaseActive()){
-            return getPreLoadedData(patchDetail,bID);
+            if(kDebugMode) print("${patchDetail.getPreLoadPrefix} DATA FROM GREEN DATABASE");
+            String jsonString = await rootBundle.loadString('assets/PreLoads/${patchDetail.getPreLoadPrefix}$bID.json');
+            final data = json.decode(jsonString);
+            final patchData = PatchAPIModel(responseBody: data);
+            DataBaseManager().saveData(patchData, patchDetail, bID);
         }else {
             print("2nd iteration patch return");
             if (patchBox.containsKey(bID)) {
@@ -499,11 +531,9 @@ class RepositoryManager{
     }
 
     dynamic getPreLoadedData(Detail details,String bID) async {
-        if(kDebugMode) print("${details.getPreLoadPrefix} DATA FROM GREEN DATABASE");
+        // if(kDebugMode) print("${details.getPreLoadPrefix} DATA FROM GREEN DATABASE");
         String jsonString = await rootBundle.loadString('assets/PreLoads/${details.getPreLoadPrefix}$bID.json');
         final data = json.decode(jsonString);
-        print("details.conversionFunction(data)");
-        print(details.conversionFunction(data));
         details.method;
         return details.conversionFunction(data);
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwaymaps/NAVIGATION/DatabaseManager/SwitchDataBase.dart';
 import 'RenderingManager.dart';
 
 
@@ -26,6 +27,8 @@ class GoogleMapManager extends RenderingManager with ChangeNotifier{
     await createMap();
     notifyListeners();
     fitPolygonsInView(polygons);
+    SwitchDataBase().switchGreenDataBase(false);
+    startDataFechFromServerCycle();
   }
 
   void onCameraMove(CameraPosition position) {

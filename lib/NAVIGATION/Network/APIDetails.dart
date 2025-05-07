@@ -1,5 +1,9 @@
 import 'package:device_information/device_information.dart';
 import 'package:flutter/foundation.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/DB2DataVersionLocalModelBOX.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/DB2LandMarkApiModelBox.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/DB2PatchAPIModelBox.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/DB2PolylineAPIModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/VenueBeaconAPIModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/VenueBeaconAPIModel.dart';
 
@@ -32,9 +36,10 @@ class Detail {
   Map<String, dynamic>? body;
   Function(dynamic) conversionFunction;
   Function()? dataBaseGetData;
+  Function()? dataBaseGetDataDB2;
   String? getPreLoadPrefix;
 
-  Detail(this.url, this.method, this.headers, this.encryption, this.body, this.conversionFunction , this.dataBaseGetData,this.getPreLoadPrefix);
+  Detail(this.url, this.method, this.headers, this.encryption, this.body, this.conversionFunction, this.dataBaseGetData,this.getPreLoadPrefix,[this.dataBaseGetDataDB2]);
 
   updateAccessToken(String newAccessToken){
     headers?['x-access-token'] = newAccessToken;
@@ -57,7 +62,8 @@ class Apidetails {
         {"id": bid},
         land.fromJson,
         LandMarkApiModelBox.getData,
-        "Landmark"
+        "Landmark",
+        DB2LandMarkApiModelBox.getData()
     );
   }
 
@@ -125,7 +131,8 @@ class Apidetails {
         {"building_ID": bid},
         DataVersion.fromJson,
         DataVersionLocalModelBOX.getData,
-        "DataVersion"
+        "DataVersion",
+      DB2DataVersionLocalModelBOX.getData
     );
   }
 
@@ -180,7 +187,8 @@ class Apidetails {
         },
         patchDataModel.fromJson,
         PatchAPIModelBox.getData,
-        "Patch"
+        "Patch",
+      DB2PatchAPIModelBOX.getData
     );
   }
 
@@ -199,7 +207,8 @@ class Apidetails {
         },
         polylinedata.fromJson,
         PolylineAPIModelBOX.getData,
-        "Polyline"
+        "Polyline",
+      DB2PolylineAPIModelBOX.getData
     );
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 
 import '../APIMODELS/landmark.dart';
 import '../APIMODELS/patchDataModel.dart';
@@ -110,6 +111,15 @@ class RenderingManager {
     }
 
     return;
+  }
+
+  Future<void> startDataFechFromServerCycle() async {
+    await venueManager.runDataVersionCycle();
+
+    await venueManager.getPolylinePolygonDataAllBuildings();
+    // await venueManager.getPatchDataAllBuildings();
+    // await venueManager.getLandmarkDataAllBuildings();
+
   }
   
   Future<void> changeFloorOfBuilding(String buildingID, int floor) async {

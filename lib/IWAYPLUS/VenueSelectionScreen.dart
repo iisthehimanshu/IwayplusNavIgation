@@ -16,6 +16,7 @@ import 'package:hive/hive.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
 import 'package:iwaymaps/NAVIGATION/API/RefreshTokenAPI.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/WayPointModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/DataBaseManager.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/SwitchDataBase.dart';
@@ -398,6 +399,7 @@ if(userLoc!=null){
                 final PolyLineBox = PolylineAPIModelBOX.getData();
                 final WayPointBox = WayPointModeBOX.getData();
                 final OutBuildingBox = OutDoorModeBOX.getData();
+                final DataVersionBox = DataVersionLocalModelBOX.getData();
 
                 BeaconBox.clear();
                 BuildingAllBox.clear();
@@ -406,7 +408,8 @@ if(userLoc!=null){
                 PolyLineBox.clear();
                 WayPointBox.clear();
                 OutBuildingBox.clear();
-                showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length},${WayPointBox.length},${OutBuildingBox.length}");
+                DataVersionBox.clear();
+                showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length},${WayPointBox.length},${OutBuildingBox.length},${DataVersionBox.length}");
 
               },
             ),

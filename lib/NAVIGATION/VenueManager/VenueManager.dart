@@ -105,6 +105,11 @@ class VenueManager extends BuildingStore{
     return data;
   }
 
+  Future<void> runDataVersionCycle() async {
+    for (var building in buildings) {
+      await RepositoryManager().getDataVersionData(building.sId!);
+    }
+  }
 
 
 

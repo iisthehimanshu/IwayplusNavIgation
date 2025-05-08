@@ -2,6 +2,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
 import 'dart:convert';
 import 'GPSService.dart';
+import 'Navigation.dart';
 
 class Cell{
   int node;
@@ -80,10 +81,4 @@ class ClosestPointResult {
   final IntPoint intPoint;
 
   ClosestPointResult(this.latLngPoint, this.intPoint);
-}
-class IntPoint {
-  int x;
-  int y;
-
-  IntPoint(this.x, this.y);
 }

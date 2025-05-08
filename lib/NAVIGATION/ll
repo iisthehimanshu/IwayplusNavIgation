@@ -1,0 +1,51 @@
+Future<void> _handleBeaconLocalization(
+  String nearestBeacon,
+  bool speakTTS,
+  bool render,
+  bool providePinSelection,
+) async {
+  try {
+    // Fetch all building landmarks in parallel
+    final apiCalls = buildingAllApi.getStoredAllBuildingID().map((key, value) =>
+      MapEntry(key, landmarkApi().fetchLandmarkData(id: key))
+    );
+    await Future.wait(apiCalls.values);
+
+    final beaconData = SingletonFunctionController.apibeaconmap[nearestBeacon];
+    if (beaconData == null) {
+      if (speakTTS) unableToFindLocation();
+      return;
+    }
+
+    final landmarkData = await SingletonFunctionController.building.landmarkdata;
+    if (landmarkData?.landmarksMap == null) {
+      if (speakTTS) unableToFindLocation();
+      return;
+    }
+
+    // Handle pin selection
+    if (providePinSelection) {
+      SingletonFunctionController.building.listOfNearbyLandmarksToLocalize =
+        tools.findListOfNearbyLandmark(beaconData, landmarkData!.landmarksMap!);
+
+      if (SingletonFunctionController.building.listOfNearbyLandmarksToLocalize != null) {
+        final userSetLocation = tools.localizefindNearbyLandmark(beaconData, landmarkData!.landmarksMap!);
+        if (userSetLocation != null) {
+          initializeUser(userSetLocation, beaconData, speakTTS: speakTTS, render: render);
+        } else {
+          unableToFindLocation();
+        }
+      }
+    } else {
+      final userSetLocation = tools.localizefindNearbyLandmark(beaconData, landmarkData!.landmarksMap!);
+      if (userSetLocation != null) {
+        initializeUser(userSetLocation, beaconData, speakTTS: speakTTS, render: render);
+      } else {
+        unableToFindLocation();
+      }
+    }
+  } catch (e, stackTrace) {
+    print("Error during beacon localization: $e\n$stackTrace");
+    if (speakTTS) unableToFindLocation();
+  }
+}

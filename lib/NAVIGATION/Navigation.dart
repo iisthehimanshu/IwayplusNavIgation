@@ -75,6 +75,7 @@ import 'APIMODELS/outbuildingmodel.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
 import 'BluetoothScanAndroidClass.dart';
+import 'BluetoothScanIOSClass.dart';
 import 'Cell.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'DebugToggle.dart';
@@ -1910,6 +1911,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     print("got into GPS localization");
     if(kIsWeb){
       unableToFindLocation();
+      return;
     }
     KalmanFilter _kalmanFilter = KalmanFilter();
     try{
@@ -1946,6 +1948,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
   void unableToFindLocation(){
+    final stackTrace = StackTrace.current;
+    print("unableToFindLocation Stack: \n$stackTrace");
     speak("Unable to find your location. Scan nearby QR to know your location",
         _currentLocale);
     showLocationDialog(context);
@@ -2357,7 +2361,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     }
     Future.delayed(Duration(milliseconds: 5000)).then((value){
-      if(isCalibrationNeeded(magneticValues) && UserState.lowCompassAccuracy==false){
+      if(!kIsWeb && isCalibrationNeeded(magneticValues) && UserState.lowCompassAccuracy==false){
         UserState.lowCompassAccuracy=true;
         speak(
             "low accuracy found.Please calibrate your device",
@@ -3488,7 +3492,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           setState(() {
             isLocalized = false;
           });
-          localizeUser(beacon: value, providePinSelection: false);
+          localizeUser();
         });
       } else {
         //SingletonFunctionController.btadapter.startScanningIOS(SingletonFunctionController.apibeaconmap);
@@ -3496,7 +3500,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           print("localized--");
           print(value);
           if(value != null){
-            localizeUser(beacon: value);
+            localizeUser();
           }
 
         });
@@ -4716,6 +4720,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
   List<LatLng> tappedPolygonCoordinates = [];
   Future<void> createRooms(polylinedata value, int floor) async {
+    final stackTrace = StackTrace.current;
+    print("createRooms Stack: \n$stackTrace");
     print("createRooms-- ${value.polyline!.buildingID!}");
 
     if (closedpolygons[buildingAllApi.getStoredString()] == null) {
@@ -12991,7 +12997,7 @@ bool _isPlaying=false;
                       : nofloorColumn() : Container(),
                   SizedBox(height: 28.0), // Adjust the height as needed
 
-                  !isLiveLocalizing? isSemanticEnabled && _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen || PinLandmarkPannel.isPanelOpened() ? Container(): Semantics(
+                  !kIsWeb && !isLiveLocalizing? !kIsWeb && isSemanticEnabled && _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen || PinLandmarkPannel.isPanelOpened() ? Container(): Semantics(
                     child: FloatingActionButton(
                       onPressed: () async {
                         //  _getUserLocation();
@@ -13398,14 +13404,6 @@ bool _isPlaying=false;
   //   }
   //   return false;
   // }
-
-  Map<String, double> sortMapByValue(Map<String, double> map) {
-    var sortedEntries = map.entries.toList()
-      ..sort(
-              (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
-
-    return Map.fromEntries(sortedEntries);
-  }
 }
 
 class CircleAnimation {

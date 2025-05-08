@@ -20,7 +20,7 @@ class SearchresultWithoutAddress extends StatelessWidget {
       child: InkWell(
         onTap: (){
           Homepage.homePageKey.currentState?.getDirection(Location);
-          Navigator.pop(context);
+          //Navigator.pop(context);
         },
         child: Container(
           margin: EdgeInsets.only(left: 13, right: 13, top: 8.5, bottom: 8.5),

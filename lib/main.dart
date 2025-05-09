@@ -210,38 +210,28 @@ class _WebAppState extends State<WebApp> {
       initialLocation: '/web',
       routes: [
         GoRoute(
-          path: '/web',
-          builder: (context, state) {
-            print("route got ${state.pathParameters}");
-            // If no ID is given, show a screen to input the ID
-            if(!SignInDatabasebox.containsKey("accessToken")){
-              return SignIn();
-            }else{
-              return AskForIdPage(); // Create this screen
-            }
-          },
-        ),
-        GoRoute(
-          path: '/web/:id',
+          path: '/web/:id/:source',
           builder: (context, state) {
             print("route got ${state.pathParameters}");
             if(!SignInDatabasebox.containsKey("accessToken")){
-              return SignIn();
+              return const SomethingWentWrongPage();
             }else{
               final id = state.pathParameters['id']!;
-              return webHome(Venue: id,source: null,); // Create this screen
+              final source = state.pathParameters['source']!;
+              return webHome(Venue: id,source: source,); // Create this screen
             }
 
           },
         ),
         GoRoute(
-          path: '/web/:id/:accessToken',
+          path: '/web/:id/:source/:accessToken',
           builder: (context, state) {
             print("route got ${state.pathParameters}");
             final id = state.pathParameters['id']!;
             final accessToken = state.pathParameters['accessToken']!;
+            final source = state.pathParameters['source']!;
             print("got accessToken $accessToken");
-            return AccessTokenHandlerPage(id: id, accessToken: accessToken);
+            return AccessTokenHandlerPage(id: id, accessToken: accessToken, source: source,);
           },
         ),
       ],

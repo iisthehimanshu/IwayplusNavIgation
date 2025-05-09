@@ -5,7 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+import 'dart:html' as html;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:path_provider/path_provider.dart';
@@ -50,6 +50,10 @@ class HelperClass{
     )) {
       throw "error";
     }
+  }
+
+  static void openMobileApp() {
+    html.window.open('https://www.google.com', '_self');
   }
 
   static Future<void> makePhoneCall(String phoneNumber) async {

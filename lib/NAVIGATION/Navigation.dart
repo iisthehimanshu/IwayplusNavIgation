@@ -85,48 +85,6 @@ import 'ELEMENTS/DirectionInstruction.dart';
 import 'ELEMENTS/ExploreModeWidget.dart';
 import 'ELEMENTS/PickupLocationPin.dart';
 import 'Elements/AccessiblePathButton.dart';
-import 'GlobalAnnotation/global_annotation_controller.dart';
-import 'GlobalAnnotation/global_rendering.dart';
-import 'LatLngTween.dart';
-import 'UserState.dart';
-import 'VersioInfo.dart';
-import 'ViewModel/DirectionInstructionViewModel.dart';
-import 'centeroid.dart';
-import 'customMarker.dart';
-import 'dijkastra.dart';
-import 'directionClass.dart';
-import 'package:chips_choice/chips_choice.dart';
-import 'package:device_information/device_information.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/semantics.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_compass/flutter_compass.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/adapters.dart';
-import 'package:sensors_plus/sensors_plus.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'API/PatchApi.dart';
-import 'API/beaconapi.dart';
-import 'API/ladmarkApi.dart';
-import 'API/outbuildingapi.dart';
-import 'APIMODELS/beaconData.dart';
-import 'APIMODELS/outbuildingmodel.dart';
-import 'APIMODELS/patchDataModel.dart';
-import 'APIMODELS/polylinedata.dart';
-import 'Cell.dart';
-import '/IWAYPLUS/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
-import 'DestinationSearchPage.dart';
 import 'Elements/HomepageSearch.dart';
 import 'Elements/NavigationFilterCard.dart';
 import 'GPSService.dart';
@@ -9099,7 +9057,7 @@ bool _isPlaying=false;
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                         children: [
-                                          kIsWeb?Container():startNavigationButton(),
+                                          kIsWeb?openInAppButton():startNavigationButton(),
                                           stepsPreviewButton(),
                                         ],
                                       ),
@@ -9110,7 +9068,7 @@ bool _isPlaying=false;
                                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                         children: [
                                           stepsPreviewButton(),
-                                          kIsWeb?Container():startNavigationButton()
+                                          kIsWeb?openInAppButton():startNavigationButton()
                                         ],
                                       ),
                                     ),
@@ -9149,6 +9107,24 @@ bool _isPlaying=false;
       ),
     );
   }
+
+  Widget openInAppButton(){
+    return ElevatedButton.icon(
+      icon: Icon(Icons.phone_android_sharp, color: Colors.white),
+      label: Text('Open In App', style: TextStyle(color: Colors.white)),
+      onPressed: () async {
+        HelperClass.openMobileApp();
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blue,
+        padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+      ),
+    );
+  }
+
   Widget startNavigationButton(){
     return Semantics(
       label: "Start Navigation",

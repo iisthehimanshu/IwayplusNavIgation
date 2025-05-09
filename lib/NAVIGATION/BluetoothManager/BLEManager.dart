@@ -31,6 +31,8 @@ class BLEManager{
   Timer? trimBufferTimer;
 
   Map<String,Map<DateTime,String>> buffer = Map();
+  Map<String,double> weightAvg = {};
+
 
 
   void startScanning({
@@ -39,9 +41,7 @@ class BLEManager{
     int? duration,
   }) {
     // stopScanning(); // cancel previous
-
     listenToScanUpdates(Building.apibeaconmap);
-
     // Start emitting data to stream every [streamFrequency] seconds
     startBufferedEmission(bufferSizeInSeconds: streamFrequency);
 
@@ -54,15 +54,10 @@ class BLEManager{
 
 
   void startBufferedEmission({required int bufferSizeInSeconds}) {
-    print("📚 Call Stack:\n${StackTrace.current}");
-
     if(kDebugMode) print("startBufferEmission");
     _bufferEmitTimer?.cancel(); // cancel previous if any
     _bufferEmitTimer = Timer.periodic(Duration(seconds: bufferSizeInSeconds), (_) {
-      final dataToSend = Map<String, Map<DateTime, String>>.from(buffer); // Clone current buffer
-      print("dataToSend");
-      printFull(dataToSend.toString());
-      // _bufferedDeviceStreamController.
+      final dataToSend = Map<String, double>.from(weightAvg);
       _bufferedDeviceStreamController.add(dataToSend);
     });
   }
@@ -89,17 +84,14 @@ class BLEManager{
       //cancel _scanSubscription of native scanning
       _scanSubscription?.cancel();
       _scanSubscription = null;
-
       //cancel buffer Emission
       _bufferEmitTimer?.cancel();
-
       // trimBuffer Timer
       trimBufferTimer?.cancel();
       //timer for manual scanning stop
       _manualStopTimer?.cancel();
       //dataStructure buffer clean
       buffer.clear();
-
     } on PlatformException catch (e) {
       print("Failed to stop scan: ${e.message}");
     }
@@ -125,7 +117,7 @@ class BLEManager{
       buffer.forEach((beaconName,beaconRespVal){
         final toRemove = <DateTime>[];
         beaconRespVal.forEach((beaconDateTime, beaconRSSI){
-          if(DateTime.now().difference(beaconDateTime) > Duration(seconds: 5)){
+          if(DateTime.now().difference(beaconDateTime) > Duration(seconds: 10)){
             toRemove.add(beaconDateTime);
           }
         });
@@ -147,7 +139,6 @@ class BLEManager{
   }
 
   void doCalculationForNearestBeacon(){
-    Map<String,double> weightAvg = {};
     buffer.forEach((beaconName, beaconResponseValues){
       double totalWeight = 0.0;
       int divideBySize = 0;

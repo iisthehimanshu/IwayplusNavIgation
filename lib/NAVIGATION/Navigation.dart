@@ -29,6 +29,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:iwaymaps/NAVIGATION/BluetoothManager/BLEManager.dart';
 import 'package:iwaymaps/NAVIGATION/Screens/NearestLandmarkScreen.dart';
 import 'package:iwaymaps/NAVIGATION/Sensor/SensorManager.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
@@ -12612,6 +12613,7 @@ bool _isPlaying=false;
 
   late Timer EM_TIMER;
   String EM_LastBeacon = "";
+  String testingSTring = "";
 
 
   @override
@@ -12836,6 +12838,38 @@ bool _isPlaying=false;
 
                   SizedBox(height: 28.0),
                   DebugToggle.Slider ? Text("${user.theta}") : Container(),
+                  FloatingActionButton(onPressed: (){
+                    BLEManager bleManager = BLEManager();
+
+                    bleManager.startScanning(
+                      bufferSize: 10,
+                      streamFrequency: 2,
+                      duration: null,
+                    );
+
+                    bleManager.bufferedDeviceStream.listen((bufferedData) {
+                      // You can update UI or process data here
+                      print("bufferedData $bufferedData");
+
+                      String? highestAvgDevice;
+                      double? highestAvgValue;
+
+                      // print("Scanned Data");
+                      bufferedData.forEach((deviceName, deviceAvg){
+                        if(highestAvgValue == null || deviceAvg > highestAvgValue!){
+                          highestAvgValue = deviceAvg;
+                          highestAvgDevice = deviceName;
+                        }
+                      });
+                      if(highestAvgDevice!=null && highestAvgValue!=null){
+                        print("ClosestDevice is $highestAvgDevice $highestAvgValue");
+                        setState(() {
+                          testingSTring = "ClosestDevice is $highestAvgDevice $highestAvgValue";
+                        });
+                      }
+                    });
+                  },
+                  child: Icon(Icons.account_balance_outlined,size: 20,),),
 
                   // Text("coord [${user.coordX},${user.coordY}] \n"
                   //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
@@ -12846,7 +12880,7 @@ bool _isPlaying=false;
                   // "stepSize ${UserState.stepSize}\n"
                   //     "index ${user.pathobj.index} \n"
                   //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
-
+                  Text(testingSTring),
                   DebugToggle.Slider
                       ? Slider(
                       value: user.theta,

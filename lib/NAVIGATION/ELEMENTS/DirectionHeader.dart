@@ -140,10 +140,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   void initState() {
     super.initState();
 
-    _bufferSubscription = BLEManager().bufferedDeviceStream.listen((bufferedData) {
-      print("Received buffer: $bufferedData");
-
-    });
 
 
     // initTts();

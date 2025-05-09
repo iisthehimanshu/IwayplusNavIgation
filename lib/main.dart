@@ -210,6 +210,12 @@ class _WebAppState extends State<WebApp> {
       initialLocation: '/web',
       routes: [
         GoRoute(
+          path: '/web',
+          builder: (context, state) {
+              return SomethingWentWrongPage(); // Create this screen
+          },
+        ),
+        GoRoute(
           path: '/web/:id/:source',
           builder: (context, state) {
             print("route got ${state.pathParameters}");

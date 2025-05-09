@@ -73,8 +73,6 @@ class NavigationAPIController {
   }
 
   Future<void> landmarkAPIController(String id, bool selected) async {
-    final stackTrace = StackTrace.current;
-    print("landmarkAPIController Stack: \n$stackTrace");
     var landmarkData = await RepositoryManager().getLandmarkData(id) as land;
     if(selected){
       SingletonFunctionController.building.landmarkdata = Future.value(landmarkData);

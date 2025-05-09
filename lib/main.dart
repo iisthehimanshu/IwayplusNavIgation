@@ -16,6 +16,8 @@ import 'IWAYPLUS/LOGIN SIGNUP/SignIn.dart';
 import 'IWAYPLUS/MainScreen.dart';
 import 'dart:io' show Platform;
 import 'IWAYPLUS/websocket/navigationLogManager.dart';
+import 'NAVIGATION/AccessTokenHandlerPage.dart';
+import 'NAVIGATION/somethingWentWrong.dart';
 import 'NAVIGATION/webHome.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -210,6 +212,7 @@ class _WebAppState extends State<WebApp> {
         GoRoute(
           path: '/web',
           builder: (context, state) {
+            print("route got ${state.pathParameters}");
             // If no ID is given, show a screen to input the ID
             if(!SignInDatabasebox.containsKey("accessToken")){
               return SignIn();
@@ -221,6 +224,7 @@ class _WebAppState extends State<WebApp> {
         GoRoute(
           path: '/web/:id',
           builder: (context, state) {
+            print("route got ${state.pathParameters}");
             if(!SignInDatabasebox.containsKey("accessToken")){
               return SignIn();
             }else{
@@ -231,18 +235,17 @@ class _WebAppState extends State<WebApp> {
           },
         ),
         GoRoute(
-          path: '/web/:id/:source',
+          path: '/web/:id/:accessToken',
           builder: (context, state) {
-            if(!SignInDatabasebox.containsKey("accessToken")){
-              return SignIn();
-            }else{
-              final id = state.pathParameters['id']!;
-              final source = state.pathParameters['source']!;
-              return webHome(Venue: id,source: source,); // Create this screen
-            }
+            print("route got ${state.pathParameters}");
+            final id = state.pathParameters['id']!;
+            final accessToken = state.pathParameters['accessToken']!;
+            print("got accessToken $accessToken");
+            return AccessTokenHandlerPage(id: id, accessToken: accessToken);
           },
         ),
       ],
+      errorBuilder: (context, state) => const SomethingWentWrongPage(),
     );
 
     super.initState();

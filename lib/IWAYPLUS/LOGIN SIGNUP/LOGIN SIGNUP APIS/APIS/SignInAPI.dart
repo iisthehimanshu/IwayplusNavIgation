@@ -39,16 +39,7 @@ class SignInAPI{
         ss.refreshToken = responseBody["refreshToken"];
         ss.payload?.userId = responseBody["payload"]["userId"];
         ss.payload?.roles = responseBody["payload"]["roles"];
-
-        var signInBox = Hive.box('SignInDatabase');
-        signInBox.put("accessToken", responseBody["accessToken"]);
-        signInBox.put("refreshToken", responseBody["refreshToken"]);
-        signInBox.put("userId", responseBody["payload"]["userId"]);
-        List<dynamic> roles = responseBody["payload"]["roles"];
-        print(responseBody["payload"]["roles"].runtimeType);
-        signInBox.put("roles", roles);
-
-        print("Sign in details saved to database");
+        saveInDatabase(responseBody);
         return ss;
       } catch (e) {
         print("Error occurred during data parsing: $e");
@@ -58,6 +49,18 @@ class SignInAPI{
       print("Code is ${response.statusCode}");
       return null;
     }
+  }
+
+  void saveInDatabase(Map<String, dynamic> responseBody){
+    var signInBox = Hive.box('SignInDatabase');
+    signInBox.put("accessToken", responseBody["accessToken"]);
+    signInBox.put("refreshToken", responseBody["refreshToken"]);
+    signInBox.put("userId", responseBody["payload"]["userId"]);
+    List<dynamic> roles = responseBody["payload"]["roles"];
+    print(responseBody["payload"]["roles"].runtimeType);
+    signInBox.put("roles", roles);
+
+    print("Sign in details saved to database");
   }
 
   Future<int> sendOtpForgetPassword(String user) async {

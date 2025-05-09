@@ -1,7 +1,8 @@
-import 'dart:convert';
-import 'GPSService.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
+import 'dart:convert';
+import 'GPSService.dart';
+import 'Navigation.dart';
 
 class Cell{
   int node;
@@ -19,8 +20,7 @@ class Cell{
   Location? position;
 
   Cell(this.node, this.x, this.y, this.move, this.lat, this.lng,this.bid, this.floor, this.numCols, {this.ttsEnabled = true, this.imaginedCell = false, this.imaginedIndex, this.position});
-
-
+   
   Map<String, dynamic> toJson() => {
     'node': node,
     'x': x,
@@ -74,10 +74,6 @@ class Cell{
 
   @override
   String toString() => jsonEncode(toJson());
-
-
-
-
 }
 
 class ClosestPointResult {
@@ -85,11 +81,4 @@ class ClosestPointResult {
   final IntPoint intPoint;
 
   ClosestPointResult(this.latLngPoint, this.intPoint);
-}
-class IntPoint {
-  int x;
-  int y;
-
-  IntPoint(this.x, this.y);
-
 }

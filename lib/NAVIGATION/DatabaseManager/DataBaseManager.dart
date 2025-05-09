@@ -37,47 +37,6 @@ class DataBaseManager implements DBManager {
   // Factory constructor returning the singleton
   factory DataBaseManager() => _instance;
 
-  // Static init method
-  static Future<void> init() async {
-    Hive.registerAdapter(LandMarkApiModelAdapter());
-    await Hive.openBox<LandMarkApiModel>('LandMarkApiModelFile');
-    Hive.registerAdapter(PatchAPIModelAdapter());
-    await Hive.openBox<PatchAPIModel>('PatchAPIModelFile');
-    Hive.registerAdapter(PolyLineAPIModelAdapter());
-    await Hive.openBox<PolyLineAPIModel>("PolyLineAPIModelFile");
-    Hive.registerAdapter(BuildingAllAPIModelAdapter());
-    await Hive.openBox<BuildingAllAPIModel>("BuildingAllAPIModelFile");
-    Hive.registerAdapter(FavouriteDataBaseModelAdapter());
-    await Hive.openBox<FavouriteDataBaseModel>("FavouriteDataBaseModelFile");
-    Hive.registerAdapter(BeaconAPIModelAdapter());
-    await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
-    Hive.registerAdapter(BuildingAPIModelAdapter());
-    await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
-    Hive.registerAdapter(SignINAPIModelAdapter());
-    await Hive.openBox<SignINAPIModel>('SignINAPIModelFile');
-    Hive.registerAdapter(OutDoorModelAdapter());
-    await Hive.openBox<OutDoorModel>('OutDoorModelFile');
-    Hive.registerAdapter(WayPointModelAdapter());
-    await Hive.openBox<WayPointModel>('WayPointModelFile');
-    Hive.registerAdapter(DataVersionLocalModelAdapter());
-    await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
-    Hive.registerAdapter(LocalNotificationAPIDatabaseModelAdapter());
-    await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
-    Hive.registerAdapter(BuildingByVenueAPIModelAdapter());
-    await Hive.openBox<BuildingByVenueAPIModel>('BuildingByVenueModelFile');
-    Hive.registerAdapter(GlobalAnnotationAPIModelAdapter());
-    await Hive.openBox<GlobalAnnotationAPIModel>('GlobalAnnotationAPIModelFile');
-    Hive.registerAdapter(VenueBeaconAPIModelAdapter());
-    await Hive.openBox<VenueBeaconAPIModel>('VenueBeaconAPIModelFile');
-
-    await Hive.openBox('Favourites');
-    await Hive.openBox('UserInformation');
-    await Hive.openBox('Filters');
-    await Hive.openBox('SignInDatabase');
-    await Hive.openBox('LocationPermission');
-    await Hive.openBox('VersionData');
-  }
-
   @override
   Future<void> delete(int id) {
     throw UnimplementedError();
@@ -104,6 +63,9 @@ class DataBaseManager implements DBManager {
   @override
   String getAccessToken() {
     var signInBox = Hive.box('SignInDatabase');
+    print("getAccessToken");
+    print(signInBox.keys);
+    print(signInBox.values);
     return signInBox.get("accessToken");
   }
 

@@ -35,7 +35,6 @@ class buildingAllApi {
   static String outdoorID = "";
 
 
-
   Future<List<buildingAll>> fetchBuildingAllData() async {
     final BuildingAllBox = BuildingAllAPIModelBOX.getData();
 

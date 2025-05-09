@@ -63,8 +63,7 @@ class RepositoryManager{
         VenueManager().buildings.forEach((buildingData){
             getDataVersionData(buildingData.sId!);
         });
-
-
+        loadPreLoadedDataBase();
 
     }
 

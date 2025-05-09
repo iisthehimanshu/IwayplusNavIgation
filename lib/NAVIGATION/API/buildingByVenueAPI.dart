@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../../IWAYPLUS/API/buildingAllApi.dart';
@@ -51,6 +53,11 @@ class Buildingbyvenueapi {
       print("BUILDINGBYVENUE API DATA FROM API $responseBody");
       //BuildingByVenueBox.add(buildingByVenueData);
       // buildingByVenueData.save();
+      if(!kIsWeb && kDebugMode && Platform.isAndroid) {
+        List<dynamic> JSONresponseBody = json.decode(response.body);
+        String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
+        HelperClass().saveJsonToAndroidDownloads("BuildingByVenue$id", formattedJson);
+      }
       List<Buildingbyvenue> buildingList = responseBody.map((data) => Buildingbyvenue.fromJson(data)).toList();
       return buildingList;
 

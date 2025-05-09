@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
@@ -30,6 +31,11 @@ class GlobalAnnotation {
     if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         final completeData = GlobalModel.fromJson(jsonData);
+        if(!kIsWeb && kDebugMode && Platform.isAndroid) {
+          List<dynamic> JSONresponseBody = json.decode(response.body);
+          String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
+          HelperClass().saveJsonToAndroidDownloads("Global$id", formattedJson);
+        }
         print("globalannotation data $jsonData");
         return completeData;
 

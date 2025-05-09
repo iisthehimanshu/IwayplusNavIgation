@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
@@ -66,6 +67,11 @@ class BuildingAPI {
         print('BUILDING DATA FROM API AFTER 403');
         BuildingBox.put(buildingAllApi.getStoredString(), BuildingData);
         BuildingData.save();
+        if(!kIsWeb && kDebugMode && Platform.isAndroid) {
+          List<dynamic> JSONresponseBody = json.decode(response.body);
+          String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
+          HelperClass().saveJsonToAndroidDownloads("Building${buildingAllApi.getStoredVenue()}", formattedJson);
+        }
         return Building.fromJson(responseBody);
       }else{
         print('BUILDING DATA EMPTY FROM API AFTER 403');

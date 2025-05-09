@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/NAVIGATION/API/RefreshTokenAPI.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/OutDoorModelBOX.dart';
+import '../../IWAYPLUS/Elements/HelperClass.dart';
 import '../config.dart';
 import '/NAVIGATION/APIMODELS/outdoormodel.dart';
 import '../DATABASE/DATABASEMODEL/OutDoorModel.dart';
@@ -45,6 +47,12 @@ class outBuilding {
       OutBuildingBox.put(ids[0], outBuildingData);
       outBuildingData.save();
 
+      if(!kIsWeb && kDebugMode && Platform.isAndroid) {
+        List<dynamic> JSONresponseBody = json.decode(response.body);
+        String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
+        HelperClass().saveJsonToAndroidDownloads("Outbuilding${ids.toString()}", formattedJson);
+      }
+
       return outdoormodel.fromJson(responseBody);
 
     }else if(response.statusCode == 403){
@@ -67,7 +75,11 @@ class outBuilding {
         Map<String, dynamic> responseBody = json.decode(response.body);
         final outBuildingData = OutDoorModel(responseBody: responseBody);
         print("OUTBUILDING DATA FORM API");
-
+        if(!kIsWeb && kDebugMode && Platform.isAndroid) {
+          List<dynamic> JSONresponseBody = json.decode(response.body);
+          String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
+          HelperClass().saveJsonToAndroidDownloads("Outbuilding${ids.toString()}", formattedJson);
+        }
 
         OutBuildingBox.put(ids[0], outBuildingData);
         outBuildingData.save();

@@ -10,12 +10,27 @@ import 'package:iwaymaps/NAVIGATION/DatabaseManager/DataBaseManager.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
+import 'IWAYPLUS/DATABASE/DATABASEMODEL/BuildingByVenueAPIModel.dart';
+import 'IWAYPLUS/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
+import 'IWAYPLUS/DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
+import 'IWAYPLUS/DATABASE/DATABASEMODEL/SignINAPIModel.dart';
 import 'IWAYPLUS/Elements/locales.dart';
 import 'IWAYPLUS/FIREBASE NOTIFICATION API/PushNotifications.dart';
 import 'IWAYPLUS/LOGIN SIGNUP/SignIn.dart';
 import 'IWAYPLUS/MainScreen.dart';
 import 'dart:io' show Platform;
 import 'IWAYPLUS/websocket/navigationLogManager.dart';
+import 'NAVIGATION/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
+import 'NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import 'NAVIGATION/DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
+import 'NAVIGATION/DATABASE/DATABASEMODEL/GlobalAnnotationAPIModel.dart';
+import 'NAVIGATION/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
+import 'NAVIGATION/DATABASE/DATABASEMODEL/OutDoorModel.dart';
+import 'NAVIGATION/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
+import 'NAVIGATION/DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
+import 'NAVIGATION/DATABASE/DATABASEMODEL/VenueBeaconAPIModel.dart';
+import 'NAVIGATION/DATABASE/DATABASEMODEL/WayPointModel.dart';
 import 'NAVIGATION/webHome.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -42,8 +57,37 @@ Future<void> localDBInitialsation() async {
     var directory = await getApplicationDocumentsDirectory();
     Hive.init(directory.path);
   }
-  DataBaseManager.init();
-  await navigationManager.initialize();
+  print("initinit");
+  Hive.registerAdapter(LandMarkApiModelAdapter());
+  await Hive.openBox<LandMarkApiModel>('LandMarkApiModelFile');
+  Hive.registerAdapter(PatchAPIModelAdapter());
+  await Hive.openBox<PatchAPIModel>('PatchAPIModelFile');
+  Hive.registerAdapter(PolyLineAPIModelAdapter());
+  await Hive.openBox<PolyLineAPIModel>("PolyLineAPIModelFile");
+  Hive.registerAdapter(BuildingAllAPIModelAdapter());
+  await Hive.openBox<BuildingAllAPIModel>("BuildingAllAPIModelFile");
+  Hive.registerAdapter(FavouriteDataBaseModelAdapter());
+  await Hive.openBox<FavouriteDataBaseModel>("FavouriteDataBaseModelFile");
+  Hive.registerAdapter(BeaconAPIModelAdapter());
+  await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
+  Hive.registerAdapter(BuildingAPIModelAdapter());
+  await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
+  Hive.registerAdapter(SignINAPIModelAdapter());
+  await Hive.openBox<SignINAPIModel>('SignINAPIModelFile');
+  Hive.registerAdapter(OutDoorModelAdapter());
+  await Hive.openBox<OutDoorModel>('OutDoorModelFile');
+  Hive.registerAdapter(WayPointModelAdapter());
+  await Hive.openBox<WayPointModel>('WayPointModelFile');
+  Hive.registerAdapter(DataVersionLocalModelAdapter());
+  await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
+  Hive.registerAdapter(LocalNotificationAPIDatabaseModelAdapter());
+  await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
+  Hive.registerAdapter(BuildingByVenueAPIModelAdapter());
+  await Hive.openBox<BuildingByVenueAPIModel>('BuildingByVenueModelFile');
+  Hive.registerAdapter(GlobalAnnotationAPIModelAdapter());
+  await Hive.openBox<GlobalAnnotationAPIModel>('GlobalAnnotationAPIModelFile');
+  Hive.registerAdapter(VenueBeaconAPIModelAdapter());
+  await Hive.openBox<VenueBeaconAPIModel>('VenueBeaconAPIModelFile');
 
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');
@@ -51,6 +95,8 @@ Future<void> localDBInitialsation() async {
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('LocationPermission');
   await Hive.openBox('VersionData');
+  await navigationManager.initialize();
+
 
 }
 
@@ -83,6 +129,8 @@ class _MobileAppState extends State<MobileApp> {
   @override
   void initState() {
     configureLocalization();
+
+
     super.initState();
   }
   void configureLocalization(){

@@ -1467,9 +1467,7 @@ class tools {
     List<Cell> turns = tools.getTurnpoints_inCell(path);
     turns.insert(0, path[0]);
     turns.add(path.last);
-    print("turns $turns");
     double Nextdistance = tools.calculateAerialDist(turns[0].lat,turns[0].lng, turns[1].lat,turns[1].lng);
-    print("adding turn distance as $Nextdistance between ${[turns[0].x,turns[0].y]} and ${[turns[1].x,turns[1].y]}");
 
     List<direction> Directions = [direction(path[0].node, "Straight", null, Nextdistance, null,path[0].x,path[0].y,path[0].floor,path[0].bid,numCols:path[0].numCols)];
     for(int i = 1 ; i<turns.length-1 ; i++){
@@ -1486,7 +1484,6 @@ class tools {
       int index = path.indexOf(turns[i]);
       double Nextdistance = tools.calculateDistance([turns[i].x,turns[i].y], [turns[i+1].x,turns[i+1].y]);
       double Prevdistance = tools.calculateDistance([turns[i].x,turns[i].y], [turns[i-1].x,turns[i-1].y]);
-      print("adding turn distance as $Nextdistance between ${[turns[i].x,turns[i].y]} and ${[turns[i+1].x,turns[i+1].y]} distance $Nextdistance and $Prevdistance");
 
       double angle = tools.calculateAnglefifth_inCell(path[index-1], path[index], path[index+1]);
       if(path[index-1].bid != path[index].bid){
@@ -2350,7 +2347,6 @@ class tools {
         }else if(prevDeltaY==0 && nextDeltaY==0){
 
         }else{
-          print("adding turn ${currPos.x},${currPos.y}");
           res.add(currPos);
         }
 

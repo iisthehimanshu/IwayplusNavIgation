@@ -55,10 +55,6 @@ class RepositoryManager{
         List<dynamic> list = await getBuildingByVenue(VenueManager().venueName);
         VenueManager().buildings = list.whereType<Buildingbyvenue>().toList();
         print("VenueManager().buildings ${VenueManager().buildings}");
-        VenueManager().buildings.forEach((buildingData){
-            getDataVersionData(buildingData.sId!);
-        });
-
     }
 
 

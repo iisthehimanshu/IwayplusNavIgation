@@ -50,25 +50,17 @@ class SingletonFunctionController {
     _completer = Completer<void>();
 
 
-    print("building.beacondata.length");
     try {
       // Perform your task here
-      print("Function is running...");
       building.qrOpened=false;
       building.destinationQr=false;
       await Future.wait(allBuildingID.entries.map((entry) async {
-        print("entry$entry");
         var key = entry.key;
         var beaconData = await beaconapi().fetchBeaconData(key);
-        print("keydata${beaconData.length}");
         if (building.beacondata == null) {
-          print("entryprintifstate${key}");
           building.beacondata = beaconData;
-          print("entryprintifstate${building.beacondata!.length}");
         } else {
-          print("entryprint${building.beacondata!.length}");
           building.beacondata = List.from(building.beacondata!)..addAll(beaconData);
-          print("entryprint${building.beacondata!.length}");
         }
         for (var beacon in beaconData) {
           if (beacon.name != null) {
@@ -76,8 +68,6 @@ class SingletonFunctionController {
           }
         }
         Building.apibeaconmap = apibeaconmap;
-        print(buildingAllApi.allBuildingID);
-        print(apibeaconmap);
       })).then((value) async {
         //-------------
         // print("blue statusssss");
@@ -117,7 +107,6 @@ class SingletonFunctionController {
       });
 
       // Simulate a long-running task
-      print("Function completed.");
     } finally {
       // Mark the function as complete
       _isRunning = false;

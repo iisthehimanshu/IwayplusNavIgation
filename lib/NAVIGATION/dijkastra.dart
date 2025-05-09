@@ -343,7 +343,6 @@ Future<List<int>> findShortestPath (Map<String, dynamic> graph, int sourceX, int
   }
 
   for(int i = s ; i<=e; i++){
-    print("adding cell ${temppath[i][0]},${temppath[i][1]}");
     l2.add((temppath[i][1]*col) + temppath[i][0]);
   }
   if((sourceY*col)+sourceX != (temppath[0][1]*col)+temppath[0][0] && isoutdoorPath){

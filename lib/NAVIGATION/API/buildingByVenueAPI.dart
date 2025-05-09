@@ -44,7 +44,6 @@ class Buildingbyvenueapi {
       },
     );
 
-    print(" fetchBuildingIDS ${response.statusCode} ${response.body}");
     if (response.statusCode == 200) {
       List<dynamic> responseBody = json.decode(response.body);
       // final buildingByVenueData = BuildingByVenueAPIModel(responseBody: responseBody);

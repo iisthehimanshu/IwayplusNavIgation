@@ -34,9 +34,9 @@ class NavigationAPIController {
   Future<void> patchAPIController(String id, bool selected) async {
     print("patch for $id");
     var patchData = await RepositoryManager().getPatchData(id) as patchDataModel;
+    print("patchData print ${patchData.toJson()}");
     Building.buildingData ??= Map();
-    Building.buildingData![patchData.patchData!.buildingID!] =
-        patchData.patchData!.buildingName;
+    Building.buildingData![patchData.patchData!.buildingID!] = patchData.patchData!.buildingName;
     SingletonFunctionController
         .building.patchData[patchData.patchData!.buildingID!] = patchData;
     if (selected) {

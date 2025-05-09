@@ -20,7 +20,6 @@ class Apimanager{
 
       switch (apiDetail.method.toUpperCase()) {
         case 'POST':
-          print("apiDetail.headers ${apiDetail.headers}");
           response = await client.post(
             Uri.parse(apiDetail.url),
             body: jsonEncode(apiDetail.body),
@@ -35,17 +34,13 @@ class Apimanager{
         default:
           throw Exception('Unsupported HTTP method');
       }
-      print("response code ${response.statusCode}");
-      print("response body ${response.body}");
       if(response.statusCode == 200){
-
         String responseBody = response.body;
         dynamic decryptedBody = json.decode(responseBody);
         if(apiDetail.encryption){
           decryptedBody = encryptionService.decrypt(decryptedBody['encryptedData']);
           decryptedBody = json.decode(decryptedBody);
         }
-        print("decryptedBody  $decryptedBody");
         Response responseObject = Response(response.statusCode, decryptedBody);
 
         return responseObject;

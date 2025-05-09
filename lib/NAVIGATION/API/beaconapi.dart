@@ -1,17 +1,14 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
-import 'package:iwaymaps/NAVIGATION/config.dart';
-import 'package:permission_handler/permission_handler.dart';
+import '../../IWAYPLUS/Elements/HelperClass.dart';
 import '../APIMODELS/beaconData.dart';
-import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/BeaconAPIModelBOX.dart';
-import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
-import '/IWAYPLUS/Elements/HelperClass.dart';
 
+import '../DATABASE/BOXES/BeaconAPIModelBOX.dart';
+import '../DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import '../VersioInfo.dart';
+import '../config.dart';
 import 'RefreshTokenAPI.dart';
 
 
@@ -20,124 +17,56 @@ class beaconapi {
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
-  String encryptDecrypt(String input, String key){
-    StringBuffer result = StringBuffer();
-    for (int i = 0; i < input.length; i++) {
-      // XOR each character of the input with the corresponding character of the key
-      result.writeCharCode(input.codeUnitAt(i) ^ key.codeUnitAt(i % key.length));
-    }
-    return result.toString();
-  }
-  String getDecryptedData(String encryptedData){
-    Map<String, dynamic> encryptedResponseBody = json.decode(encryptedData);
-    String newResponse=encryptDecrypt(encryptedResponseBody['encryptedData'], "xX7/kWYt6cjSDMwB4wJPOBI+/AwC+Lfbd610sWfwywU=");
-    List<dynamic> originalList = jsonDecode(newResponse);
-    // Wrap in landmarks header
-    Map<String, dynamic> wrappedResponse = {
-      "landmarks": originalList
-    };
-    return jsonEncode(wrappedResponse);
-  }
 
   Future<List<beacon>> fetchBeaconData(String id) async {
 
-    print("beacon---");
-    print(baseUrl);
     accessToken = signInBox.get("accessToken");
     final BeaconBox = BeaconAPIModelBOX.getData();
 
-    print("beaconapi $id");
-    print(BeaconBox.containsKey(id));
-    print(VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id));
     // print(VersionInfo.buildingLandmarkDataVersionUpdate[id]!);
-    // if(VersionInfo.buildingLandmarkDataVersionUpdate.isEmpty || (BeaconBox.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate[id]! == false)){
-    //   print("BEACON DATA FROM DATABASE");
-    //   print(BeaconBox.keys);
-    //   print(BeaconBox.values);
-    //   if(BeaconBox.get(id) != null ){
-    //     List<dynamic> responseBody = BeaconBox.get(id)!.responseBody;
-    //     List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
-    //     return beaconList;
-    //   }
-    //
-    // }
+    if(VersionInfo.buildingLandmarkDataVersionUpdate.isEmpty || (BeaconBox.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate[id]! == false)){
+      if(BeaconBox.get(id) != null ){
+        List<dynamic> responseBody = BeaconBox.get(id)!.responseBody;
+        List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
+        return beaconList;
+      }
+
+    }
 
     final Map<String, dynamic> data = {
       "buildingId": id,
     };
-    print("Mishordata");
-    print(data);
-
     final response = await http.post(
       Uri.parse(baseUrl),
-      body: json.encode(data),
+      body: jsonEncode(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken,
+        'x-access-token': accessToken
+        // 'Authorization' : AppConfig.Authorization
       },
     );
 
     if (response.statusCode == 200) {
-      print("BEACON DATA FROM API");
-        print("beaconapiresponse ${response.body}");
-        List<dynamic> responseBody = json.decode(response.body);
-        List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
-        print("response.statusCode");
-        print("beaconList $beaconList $id");
+      //   Map<String, dynamic> encryptedResponseBody = json.decode(response.body);
+      // String decryptedData = encryptDecrypt(encryptedResponseBody['encryptedData']);
+      List<dynamic> responseBody = json.decode(response.body);
+
+
+      List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
         final beaconData = BeaconAPIModel(responseBody: responseBody);
-        print(beaconData);
         String i = id;
         if(beaconList.isNotEmpty){
           i=beaconList[0].buildingID!;
         }
         BeaconBox.put(i,beaconData);
         beaconData.save();
-        print(BeaconBox.keys);
-        if(!kIsWeb && kDebugMode && Platform.isAndroid) {
-          List<dynamic> JSONresponseBody = json.decode(response.body);
-          String formattedJson = JsonEncoder.withIndent('  ').convert(JSONresponseBody);
-          HelperClass().saveJsonToAndroidDownloads("beacon$id", formattedJson);
-        }
         return beaconList;
-    }
-    else if (response.statusCode == 403) {
-      print("BEACON API in error 403");
+
+
+    }else if (response.statusCode == 403) {
       String newAccessToken = await RefreshTokenAPI.refresh();
-      print('Refresh done');
       accessToken = newAccessToken;
-
-      final response = await http.post(
-        Uri.parse(baseUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': accessToken
-        },
-      );
-      if (response.statusCode == 200) {
-        print("BEACON API DATA FROM API AFTER 403");
-        List<dynamic> responseBody = json.decode(response.body);
-        List<beacon> beaconList = responseBody.map((data) => beacon.fromJson(data)).toList();
-        print("response.statusCode");
-        beaconList.forEach((beacon){
-          print(beacon.name);
-        });
-        print("beaconList $beaconList");
-        final beaconData = BeaconAPIModel(responseBody: responseBody);
-        String i = id;
-        if(beaconList.isNotEmpty){
-          i=beaconList[0].buildingID!;
-        }
-        BeaconBox.put(i,beaconData);
-        beaconData.save();
-
-        return beaconList;
-
-      }else {
-        print("BEACON API EMPTY DATA FROM API AFTER 403");
-        List<beacon> beaconList = [];
-        return beaconList;
-
-      }
+      return fetchBeaconData(id);
 
     } else {
 
@@ -146,5 +75,4 @@ class beaconapi {
       throw Exception('Failed to load data');
     }
   }
-
 }

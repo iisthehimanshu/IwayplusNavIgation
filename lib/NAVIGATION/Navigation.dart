@@ -3045,8 +3045,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     Future.delayed(Duration(seconds: 5));
     SingletonFunctionController.building.buildingsLoaded = true;
   }
-  var versionBox = Hive.box('VersionData');
-  final DataVersionLocalModelBox = DataVersionLocalModelBOX.getData();
   void findCentroid(List<Coordinates> vertices, String bid) {
     double xSum = 0;
     double ySum = 0;
@@ -4679,8 +4677,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   List<LatLng> tappedPolygonCoordinates = [];
   Future<void> createRooms(polylinedata value, int floor) async {
     final stackTrace = StackTrace.current;
-    print("createRooms Stack: \n$stackTrace");
-    print("createRooms-- ${value.polyline!.buildingID!}");
+    print("createRooms Stack: ${value.polyline!.buildingID!} \n$stackTrace");
 
     if (closedpolygons[buildingAllApi.getStoredString()] == null) {
       closedpolygons[buildingAllApi.getStoredString()] = Set();
@@ -4762,11 +4759,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               }
             }
             else if (polyArray.polygonType == 'Room' ) {
-              print("polyArray.name");
-              print(polyArray.name);
-
               if(polyArray.name!.toLowerCase().contains('lr') || polyArray.name!.toLowerCase().contains('lab') || polyArray.name!.toLowerCase().contains('office') || polyArray.name!.toLowerCase().contains('pantry') || polyArray.name!.toLowerCase().contains('reception')) {
-                print("COntaining LA");
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
@@ -4784,7 +4777,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       }));
                 }
               }else if(polyArray.name!.toLowerCase().contains('atm') || polyArray.name!.toLowerCase().contains('health')) {
-                print("COntaining LA");
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
@@ -7826,7 +7818,6 @@ int currentCols=0;
           numCols,
           numRows,
           isoutdoorPath: bid == buildingAllApi.outdoorID);
-      print("path from waypoint for bid $bid $path");
       path.forEach((index){
         print([index % numCols, index ~/ numCols]);
       });
@@ -8766,10 +8757,8 @@ bool _isPlaying=false;
                     autofocus: true,
                     onFocusChange: (hasFocus) {
                       if (!hasFocus) {
-                        print("printhasFocus");
                         _startbuttonFocus.requestFocus();
                       }else{
-                        print("printhasFocus");
                       }
                     },
                     child: Column(
@@ -12680,7 +12669,6 @@ bool _isPlaying=false;
                 },
                 onCameraIdle: () {
                   if (mapState.cameraposition != null) {
-                    print("selecting landmark");
                     selectPinLandmark(mapState.cameraposition!);
                     mapState.cameraposition = null; // User has stopped panning
                   }

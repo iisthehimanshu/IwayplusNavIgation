@@ -41,7 +41,7 @@ class BLEManager{
     int? duration,
   }) {
     // stopScanning(); // cancel previous
-    listenToScanUpdates(Building.apibeaconmap);
+    listenToScanUpdates(Building.apibeaconmap,bufferSize);
     // Start emitting data to stream every [streamFrequency] seconds
     startBufferedEmission(bufferSizeInSeconds: streamFrequency);
 
@@ -97,7 +97,7 @@ class BLEManager{
     }
   }
 
-  void listenToScanUpdates(HashMap<String, beacon> apibeaconmap) {
+  void listenToScanUpdates(HashMap<String, beacon> apibeaconmap,int bufferSize) {
     startScan();
     trimBuffer();
     if (kDebugMode) print("listenToScanUpdates");
@@ -112,12 +112,12 @@ class BLEManager{
   }
 
   void trimBuffer(){
-    trimBufferTimer = Timer.periodic(Duration(seconds: 2), (timer)  {
+    trimBufferTimer = Timer.periodic(Duration(seconds: 1), (timer)  {
       if (kDebugMode) print("startCleanupTimer");
       buffer.forEach((beaconName,beaconRespVal){
         final toRemove = <DateTime>[];
         beaconRespVal.forEach((beaconDateTime, beaconRSSI){
-          if(DateTime.now().difference(beaconDateTime) > Duration(seconds: 10)){
+          if(DateTime.now().difference(beaconDateTime) > Duration(seconds: 5)){
             toRemove.add(beaconDateTime);
           }
         });

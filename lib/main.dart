@@ -6,6 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/DB2DataVersionLocalModel.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/DB2LandMarkApiModel.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/DB2PatchAPIModel.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/DB2PolyLineAPIModel.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/DataBaseManager.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 import 'package:path_provider/path_provider.dart';
@@ -23,6 +27,7 @@ import 'dart:io' show Platform;
 import 'IWAYPLUS/websocket/navigationLogManager.dart';
 import 'NAVIGATION/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import 'NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import 'NAVIGATION/DATABASE/DATABASEMODEL/DB2BeaconAPIModel.dart';
 import 'NAVIGATION/DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
 import 'NAVIGATION/DATABASE/DATABASEMODEL/GlobalAnnotationAPIModel.dart';
 import 'NAVIGATION/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
@@ -41,7 +46,7 @@ final navigationManager=NavigationLogManager();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await localDBInitialsation();
-  RepositoryManager().loadBuildings();
+
   if(!kIsWeb){
     mobileInitialization();
     runApp(const MobileApp());
@@ -88,6 +93,18 @@ Future<void> localDBInitialsation() async {
   await Hive.openBox<GlobalAnnotationAPIModel>('GlobalAnnotationAPIModelFile');
   Hive.registerAdapter(VenueBeaconAPIModelAdapter());
   await Hive.openBox<VenueBeaconAPIModel>('VenueBeaconAPIModelFile');
+  Hive.registerAdapter(DB2DataVersionLocalModelAdapter());
+  await Hive.openBox<DB2DataVersionLocalModel>('DB2DataVersionLocalModelFile');
+  Hive.registerAdapter(DB2LandMarkApiModelAdapter());
+  await Hive.openBox<DB2LandMarkApiModel>('DB2LandMarkApiModelFile');
+  Hive.registerAdapter(DB2PatchAPIModelAdapter());
+  await Hive.openBox<DB2PatchAPIModel>('DB2PatchAPIModelFile');
+  Hive.registerAdapter(DB2PolyLineAPIModelAdapter());
+  await Hive.openBox<DB2PolyLineAPIModel>('DB2PolyLineAPIModelFile');
+  Hive.registerAdapter(DB2BeaconAPIModelAdapter());
+  await Hive.openBox<DB2BeaconAPIModel>('DB2BeaconAPIModelFile');
+
+
 
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');
@@ -95,7 +112,10 @@ Future<void> localDBInitialsation() async {
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('LocationPermission');
   await Hive.openBox('VersionData');
+  await Hive.openBox('SwitchingDatabaseInfo');
   await navigationManager.initialize();
+  var switchDatabaseBox = Hive.box('SwitchingDatabaseInfo');
+  switchDatabaseBox.put('greenDataBase', true);
 
 
 }

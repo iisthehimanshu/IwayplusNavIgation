@@ -33,7 +33,7 @@ class NavigationAPIController {
 
   Future<void> patchAPIController(String id, bool selected) async {
     print("patch for $id");
-    var patchData = await RepositoryManager().getPatchData(id) as patchDataModel;
+    var patchData = await RepositoryManager().getPatchDataNew(id) as patchDataModel;
     Building.buildingData ??= Map();
     Building.buildingData![patchData.patchData!.buildingID!] =
         patchData.patchData!.buildingName;

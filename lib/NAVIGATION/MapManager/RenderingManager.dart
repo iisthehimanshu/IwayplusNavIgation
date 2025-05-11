@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hive/hive.dart';
+import 'package:iwaymaps/NAVIGATION/DatabaseManager/SwitchDataBase.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 
 import '../APIMODELS/landmark.dart';
 import '../APIMODELS/patchDataModel.dart';
 import '../APIMODELS/polylinedata.dart' as polyline_model;
 import '../VenueManager/VenueManager.dart';
+import '../VersioInfo.dart';
 import 'InteractionManager.dart';
 import 'RenderingElement/Marker.dart';
 import 'RenderingElement/Polygon.dart';
@@ -109,19 +112,42 @@ class RenderingManager {
         _highPriorityMarkers[buildingData.landmarks!.first.buildingID!] = markerMap["high"] ?? {};
       }
     }
-
     return;
   }
 
   Future<void> startDataFechFromServerCycle() async {
     await venueManager.runDataVersionCycle();
-
-    await venueManager.getPolylinePolygonDataAllBuildings();
-    // await venueManager.getPatchDataAllBuildings();
-    // await venueManager.getLandmarkDataAllBuildings();
-
+    if(SwitchDataBase().newDataFromServerDBShouldBeCreated){
+      await updateNewDB().then((_){
+        var switchBox = Hive.box('SwitchingDatabaseInfo');
+        SwitchDataBase().switchGreenDataBase(!switchBox.get('greenDataBase'));
+        SwitchDataBase().newDataFromServerDBShouldBeCreated = false;
+      });
+    }else{
+      print("SwitchDataBase().newDataFromServerDBShouldBeCreated ${SwitchDataBase().newDataFromServerDBShouldBeCreated} NO CREATION OF DB2");
+    }
   }
-  
+
+  Future<void> updateNewDB() async {
+    for (var building in VenueManager().buildings) {
+      // await RepositoryManager().runAPICallDataVersion(building.sId!);
+      await RepositoryManager().runAPICallPatchData(building.sId!);
+      await RepositoryManager().runAPICallPolylineData(building.sId!);
+      await RepositoryManager().runAPICallLandmarkData(building.sId!);
+      await RepositoryManager().runAPICallBeaconData(building.sId!);
+      // Space optimization CODE for FUTURE
+      // if(VersionInfo.buildingPatchDataVersionUpdate.containsKey(building.sId) && VersionInfo.buildingPatchDataVersionUpdate[building.sId]==true){
+      //   RepositoryManager().savePatchDataForDB2(building.sId!);
+      // }
+      // if(VersionInfo.buildingPolylineDataVersionUpdate.containsKey(building.sId) && VersionInfo.buildingPolylineDataVersionUpdate[building.sId]==true){
+      //   RepositoryManager().savePolylineDataForDB2(building.sId!);
+      // }
+      // if(VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(building.sId) && VersionInfo.buildingLandmarkDataVersionUpdate[building.sId]==true){
+      //   RepositoryManager().saveLandmarkDataForDB2(building.sId!);
+      // }
+    }
+  }
+
   Future<void> changeFloorOfBuilding(String buildingID, int floor) async {
     polyline_model.polylinedata? polylineData = await venueManager.getPolylinePolygonData(buildingID);
     land? landmarkData = await venueManager.getLandmarkData(buildingID);

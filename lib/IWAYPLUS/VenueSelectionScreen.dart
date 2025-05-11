@@ -16,11 +16,13 @@ import 'package:hive/hive.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
 import 'package:iwaymaps/NAVIGATION/API/RefreshTokenAPI.dart';
+import 'package:iwaymaps/NAVIGATION/APIMODELS/Buildingbyvenue.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/WayPointModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/DataBaseManager.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/SwitchDataBase.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
+import 'package:iwaymaps/NAVIGATION/VenueManager/VenueManager.dart';
 import '../NAVIGATION/BluetoothScanAndroid.dart';
 import '../NAVIGATION/Network/NetworkManager.dart';
 import '/IWAYPLUS/Elements/HelperClass.dart';
@@ -77,8 +79,9 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     // checkForUpdate();
     //startScan();
     getLocs();
-    SwitchDataBase().switchGreenDataBase(true);
-    print("GREEN DATABASE IS ACTIVE venueselectionscreen : ${SwitchDataBase().isGreenDataBaseActive()}");
+    RepositoryManager().loadBuildings();
+
+    // print("GREEN DATABASE IS ACTIVE venueselectionscreen : ${SwitchDataBase().isGreenDataBaseActive()}");
 
     apiCall();
     print("venueHashMap");
@@ -723,7 +726,7 @@ if(userLoc!=null){
                 )
               ],
             )
-        )
+        ),
 
         // AnimationLimiter(
         //   child: ListView.builder(
@@ -748,7 +751,99 @@ if(userLoc!=null){
         //
         //   ),
         // )
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: CupertinoColors.black,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+          child: Icon(CupertinoIcons.ant, color: Colors.white,size: 30,),
+          enableFeedback: true,
+          onPressed: () {
+            if(RepositoryManager().preLoadDataBaseCreated){
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Local Database Already Prepared',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  duration: Duration(seconds: 3),
+                  behavior: SnackBarBehavior.fixed,
+                  backgroundColor: Color(0xFF2C3E50), // professional dark tone
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                  ),
+                ),
+              );
+            }else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Preparing Local DataBase',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  duration: Duration(seconds: 3),
+                  behavior: SnackBarBehavior.fixed,
+                  backgroundColor: Color(0xFF2C3E50),
+                  // professional dark tone
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                  ),
+                ),
+              );
 
+              List<Buildingbyvenue> totalBuildings = VenueManager().buildings;
+
+              totalBuildings.forEach((indexBuilding) async {
+                await RepositoryManager().runAPICallDataVersion(indexBuilding.sId!, generateJSON: true);
+                await RepositoryManager().runAPICallPatchData(indexBuilding.sId!, generateJSON: true);
+                await RepositoryManager().runAPICallPolylineData(indexBuilding.sId!, generateJSON: true);
+                await RepositoryManager().runAPICallLandmarkData(indexBuilding.sId!, generateJSON: true);
+                await RepositoryManager().runAPICallBeaconData(indexBuilding.sId!, generateJSON: true);
+                //await RepositoryManager().getGlobalAnnotationData(indexBuilding.sId!,generateJSON: true);
+                try {
+                  await RepositoryManager().getWaypointData(
+                      indexBuilding.sId!, generateJSON: true);
+                }catch(e){}
+              });
+
+              RepositoryManager().loadPreLoadedDataBase();
+              Future.delayed(Duration(seconds: 2));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Local Database Prepared',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  duration: Duration(seconds: 3),
+                  behavior: SnackBarBehavior.fixed,
+                  backgroundColor: Color(0xFF2C3E50),
+                  // professional dark tone
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                  ),
+                ),
+              );
+            }
+          },
+        ),
 
       ),
     );

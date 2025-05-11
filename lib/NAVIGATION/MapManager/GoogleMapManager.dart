@@ -27,7 +27,7 @@ class GoogleMapManager extends RenderingManager with ChangeNotifier{
     await createMap();
     notifyListeners();
     fitPolygonsInView(polygons);
-    SwitchDataBase().switchGreenDataBase(false);
+    // SwitchDataBase().switchGreenDataBase(false);
     startDataFechFromServerCycle();
   }
 

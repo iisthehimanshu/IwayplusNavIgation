@@ -53,6 +53,11 @@ class DataBaseManager implements DBManager {
     databaseBox.put(bID, dataModel);
   }
 
+  Future<void> saveDataDB2(dynamic dataModel, Detail details, String bID) async {
+    final databaseBox = details.dataBaseGetDataDB2!();
+    databaseBox.put(bID, dataModel);
+  }
+
   @override
   dynamic getData(Detail details, String bID) {
     final databaseBox = details.dataBaseGetData!();
@@ -60,12 +65,35 @@ class DataBaseManager implements DBManager {
     return data;
   }
 
+  dynamic getDataDB2(Detail details, String bID) {
+    final databaseBox = details.dataBaseGetDataDB2!();
+    final data = databaseBox.get(bID);
+    return data;
+  }
+
+  dynamic getDataBaseKeysDB2(Detail details){
+    final databaseBox = details.dataBaseGetDataDB2!();
+    return databaseBox.keys;
+  }
+  dynamic getDataBaseValuesDB2(Detail details){
+    final databaseBox = details.dataBaseGetDataDB2!();
+    return databaseBox.values;
+  }
+
+
+  dynamic getDataBaseKeys(Detail details){
+    final databaseBox = details.dataBaseGetData!();
+    return databaseBox.keys;
+  }
+
+  dynamic getDataBaseValues(Detail details){
+    final databaseBox = details.dataBaseGetData!();
+    return databaseBox.values;
+  }
+
   @override
   String getAccessToken() {
     var signInBox = Hive.box('SignInDatabase');
-    print("getAccessToken");
-    print(signInBox.keys);
-    print(signInBox.values);
     return signInBox.get("accessToken");
   }
 

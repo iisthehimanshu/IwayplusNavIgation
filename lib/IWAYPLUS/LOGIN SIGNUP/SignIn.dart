@@ -10,6 +10,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
+import '../../NAVIGATION/Repository/RepositoryManager.dart';
 import '../Elements/HelperClass.dart';
 import '../MainScreen.dart';
 import 'ForgetPassword.dart';
@@ -174,6 +175,7 @@ class _SignInState extends State<SignIn> {
       });
       HelperClass.showToast("Invalid Username or Password");
     } else {
+      // RepositoryManager().loadBuildings();
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(

@@ -1,4 +1,7 @@
 
+import 'package:flutter/foundation.dart';
+import 'package:hive/hive.dart';
+
 class SwitchDataBase{
 
   static final SwitchDataBase _instance = SwitchDataBase._internal();
@@ -9,15 +12,15 @@ class SwitchDataBase{
     return _instance;
   }
 
-  bool greenDataBase = true;
+  var switchDatabaseBox = Hive.box('SwitchingDatabaseInfo');
+  bool newDataFromServerDBShouldBeCreated = false;
 
   bool isGreenDataBaseActive(){
-    return greenDataBase;
+    return switchDatabaseBox.get('greenDataBase');
   }
 
   void switchGreenDataBase(bool value){
-    greenDataBase = value;
-    print("greenDataBase $greenDataBase");
-    print(isGreenDataBaseActive());
+    switchDatabaseBox.put('greenDataBase', value);
+    if(kDebugMode) print("SWITCHING DB1 DATABASE TO $value");
   }
 }

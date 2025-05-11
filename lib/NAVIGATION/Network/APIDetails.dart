@@ -1,5 +1,6 @@
 import 'package:device_information/device_information.dart';
 import 'package:flutter/foundation.dart';
+import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/DB2BeaconAPIModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/DB2DataVersionLocalModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/DB2LandMarkApiModelBox.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/DB2PatchAPIModelBox.dart';
@@ -36,8 +37,9 @@ class Detail {
   Map<String, dynamic>? body;
   Function(dynamic) conversionFunction;
   Function()? dataBaseGetData;
-  Function()? dataBaseGetDataDB2;
   String? getPreLoadPrefix;
+  Function()? dataBaseGetDataDB2;
+
 
   Detail(this.url, this.method, this.headers, this.encryption, this.body, this.conversionFunction, this.dataBaseGetData,this.getPreLoadPrefix,[this.dataBaseGetDataDB2]);
 
@@ -63,7 +65,7 @@ class Apidetails {
         land.fromJson,
         LandMarkApiModelBox.getData,
         "Landmark",
-        DB2LandMarkApiModelBox.getData()
+        DB2LandMarkApiModelBox.getData
     );
   }
 
@@ -80,7 +82,8 @@ class Apidetails {
         {"buildingId": bid},
         beacon.fromJsonToList,
         BeaconAPIModelBOX.getData,
-        "Beacon"
+        "Beacon",
+        DB2BeaconAPIModelBOX.getData
     );
   }
 

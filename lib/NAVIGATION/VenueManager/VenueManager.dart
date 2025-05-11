@@ -51,7 +51,7 @@ class VenueManager extends BuildingStore{
   }
 
   Future<polylinedata?> getPolylinePolygonData(String buildingID) async {
-      polylinedata? buildingData = await RepositoryManager().getPolylineData(buildingID);
+      polylinedata? buildingData = await RepositoryManager().getPolylineDataNew(buildingID);
       return buildingData;
   }
 
@@ -70,7 +70,7 @@ class VenueManager extends BuildingStore{
   }
 
   Future<patchDataModel?> getPatchData(String buildingID) async {
-      patchDataModel? buildingData = await RepositoryManager().getPatchData(buildingID);
+      patchDataModel? buildingData = await RepositoryManager().getPatchDataNew(buildingID);
       return buildingData;
   }
 
@@ -88,7 +88,7 @@ class VenueManager extends BuildingStore{
   }
 
   Future<land?> getLandmarkData(String buildingID) async {
-      land? buildingData = await RepositoryManager().getLandmarkData(buildingID);
+      land? buildingData = await RepositoryManager().getLandmarkDataNew(buildingID);
       return buildingData;
   }
 
@@ -107,7 +107,7 @@ class VenueManager extends BuildingStore{
 
   Future<void> runDataVersionCycle() async {
     for (var building in buildings) {
-      await RepositoryManager().getDataVersionData(building.sId!);
+      await RepositoryManager().runAPICallDataVersion(building.sId!);
     }
   }
 

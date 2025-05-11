@@ -15,5 +15,6 @@ class VersionInfo{
   static bool buildingDataVersionUpdate =false;
   static bool patchDataVersionUpdate =false;
   static bool landmarksDataVersionUpdate =false;
+  static bool shouldBeUpdated = false;
 
 }

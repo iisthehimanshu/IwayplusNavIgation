@@ -5,7 +5,8 @@ import 'dart:math' as math;
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'dart:ui';
-
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:image/image.dart' as img;
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:collection/collection.dart' as pac;
@@ -165,8 +166,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   bool checkedForPatchDataUpdated = false;
   bool checkedForLandmarkDataUpdated = false;
   pac.PriorityQueue<MapEntry<String, double>> debugPQ = new pac.PriorityQueue();
-  late final Uint8List userloc;
-  late final Uint8List userlocdebug;
+  late Uint8List userloc;
+  late Uint8List userlocdebug;
 
   // HashMap<String, beacon> SingletonFunctionController.apibeaconmap = HashMap();
   late FlutterTts flutterTts;
@@ -566,7 +567,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
 
-  void initializeMarkers() async {
+  Future<void> initializeMarkers() async {
     userloc = await getImagesFromMarker('assets/userloc0.png', 130);
     if (kDebugMode) {
       userlocdebug = await getImagesFromMarker('assets/tealtorch.png', 35);
@@ -1845,8 +1846,17 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       bool render
       ) async {
     try {
-      final landmarkData = await SingletonFunctionController.building.landmarkdata;
-      final userSetLocation = landmarkData?.landmarksMap?[polyID];
+      land snapshot = land();
+      // Collect all API call futures
+      List<Future<void>> apiCalls = [];
+      buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
+        apiCalls.add(landmarkApi().fetchLandmarkData(id: key).then((value) {
+          snapshot.mergeLandmarks(value.landmarks);
+          print("merged $key");
+        }));
+      });
+      await Future.wait(apiCalls);
+      final userSetLocation = snapshot.landmarksMap?[polyID];
       print("polygonlocalization called");
       if (userSetLocation != null){
         initializeUser(userSetLocation,null, speakTTS: speakTTS, render: render);
@@ -2083,7 +2093,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     )..repeat(reverse: true);
 
     // Create the animation
-
+    await initializeMarkers();
     setState(() {
       markers.clear();
       //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
@@ -5268,13 +5278,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
 
   Future<Uint8List> getImagesFromMarker(String path, int width) async {
-    ByteData data = await rootBundle.load(path);
-    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
-        targetHeight: width);
-    ui.FrameInfo frameInfo = await codec.getNextFrame();
-    return (await frameInfo.image.toByteData(format: ui.ImageByteFormat.png))!
-        .buffer
-        .asUint8List();
+    final data = await rootBundle.load(path);
+    final image = img.decodeImage(data.buffer.asUint8List());
+    final resized = img.copyResize(image!, width: width);
+    return Uint8List.fromList(img.encodePng(resized));
   }
 
   Future<BitmapDescriptor> bitmapDescriptorFromTextAndImage(
@@ -11815,6 +11822,7 @@ bool _isPlaying=false;
               ),
             ],
             minHeight: 80,
+            maxHeight: 80,
             panel: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),

@@ -139,13 +139,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   @override
   void initState() {
     super.initState();
-
-    _bufferSubscription = BLEManager().bufferedDeviceStream.listen((bufferedData) {
-      print("Received buffer: $bufferedData");
-
-    });
-
-
     // initTts();
 
     _flutterLocalization = FlutterLocalization.instance;

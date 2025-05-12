@@ -130,7 +130,6 @@ class RenderingManager {
 
   Future<void> updateNewDB() async {
     for (var building in VenueManager().buildings) {
-      // await RepositoryManager().runAPICallDataVersion(building.sId!);
       await RepositoryManager().runAPICallPatchData(building.sId!);
       await RepositoryManager().runAPICallPolylineData(building.sId!);
       await RepositoryManager().runAPICallLandmarkData(building.sId!);

@@ -17,10 +17,12 @@ import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
 import 'package:iwaymaps/NAVIGATION/API/RefreshTokenAPI.dart';
 import 'package:iwaymaps/NAVIGATION/APIMODELS/Buildingbyvenue.dart';
+import 'package:iwaymaps/NAVIGATION/BluetoothManager/BLEManager.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/WayPointModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/DataBaseManager.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/SwitchDataBase.dart';
+import 'package:iwaymaps/NAVIGATION/MapManager/GoogleMapManager.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 import 'package:iwaymaps/NAVIGATION/VenueManager/VenueManager.dart';
 import '../NAVIGATION/BluetoothScanAndroid.dart';
@@ -71,10 +73,21 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   bool checkedForBuildingAllUpdated = false;
   bool isLocating=false;
 
-
   @override
   void initState(){
     super.initState();
+    BLEManager bleManager = BLEManager();
+    bleManager.startScanning(
+      bufferSize: 6,
+      streamFrequency: 6,
+      duration: null,
+    );
+
+    bleManager.bufferedDeviceStream.listen((bufferedData) {
+      // You can update UI or process data here
+      print("Scanned data: $bufferedData");
+      GoogleMapManager().setNearestLandmark(bufferedData);
+    });
     NotificationSocket.receiveMessage();
     // checkForUpdate();
     //startScan();

@@ -22,8 +22,8 @@ class BLEManager{
   static const methodChannel = MethodChannel('com.example.bluetooth/scan');
   static const eventChannel = EventChannel('com.example.bluetooth/scanUpdates');
   RepositoryManager networkManager = RepositoryManager();
-  final StreamController<Map<String, dynamic>> _bufferedDeviceStreamController = StreamController<Map<String, dynamic>>.broadcast();
-  Stream<Map<String, dynamic>> get bufferedDeviceStream => _bufferedDeviceStreamController.stream;
+  final StreamController<String> _bufferedDeviceStreamController = StreamController<String>.broadcast();
+  Stream<String> get bufferedDeviceStream => _bufferedDeviceStreamController.stream;
   static StreamSubscription? _scanSubscription;
 
   Timer? _bufferEmitTimer;
@@ -31,6 +31,8 @@ class BLEManager{
   Timer? trimBufferTimer;
 
   Map<String,Map<DateTime,String>> buffer = Map();
+
+  String nearestBeaconFound = "";
 
 
   void startScanning({
@@ -54,12 +56,10 @@ class BLEManager{
 
 
   void startBufferedEmission({required int bufferSizeInSeconds}) {
-    print("📚 Call Stack:\n${StackTrace.current}");
-
     if(kDebugMode) print("startBufferEmission");
     _bufferEmitTimer?.cancel(); // cancel previous if any
     _bufferEmitTimer = Timer.periodic(Duration(seconds: bufferSizeInSeconds), (_) {
-      final dataToSend = Map<String, Map<DateTime, String>>.from(buffer); // Clone current buffer
+      final dataToSend = nearestBeaconFound; // Clone current buffer
       print("dataToSend");
       printFull(dataToSend.toString());
       // _bufferedDeviceStreamController.
@@ -165,6 +165,7 @@ class BLEManager{
           finalName = name;
         }
     });
+    nearestBeaconFound = finalName;
     
     if (kDebugMode) print("Reposition on $finalName $finalWeight $weightAvg");
   }

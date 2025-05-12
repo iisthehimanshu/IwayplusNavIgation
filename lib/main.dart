@@ -14,6 +14,7 @@ import 'package:iwaymaps/NAVIGATION/DatabaseManager/DataBaseManager.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'IWAYPLUS/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import 'IWAYPLUS/DATABASE/DATABASEMODEL/BuildingByVenueAPIModel.dart';
 import 'IWAYPLUS/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
@@ -36,6 +37,7 @@ import 'NAVIGATION/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'NAVIGATION/DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
 import 'NAVIGATION/DATABASE/DATABASEMODEL/VenueBeaconAPIModel.dart';
 import 'NAVIGATION/DATABASE/DATABASEMODEL/WayPointModel.dart';
+import 'NAVIGATION/MapManager/GoogleMapManager.dart';
 import 'NAVIGATION/webHome.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -49,7 +51,17 @@ Future<void> main() async {
 
   if(!kIsWeb){
     mobileInitialization();
-    runApp(const MobileApp());
+    runApp(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider<GoogleMapManager>.value(
+              value: GoogleMapManager(),
+            ),
+            // Add other providers here if needed
+          ],
+          child: const MobileApp(),
+        ),
+    );
   }else{
     runApp(const WebApp());
   }

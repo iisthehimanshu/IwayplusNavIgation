@@ -1,11 +1,12 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwaymaps/NAVIGATION/BluetoothManager/BLEManager.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/SwitchDataBase.dart';
+import '../APIMODELS/beaconData.dart';
 import 'RenderingManager.dart';
+import 'package:flutter/foundation.dart';
 
-
-class GoogleMapManager extends RenderingManager with ChangeNotifier{
+class GoogleMapManager extends RenderingManager with ChangeNotifier {
   static final GoogleMapManager _instance = GoogleMapManager._internal();
   factory GoogleMapManager() => _instance;
   GoogleMapManager._internal();
@@ -15,7 +16,35 @@ class GoogleMapManager extends RenderingManager with ChangeNotifier{
   GoogleMapController? get controller => _controller;
   CameraPosition get initialPosition => _initialPosition;
 
-  CameraPosition _initialPosition = CameraPosition(
+  String _nearestBeacon = "";
+  bool _showNearestLandmarkPanelVar = false;
+
+  String? get nearestBeacon => _nearestBeacon;
+  bool get showNearestLandmarkPanel => _showNearestLandmarkPanelVar;
+
+  void setNearestLandmark(String beaconValue) {
+    _nearestBeacon = beaconValue;
+  }
+
+  void showNearestLandmarkPanelIfBeaconExists() {
+    if (_nearestBeacon.isNotEmpty) {
+      _showNearestLandmarkPanelVar = true;
+      BLEManager().stopScanning();
+      notifyListeners();
+    }
+  }
+
+  void closeNearestLandmarkPanel() {
+    _showNearestLandmarkPanelVar = false;
+    notifyListeners();
+  }
+
+  void resetBeaconState() {
+    _nearestBeacon = "";
+    _showNearestLandmarkPanelVar = false;
+  }
+
+  CameraPosition _initialPosition = const CameraPosition(
     target: LatLng(28.6139, 77.2090),
     zoom: 14,
   );
@@ -26,13 +55,14 @@ class GoogleMapManager extends RenderingManager with ChangeNotifier{
     _controller?.setMapStyle(style);
     await createMap();
     notifyListeners();
+
     fitPolygonsInView(polygons);
-    // SwitchDataBase().switchGreenDataBase(false);
+
     startDataFechFromServerCycle();
+    showNearestLandmarkPanelIfBeaconExists();
   }
 
   void onCameraMove(CameraPosition position) {
-    print("zoom ${position.zoom}");
     updateZoomLevel(position.zoom);
     venueManager.changeFocusedBuilding(position);
     notifyListeners();
@@ -57,7 +87,7 @@ class GoogleMapManager extends RenderingManager with ChangeNotifier{
 
     if (bounds != null) {
       await _controller!.animateCamera(
-        CameraUpdate.newLatLngBounds(bounds, 50), // 50 is padding
+        CameraUpdate.newLatLngBounds(bounds, 50),
       );
     }
   }
@@ -86,9 +116,8 @@ class GoogleMapManager extends RenderingManager with ChangeNotifier{
     );
   }
 
-
   @override
-  void clearAll(){
+  void clearAll() {
     super.clearAll();
     notifyListeners();
   }
@@ -98,5 +127,4 @@ class GoogleMapManager extends RenderingManager with ChangeNotifier{
     super.changeFloorOfBuilding(buildingID, floor);
     notifyListeners();
   }
-
 }

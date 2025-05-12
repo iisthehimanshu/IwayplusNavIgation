@@ -16,7 +16,7 @@ class PlayPreviewManager {
   bool _isPlaying = false;
   bool _isCancelled = false;
   bool _stopAnimation = false;
-
+  static Function alignMapToPath = (List<double> A, List<double> B,{bool isTurn=false}) {};
   Map<String, Map<int, Set<gmap.Polyline>>> get pathCovered => _pathCovered;
 
   void clearPreview() {
@@ -38,9 +38,13 @@ class PlayPreviewManager {
     _isPlaying = true;
     _isCancelled = false;
     _stopAnimation = false;
+
     try {
       List<gmap.LatLng> currentCoordinates = [];
-      List<int> turnPoints = tools.getTurnpoints(pathList.map((e) => e.node).toList(), pathList.first.numCols);
+      List<int> turnPoints = tools.getTurnpoints(
+        pathList.map((e) => e.node).toList(),
+        pathList.first.numCols,
+      );
 
       for (int i = 0; i < pathList.length - 2; i++) {
         if (_isCancelled || _stopAnimation) {
@@ -51,36 +55,58 @@ class PlayPreviewManager {
         final current = pathList[i];
         final next = pathList[i + 2];
 
-        int row = (current.node % pathList[i].numCols); //divide by floor length
-        int col = (current.node ~/ pathList[i].numCols);
+        int row = current.node % current.numCols;
+        int col = current.node ~/ current.numCols;
+
+        int row1 = next.node % next.numCols;
+        int col1 = next.node ~/ next.numCols;
+
         List<double> value = tools.localtoglobal(
-            row, col, SingletonFunctionController.building.patchData[current.bid]);
+          row,
+          col,
+          SingletonFunctionController.building.patchData[current.bid],
+        );
+
+        List<double> value1 = tools.localtoglobal(
+          row1,
+          col1,
+          SingletonFunctionController.building.patchData[current.bid],
+        );
+
         final latLng = gmap.LatLng(value[0], value[1]);
         currentCoordinates.add(latLng);
+
         final buildingId = current.bid!;
         final floorId = current.floor;
 
         final polyline = gmap.Polyline(
           polylineId: gmap.PolylineId("preview_${floorId}_$i"),
-          points: currentCoordinates,
+          points: List.from(currentCoordinates),
           color: Colors.green,
           width: 8,
         );
+        if (turnPoints.contains(current.node)) {
+          await alignMapToPath([value[0], value[1]], [value1[0], value1[1]], isTurn: true);
+        } else {
+          await alignMapToPath([value[0], value[1]], [value1[0], value1[1]]);
+        }
 
-        // Populate the pathCovered structure
+        // ✅ Accumulate instead of overwrite
         _pathCovered.putIfAbsent(buildingId, () => {});
-        _pathCovered[buildingId]!.putIfAbsent(floorId, () => {});
+        _pathCovered[buildingId]!.putIfAbsent(floorId, () => <gmap.Polyline>{});
+        _pathCovered[buildingId]![floorId]!.add(polyline);
 
-          _pathCovered[buildingId]![floorId]={polyline};
         await Future.delayed(const Duration(milliseconds: 100));
       }
 
       print("✅ Animation complete for ${pathList.first.bid} | Floor ${pathList.first.floor}");
+      // _pathCovered.clear();
     } catch (e) {
       print("❌ Error in preview animation: $e");
     } finally {
       _isPlaying = false;
     }
   }
+
 
 }

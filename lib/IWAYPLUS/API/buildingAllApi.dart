@@ -49,7 +49,6 @@ class buildingAllApi {
           .toList();
       return buildingList;
     }
-
     accessToken = signInBox.get("accessToken");
 
     final response = await http.post(

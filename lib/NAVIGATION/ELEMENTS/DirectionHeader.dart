@@ -130,25 +130,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       }
 
       await flutterTts.stop();
-      if (Platform.isAndroid) {
+      if (Platform.isAndroid){
         await flutterTts.setSpeechRate(0.7);
-      } else {
+      }else{
         await flutterTts.setSpeechRate(0.55);
       }
-
       await flutterTts.setPitch(1.0);
-    }catch(e){
-
-    }
+    }catch(e){}
   }
 
   @override
   void initState() {
     super.initState();
-
-
     // initTts();
-
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
     setTTSParams(_currentLocale);

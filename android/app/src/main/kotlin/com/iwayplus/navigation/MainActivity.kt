@@ -55,6 +55,21 @@ class MainActivity : FlutterActivity() {
 
     private var eventSinkCompass: EventChannel.EventSink? = null
 
+    var smoothedHeading = 0f
+    private var lastAccuracySensorStatus = 0
+
+    private fun getAccuracy(): Double {
+        return if (lastAccuracySensorStatus == SensorManager.SENSOR_STATUS_ACCURACY_HIGH) {
+            15.toDouble()
+        } else if (lastAccuracySensorStatus == SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM) {
+            30.toDouble()
+        } else if (lastAccuracySensorStatus == SensorManager.SENSOR_STATUS_ACCURACY_LOW) {
+            45.toDouble()
+        } else {
+            (-1).toDouble() // unknown
+        }
+    }
+
     private fun lowPassFilter(input: FloatArray, output: FloatArray?): FloatArray {
         val alpha = 0.25f
         if (output == null) return input
@@ -218,7 +233,18 @@ class MainActivity : FlutterActivity() {
 
                     sensorListener = object : SensorEventListener {
                         override fun onSensorChanged(event: SensorEvent?) {
+
+
                             if (event == null) return
+
+                            if (lastAccuracySensorStatus == SensorManager.SENSOR_STATUS_UNRELIABLE) {
+                                Log.d("Compass Inaccuarcy",
+                                    "Compass sensor is unreliable, device calibration is needed."
+                                )
+                                // Update the heading, even if the sensor is unreliable.
+                                // This makes it possible to use a different indicator for the unreliable case,
+                                // instead of just changing the RenderMode to NORMAL.
+                            }
 
                             when (event.sensor.type) {
                                 Sensor.TYPE_ROTATION_VECTOR -> {
@@ -238,14 +264,24 @@ class MainActivity : FlutterActivity() {
                             if (currentTime - lastUpdateTime > COMPASS_UPDATE_RATE_MS) {
                                 lastUpdateTime = currentTime
                                 val heading = updateHeading()
-                                heading?.let {
+                               val accuracy= getAccuracy()
+                                heading?.let{
 //                                    Log.d("HeadingPlugin", "Heading: $it")
-                                    eventSinkCompass?.success(it)
+                                    smoothedHeading = smoothHeading(smoothedHeading, it.toFloat())
+                                    val result=mapOf(
+                                        "heading" to smoothedHeading.toDouble(),
+                                        "accuracy" to accuracy
+                                    )
+                                    eventSinkCompass?.success(result)
                                 }
                             }
                         }
 
-                        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+                        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+                            if (lastAccuracySensorStatus != accuracy) {
+                                lastAccuracySensorStatus = accuracy
+                            }
+                        }
                     }
 
                     // ✅ Register all three sensors
@@ -253,7 +289,6 @@ class MainActivity : FlutterActivity() {
                     sensorManager.registerListener(sensorListener, magnetometer, SensorManager.SENSOR_DELAY_GAME)
                     sensorManager.registerListener(sensorListener, rotationVectorSensor, SensorManager.SENSOR_DELAY_GAME)
                 }
-
                 override fun onCancel(arguments: Any?) {
                     sensorManager.unregisterListener(sensorListener)
                 }
@@ -294,6 +329,15 @@ class MainActivity : FlutterActivity() {
 
         return null
     }
+
+    private fun smoothHeading(current: Float, newHeading: Float, alpha: Float = 0.1f): Float {
+        var delta = newHeading - current
+        // Handle wraparound
+        if (delta > 180) delta -= 360
+        else if (delta < -180) delta += 360
+        return current + alpha * delta
+    }
+
 
 
 

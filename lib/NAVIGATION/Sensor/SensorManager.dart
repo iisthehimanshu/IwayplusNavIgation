@@ -19,7 +19,7 @@ class SensorManager {
   //stream data for magnetometer
   void startMagnetometer() => _magnetometer.startListening();
   void stopMagnetometer() => _magnetometer.stopListening();
-  Stream<double> get magnetometerStream => _magnetometer.stream;
+  Stream<Map<String, dynamic>> get magnetometerStream => _magnetometer.stream;
 
   // stream data for GPS
   void startGps() => _gpsSensor.startListening();

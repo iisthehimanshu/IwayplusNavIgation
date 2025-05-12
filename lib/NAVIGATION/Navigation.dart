@@ -836,8 +836,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       if (!mounted) return; // Prevent setState if the widget is no longer in the tree
       networkManager.ws.updateSensorStatus(compass: true);
       networkManager.ws.updatePermissions(compass: true);
-      double? compassHeading = event;
+      double? compassHeading = event['heading'];
       setState((){
+        accuracy= event['accuracy'];
         user.theta = compassHeading!;
         if (mapState.interaction2) {
           mapState.bearing = compassHeading!;
@@ -1707,23 +1708,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
 // Function to check if calibration is needed
   bool isCalibrationNeeded(List<double> magneticFieldStrengths) {
-    double acceptableLowerBound =
-        expectedFieldStrength * (1 - acceptableDeviationPercentage);
-    double acceptableUpperBound =
-        expectedFieldStrength * (1 + acceptableDeviationPercentage);
-    double averageStrength = 0.0;
-    if (magneticFieldStrengths.length > 0) {
-      averageStrength = magneticFieldStrengths.reduce((a, b) => a + b) /
-          magneticFieldStrengths.length;
-    }
-
-    print(magneticFieldStrengths);
-
-    if (averageStrength < acceptableLowerBound ||
-        averageStrength > acceptableUpperBound) {
-      return true; // Calibration needed
-    }
-    return false; // No calibration needed
+   if(accuracy>30 || accuracy==-1){
+     return true;
+   }
+   return false;
   }
 
 
@@ -1736,7 +1724,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       double x = event.x;
       double y = event.y;
       double z = event.z;
-
       // Calculate magnetic field strength
       double magneticFieldStrength = calculateMagneticFieldStrength(x, y, z);
       if (magneticValues.length < 6) {
@@ -2324,8 +2311,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         }
       }
     }
-
-    if (speakTTS) {
+    if (speakTTS){
       List<double> lvalue = tools.localtoglobal(
           (userSetLocation.doorX??userSetLocation.coordinateX!).toInt(),
           (userSetLocation.doorY??userSetLocation.coordinateY!).toInt(),
@@ -2379,7 +2365,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         speak(
             "low accuracy found.Please calibrate your device",
             _currentLocale);
-        showLowAccuracyDialog();
+        if(Platform.isAndroid){
+          showLowAccuracyDialog();
+        }
+
       }
     });
   }
@@ -2613,7 +2602,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     });
   }
 
-  bool accuracy = false;
+  double accuracy = 0.0;
   ValueNotifier<bool> accuracyNotifier = ValueNotifier<bool>(true);
 
   void showLowAccuracyDialog() {
@@ -3344,7 +3333,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     print("callback");
     SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID).then((_){
       SingletonFunctionController.timer?.whenComplete((){
-        print("localizeUser 1 ${DateTime.now().difference(timerStartTime)}");
         localizeUserInCallback();
         SingletonFunctionController.timer = null;
       });
@@ -5091,8 +5079,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                         setState(() {
                           tappedPolygonCoordinates=coordinates;
                         });
-
-
                         moveCameraSmoothly(controller: _googleMapController, targetPosition:  CameraPosition(
                             target: tools.calculateRoomCenterinLatLng(coordinates),zoom:22), currTarget: LatLng(user.lat,user.lng));
                        // smoothZoomAndPan(coordinates,22);
@@ -7981,7 +7967,6 @@ int currentCols=0;
               row, col, SingletonFunctionController.building.patchData[bid]);
           coordinates.add(LatLng(value[0], value[1]));
         }
-
         setState(() {
           singleroute[bid]!.putIfAbsent(floor, () => Set());
           singleroute[bid]![floor]?.add(gmap.Polyline(
@@ -8860,6 +8845,7 @@ bool _isPlaying=false;
                                               child: IconButton(
                                                 onPressed: () {
                                                   PlayPreviewManager().playPreviewAnimation(pathList:PathState.singleCellListPath);
+                                                  PlayPreviewManager.alignMapToPath=alignMapToPath;
                                                   // setState((){
                                                   //   _isPlaying=!_isPlaying;
                                                   //   singleroute.clear();
@@ -9865,8 +9851,6 @@ bool _isPlaying=false;
     );
   }
   Future<void> alignMapToPath(List<double> A, List<double> B,{bool isTurn=false}) async {
-    print("enteredddd");
-    print(onStart);
     double screenHeight=MediaQuery.of(context).size.height;
     double pixelRatio=MediaQuery.of(context).devicePixelRatio;
     mapState.tilt = 52.5;
@@ -9891,7 +9875,7 @@ bool _isPlaying=false;
     LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: newX, y: newY));
     setState(() {
       if(isTurn){
-         Future.delayed(Duration(microseconds: 2500)).then((onValue){
+         Future.delayed(Duration(microseconds: 3000)).then((onValue){
            _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
              CameraPosition(
                  target: (onStart==false)?mapState.target:mapState.target,
@@ -9900,7 +9884,6 @@ bool _isPlaying=false;
                  tilt: mapState.tilt),
            ));
          });
-
       }else{
         _googleMapController.moveCamera(CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -11941,6 +11924,7 @@ bool _isPlaying=false;
     return cachedPolygon.union(patch).union(otherpatch).union(blurPatch);
   }
   bool hasRun = false;
+  Set<gmap.Polyline> previewPolyline = Set();
   Set<gmap.Polyline> getCombinedPolylines() {
     Set<gmap.Polyline> poly = Set();
 
@@ -11972,15 +11956,53 @@ bool _isPlaying=false;
       }
     });
 
-    PlayPreviewManager().pathCovered.forEach((key,value){
-      value.forEach((key1,value1){
-       if(!hasRun && key1==PathState.destinationFloor){
-         hasRun=true;
-          createRooms(SingletonFunctionController.building.polylinedatamap[buildingAllApi.selectedBuildingID]!, PathState.destinationFloor);
-       }
-        poly = poly.union(value1).union(focusturn);
-      });
-    });
+    final pathData = PlayPreviewManager().pathCovered;
+    if (pathData.containsKey(buildingAllApi.selectedBuildingID)) {
+      final floorMap = pathData[buildingAllApi.selectedBuildingID]!;
+      if (floorMap.containsKey(PathState.destinationFloor)) {
+        // ✅ Get only the polylines for the destination floor
+        final previewPolyline = floorMap[PathState.destinationFloor]!;
+        // 🧼 Optional: This ensures createRooms is only called once
+        if (!hasRun) {
+          hasRun = true;
+          createRooms(
+            SingletonFunctionController
+                .building
+                .polylinedatamap[buildingAllApi.selectedBuildingID]!,
+            PathState.destinationFloor,
+          );
+        }
+
+        // ✅ Add only relevant floor's polylines
+        poly = poly.union(previewPolyline);
+      }
+    }
+
+    // PlayPreviewManager().pathCovered.forEach((buildingId, floorMap) {
+    //   floorMap.forEach((floorId, polylines) {
+    //     if (floorId == PathState.destinationFloor && !hasRun) {
+    //       hasRun = true;
+    //       _polygon.clear();
+    //       _polygon.add(Polygon(
+    //         polygonId: PolygonId("$matchPolygonPoints"),
+    //         points: matchPolygonPoints,
+    //         fillColor: Colors.lightBlueAccent.withOpacity(0.4),
+    //         strokeColor:Colors.blue,
+    //         strokeWidth: 2,
+    //       ));
+    //       cachedPolygon.clear();
+    //       circles.clear();
+    //       _markers.clear();
+    //       _markerLocationsMap.clear();
+    //       _markerLocationsMapLanName.clear();
+    //       createRooms(
+    //         SingletonFunctionController.building.polylinedatamap[buildingAllApi.selectedBuildingID]!,
+    //         PathState.destinationFloor,
+    //       );
+    //       poly = poly.union(polylines);
+    //     }
+    //   });
+    // });
     // print("pathCovered:${PlayPreviewManager().pathCovered}");
 
     return poly;
@@ -12732,7 +12754,6 @@ bool _isPlaying=false;
                 //     : {},
 
                 polygons: getCombinedPolygons().union(_polygon).union(globalCampus),
-
                 polylines: getCombinedPolylines(),
                 markers: getCombinedMarkers()
                     .union(_markers)
@@ -12794,7 +12815,6 @@ bool _isPlaying=false;
                 },
                 onCameraIdle: () {
                   if (mapState.cameraposition != null) {
-                    print("selecting landmark");
                     selectPinLandmark(mapState.cameraposition!);
                     mapState.cameraposition = null; // User has stopped panning
                   }
@@ -12986,7 +13006,6 @@ bool _isPlaying=false;
                           fontWeight: FontWeight.w500,
                           color: Color(0xff24b9b0),
                           height: 19 / 16,
-
                         ),
                       ),
                       activeIcon: Icons.close,
@@ -12997,7 +13016,6 @@ bool _isPlaying=false;
                             [0])
                             .length,
                             (int i) {
-                          //
                           List<int> floorList = Building
                               .numberOfFloorsDelhi[
                           buildingAllApi.getStoredString()] ??
@@ -13080,8 +13098,6 @@ bool _isPlaying=false;
                                     bid: buildingAllApi
                                         .getStoredString());
                               });
-
-
                             },
                           );
                         },

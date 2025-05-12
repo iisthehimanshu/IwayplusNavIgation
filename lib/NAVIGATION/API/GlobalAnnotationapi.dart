@@ -17,7 +17,6 @@ class GlobalAnnotation {
   String refreshToken = signInBox.get("refreshToken");
 
   Future<GlobalModel> fetchGlobalAnnotationData(id, {String? newaccesstoken}) async {
-
     final response = await http.get(
       Uri.parse(baseUrl+id),
       headers: {

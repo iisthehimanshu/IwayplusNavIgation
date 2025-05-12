@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'dart:html' as html;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/NAVIGATION/config.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
@@ -20,6 +21,7 @@ import '../MODELS/VenueModel.dart';
 
 class HelperClass{
   static bool SemanticEnabled = false;
+  static String locationID = "";
 
   static Future<bool> checkInternetConnectivity() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
@@ -53,7 +55,7 @@ class HelperClass{
   }
 
   static void openMobileApp() {
-    html.window.open('https://www.google.com', '_self');
+    html.window.open('${AppConfig.baseUrl}/#/deeplink/$locationID', '_self');
   }
 
   static Future<void> makePhoneCall(String phoneNumber) async {

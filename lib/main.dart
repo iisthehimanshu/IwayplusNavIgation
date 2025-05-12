@@ -5,6 +5,7 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:iwaymaps/IWAYPLUS/Elements/HelperClass.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/DataBaseManager.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
@@ -32,6 +33,7 @@ import 'NAVIGATION/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'NAVIGATION/DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
 import 'NAVIGATION/DATABASE/DATABASEMODEL/VenueBeaconAPIModel.dart';
 import 'NAVIGATION/DATABASE/DATABASEMODEL/WayPointModel.dart';
+import 'NAVIGATION/directToMobile.dart';
 import 'NAVIGATION/somethingWentWrong.dart';
 import 'NAVIGATION/webHome.dart';
 
@@ -269,7 +271,15 @@ class _WebAppState extends State<WebApp> {
             }else{
               final id = state.pathParameters['id']!;
               final source = state.pathParameters['source']!;
-              return webHome(Venue: id,source: source,); // Create this screen
+              HelperClass.locationID = source;
+              return Column(
+                children: [
+                  direcToMobile(),
+                  Container(
+                    height: MediaQuery.of(context).size.height - 35,
+                      child: webHome(Venue: id,source: source,)),
+                ],
+              ); // Create this screen
             }
 
           },

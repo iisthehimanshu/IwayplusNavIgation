@@ -5278,6 +5278,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
 
   Future<Uint8List> getImagesFromMarker(String path, int width) async {
+    if(kIsWeb){
+      width = 45;
+    }
     final data = await rootBundle.load(path);
     final image = img.decodeImage(data.buffer.asUint8List());
     final resized = img.copyResize(image!, width: width);
@@ -5287,6 +5290,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Future<BitmapDescriptor> bitmapDescriptorFromTextAndImage(
       String text, String? imagePath,
       {Size imageSize = const Size(50, 50), Color? color}) async {
+    if(kIsWeb){
+      imageSize = Size(45,45);
+    }
     // Set the text style and layout
     final TextPainter textPainter = TextPainter(
       textDirection: TextDirection.ltr,
@@ -5295,7 +5301,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       text: text,
       style: TextStyle(
         fontWeight: FontWeight.w600,
-        fontSize: 30.0, // Increased font size
+        fontSize: kIsWeb?12.0:30.0, // Increased font size
         color: color??Color(0xff000000),
       ),
     );

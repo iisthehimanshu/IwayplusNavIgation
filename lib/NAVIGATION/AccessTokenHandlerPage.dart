@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 
+import '../IWAYPLUS/LOGIN SIGNUP/LOGIN SIGNUP APIS/APIS/SignInAPI.dart';
 import 'API/RefreshTokenAPI.dart';
 
 class AccessTokenHandlerPage extends StatelessWidget {
@@ -14,8 +15,9 @@ class AccessTokenHandlerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      Hive.box('SignInDatabase').put("accessToken", accessToken);
-      Hive.box('SignInDatabase').put("refreshToken", accessToken);
+      await SignInAPI().signIN("yigov19856@magpit.com", "D9#vLz!tQ2&mXeR1pW@8");
+      // Hive.box('SignInDatabase').put("accessToken", accessToken);
+      // Hive.box('SignInDatabase').put("refreshToken", accessToken);
       context.go('/web/$id/$source');
     });
 

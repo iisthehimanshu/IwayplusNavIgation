@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwaymaps/NAVIGATION/BluetoothManager/BLEManager.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'RenderingManager.dart';
 import 'package:flutter/foundation.dart';
 
@@ -24,11 +25,22 @@ class GoogleMapManager extends RenderingManager with ChangeNotifier {
     _nearestBeacon = beaconValue;
   }
 
-  void showNearestLandmarkPanelIfBeaconExists() {
+  Future<void> showNearestLandmarkPanelIfBeaconExists() async {
     if (_nearestBeacon.isNotEmpty) {
       _showNearestLandmarkPanelVar = true;
-      BLEManager().stopScanning();
-      notifyListeners();
+      await BLEManager().waitForBufferEmitCompletion().then((_){
+        print("timerCompleted");
+        BLEManager().stopScanning();
+        notifyListeners();
+      });
+
+      // if(BLEManager().getBufferEmitTimer != null && !BLEManager().getBufferEmitTimer.isActive){
+      //   print("TImer completed");
+      // }else{
+      //   print("timer running");
+      // }
+
+
     }
   }
 

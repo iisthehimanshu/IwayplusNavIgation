@@ -76,6 +76,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   @override
   void initState(){
     super.initState();
+    GoogleMapManager().closeNearestLandmarkPanel();
     BLEManager bleManager = BLEManager();
     bleManager.startScanning(
       bufferSize: 6,

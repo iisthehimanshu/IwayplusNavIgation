@@ -10,7 +10,6 @@ import '../buildingState.dart';
 
 
 class BLEManager{
-
   static final BLEManager _instance = BLEManager._internal();
 
   factory BLEManager() {
@@ -25,10 +24,15 @@ class BLEManager{
   final StreamController<String> _bufferedDeviceStreamController = StreamController<String>.broadcast();
   Stream<String> get bufferedDeviceStream => _bufferedDeviceStreamController.stream;
   static StreamSubscription? _scanSubscription;
+  DateTime? _bufferEmitTimerEndTime;
+  bool get isBufferEmitTimerRunning => _bufferEmitTimer?.isActive ?? false;
+
 
   Timer? _bufferEmitTimer;
   Timer? _manualStopTimer;
   Timer? trimBufferTimer;
+
+  Timer get getBufferEmitTimer => _bufferEmitTimer!;
 
   Map<String,Map<DateTime,String>> buffer = Map();
 
@@ -64,13 +68,29 @@ class BLEManager{
       printFull(dataToSend.toString());
       // _bufferedDeviceStreamController.
       _bufferedDeviceStreamController.add(dataToSend);
+      _bufferEmitTimerEndTime = DateTime.now().add(Duration(seconds: bufferSizeInSeconds));
+
     });
   }
+
   void printFull(String text) {
     const int chunkSize = 800; // Console limit-safe size
     for (var i = 0; i < text.length; i += chunkSize) {
       print(text.substring(i, i + chunkSize > text.length ? text.length : i + chunkSize));
     }
+  }
+
+  Future<void> waitForBufferEmitCompletion() async {
+    print("waiting");
+    final remaining = bufferEmitRemainingTime;
+    if (remaining != null && remaining > Duration.zero) {
+      await Future.delayed(remaining);
+    }
+  }
+
+  Duration? get bufferEmitRemainingTime {
+    if (_bufferEmitTimerEndTime == null) return null;
+    return _bufferEmitTimerEndTime!.difference(DateTime.now());
   }
 
 

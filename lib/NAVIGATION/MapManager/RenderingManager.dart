@@ -79,71 +79,58 @@ class RenderingManager {
 
 
   Future<void> createMap() async {
-    clearAll();
-    List<polyline_model.polylinedata>? polylineData = await venueManager.getPolylinePolygonDataAllBuildings();
-    List<patchDataModel>? patchData = await venueManager.getPatchDataAllBuildings();
-    List<land>? landmarkData = await venueManager.getLandmarkDataAllBuildings();
+    try {
+      clearAll();
+      List<polyline_model.polylinedata>? polylineData = await venueManager
+          .getPolylinePolygonDataAllBuildings();
+      List<patchDataModel>? patchData = await venueManager
+          .getPatchDataAllBuildings();
+      List<land>? landmarkData = await venueManager
+          .getLandmarkDataAllBuildings();
 
-    print("createBuildings data $polylineData");
-    if(polylineData == null) return;
-    if(patchData == null) return;
-    if(landmarkData == null) return;
+      print("createBuildings data $polylineData");
+      if (polylineData == null) return;
+      if (patchData == null) return;
+      if (landmarkData == null) return;
 
-    for(var buildingPatches in patchData){
-      Set<Polygon>? patchCreated = polygonController.createPatch(buildingPatches);
-      if(patchCreated != null){
-        _patch.addAll(patchCreated);
+      for (var buildingPatches in patchData) {
+        Set<Polygon>? patchCreated = polygonController.createPatch(
+            buildingPatches);
+        if (patchCreated != null) {
+          _patch.addAll(patchCreated);
+        }
       }
-    }
 
-    for (var buildingData in polylineData) {
-      Set<Polygon>? polygonsCreated = polygonController.createRooms(buildingData, 0);
-      venueManager.switchFloor(0,buildingID: buildingData.polyline!.buildingID);
-      if(polygonsCreated != null){
-        _buildingSpecificPolygons[buildingData.polyline!.buildingID!] = polygonsCreated;
+      for (var buildingData in polylineData) {
+        Set<Polygon>? polygonsCreated = polygonController.createRooms(
+            buildingData, 0);
+        venueManager.switchFloor(
+            0, buildingID: buildingData.polyline!.buildingID);
+        if (polygonsCreated != null) {
+          _buildingSpecificPolygons[buildingData.polyline!.buildingID!] =
+              polygonsCreated;
+        }
       }
-    }
 
-    for (var buildingData in landmarkData) {
-      Map<String,Set<Marker>>? markerMap = await markerController.createMarkers(buildingData, 0);
-      if (markerMap != null) {
-        _lowPriorityMarkers[buildingData.landmarks!.first.buildingID!] = markerMap["low"] ?? {};
-        _midPriorityMarkers[buildingData.landmarks!.first.buildingID!] = markerMap["mid"] ?? {};
-        _highPriorityMarkers[buildingData.landmarks!.first.buildingID!] = markerMap["high"] ?? {};
+      for (var buildingData in landmarkData) {
+        Map<String, Set<Marker>>? markerMap = await markerController
+            .createMarkers(buildingData, 0);
+        if (markerMap != null) {
+          _lowPriorityMarkers[buildingData.landmarks!.first.buildingID!] =
+              markerMap["low"] ?? {};
+          _midPriorityMarkers[buildingData.landmarks!.first.buildingID!] =
+              markerMap["mid"] ?? {};
+          _highPriorityMarkers[buildingData.landmarks!.first.buildingID!] =
+              markerMap["high"] ?? {};
+        }
       }
-    }
-    return;
-  }
 
-  Future<void> startDataFechFromServerCycle() async {
-    await venueManager.runDataVersionCycle();
-    if(SwitchDataBase().newDataFromServerDBShouldBeCreated){
-      await updateNewDB().then((_){
-        var switchBox = Hive.box('SwitchingDatabaseInfo');
-        SwitchDataBase().switchGreenDataBase(!switchBox.get('greenDataBase'));
-        SwitchDataBase().newDataFromServerDBShouldBeCreated = false;
-      });
-    }else{
-      print("SwitchDataBase().newDataFromServerDBShouldBeCreated ${SwitchDataBase().newDataFromServerDBShouldBeCreated} NO CREATION OF DB2");
-    }
-  }
+      return;
+    }catch(e){
 
-  Future<void> updateNewDB() async {
-    for (var building in VenueManager().buildings) {
-      await RepositoryManager().runAPICallPatchData(building.sId!);
-      await RepositoryManager().runAPICallPolylineData(building.sId!);
-      await RepositoryManager().runAPICallLandmarkData(building.sId!);
-      await RepositoryManager().runAPICallBeaconData(building.sId!);
-      // Space optimization CODE for FUTURE
-      // if(VersionInfo.buildingPatchDataVersionUpdate.containsKey(building.sId) && VersionInfo.buildingPatchDataVersionUpdate[building.sId]==true){
-      //   RepositoryManager().savePatchDataForDB2(building.sId!);
-      // }
-      // if(VersionInfo.buildingPolylineDataVersionUpdate.containsKey(building.sId) && VersionInfo.buildingPolylineDataVersionUpdate[building.sId]==true){
-      //   RepositoryManager().savePolylineDataForDB2(building.sId!);
-      // }
-      // if(VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(building.sId) && VersionInfo.buildingLandmarkDataVersionUpdate[building.sId]==true){
-      //   RepositoryManager().saveLandmarkDataForDB2(building.sId!);
-      // }
+    }
+    finally{
+      venueManager.runDataVersionCycle();
     }
   }
 

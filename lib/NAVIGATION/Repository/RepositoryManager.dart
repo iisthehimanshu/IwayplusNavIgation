@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
 import 'package:iwaymaps/NAVIGATION/API/GlobalAnnotationapi.dart';
 import 'package:iwaymaps/NAVIGATION/APIMODELS/landmark.dart';
 import 'package:iwaymaps/NAVIGATION/APIMODELS/outbuildingmodel.dart';
@@ -318,6 +319,37 @@ class RepositoryManager{
             if(kDebugMode) print("${dataVersionDetails.getPreLoadPrefix} DATA FROM BLUE DATABASE");
             DataVersionLocalModel responseFromDatabase = DataBaseManager().getDataDB2(dataVersionDetails, bID);
             return dataVersionDetails.conversionFunction(responseFromDatabase.responseBody);
+        }
+    }
+
+    Future<void> startDataFechFromServerCycle() async {
+        if(SwitchDataBase().newDataFromServerDBShouldBeCreated){
+            await updateNewDB().then((_){
+                var switchBox = Hive.box('SwitchingDatabaseInfo');
+                SwitchDataBase().switchGreenDataBase(!switchBox.get('greenDataBase'));
+                SwitchDataBase().newDataFromServerDBShouldBeCreated = false;
+            });
+        }else{
+            print("SwitchDataBase().newDataFromServerDBShouldBeCreated ${SwitchDataBase().newDataFromServerDBShouldBeCreated} NO CREATION OF DB2");
+        }
+    }
+
+    Future<void> updateNewDB() async {
+        for (var building in VenueManager().buildings) {
+            await RepositoryManager().runAPICallPatchData(building.sId!);
+            await RepositoryManager().runAPICallPolylineData(building.sId!);
+            await RepositoryManager().runAPICallLandmarkData(building.sId!);
+            await RepositoryManager().runAPICallBeaconData(building.sId!);
+            // Space optimization CODE for FUTURE
+            // if(VersionInfo.buildingPatchDataVersionUpdate.containsKey(building.sId) && VersionInfo.buildingPatchDataVersionUpdate[building.sId]==true){
+            //   RepositoryManager().savePatchDataForDB2(building.sId!);
+            // }
+            // if(VersionInfo.buildingPolylineDataVersionUpdate.containsKey(building.sId) && VersionInfo.buildingPolylineDataVersionUpdate[building.sId]==true){
+            //   RepositoryManager().savePolylineDataForDB2(building.sId!);
+            // }
+            // if(VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(building.sId) && VersionInfo.buildingLandmarkDataVersionUpdate[building.sId]==true){
+            //   RepositoryManager().saveLandmarkDataForDB2(building.sId!);
+            // }
         }
     }
 

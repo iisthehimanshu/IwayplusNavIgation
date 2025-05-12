@@ -109,8 +109,7 @@ class VenueManager extends BuildingStore{
     for (var building in buildings) {
       await RepositoryManager().runAPICallDataVersion(building.sId!);
     }
+    RepositoryManager().startDataFechFromServerCycle();
   }
-
-
 
 }

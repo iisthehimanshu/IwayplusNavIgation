@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:iwaymaps/IWAYPLUS/Elements/locales.dart';
 import 'package:iwaymaps/NAVIGATION/UserState.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../ViewModel/NearestLandmarkViewModel.dart';
 
 class NearestLandmarkScreen extends StatefulWidget {
   const NearestLandmarkScreen({super.key});
@@ -13,13 +17,21 @@ class NearestLandmarkScreen extends StatefulWidget {
 
 class _NearestLandmarkScreenState extends State<NearestLandmarkScreen> {
   @override
+  void initState() {
+    super.initState();
+
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final floorText = context.watch<NearestLandmarkViewModel>().floorText;
+
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             Text(
-              "You are near , ${LocaleData.floor.getString(context)} ",
+              floorText,
               style: const TextStyle(
                 fontFamily: "Roboto",
                 fontSize: 18,
@@ -30,10 +42,11 @@ class _NearestLandmarkScreenState extends State<NearestLandmarkScreen> {
               textAlign: TextAlign.left,
               softWrap: true,
               overflow: TextOverflow.visible,
-            )
+            ),
           ],
         ),
       ),
     );
   }
 }
+

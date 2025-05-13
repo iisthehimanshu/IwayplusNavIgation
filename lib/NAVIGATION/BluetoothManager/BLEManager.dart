@@ -35,9 +35,7 @@ class BLEManager{
   Timer get getBufferEmitTimer => _bufferEmitTimer!;
 
   Map<String,Map<DateTime,String>> buffer = Map();
-
-  String nearestBeaconFound = "";
-
+  String calculatedNearestBeacon = "";
 
   void startScanning({
     required int bufferSize,
@@ -63,7 +61,7 @@ class BLEManager{
     if(kDebugMode) print("startBufferEmission");
     _bufferEmitTimer?.cancel(); // cancel previous if any
     _bufferEmitTimer = Timer.periodic(Duration(seconds: bufferSizeInSeconds), (_) {
-      final dataToSend = nearestBeaconFound; // Clone current buffer
+      final dataToSend = calculatedNearestBeacon; // Clone current buffer
       print("dataToSend");
       printFull(dataToSend.toString());
       // _bufferedDeviceStreamController.
@@ -185,7 +183,7 @@ class BLEManager{
           finalName = name;
         }
     });
-    nearestBeaconFound = finalName;
+    calculatedNearestBeacon = finalName;
     
     if (kDebugMode) print("Reposition on $finalName $finalWeight $weightAvg");
   }

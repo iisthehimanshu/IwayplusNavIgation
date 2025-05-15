@@ -23,8 +23,11 @@ import 'package:iwaymaps/NAVIGATION/DATABASE/BOXES/WayPointModelBOX.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/DataBaseManager.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/SwitchDataBase.dart';
 import 'package:iwaymaps/NAVIGATION/MapManager/GoogleMapManager.dart';
+import 'package:iwaymaps/NAVIGATION/Panel%20Manager/PanelManager.dart';
+import 'package:iwaymaps/NAVIGATION/Panel%20Manager/PanelState.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 import 'package:iwaymaps/NAVIGATION/VenueManager/VenueManager.dart';
+import 'package:provider/provider.dart';
 import '../NAVIGATION/BluetoothScanAndroid.dart';
 import '../NAVIGATION/Network/NetworkManager.dart';
 import '/IWAYPLUS/Elements/HelperClass.dart';
@@ -76,8 +79,8 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   @override
   void initState(){
     super.initState();
-    GoogleMapManager().closeNearestLandmarkPanel();
     BLEManager bleManager = BLEManager();
+    PanelState.none;
     bleManager.startScanning(
       bufferSize: 6,
       streamFrequency: 6,
@@ -87,7 +90,8 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     bleManager.bufferedDeviceStream.listen((bufferedData) {
       // You can update UI or process data here
       print("Scanned data: $bufferedData");
-      GoogleMapManager().setNearestLandmark(bufferedData);
+      GoogleMapManager(PanelManager()).setNearestLandmark(bufferedData);
+      // if(mounted) context.read<GoogleMapManager>().setNearestLandmark(bufferedData);
     });
     NotificationSocket.receiveMessage();
     // checkForUpdate();

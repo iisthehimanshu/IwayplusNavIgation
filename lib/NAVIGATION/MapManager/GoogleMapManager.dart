@@ -1,46 +1,46 @@
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwaymaps/NAVIGATION/BluetoothManager/BLEManager.dart';
+import 'package:iwaymaps/NAVIGATION/Panel%20Manager/PanelManager.dart';
+import 'package:iwaymaps/NAVIGATION/Panel%20Manager/PanelState.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'RenderingManager.dart';
 import 'package:flutter/foundation.dart';
 
 class GoogleMapManager extends RenderingManager with ChangeNotifier {
-  static final GoogleMapManager _instance = GoogleMapManager._internal();
-  factory GoogleMapManager() => _instance;
-  GoogleMapManager._internal();
-
+  static final GoogleMapManager _instance = GoogleMapManager._internal(PanelManager());
+  factory GoogleMapManager(PanelManager panelManager) => _instance;
+  GoogleMapManager._internal(this.panelManager);
   GoogleMapController? _controller;
-
   GoogleMapController? get controller => _controller;
   CameraPosition get initialPosition => _initialPosition;
-
   String _nearestBeacon = "";
   bool _showNearestLandmarkPanelVar = false;
-
   String? get nearestBeacon => _nearestBeacon;
   bool get showNearestLandmarkPanel => _showNearestLandmarkPanelVar;
 
+
+  final PanelManager panelManager;
+
+
   void setNearestLandmark(String beaconValue) {
+    print(beaconValue);
     _nearestBeacon = beaconValue;
+    print("_nearestBeacon$_nearestBeacon");
   }
 
   Future<void> showNearestLandmarkPanelIfBeaconExists() async {
+    print("showNearestLandmarkPanelIfBeaconExists");
     if (_nearestBeacon.isNotEmpty) {
-      _showNearestLandmarkPanelVar = true;
+      panelManager.showPanel(PanelState.localized);
+
       await BLEManager().waitForBufferEmitCompletion().then((_){
         print("timerCompleted");
         BLEManager().stopScanning();
         notifyListeners();
       });
-
-      // if(BLEManager().getBufferEmitTimer != null && !BLEManager().getBufferEmitTimer.isActive){
-      //   print("TImer completed");
-      // }else{
-      //   print("timer running");
-      // }
-
-
+    }else{
+      print("_nearestBeacon.isEmpty");
     }
   }
 
@@ -127,6 +127,7 @@ class GoogleMapManager extends RenderingManager with ChangeNotifier {
   @override
   void clearAll() {
     super.clearAll();
+    // resetBeaconState();
     notifyListeners();
   }
 

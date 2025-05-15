@@ -331,6 +331,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
         optionListItemBuildingName.forEach((element) {
           searcCategoryhResults.add(
             SearchpageCategoryResults(
+              key: UniqueKey(),
               name: searchText,
               buildingName: element,
               onClicked: onVenueClicked,

@@ -100,7 +100,11 @@ class DirectionInstructionViewModel extends ChangeNotifier {
       }else{
         _sourceUPHeight+=68;
       }
-      totalSourceTurns++;
+      if(dir.turnDirection!.contains("Turn")){
+        print("dir.turnDirection!.contains");
+        print(dir.turnDirection);
+        totalSourceTurns++;
+      }
       if(dir.distanceToNextTurnInFeet != null) {
         totalSourceDistance += dir.distanceToNextTurnInFeet!;
       }
@@ -116,7 +120,9 @@ class DirectionInstructionViewModel extends ChangeNotifier {
         }else{
           _destinationUpHeight+=50;
         }
-        totalDestinationTurns++;
+        if(dir.turnDirection!.contains("Turn")){
+          totalDestinationTurns++;
+        }
         if(dir.distanceToNextTurnInFeet != null) {
           totalDestinationDistance += dir.distanceToNextTurnInFeet!;
         }

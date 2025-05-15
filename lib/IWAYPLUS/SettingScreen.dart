@@ -24,6 +24,10 @@ class _SettingScreenState extends State<SettingScreen> {
   // String? selectedLanguage = 'English';
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
+  final GlobalKey _infoIconKey = GlobalKey();
+  final GlobalKey _infoIconKey1 = GlobalKey();
+  final GlobalKey _infoIconKey2 = GlobalKey();
+  final GlobalKey _infoIconKey3 = GlobalKey();
 
   @override
   void initState() {
@@ -623,11 +627,16 @@ class _SettingScreenState extends State<SettingScreen> {
                       ),
                     ),
                     Spacer(),
-                    Container(
-                      width: 13,
-                      height: 13,
-                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                      child: SvgPicture.asset('assets/images/info.svg'),
+                    GestureDetector(
+                      key: _infoIconKey,
+                      onTap: () => _showTooltip(
+                          context, "Select your height to improve navigation",_infoIconKey),
+                      child: Container(
+                        width: 13,
+                        height: 13,
+                        // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                        child: SvgPicture.asset('assets/images/info.svg'),
+                      ),
                     ),
                   ],
                 ),
@@ -721,11 +730,17 @@ class _SettingScreenState extends State<SettingScreen> {
                       ),
                     ),
                     Spacer(),
-                    Container(
-                      width: 13,
-                      height: 13,
-                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                      child: SvgPicture.asset('assets/images/info.svg'),
+                    GestureDetector(
+                      key: _infoIconKey1,
+                      onTap: () => _showTooltip(
+                          context, "Orientation preference for accurate guidance", _infoIconKey1),
+
+                      child: Container(
+                        width: 13,
+                        height: 13,
+                        // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                        child: SvgPicture.asset('assets/images/info.svg'),
+                      ),
                     ),
                   ],
                 ),
@@ -863,11 +878,16 @@ class _SettingScreenState extends State<SettingScreen> {
                       ),
                     ),
                     Spacer(),
-                    Container(
-                      width: 13,
-                      height: 13,
-                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                      child: SvgPicture.asset('assets/images/info.svg'),
+                    GestureDetector(
+                      key: _infoIconKey2,
+                      onTap: () => _showTooltip(
+                          context, "Preferred navigation mode ", _infoIconKey2),
+                      child: Container(
+                        width: 13,
+                        height: 13,
+                        // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                        child: SvgPicture.asset('assets/images/info.svg'),
+                      ),
                     ),
                   ],
                 ),
@@ -1004,11 +1024,16 @@ class _SettingScreenState extends State<SettingScreen> {
                       ),
                     ),
                     Spacer(),
-                    Container(
-                      width: 13,
-                      height: 13,
-                      // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                      child: SvgPicture.asset('assets/images/info.svg'),
+                    GestureDetector(
+                      key: _infoIconKey3,
+                      onTap: () => _showTooltip(
+                          context, "Show distance in meters or steps.", _infoIconKey3),
+                      child: Container(
+                        width: 13,
+                        height: 13,
+                        // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                        child: SvgPicture.asset('assets/images/info.svg'),
+                      ),
                     ),
                   ],
                 ),
@@ -1159,6 +1184,40 @@ class _SettingScreenState extends State<SettingScreen> {
 
     setState(() {
       _currentLocale = value;
+    });
+  }
+
+  void _showTooltip(BuildContext context, String message, GlobalKey key) {
+    final RenderBox renderBox =
+    key.currentContext!.findRenderObject() as RenderBox;
+    final Offset position = renderBox.localToGlobal(Offset.zero);
+
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: position.dy - 35,
+        right: 0,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.black26,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              message,
+              style: TextStyle(color: Colors.white, fontSize: 14),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+
+    Future.delayed(Duration(seconds: 2), () {
+      overlayEntry.remove();
     });
   }
 }

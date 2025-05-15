@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 
+import '../APIMODELS/polylinedata.dart';
 import '../Cell.dart';
+import '../UserState.dart';
 import '../navigationTools.dart';
 import '../singletonClass.dart';
 // assuming your utils are here
@@ -17,6 +19,8 @@ class PlayPreviewManager {
   bool _isCancelled = false;
   bool _stopAnimation = false;
   static Function alignMapToPath = (List<double> A, List<double> B,{bool isTurn=false}) {};
+  static Function findLift = (String floor, List<Floors> floorData) {};
+  static Function findCommonLift = (List<PolyArray> list1, List<PolyArray> list2) {};
   Map<String, Map<int, Set<gmap.Polyline>>> get pathCovered => _pathCovered;
 
   void clearPreview() {
@@ -31,9 +35,7 @@ class PlayPreviewManager {
     _stopAnimation = true;
   }
 
-  Future<void> playPreviewAnimation({
-    required List<Cell> pathList,
-  }) async {
+  Future<void> playPreviewAnimation({required List<Cell> pathList}) async {
     if (_isPlaying || pathList.isEmpty) return;
     _isPlaying = true;
     _isCancelled = false;
@@ -45,7 +47,9 @@ class PlayPreviewManager {
         pathList.map((e) => e.node).toList(),
         pathList.first.numCols,
       );
-
+      int lastFloorItterated = pathList.first.floor;
+      String lastBidIterated = pathList.first.bid!;
+      await alignFloor(pathList.first.floor, pathList.first.bid!);
       for (int i = 0; i < pathList.length - 2; i++) {
         if (_isCancelled || _stopAnimation) {
           print("🔴 Animation stopped manually.");
@@ -60,6 +64,16 @@ class PlayPreviewManager {
 
         int row1 = next.node % next.numCols;
         int col1 = next.node ~/ next.numCols;
+
+        final buildingId = current.bid!;
+        final floorId = current.floor;
+
+        if(floorId != lastFloorItterated || buildingId != lastBidIterated){
+          await alignFloor(floorId, buildingId);
+          lastFloorItterated = floorId;
+          lastBidIterated = buildingId;
+          currentCoordinates.clear();
+        }
 
         List<double> value = tools.localtoglobal(
           row,
@@ -76,9 +90,6 @@ class PlayPreviewManager {
         final latLng = gmap.LatLng(value[0], value[1]);
         currentCoordinates.add(latLng);
 
-        final buildingId = current.bid!;
-        final floorId = current.floor;
-
         final polyline = gmap.Polyline(
           polylineId: gmap.PolylineId("preview_${floorId}_$i"),
           points: List.from(currentCoordinates),
@@ -94,9 +105,10 @@ class PlayPreviewManager {
         // ✅ Accumulate instead of overwrite
         _pathCovered.putIfAbsent(buildingId, () => {});
         _pathCovered[buildingId]!.putIfAbsent(floorId, () => <gmap.Polyline>{});
+        print("adding for floor $floorId");
         _pathCovered[buildingId]![floorId]!.add(polyline);
 
-        await Future.delayed(const Duration(milliseconds: 100));
+        await Future.delayed(const Duration(milliseconds: 50));
       }
 
       print("✅ Animation complete for ${pathList.first.bid} | Floor ${pathList.first.floor}");
@@ -106,6 +118,26 @@ class PlayPreviewManager {
     } finally {
       _isPlaying = false;
     }
+  }
+
+  Future<void> alignFloor(int floor, String bid)async{
+    if (floor != 0) {
+      List<PolyArray> prevFloorLifts = findLift(
+          tools.numericalToAlphabetical(0),
+          SingletonFunctionController
+              .building.polylinedatamap[bid]!.polyline!.floors!);
+      List<PolyArray> currFloorLifts = findLift(
+          tools.numericalToAlphabetical(floor),
+          SingletonFunctionController
+              .building.polylinedatamap[bid]!.polyline!.floors!);
+      List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+      UserState.xdiff = dvalue[0];
+      UserState.ydiff = dvalue[1];
+    } else {
+      UserState.xdiff = 0;
+      UserState.ydiff = 0;
+    }
+    return;
   }
 
 

@@ -8844,8 +8844,11 @@ bool _isPlaying=false;
                                               excludeSemantics: true,
                                               child: IconButton(
                                                 onPressed: () {
-                                                  PlayPreviewManager().playPreviewAnimation(pathList:PathState.singleCellListPath);
                                                   PlayPreviewManager.alignMapToPath=alignMapToPath;
+                                                  PlayPreviewManager.findLift=findLift;
+                                                  PlayPreviewManager.findCommonLift=findCommonLift;
+                                                  PlayPreviewManager().playPreviewAnimation(pathList:PathState.singleCellListPath);
+
                                                   // setState((){
                                                   //   _isPlaying=!_isPlaying;
                                                   //   singleroute.clear();
@@ -11957,21 +11960,22 @@ bool _isPlaying=false;
     });
 
     final pathData = PlayPreviewManager().pathCovered;
-    if (pathData.containsKey(buildingAllApi.selectedBuildingID)) {
-      final floorMap = pathData[buildingAllApi.selectedBuildingID]!;
-      if (floorMap.containsKey(PathState.destinationFloor)) {
+    if (pathData.containsKey(buildingAllApi.getStoredString())) {
+      final floorMap = pathData[buildingAllApi.getStoredString()]!;
+      if (floorMap.containsKey(SingletonFunctionController.building.floor[buildingAllApi.getStoredString()])) {
         // ✅ Get only the polylines for the destination floor
-        final previewPolyline = floorMap[PathState.destinationFloor]!;
+        final previewPolyline = floorMap[SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]]!;
+        print("previewPolyline ${previewPolyline.length}");
         // 🧼 Optional: This ensures createRooms is only called once
-        if (!hasRun) {
-          hasRun = true;
-          createRooms(
-            SingletonFunctionController
-                .building
-                .polylinedatamap[buildingAllApi.selectedBuildingID]!,
-            PathState.destinationFloor,
-          );
-        }
+        // if (!hasRun) {
+        //   hasRun = true;
+        //   createRooms(
+        //     SingletonFunctionController
+        //         .building
+        //         .polylinedatamap[buildingAllApi.selectedBuildingID]!,
+        //     PathState.destinationFloor,
+        //   );
+        // }
 
         // ✅ Add only relevant floor's polylines
         poly = poly.union(previewPolyline);
@@ -12949,8 +12953,7 @@ bool _isPlaying=false;
                   SizedBox(height: 28.0),
                   DebugToggle.Slider ? Text("${user.theta}") : Container(),
                   // Text(SingletonFunctionController.SC_IL_RSSI_AVERAGE.toString()),
-
-
+                  Text(user.cellPath.length.toString()),
                   // Text("coord [${user.coordX},${user.coordY}] \n"
                   //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
                   // "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
@@ -13162,40 +13165,45 @@ bool _isPlaying=false;
                         // } else {
                         //   _recenterMap();
                         // }
-                        debugMarker.clear();
-                        if (!user.isnavigating && !isLocalized) {
-                          SingletonFunctionController.btadapter.emptyBin();
-                          SingletonFunctionController.btadapter
-                              .stopScanning();
-                          if (Platform.isAndroid) {
-                            SingletonFunctionController.btadapter
-                                .startScanning(
-                                SingletonFunctionController.apibeaconmap);
-                          } else {
-                            SingletonFunctionController.btadapter
-                                .startScanningIOS(
-                                SingletonFunctionController.apibeaconmap);
-                          }
-                          setState(() {
-                            isLocalized = true;
-                            resBeacons =
-                                SingletonFunctionController.apibeaconmap;
-                          });
-                          late Timer _timer;
-                          _timer = Timer.periodic(
-                              Duration(milliseconds: 5000), (timer) {
-                            localizeUser().then((value) => {
-                              setState(() {
-                                isLocalized = false;
-                              })
-                            });
 
-                            _timer.cancel();
-                          });
-                        } else {
-                          _recenterMap();
-                        }
 
+
+
+                        // debugMarker.clear();
+                        // if (!user.isnavigating && !isLocalized) {
+                        //   SingletonFunctionController.btadapter.emptyBin();
+                        //   SingletonFunctionController.btadapter
+                        //       .stopScanning();
+                        //   if (Platform.isAndroid) {
+                        //     SingletonFunctionController.btadapter
+                        //         .startScanning(
+                        //         SingletonFunctionController.apibeaconmap);
+                        //   } else {
+                        //     SingletonFunctionController.btadapter
+                        //         .startScanningIOS(
+                        //         SingletonFunctionController.apibeaconmap);
+                        //   }
+                        //   setState(() {
+                        //     isLocalized = true;
+                        //     resBeacons =
+                        //         SingletonFunctionController.apibeaconmap;
+                        //   });
+                        //   late Timer _timer;
+                        //   _timer = Timer.periodic(
+                        //       Duration(milliseconds: 5000), (timer) {
+                        //     localizeUser().then((value) => {
+                        //       setState(() {
+                        //         isLocalized = false;
+                        //       })
+                        //     });
+                        //
+                        //     _timer.cancel();
+                        //   });
+                        // } else {
+                        //   _recenterMap();
+                        // }
+
+                        print("pathcovered ${PlayPreviewManager().pathCovered[buildingAllApi.getStoredString()]?.keys}");
                       },
                       child: Semantics(
                         label:

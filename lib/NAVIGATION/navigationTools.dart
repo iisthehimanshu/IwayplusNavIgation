@@ -125,10 +125,9 @@ class tools {
 
   static bool gotBhart = false;
 
-  static List<double> localtoglobal(int x, int y,PDM.patchDataModel? patchData) {
-
-    x = x - UserState.xdiff;
-    y = y - UserState.ydiff;
+  static List<double> localtoglobal(int x, int y,PDM.patchDataModel? patchData, {int? xdiff, int? ydiff}) {
+    x = x - (xdiff??UserState.xdiff);
+    y = y - (ydiff??UserState.ydiff);
 
     ////
     PDM.patchDataModel Data = PDM.patchDataModel();

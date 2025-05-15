@@ -13,7 +13,7 @@ class SearchpageCategoryResults extends StatefulWidget {
   final String name;
   final String buildingName;
 
-  const SearchpageCategoryResults({required this.name, required this.buildingName,required this.onClicked});
+  const SearchpageCategoryResults({Key? key, required this.name,required this.buildingName,required this.onClicked}):super(key: key);
 
   @override
   State<SearchpageCategoryResults> createState() => _SearchpageCategoryResultsState();
@@ -46,19 +46,19 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
     print("sortedListString");
     print(sortedListString);
   }
-  Future<void> fetchlist()async{
-    buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
+  Future<void> fetchlist() async {
+    buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
       await landmarkApi().fetchLandmarkData(id: key).then((value){
-        value.landmarksMap?.forEach((key, value) {
-          if (value.floor != null && value.buildingName == widget.buildingName) {
-            floors.add(value.floor!);
-            //floors.sort();
-            print("floors");
-            print(floors);
-          } else {
-            return;
+        value.landmarksMap?.forEach((key, landmark){
+          if (landmark.floor != null &&
+              landmark.buildingName == widget.buildingName &&
+              landmark.name != null &&
+              landmark.name!.toUpperCase().contains(widget.name.toUpperCase())) {
+            // print("Matched floor: ${landmark.name} ${landmark.floor}");
+            floors.add(landmark.floor!);
           }
         });
+
         landmarkData.mergeLandmarks(value.landmarks);
       });
     });

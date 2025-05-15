@@ -21,6 +21,7 @@ class PlayPreviewManager {
   static Function alignMapToPath = (List<double> A, List<double> B,{bool isTurn=false}) {};
   static Function findLift = (String floor, List<Floors> floorData) {};
   static Function findCommonLift = (List<PolyArray> list1, List<PolyArray> list2) {};
+  static Function createRooms=(polylinedata value, int floor){};
   Map<String, Map<int, Set<gmap.Polyline>>> get pathCovered => _pathCovered;
 
   void clearPreview() {
@@ -40,7 +41,6 @@ class PlayPreviewManager {
     _isPlaying = true;
     _isCancelled = false;
     _stopAnimation = false;
-
     try {
       List<gmap.LatLng> currentCoordinates = [];
       List<int> turnPoints = tools.getTurnpoints(
@@ -69,9 +69,11 @@ class PlayPreviewManager {
         final floorId = current.floor;
 
         if(floorId != lastFloorItterated || buildingId != lastBidIterated){
+
           await alignFloor(floorId, buildingId);
           lastFloorItterated = floorId;
           lastBidIterated = buildingId;
+          createRooms(SingletonFunctionController.building.polylinedatamap[lastBidIterated],lastFloorItterated);
           currentCoordinates.clear();
         }
 

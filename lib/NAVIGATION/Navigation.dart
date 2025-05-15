@@ -8847,6 +8847,13 @@ bool _isPlaying=false;
                                                   PlayPreviewManager.alignMapToPath=alignMapToPath;
                                                   PlayPreviewManager.findLift=findLift;
                                                   PlayPreviewManager.findCommonLift=findCommonLift;
+                                                  PlayPreviewManager.createRooms=(polylinedata value, int floor){
+                                                    createRooms(value, floor);
+                                                    SingletonFunctionController
+                                                        .building.floor[
+                                                    buildingAllApi
+                                                        .getStoredString()] = floor;
+                                                  };
                                                   PlayPreviewManager().playPreviewAnimation(pathList:PathState.singleCellListPath);
 
                                                   // setState((){
@@ -13049,21 +13056,20 @@ bool _isPlaying=false;
                                 : Color(0xff24b9b0),
                             onTap: () {
                               if(revfloorList[i] == PathState.destinationFloor){
-                                _polygon.clear();
-                                _polygon.add(Polygon(
-                                  polygonId: PolygonId("$matchPolygonPoints"),
-                                  points: matchPolygonPoints,
-                                  fillColor: Colors.lightBlueAccent.withOpacity(0.4),
-                                  strokeColor:Colors.blue,
-                                  strokeWidth: 2,
-                                ));
+                                // _polygon.clear();
+                                // _polygon.add(Polygon(
+                                //   polygonId: PolygonId("$matchPolygonPoints"),
+                                //   points: matchPolygonPoints,
+                                //   fillColor: Colors.lightBlueAccent.withOpacity(0.4),
+                                //   strokeColor:Colors.blue,
+                                //   strokeWidth: 2,
+                                // ));
                               }else{
                                 _polygon.clear();
                               }
                               //_polygon.clear();
                               print("_polygon.length");
                               print(_polygon.length);
-
                               cachedPolygon.clear();
                               circles.clear();
                               _markers.clear();

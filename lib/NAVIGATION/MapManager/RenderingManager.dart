@@ -115,37 +115,6 @@ class RenderingManager {
     return;
   }
 
-  Future<void> startDataFechFromServerCycle() async {
-    await venueManager.runDataVersionCycle();
-    if(SwitchDataBase().newDataFromServerDBShouldBeCreated){
-      await updateNewDB().then((_){
-        var switchBox = Hive.box('SwitchingDatabaseInfo');
-        SwitchDataBase().switchGreenDataBase(!switchBox.get('greenDataBase'));
-        SwitchDataBase().newDataFromServerDBShouldBeCreated = false;
-      });
-    }else{
-      print("SwitchDataBase().newDataFromServerDBShouldBeCreated ${SwitchDataBase().newDataFromServerDBShouldBeCreated} NO CREATION OF DB2");
-    }
-  }
-
-  Future<void> updateNewDB() async {
-    for (var building in VenueManager().buildings) {
-      await RepositoryManager().runAPICallPatchData(building.sId!);
-      await RepositoryManager().runAPICallPolylineData(building.sId!);
-      await RepositoryManager().runAPICallLandmarkData(building.sId!);
-      await RepositoryManager().runAPICallBeaconData(building.sId!);
-      // Space optimization CODE for FUTURE
-      // if(VersionInfo.buildingPatchDataVersionUpdate.containsKey(building.sId) && VersionInfo.buildingPatchDataVersionUpdate[building.sId]==true){
-      //   RepositoryManager().savePatchDataForDB2(building.sId!);
-      // }
-      // if(VersionInfo.buildingPolylineDataVersionUpdate.containsKey(building.sId) && VersionInfo.buildingPolylineDataVersionUpdate[building.sId]==true){
-      //   RepositoryManager().savePolylineDataForDB2(building.sId!);
-      // }
-      // if(VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(building.sId) && VersionInfo.buildingLandmarkDataVersionUpdate[building.sId]==true){
-      //   RepositoryManager().saveLandmarkDataForDB2(building.sId!);
-      // }
-    }
-  }
 
   Future<void> changeFloorOfBuilding(String buildingID, int floor) async {
     polyline_model.polylinedata? polylineData = await venueManager.getPolylinePolygonData(buildingID);

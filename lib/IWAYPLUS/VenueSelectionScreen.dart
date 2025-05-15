@@ -72,11 +72,12 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   // Replace with your actual document ID
   bool checkedForBuildingAllUpdated = false;
   bool isLocating=false;
+  BLEManager bleManager = BLEManager();
+
 
   @override
   void initState(){
     super.initState();
-    BLEManager bleManager = BLEManager();
     bleManager.startScanning(
       bufferSize: 6,
       streamFrequency: 6,

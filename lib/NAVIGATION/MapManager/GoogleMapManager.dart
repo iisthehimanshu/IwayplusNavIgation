@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwaymaps/NAVIGATION/BluetoothManager/BLEManager.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/SwitchDataBase.dart';
+import 'package:iwaymaps/NAVIGATION/VenueManager/VenueManager.dart';
 import '../APIMODELS/beaconData.dart';
 import 'RenderingManager.dart';
 import 'package:flutter/foundation.dart';
@@ -58,7 +59,7 @@ class GoogleMapManager extends RenderingManager with ChangeNotifier {
 
     fitPolygonsInView(polygons);
 
-    startDataFechFromServerCycle();
+    VenueManager().startDataFechFromServerCycle();
     showNearestLandmarkPanelIfBeaconExists();
   }
 

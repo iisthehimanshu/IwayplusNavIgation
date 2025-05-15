@@ -39,6 +39,7 @@ import 'package:iwaymaps/NAVIGATION/path_snapper.dart';
 import 'package:iwaymaps/NAVIGATION/realWorldModel.dart';
 import 'package:iwaymaps/NAVIGATION/routeOption.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
+import 'package:iwaymaps/NAVIGATION/somethingWentWrong.dart';
 import 'package:iwaymaps/NAVIGATION/waypoint.dart';
 import 'package:lottie/lottie.dart' as lott;
 import 'package:permission_handler/permission_handler.dart';
@@ -2933,7 +2934,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       await DataVersionApi()
           .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
     }catch(e){
-      print(" APICALLS DataVersionApi API TRY-CATCH");
+      Navigator.pushReplacement(context, MaterialPageRoute(
+          builder: (context) => const SomethingWentWrongPage(
+            errorMessage: 'We couldn\'t load the data. Please check your internet connection.',
+          )));
     }
 
     _updateProgress();
@@ -3946,141 +3950,74 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Animation<double>? _sizeAnimation;
   late Animation<double> _zoomAnimation;
   late Animation<LatLng> _latLngAnimation;
-  Future<void> moveCameraSmoothly({
-    required GoogleMapController controller,
-    required CameraPosition targetPosition,
-    required LatLng currTarget,
-    Duration duration = const Duration(milliseconds:100),
-    int steps = 50,
-  }) async {
-    print("runnningggg");
-    // Get the current camera position
-    final LatLng currentTarget;
-    if(tappedPolygonCoordinates.isNotEmpty){
-      currentTarget=tools.calculateRoomCenterinLatLng(tappedPolygonCoordinates);
-    }else{
-      currentTarget=currTarget;
-    }
-    // Assume the current zoom level
-    double currentZoom = await controller.getZoomLevel();
-    // Extract details for interpolation
-    final double latIncrement =
-        (targetPosition.target.latitude - currentTarget.latitude) / steps;
-    final double lngIncrement =
-        (targetPosition.target.longitude - currentTarget.longitude) / steps;
-    final double zoomIncrement = (targetPosition.zoom - currentZoom) / steps;
 
-    // Gradually update camera position
-    for (int i = 1; i <= steps; i++) {
-      final LatLng intermediateTarget = LatLng(
-        currentTarget.latitude + (latIncrement * i),
-        currentTarget.longitude + (lngIncrement * i),
-      );
-      final double intermediateZoom = currentZoom + (zoomIncrement * i);
-
-      await controller.moveCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: intermediateTarget,
-            zoom: intermediateZoom,
-          ),
-        ),
-      );
-
-      // Add a delay between each step
-      await Future.delayed(duration ~/ steps);
-    }
-  }
-
-
-  Future<void> addselectedRoomMarker(List<LatLng> polygonPoints,String assetPath ,{Color? color}) async {
+  Future<void> addselectedRoomMarker(List<LatLng> polygonPoints, String assetPath, {Color? color}) async {
     // Cancel any ongoing animation
     _controller12?.stop();
     _controller12?.dispose();
     _controller12 = null;
-    selectedroomMarker.clear(); // Clear existing markers
+    selectedroomMarker.clear();
     matchPolygonId = PolygonId("$polygonPoints");
     matchPolygonPoints = polygonPoints;
     _polygon.clear();
     _polygon.add(Polygon(
       polygonId: PolygonId("$polygonPoints"),
       points: polygonPoints,
-      fillColor: color != null
-          ? color.withOpacity(0.4)
-          : Colors.lightBlueAccent.withOpacity(0.4),
+      fillColor: color?.withOpacity(0.4) ?? Colors.lightBlueAccent.withOpacity(0.4),
       strokeColor: color ?? Colors.blue,
       strokeWidth: 2,
     ));
     cachedPolygon.clear();
-    List<geo.LatLng> points = [];
-    for (var e in polygonPoints) {
-      points.add(geo.LatLng(e.latitude, e.longitude));
-    }
 
+    List<geo.LatLng> points = polygonPoints.map((e) => geo.LatLng(e.latitude, e.longitude)).toList();
     Uint8List baseIcon = await getImagesFromMarker(assetPath, 140);
 
-    // Initialize a new animation controller
     _controller12 = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 900),
+      duration: Duration(milliseconds: 200),
     );
 
     _sizeAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
       CurvedAnimation(parent: _controller12!, curve: Curves.easeInOut),
     );
 
-    void updateMarkerSize() async {
+    _controller12?.addListener(() async {
       double scale = _sizeAnimation?.value ?? 1.0;
-      Uint8List resizedIcon =
-      await getImagesFromMarker(assetPath, (140 * scale).toInt());
+      Uint8List resizedIcon = await getImagesFromMarker(assetPath, (140 * scale).toInt());
 
       setState(() {
-        if (selectedroomMarker.containsKey(buildingAllApi.getStoredString())) {
-          selectedroomMarker[buildingAllApi.getStoredString()]?.add(
-            Marker(
-              markerId: MarkerId('selectedRoomMarker'),
-              position: calculateRoomCenter(polygonPoints),
-              icon: BitmapDescriptor.fromBytes(resizedIcon),
-              onTap: () {},
-            ),
-          );
-        } else {
-          selectedroomMarker[buildingAllApi.getStoredString()] = Set<Marker>();
-          selectedroomMarker[buildingAllApi.getStoredString()]?.add(
-            Marker(
-              markerId: MarkerId('selectedRoomMarker'),
-              position: calculateRoomCenter(polygonPoints),
-              icon: BitmapDescriptor.fromBytes(resizedIcon),
-              onTap: () {},
-            ),
-          );
-        }
-      });
-    }
-
-    // Start the animation
-    _controller12?.addListener(updateMarkerSize);
-    _controller12?.repeat(reverse: true);
-
-    // Stop animation after 5 seconds
-    Timer(Duration(seconds: 5), () {
-      _controller12?.stop();
-      _controller12?.dispose();
-      _controller12 = null;
-
-      setState(() {
-        selectedroomMarker[buildingAllApi.getStoredString()]?.add(
+        final key = buildingAllApi.getStoredString();
+        selectedroomMarker[key] = {
           Marker(
             markerId: MarkerId('selectedRoomMarker'),
             position: calculateRoomCenter(polygonPoints),
-            icon: BitmapDescriptor.fromBytes(baseIcon),
+            icon: BitmapDescriptor.fromBytes(resizedIcon),
             onTap: () {},
-          ),
-        );
+          )
+        };
       });
     });
 
-    // polygonPoints=[];
+    _controller12?.addStatusListener((status) async {
+      if (status == AnimationStatus.completed) {
+        _controller12?.dispose();
+        _controller12 = null;
+
+        setState(() {
+          final key = buildingAllApi.getStoredString();
+          selectedroomMarker[key] = {
+            Marker(
+              markerId: MarkerId('selectedRoomMarker'),
+              position: calculateRoomCenter(polygonPoints),
+              icon: BitmapDescriptor.fromBytes(baseIcon),
+              onTap: () {},
+            )
+          };
+        });
+      }
+    });
+
+    _controller12?.forward();
   }
 
   Future<void> addselectedMarker(LatLng point) async {
@@ -4801,55 +4738,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       fillColor: Color(0xffFBEAEA),
                       consumeTapEvents: true,
                       onTap: () {
-                        _googleMapController.moveCamera(
-                          CameraUpdate.newLatLngZoom(
-                            tools.calculateRoomCenterinLatLng(coordinates),
-                            22,
-                          ),
-                        );
-                        setState(() {
-                          tappedPolygonCoordinates=coordinates;
-                        });
-
-                        // smoothZoomAndPan(coordinates,22);
-                        setState(() {
-                          if (SingletonFunctionController.building
-                              .selectedLandmarkID != polyArray.id &&
-                              !user.isnavigating &&
-                              !_isRoutePanelOpen) {
-                            user.reset();
-                            PathState = pathState.withValues(
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                null,
-                                0);
-                            pathMarkers.clear();
-                            PathState.path.clear();
-                            PathState.sourcePolyID = "";
-                            PathState.destinationPolyID = "";
-                            singleroute.clear(); pathCovered.clear();
-
-                            user.isnavigating = false;
-                            _isnavigationPannelOpen = false;
-                            SingletonFunctionController.building
-                                .selectedLandmarkID = polyArray.id;
-                            SingletonFunctionController.building.ignoredMarker
-                                .clear();
-                            SingletonFunctionController.building.ignoredMarker
-                                .add(polyArray.id!);
-                            _isBuildingPannelOpen = false;
-                            _isRoutePanelOpen = false;
-                            singleroute.clear(); pathCovered.clear();
-                            _isLandmarkPanelOpen = true;
-                            PathState.directions = [];
-                            interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,'assets/ATM.png');
-                          }
-                        });
+                        polygonTap(coordinates, polyArray.id!);
                       }));
                 }
               } else{
@@ -4867,57 +4756,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       fillColor: Color(0xffE8E3E7),
                       consumeTapEvents: true,
                       onTap: () {
-                        // _googleMapController.moveCamera(
-                        //   CameraUpdate.newLatLngZoom(
-                        //     tools.calculateRoomCenterinLatLng(coordinates),
-                        //     22,
-                        //   ),
-                        // );
-                        setState(() {
-                          tappedPolygonCoordinates=coordinates;
-                        });
-
-                        moveCameraSmoothly(controller: _googleMapController, targetPosition:  CameraPosition(
-                            target: tools.calculateRoomCenterinLatLng(coordinates),zoom:22), currTarget: LatLng(user.lat,user.lng));
-                      //  smoothZoomAndPan(coordinates,22);
-                        setState(() {
-                          if (SingletonFunctionController.building
-                              .selectedLandmarkID != polyArray.id &&
-                              !user.isnavigating &&
-                              !_isRoutePanelOpen) {
-                            user.reset();
-                            PathState = pathState.withValues(
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                null,
-                                0);
-                            pathMarkers.clear();
-                            PathState.path.clear();
-                            PathState.sourcePolyID = "";
-                            PathState.destinationPolyID = "";
-                            singleroute.clear(); pathCovered.clear();
-
-                            user.isnavigating = false;
-                            _isnavigationPannelOpen = false;
-                            SingletonFunctionController.building
-                                .selectedLandmarkID = polyArray.id;
-                            SingletonFunctionController.building.ignoredMarker
-                                .clear();
-                            SingletonFunctionController.building.ignoredMarker
-                                .add(polyArray.id!);
-                            _isBuildingPannelOpen = false;
-                            _isRoutePanelOpen = false;
-                            singleroute.clear(); pathCovered.clear();
-                            _isLandmarkPanelOpen = true;
-                            PathState.directions = [];
-                            interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,'assets/Generic Marker.png');
-                          }
-                        });
+                        polygonTap(coordinates, polyArray.id!);
                       }));
                 }
               }
@@ -4954,50 +4793,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       consumeTapEvents: true,
                       fillColor: Color(0xffDAE6F1),
                       onTap: () {
-                        _googleMapController.moveCamera(
-                          CameraUpdate.newLatLngZoom(
-                            tools.calculateRoomCenterinLatLng(coordinates),
-                            22,
-                          ),
-                        );
-                        setState(() {
-                          tappedPolygonCoordinates=coordinates;
-                        });
-
-                        // smoothZoomAndPan(coordinates,22);
-                        setState(() {
-                          if (SingletonFunctionController
-                              .building.selectedLandmarkID !=
-                              polyArray.id &&
-                              !user.isnavigating &&
-                              !_isRoutePanelOpen) {
-                            user.reset();
-                            PathState = pathState.withValues(
-                                -1, -1, -1, -1, -1, -1, null, 0);
-                            pathMarkers.clear();
-                            PathState.path.clear();
-                            PathState.sourcePolyID = "";
-                            PathState.destinationPolyID = "";
-                            singleroute.clear(); pathCovered.clear();
-
-                            user.isnavigating = false;
-                            _isnavigationPannelOpen = false;
-                            SingletonFunctionController
-                                .building.selectedLandmarkID = polyArray.id;
-                            SingletonFunctionController.building.ignoredMarker
-                                .clear();
-                            SingletonFunctionController.building.ignoredMarker
-                                .add(polyArray.id!);
-                            _isBuildingPannelOpen = false;
-                            _isRoutePanelOpen = false;
-                            singleroute.clear(); pathCovered.clear();
-                            _isLandmarkPanelOpen = true;
-                            PathState.directions = [];
-                            interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,'assets/entry.png',
-                                color: Colors.greenAccent);
-                          }
-                        });
+                        polygonTap(coordinates, polyArray.id!);
                       }));
                 }
               } else if (polyArray.cubicleName == "Male Washroom") {
@@ -5013,52 +4809,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       strokeColor: Color(0xff6EBCF7),
                       fillColor: Color(0xFFE7F4FE),
                       onTap: () {
-                        // _googleMapController.moveCamera(
-                        //   CameraUpdate.newLatLngZoom(
-                        //     tools.calculateRoomCenterinLatLng(coordinates),
-                        //     22,
-                        //   ),
-                        // );
-                        setState(() {
-                          tappedPolygonCoordinates=coordinates;
-                        });
-
-                        moveCameraSmoothly(controller: _googleMapController, targetPosition:  CameraPosition(
-                            target: tools.calculateRoomCenterinLatLng(coordinates),zoom:22), currTarget: LatLng(user.lat,user.lng));
-                       // smoothZoomAndPan(coordinates,22);
-                        setState(() {
-                          if (SingletonFunctionController
-                              .building.selectedLandmarkID !=
-                              polyArray.id &&
-                              !user.isnavigating &&
-                              !_isRoutePanelOpen) {
-                            user.reset();
-                            PathState = pathState.withValues(
-                                -1, -1, -1, -1, -1, -1, null, 0);
-                            pathMarkers.clear();
-                            PathState.path.clear();
-                            PathState.sourcePolyID = "";
-                            PathState.destinationPolyID = "";
-                            singleroute.clear(); pathCovered.clear();
-
-                            user.isnavigating = false;
-                            _isnavigationPannelOpen = false;
-                            SingletonFunctionController
-                                .building.selectedLandmarkID = polyArray.id;
-                            SingletonFunctionController.building.ignoredMarker
-                                .clear();
-                            SingletonFunctionController.building.ignoredMarker
-                                .add(polyArray.id!);
-                            _isBuildingPannelOpen = false;
-                            _isRoutePanelOpen = false;
-                            singleroute.clear(); pathCovered.clear();
-                            _isLandmarkPanelOpen = true;
-                            PathState.directions = [];
-                            interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,'assets/Generic Marker.png',
-                                color: Colors.white);
-                          }
-                        });
+                        polygonTap(coordinates, polyArray.id!);
                       }));
                 }
               } else if (polyArray.cubicleName == "Female Washroom") {
@@ -5074,53 +4825,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       strokeColor: Color(0xff6EBCF7),
                       fillColor: Color(0xFFE7F4FE),
                       onTap: () {
-                        // _googleMapController.moveCamera(
-                        //   CameraUpdate.newLatLngZoom(
-                        //     tools.calculateRoomCenterinLatLng(coordinates),
-                        //     22,
-                        //   ),
-                        // );
-                        setState(() {
-                          tappedPolygonCoordinates=coordinates;
-                        });
-
-
-                        moveCameraSmoothly(controller: _googleMapController, targetPosition:  CameraPosition(
-                            target: tools.calculateRoomCenterinLatLng(coordinates),zoom:22), currTarget: LatLng(user.lat,user.lng));
-                       // smoothZoomAndPan(coordinates,22);
-                        setState(() {
-                          if (SingletonFunctionController
-                              .building.selectedLandmarkID !=
-                              polyArray.id &&
-                              !user.isnavigating &&
-                              !_isRoutePanelOpen) {
-                            user.reset();
-                            PathState = pathState.withValues(
-                                -1, -1, -1, -1, -1, -1, null, 0);
-                            pathMarkers.clear();
-                            PathState.path.clear();
-                            PathState.sourcePolyID = "";
-                            PathState.destinationPolyID = "";
-                            singleroute.clear(); pathCovered.clear();
-
-                            user.isnavigating = false;
-                            _isnavigationPannelOpen = false;
-                            SingletonFunctionController
-                                .building.selectedLandmarkID = polyArray.id;
-                            SingletonFunctionController.building.ignoredMarker
-                                .clear();
-                            SingletonFunctionController.building.ignoredMarker
-                                .add(polyArray.id!);
-                            _isBuildingPannelOpen = false;
-                            _isRoutePanelOpen = false;
-                            singleroute.clear(); pathCovered.clear();
-                            _isLandmarkPanelOpen = true;
-                            PathState.directions = [];
-                            interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,'assets/Generic Marker.png',
-                                color: Colors.white);
-                          }
-                        });
+                        polygonTap(coordinates, polyArray.id!);
                       }));
                 }
               } else if (polyArray.cubicleName!
@@ -6749,9 +6454,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                         ),
                       ),
                       onPressed: () async {
-                        if(tappedPolygonCoordinates.isNotEmpty){
-                          moveCameraSmoothly(controller: _googleMapController, targetPosition: CameraPosition(target: LatLng(user.lat,user.lng),zoom: 22), currTarget: tools.calculateRoomCenterinLatLng(tappedPolygonCoordinates));
-                        }
                         _polygon.clear();
                         cachedPolygon.clear();
                         // circles.clear();
@@ -8050,13 +7752,20 @@ int currentCols=0;
 
         }
       }
+      BitmapDescriptor textMarker = await bitmapDescriptorFromTextAndImage(
+          PathState.destinationName, 'assets/pyramids.png',imageSize: const Size(95, 95),color: Colors.black);;
+      // SingletonFunctionController.building.landmarkdata!.then((land) async {
+      //   land.landmarksMap?[SingletonFunctionController.building.selectedLandmarkID];
+      //
+      // });
       setState(() {
         if (renderDestination && liftName == null) {
           innerMarker.add(
             Marker(
               markerId: MarkerId('destination${bid}'),
               position: LatLng(dvalue[0], dvalue[1]),
-              icon: BitmapDescriptor.defaultMarker,
+              icon: textMarker??BitmapDescriptor.defaultMarker,
+
             ),
           );
         }
@@ -9131,8 +8840,6 @@ bool _isPlaying=false;
     return Semantics(
       label: "Start Navigation",
       hint: "Button. Double tap to activate",
-
-
 
       sortKey: const OrdinalSortKey(1),
 
@@ -11827,8 +11534,8 @@ bool _isPlaying=false;
                 color: Colors.grey,
               ),
             ],
-            minHeight: 80,
-            maxHeight: 80,
+            minHeight: 92,
+            maxHeight: 92,
             panel: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
@@ -12860,19 +12567,6 @@ bool _isPlaying=false;
                       ? Semantics(
                     label: "Change floor",
                     child: SpeedDial(
-                      child: Text(
-                        SingletonFunctionController.building.floor == 0
-                            ? 'G'
-                            : '${SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]}',
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xff24b9b0),
-                          height: 19 / 16,
-
-                        ),
-                      ),
                       activeIcon: Icons.close,
                       backgroundColor: Colors.white,
                       children: List.generate(
@@ -12969,6 +12663,19 @@ bool _isPlaying=false;
                             },
                           );
                         },
+                      ),
+                      child: Text(
+                        SingletonFunctionController.building.floor[buildingAllApi.getStoredString()] == 0
+                            ? 'G'
+                            : '${SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]}',
+                        style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xff24b9b0),
+                          height: 19 / 16,
+
+                        ),
                       ),
                     ),
                   )

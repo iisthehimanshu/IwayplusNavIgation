@@ -968,7 +968,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }
   }
 
-  static Icon getCustomIcon(String direction) {
+  static Icon? getCustomIcon(String direction) {
     if (direction.toLowerCase().contains("lift")) {
       return Icon(
         Icons.elevator,
@@ -1030,11 +1030,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         size: 40,
       );
     } else {
-      return Icon(
-        Icons.check_box_outline_blank,
-        color: Color(0xff01544f),
-        size: 40,
-      );
+      return null;
     }
   }
 
@@ -1356,7 +1352,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 class scrollableDirection extends StatelessWidget {
   String Direction;
   String steps;
-  Icon i;
+  Icon? i;
   int DirectionIndex;
   int nextTurnIndex;
   List<direction> listOfDirections;
@@ -1425,7 +1421,7 @@ class scrollableDirection extends StatelessWidget {
     }
   }
 
-  Icon chooseIcon() {
+  Icon? chooseIcon() {
     try {
       if (listOfDirections.isNotEmpty &&
           DirectionIndex < listOfDirections.length) {
@@ -1507,7 +1503,7 @@ class scrollableDirection extends StatelessWidget {
                   SizedBox(
                     height: 4,
                   ),
-                  Container(
+                  chooseIcon() == null? Container():Container(
                     height: 40,
                     width: 40,
                     decoration: BoxDecoration(

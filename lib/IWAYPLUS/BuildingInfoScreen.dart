@@ -82,7 +82,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
         print("timestamppp1");
         print(DateTime.timestamp());
         print(allBuildingID);
-        controller.executeFunction(allBuildingID);
+        // controller.executeFunction(allBuildingID);
       });
     });
     // widget.receivedAllBuildingList!.forEach((element) {

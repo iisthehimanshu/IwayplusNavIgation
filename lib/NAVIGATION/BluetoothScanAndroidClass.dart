@@ -61,22 +61,17 @@ class BluetoothScanAndroidClass{
       print("Failed to stop scan: ${e.message}");
     }
   }
-
-
-  BluetoothDevice parseDeviceDetails(String response) {
+  BluetoothDevice parseDeviceDetails(String response){
     final deviceRegex = RegExp(
       r'Device Name: (.+?)\n.*?Address: (.+?)\n.*?RSSI: (-?\d+).*?Raw Data: ([0-9A-Fa-f\-]+)',
       dotAll: true,
     );
-
     final match = deviceRegex.firstMatch(response);
-
     if (match != null) {
       final deviceName = match.group(1) ?? 'Unknown';
       final deviceAddress = match.group(2) ?? 'Unknown';
       final deviceRssi = match.group(3) ?? '0';
       final rawData = match.group(4) ?? '';
-
       return BluetoothDevice(
         DeviceName: deviceName,
         DeviceAddress: deviceAddress,
@@ -118,12 +113,9 @@ class BluetoothScanAndroidClass{
                 getBinNumber(int.parse(deviceDetails.DeviceRssi).abs())));
             print("EM_RSSI_VALUES");
             print(EM_RSSI_VALUES);
-
-
             if (EM_RSSI_VALUES[deviceDetails.DeviceAddress]!.length > 7) {
               EM_RSSI_VALUES[deviceDetails.DeviceAddress]!.removeAt(0);
             }
-
             if (EM_RSSI_WEIGHT[deviceDetails.DeviceAddress]!.length > 7) {
               EM_RSSI_WEIGHT[deviceDetails.DeviceAddress]!.removeAt(0);
             }

@@ -30,6 +30,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:iwaymaps/NAVIGATION/MapManager/RenderingElement/Polygon.dart';
 import 'package:iwaymaps/NAVIGATION/Screens/NearestLandmarkScreen.dart';
 import 'package:iwaymaps/NAVIGATION/Sensor/SensorManager.dart';
 import 'package:iwaymaps/NAVIGATION/pannels/PinLandmarkPannel.dart';
@@ -41,6 +42,7 @@ import 'package:iwaymaps/NAVIGATION/routeOption.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 import 'package:iwaymaps/NAVIGATION/somethingWentWrong.dart';
 import 'package:iwaymaps/NAVIGATION/waypoint.dart';
+import 'package:iwaymaps/fingerprinting/fingerprinting.dart';
 import 'package:lottie/lottie.dart' as lott;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sensors_plus/sensors_plus.dart';
@@ -76,6 +78,7 @@ import 'APIMODELS/landmark.dart';
 import 'APIMODELS/outbuildingmodel.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
+import 'BluetoothManager/BLEManager.dart';
 import 'BluetoothScanAndroidClass.dart';
 import 'BluetoothScanIOSClass.dart';
 import 'Cell.dart';
@@ -421,6 +424,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     magnetoData.startMagnetometer();
     accData.startAccelerometer();
     gpsData.startGps();
+    fingerprinting.updateMarkers = updateMarkers;
     //add a timer of duration 5sec
     //PolylineTestClass.polylineSet.clear();
     // StartPDR();
@@ -12398,7 +12402,18 @@ bool _isPlaying=false;
     return true;
   }
 
+Fingerprinting fingerprinting=Fingerprinting();
+  String nearesPoint="";
+  Timer? _strtTimer;
+  ElementPolygons polygonController=ElementPolygons();
+  Map<String, dynamic> preProcessedData={};
+  Map<String, dynamic> realTimeData={};
 
+
+  void updateMarkers(){
+    print("updating");
+    setState(() {});
+  }
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -12436,7 +12451,7 @@ bool _isPlaying=false;
                       .union(focusturnArrow)
                       .union(Markers)
                       .union(restBuildingMarker).union(debugMarker).union(GpsMarker).union(nearbyLandmarks.values.toSet()).union(_exploreModeMarker)
-                  .union(_exploreModeDebugBeaconMarker),
+                  .union(_exploreModeDebugBeaconMarker).union(fingerprinting.getMarkers()),
                   buildingsEnabled: false,
                   compassEnabled: false,
                   rotateGesturesEnabled: true,
@@ -12625,7 +12640,7 @@ bool _isPlaying=false;
 
                     SizedBox(height: 28.0),
                     DebugToggle.Slider ? Text("${user.theta}") : Container(),
-
+                    Text("${nearesPoint}"),
                     // Text("coord [${user.coordX},${user.coordY}] \n"
                     //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
                     // "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
@@ -12659,9 +12674,9 @@ bool _isPlaying=false;
                             );
                           } else {
                             if (markers.length > 0)
-                              markers[user.Bid]?[0] = customMarker.rotate(
+                              markers[user.bid]?[0] = customMarker.rotate(
                                   compassHeading! - mapbearing,
-                                  markers[user.Bid]![0]);
+                                  markers[user.bid]![0]);
                           }
                         });
                       })
@@ -12920,7 +12935,45 @@ bool _isPlaying=false;
                     backgroundColor: Color(
                         0xff24B9B0), // Set the background color of the FAB
                   )
-                      : Container(),  // Adjust the height as needed// Adjust the height as needed
+                      : Container(),
+                    FloatingActionButton(onPressed: ()async{
+                      preProcessedData=await fingerprinting.enableFingerprinting(SingletonFunctionController.apibeaconmap);
+                    },child: Icon(Icons.fingerprint),),
+                    FloatingActionButton(
+                      backgroundColor: Colors.green,
+                      onPressed: () async {
+                        fingerprinting.collectSensorDataEverySecond();
+                      },child: Icon(Icons.account_balance),),
+                    FloatingActionButton(
+                      backgroundColor: Colors.white,
+                      onPressed: () async {
+                          fingerprinting.stopCollectingRealData();
+                          realTimeData=fingerprinting.computeRealtimeBeaconStats(fingerprinting.data!.sensorFingerprint!);
+                          nearesPoint=fingerprinting.findBestMatchingLocationHybrid(realTimeData:realTimeData,preProcessData:preProcessedData );
+                          print("nearest point ${nearesPoint}");
+                          List<String> vals=nearesPoint.split(',');
+                          List<Nodes> waypoints = await polygonController.extractWaypoints(3);
+                          for (var point in waypoints){
+                            if(vals[0]==point.coordx.toString() && vals[1]==point.coordy.toString())
+                            {
+                              fingerprinting.addMarker(LatLng(point.lat!, point.lon!));
+                              return;
+                            }
+                          }
+
+                          setState(() {
+                            nearesPoint;
+                            updateMarkers();
+                          });
+                      },child: Icon(Icons.person),),
+                    FloatingActionButton(
+                      backgroundColor: Colors.red,
+                      onPressed:(){
+                        BLEManager().stopScanning();
+                        fingerprinting.stopCollectingRealData();
+                        fingerprinting.disableFingerprinting();
+                        _strtTimer?.cancel();
+                    },child: Icon(Icons.account_balance),),// Adjust the height as needed// Adjust the height as needed
 
                   ],
                 ),

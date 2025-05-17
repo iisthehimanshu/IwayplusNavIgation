@@ -925,6 +925,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
+  light:
+    dependency: "direct main"
+    description:
+      name: light
+      sha256: "6d5c6f8c5d1da89d45d2d4718ee4b26f4bfe7ad30bc4c3674a3233a04270731c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.1"
   lints:
     dependency: transitive
     description:
@@ -1914,6 +1922,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  wifi_scan:
+    dependency: "direct main"
+    description:
+      name: wifi_scan
+      sha256: "78896ea3db8838769053accd47cab02a62ead6480557e235295320603f84c9c7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.1+2"
   win32:
     dependency: transitive
     description:

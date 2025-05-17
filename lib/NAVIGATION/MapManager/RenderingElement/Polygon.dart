@@ -1,3 +1,5 @@
+import '../../../IWAYPLUS/API/buildingAllApi.dart';
+import '../../API/PolyLineApi.dart';
 import '../../APIMODELS/patchDataModel.dart';
 import '../../APIMODELS/polylinedata.dart';
 import '../../navigationTools.dart';
@@ -5,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 
 class ElementPolygons {
+  polylinedata? data;
   late Function(List<LatLng>? coordinates, String id) _polygonTap;
 
   Function(List<LatLng>? coordinates, String id) get polygonTap => _polygonTap;
@@ -170,6 +173,30 @@ class ElementPolygons {
       );
 
     return patch;
+  }
+
+  Future<List<Nodes>> extractWaypoints(int floor) async {
+    print("called");
+    data ??= await PolyLineApi().fetchPolyData(id:buildingAllApi.selectedBuildingID);
+    List<Nodes> waypoints = [];
+    for (var floors in data!.polyline!.floors!) {
+      for (var polys in floors.polyArray!) {
+        if (polys.polygonType == "Waypoints" && floor == tools.alphabeticalToNumerical(polys.floor!)) {
+          for (var node in polys.nodes!) {
+            // Check if node is at least 2 meters away from all nodes in waypoints
+            bool isFarEnough = waypoints.every((existingNode) =>
+            tools.calculateAerialDist(
+                existingNode.lat!, existingNode.lon!, node.lat!, node.lon!) >= 2);
+
+            if (isFarEnough) {
+              waypoints.add(node);
+            }
+          }
+        }
+      }
+    }
+    print("waypoints ${waypoints.length}");
+    return waypoints;
   }
 
 }

@@ -12659,9 +12659,9 @@ bool _isPlaying=false;
                             );
                           } else {
                             if (markers.length > 0)
-                              markers[user.Bid]?[0] = customMarker.rotate(
+                              markers[user.bid]?[0] = customMarker.rotate(
                                   compassHeading! - mapbearing,
-                                  markers[user.Bid]![0]);
+                                  markers[user.bid]![0]);
                           }
                         });
                       })

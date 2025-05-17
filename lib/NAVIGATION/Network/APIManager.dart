@@ -50,6 +50,19 @@ class Apimanager{
         DataBaseManager().updateAccessToken(Apidetails.refreshToken().conversionFunction(refreshResponse.data).accessToken);
         DataBaseManager().updateRefreshToken(Apidetails.refreshToken().conversionFunction(refreshResponse.data).refreshToken);
         return await request(apiDetail);
+      }else{
+        print("response code ${response.statusCode} ${apiDetail.body} ${response.body}");
+        final stackTrace = StackTrace.current;
+        print("apimanager Stack: \n$stackTrace");
+        String responseBody = response.body;
+        dynamic decryptedBody = json.decode(responseBody);
+        if(apiDetail.encryption){
+          decryptedBody = encryptionService.decrypt(decryptedBody['encryptedData']);
+          decryptedBody = json.decode(decryptedBody);
+        }
+        Response responseObject = Response(response.statusCode, decryptedBody);
+
+        return responseObject;
       }
 
 

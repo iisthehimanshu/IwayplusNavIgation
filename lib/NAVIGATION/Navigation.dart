@@ -1749,6 +1749,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       await _handleGlobalCoordinatesLocalization(speakTTS, render,providePinSelection);
     }
 
+
+
     // Reset direct source ID and Land ID
     widget.directLandID = '';
     widget.directsourceID = '';
@@ -2200,12 +2202,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     //
     if (user.isnavigating == false && speakTTS) {
       detected = true;
-      print("reachedhere");
-      customModalBottomSheet(
-        context,
-        height: MediaQuery.of(context).size.height * 0.92,
-        child: const NearestLandmarkScreen(),
-      );
       if (!_isExploreModePannelOpen && speakTTS) {
         _isBuildingPannelOpen = true;
       }
@@ -4622,6 +4618,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     });
   }
   List<LatLng> tappedPolygonCoordinates = [];
+  List<LatLng> landmarkFocus = [];
+
   Future<void> createRooms(polylinedata value, int floor) async {
     final stackTrace = StackTrace.current;
     print("createRooms Stack: ${value.polyline!.buildingID!} \n$stackTrace");
@@ -5083,6 +5081,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               markerText = parts.isNotEmpty ? parts[0].trim() : '';
               textMarker = await bitmapDescriptorFromTextAndImage(
                   markerText, 'assets/Classroom.png',imageSize: const Size(95, 95),color: Color(0xff544551));
+              print("centerX ${landmarks[i].centerX}");
+
             }else{
               final Uint8List iconMarker =
               await getImagesFromMarker('assets/Classroom.png', 85);
@@ -12233,6 +12233,7 @@ bool _isPlaying=false;
 
   IconData _mainIcon = Icons.volume_up_outlined;
   Color _mainColor = Colors.green;
+
   void _recenterMap() {
     try {
       alignMapToPath([

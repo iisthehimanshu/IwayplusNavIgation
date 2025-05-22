@@ -37,7 +37,7 @@ class _webHomeState extends State<webHome> {
 
   @override
   Widget build(BuildContext context) {
-    return buildingsReady?Navigation(directsourceID: widget.source??"",):CircularProgressIndicator();
+    return buildingsReady?Navigation(directLandID: widget.source??"",):CircularProgressIndicator();
   }
 }
 

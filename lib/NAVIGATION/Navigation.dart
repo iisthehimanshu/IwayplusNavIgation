@@ -45,6 +45,7 @@ import 'package:lottie/lottie.dart' as lott;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
 
 import '../IWAYPLUS/API/RatingsaveAPI.dart';
@@ -2226,6 +2227,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       if (user.initialallyLocalised) {
         mapState.interaction = !mapState.interaction;
       }
+      print("patchfirst $patch");
+
       fitPolygonInScreen(patch.first);
       if (speakTTS) {
         if (finalvalue == null) {
@@ -2251,6 +2254,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
         }
       }
+
     } else {
       if (speakTTS) {
         if (finalvalue == null) {
@@ -2276,6 +2280,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         }
       }
     }
+
 
     if (speakTTS) {
       List<double> lvalue = tools.localtoglobal(
@@ -2313,16 +2318,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           });
         });
       }
-        mapState.zoom = 22.0;
-      _googleMapController.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: LatLng(lvalue[0], lvalue[1]), // Use the last known target
-            zoom: 22,     // Use the last known zoom
-            bearing: user.theta,               // Update the bearing
-          ),
-        ),
-      );
+      //   mapState.zoom = 22.0;
+      // _googleMapController.animateCamera(
+      //   CameraUpdate.newCameraPosition(
+      //     CameraPosition(
+      //       target: LatLng(lvalue[0], lvalue[1]), // Use the last known target
+      //       zoom: 22,     // Use the last known zoom
+      //       bearing: user.theta,               // Update the bearing
+      //     ),
+      //   ),
+      // );
 
     }
     Future.delayed(Duration(milliseconds: 5000)).then((value){
@@ -2334,6 +2339,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         showLowAccuracyDialog();
       }
     });
+    //28.543491,77.1874362
+    print("ZOOM1");
+    _googleMapController!.moveCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: LatLng(28.9469975, 77.1016977), // Replace with your desired coordinates
+          zoom: 17,
+        ),
+      ),
+    );
   }
 
   bool _isExpanded = false;
@@ -2952,7 +2967,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     await apiController.polylineAPIController(buildingAllApi.selectedBuildingID, true);
     await apiController.landmarkAPIController(buildingAllApi.selectedBuildingID, true);
     itterated.add(buildingAllApi.selectedBuildingID);
-
+    print("patchfirst $patch");
+    for(int i=0 ; i<patch.length ; i++){
+    }
 
     List<String> ids = buildingAllApi.getStoredAllBuildingID().keys.toList();
     try {
@@ -5070,22 +5087,50 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     try {
       for (int i = 0; i < landmarks.length; i++) {
         if (landmarks[i].floor == floor && landmarks[i].buildingID == (bid ?? buildingAllApi.selectedBuildingID)) {
+          BitmapDescriptor textMarker;
+          if(landmarks[i].priority! >1){
+            String markerText;
+            print("landmarks[i].priority3");
+            List<String> parts = landmarks[i].name!.split('-');
+            markerText = parts.isNotEmpty ? parts[0].trim(): '';
+            textMarker = await bitmapDescriptorFromTextAndImage(
+                markerText, 'assets/Convocation.png',imageSize: const Size(95, 95),color: Color(0xff544551));
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!,
+                landmarks[i].coordinateY!,
+                SingletonFunctionController.building
+                    .patchData[bid ?? buildingAllApi.getStoredString()]);
+
+            Markers.add(Marker(
+                markerId: MarkerId(
+                    "Entry ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
+                position: LatLng(value[0], value[1]),
+                icon: textMarker,
+                anchor: Offset(0.5, 1.0),
+                visible: false,
+                onTap: () {},
+                infoWindow: InfoWindow(
+                    title: landmarks[i].name,
+                    // snippet: '${landmarks[i].properties!.polyId}',
+                    // Replace with additional information
+                    onTap: () {})));
+          }
+
           if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType == "Classroom" &&
               landmarks[i].coordinateX != null &&
               !landmarks[i].wasPolyIdNull!) {
-            BitmapDescriptor textMarker;
+
+
             if(landmarks[i].priority! >1){
               String markerText;
               List<String> parts = landmarks[i].name!.split('-');
               markerText = parts.isNotEmpty ? parts[0].trim() : '';
               textMarker = await bitmapDescriptorFromTextAndImage(
-                  markerText, 'assets/Classroom.png',imageSize: const Size(95, 95),color: Color(0xff544551));
+                  markerText, 'assets/Convocation.png',imageSize: const Size(85, 85),color: Color(0xff544551));
               print("centerX ${landmarks[i].centerX}");
-
             }else{
-              final Uint8List iconMarker =
-              await getImagesFromMarker('assets/Classroom.png', 85);
+              final Uint8List iconMarker = await getImagesFromMarker('assets/Classroom.png', 85);
               textMarker = BitmapDescriptor.fromBytes(iconMarker);
             }
 
@@ -5097,7 +5142,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
             Markers.add(Marker(
                 markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
+                    "Entry ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
                 position: LatLng(value[0], value[1]),
                 icon: textMarker,
                 anchor: Offset(0.5, 1.0),
@@ -5119,6 +5164,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               markerText = parts.isNotEmpty ? parts[0].trim() : '';
               textMarker = await bitmapDescriptorFromTextAndImage(
                   markerText, 'assets/cutlery.png',imageSize: const Size(95, 95),color: Color(0xfffb8c00));
+              print("cafetariaprior");
             }else{
               final Uint8List iconMarker =
               await getImagesFromMarker('assets/cutlery.png', 85);
@@ -5387,16 +5433,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             // );
 
             BitmapDescriptor textMarker;
+
             if(landmarks[i].priority! >1){
               String markerText;
               List<String> parts = landmarks[i].name!.split('-');
               markerText = parts.isNotEmpty ? parts[0].trim() : '';
               textMarker = await bitmapDescriptorFromTextAndImage(
                   markerText, 'assets/Generic Marker.png',imageSize: const Size(85, 85));
+              print("mainentry priority");
             }else{
               final Uint8List iconMarker =
               await getImagesFromMarker('assets/Generic Marker.png', 85);
               textMarker = BitmapDescriptor.fromBytes(iconMarker);
+              print("mainentry priority2");
             }
 
             List<double> value = tools.localtoglobal(
@@ -6699,9 +6748,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       return aSum.compareTo(bSum);
     });
 
-
-
-
     return commonLifts;
   }
 
@@ -6747,7 +6793,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     return null;
   }
 
-  void fitToPath(List<dynamic> result)async{
+  void fitToPath(List<dynamic> result) async {
     Map<String, dynamic> dataCurrent = await result.first;
     Map<String, dynamic> dataLast = await result.last;
     if(PathState.sourceBid == PathState.destinationBid){
@@ -8828,7 +8874,7 @@ bool _isPlaying=false;
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.blue,
-        padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
+        padding: EdgeInsets.symmetric(horizontal: 22.0, vertical: 10.0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),
         ),
@@ -8855,7 +8901,7 @@ bool _isPlaying=false;
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,
-              padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
+              padding: EdgeInsets.symmetric(horizontal: 22.0, vertical: 10.0),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.0),
               ),
@@ -8918,7 +8964,7 @@ bool _isPlaying=false;
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               side: BorderSide(color: Colors.blue),
-              padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
+              padding: EdgeInsets.symmetric(horizontal: 22.0, vertical: 10.0),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.0),
               ),
@@ -11693,6 +11739,7 @@ bool _isPlaying=false;
   }
 
   void _updateMarkers(double zoom) {
+    print("zoomLevel $zoom");
     if (SingletonFunctionController.building.updateMarkers) {
       Set<Marker> updatedMarkers = Set();
       if (user.isnavigating) {
@@ -11742,7 +11789,6 @@ bool _isPlaying=false;
             if (SingletonFunctionController.building.ignoredMarker.contains(words[1])) {
               if (marker.markerId.value.contains("Door")) {
                 Marker _marker = customMarker.visibility(true, marker);
-
                 updatedMarkers.add(_marker);
               }
               if (marker.markerId.value.contains("Room")) {
@@ -11750,7 +11796,7 @@ bool _isPlaying=false;
                 updatedMarkers.add(_marker);
               }
             }else if (marker.markerId.value.contains("toppriority")) {
-              Marker _marker = customMarker.visibility(zoom > 19, marker);
+              Marker _marker = customMarker.visibility(zoom > 16, marker);
               updatedMarkers.add(_marker);
             }else if (marker.markerId.value.contains("Room")) {
               Marker _marker = customMarker.visibility(zoom > 20.5, marker);
@@ -11759,8 +11805,7 @@ bool _isPlaying=false;
               Marker _marker = customMarker.visibility(zoom > 19, marker);
               updatedMarkers.add(_marker);
             }else if (marker.markerId.value.contains("Entry")) {
-              Marker _marker = customMarker.visibility(
-                  (zoom > 18.5 && zoom < 19) || zoom > 20.3, marker);
+              Marker _marker = customMarker.visibility((zoom > 12.5 && zoom < 13) || zoom > 20.3, marker);
               updatedMarkers.add(_marker);
             }else if (marker.markerId.value.contains("Building")) {
               Marker _marker = customMarker.visibility(zoom < 16.0, marker);
@@ -12791,6 +12836,7 @@ bool _isPlaying=false;
                   //   ),
                   // ),
                   !isLiveLocalizing? isSemanticEnabled && _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen || PinLandmarkPannel.isPanelOpened() ? Container():
+
                   Semantics(
                     child: FloatingActionButton(
                       onPressed: () async {
@@ -12857,6 +12903,8 @@ bool _isPlaying=false;
                       Colors.white, // Set the background color of the FAB
                     ),
                   ):Container(),
+                    SizedBox(height: 30,),
+
                   SizedBox(height: 28.0),
                   !user.isnavigating &&
                       (!_isLandmarkPanelOpen &&

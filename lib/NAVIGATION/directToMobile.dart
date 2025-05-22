@@ -40,6 +40,17 @@ class direcToMobile extends StatelessWidget {
               )),
           Spacer(),
           ElevatedButton(onPressed: (){
+            HelperClass.launchURL('');
+            // HelperClass.openMobileApp();
+          }, child: Text("Agenda",style: const TextStyle(
+            color: Colors.white,
+          )),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
+              )),
+          SizedBox(width:10),
+          ElevatedButton(onPressed: (){
             HelperClass.openMobileApp();
           }, child: Text("Open App",style: const TextStyle(
             color: Colors.white,

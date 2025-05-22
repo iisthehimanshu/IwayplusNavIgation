@@ -99,6 +99,7 @@ dependencies:
   ml_linalg: ^13.12.6
   google_maps_cluster_manager: ^3.1.0
   go_router: ^15.1.1
+  url_launcher:
 
 
 

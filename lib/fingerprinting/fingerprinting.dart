@@ -189,10 +189,10 @@ class Fingerprinting{
     }
     // Step 2: Compute stats and flag deviation outliers
     final beaconStats = beaconMap.map((macId, rssiList) {
+      print("rssilist:${rssiList},${macId}");
       final mean = rssiList.reduce((a, b) => a + b) / rssiList.length;
       final variance = rssiList.fold(0.0, (sum, val) => sum + pow(val - mean, 2)) / rssiList.length;
       final stdDev = sqrt(variance);
-
       final cleanedRssiList = <int>[];
       for (var rssi in rssiList) {
         if (stdDev == 0 || (rssi >= mean - 2 * stdDev && rssi <= mean + 2 * stdDev)) {
@@ -224,11 +224,9 @@ class Fingerprinting{
         'outliers': allOutliers,
       });
     });
-
     result['realtime'] = {
       'beacons': beaconStats,
     };
-
     print("realtime data: $result");
 
     return result;
@@ -435,8 +433,9 @@ print("previousSmoothedLocation ${previousSmoothedLocation} ${preProcessData.con
       theta = event.heading!;
     });
     List<Beacon> beacons = [];
+    beacons.clear();
     bleManager.bufferedDeviceStream.listen((data){
-      beacons.clear();
+      print("datafrom scanning ${data}");
       Map<String, List<int>> beaconWithRssi = {};
       data.forEach((deviceName,deviceRssi){
         List<int> rssiList = [];
@@ -452,9 +451,7 @@ print("previousSmoothedLocation ${previousSmoothedLocation} ${preProcessData.con
         }
       });
     });
-
-
-    timer = Timer.periodic(Duration(seconds: 1), (timer) async {
+    timer=Timer.periodic(Duration(seconds: 1), (timer) async {
       // List<Beacon> beacons = await fetchBeaconData();
       print("beaconsvalues $beacons");
 
@@ -472,16 +469,15 @@ print("previousSmoothedLocation ${previousSmoothedLocation} ${preProcessData.con
       print("data.toJson() ${data?.toJson()}");
     });
   }
-
   Future<bool> stopCollectingData() async {
     timer?.cancel();
     bluetoothScanAndroidClass.stopScan();
     //cancel beacon stream here
     return await fingerPrintingApi().Finger_Printing_API(buildingAllApi.selectedBuildingID, data!);
   }
-
   Future<bool> stopCollectingRealData() async {
     timer?.cancel();
+    timer=null;
     //cancel beacon stream here
     return true;
   }

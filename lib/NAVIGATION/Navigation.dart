@@ -12941,15 +12941,15 @@ Fingerprinting fingerprinting=Fingerprinting();
                     },child: Icon(Icons.fingerprint),),
                     FloatingActionButton(
                       backgroundColor: Colors.green,
-                      onPressed: () async {
+                      onPressed:()async{
                         fingerprinting.collectSensorDataEverySecond();
                       },child: Icon(Icons.account_balance),),
                     FloatingActionButton(
                       backgroundColor: Colors.white,
-                      onPressed: () async {
+                      onPressed:()async{
                           fingerprinting.stopCollectingRealData();
                           realTimeData=fingerprinting.computeRealtimeBeaconStats(fingerprinting.data!.sensorFingerprint!);
-                          nearesPoint=fingerprinting.findBestMatchingLocationHybrid(realTimeData:realTimeData,preProcessData:preProcessedData );
+                          nearesPoint=fingerprinting.findBestMatchingLocationHybrid(realTimeData:realTimeData,preProcessData:preProcessedData);
                           print("nearest point ${nearesPoint}");
                           List<String> vals=nearesPoint.split(',');
                           List<Nodes> waypoints = await polygonController.extractWaypoints(3);
@@ -12970,7 +12970,6 @@ Fingerprinting fingerprinting=Fingerprinting();
                       backgroundColor: Colors.red,
                       onPressed:(){
                         BLEManager().stopScanning();
-                        fingerprinting.stopCollectingRealData();
                         fingerprinting.disableFingerprinting();
                         _strtTimer?.cancel();
                     },child: Icon(Icons.account_balance),),// Adjust the height as needed// Adjust the height as needed

@@ -40,7 +40,7 @@ class direcToMobile extends StatelessWidget {
               )),
           Spacer(),
           ElevatedButton(onPressed: (){
-            HelperClass.launchURL('');
+            HelperClass.launchURL('https://drive.google.com/file/d/1thOJWi6gnSAD-F90113cAORliYDKSnHn/view?usp=sharing');
             // HelperClass.openMobileApp();
           }, child: Text("Agenda",style: const TextStyle(
             color: Colors.white,

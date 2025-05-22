@@ -115,13 +115,15 @@ class DataVersionApi {
 
   Future<bool> _hasInternet() async {
     try {
-      final result = await http.get(Uri.parse("https://www.google.com"))
+      final result = await http
+          .get(Uri.parse("https://jsonplaceholder.typicode.com/posts/1"))
           .timeout(const Duration(seconds: 5));
       return result.statusCode == 200;
     } catch (_) {
       return false;
     }
   }
+
 
   bool _compareVersion(
       String type,

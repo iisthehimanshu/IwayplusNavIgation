@@ -570,7 +570,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   Future<void> initializeMarkers() async {
     userloc = await getImagesFromMarker('assets/userloc0.png', 130);
-    if (kDebugMode) {
+    if (!kIsWeb && kDebugMode) {
       userlocdebug = await getImagesFromMarker('assets/tealtorch.png', 35);
     }
   }
@@ -1108,7 +1108,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      if (kDebugMode) {
+      if (!kIsWeb && kDebugMode) {
         markers[user.bid]?.add(Marker(
           markerId: MarkerId("debug"),
           position: Location,
@@ -1124,7 +1124,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      if (kDebugMode) {
+      if (!kIsWeb && kDebugMode) {
         markers[user.bid]?.add(Marker(
           markerId: MarkerId("debug"),
           position: Location,
@@ -1430,7 +1430,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   Set<Marker> debugMarker = Set();
   void addDebugMarkers(LatLng point, {double? hue,int? id}){
-    if(kDebugMode){
+    if(!kIsWeb && kDebugMode){
       print("adding marker at $point");
       setState(() {
         debugMarker.add(Marker(
@@ -2109,7 +2109,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           icon: BitmapDescriptor.fromBytes(userloc),
           anchor: Offset(0.5, 0.829),
         ));
-        if (kDebugMode) {
+        if (!kIsWeb && kDebugMode) {
           markers[user.bid]?.add(Marker(
             markerId: MarkerId("debug"),
             position: LatLng(user.lat, user.lng),
@@ -2682,7 +2682,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      if (kDebugMode) {
+      if (!kIsWeb && kDebugMode) {
         markers[user.bid]?.add(Marker(
           markerId: MarkerId("debug"),
           position: userlocation,
@@ -7769,7 +7769,7 @@ int currentCols=0;
             ),
           );
         }
-        if (renderSource && liftName == null) {
+        if (!kIsWeb && renderSource && liftName == null) {
           innerMarker.add(
             Marker(
               markerId: MarkerId('source${bid}'),
@@ -9125,7 +9125,7 @@ bool _isPlaying=false;
 
           user.pathobj = PathState;
 
-          if (kDebugMode) {
+          if (!kIsWeb && kDebugMode) {
             markers[user.bid]
                 ?.add(Marker(
               markerId: MarkerId(

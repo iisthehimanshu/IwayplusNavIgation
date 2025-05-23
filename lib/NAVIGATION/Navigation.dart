@@ -12840,6 +12840,15 @@ bool _isPlaying=false;
                   Semantics(
                     child: FloatingActionButton(
                       onPressed: () async {
+                        print("ZOOM1");
+                        _googleMapController!.moveCamera(
+                          CameraUpdate.newCameraPosition(
+                            CameraPosition(
+                              target: LatLng(28.9469975, 77.1016977), // Replace with your desired coordinates
+                              zoom: 17,
+                            ),
+                          ),
+                        );
                         debugMarker.clear();
                         if (!user.isnavigating && !isLocalized) {
                           SingletonFunctionController.btadapter.emptyBin();
@@ -12870,6 +12879,7 @@ bool _isPlaying=false;
 
                             _timer.cancel();
                           });
+
                         } else {
                           _recenterMap();
                         }

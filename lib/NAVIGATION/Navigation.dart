@@ -7710,7 +7710,9 @@ int currentCols=0;
               ));
             });
           }
-          await Future.delayed(Duration(microseconds: 1500));
+          if(!kIsWeb){
+            await Future.delayed(Duration(microseconds: 1500));
+          }
         }
       } else {
         if (singleroute[bid] == null) {
@@ -12578,7 +12580,7 @@ bool _isPlaying=false;
                 child: Column(
                   children: [
 
-                    isSemanticEnabled || PinLandmarkPannel.isPanelOpened()
+                    (isSemanticEnabled || PinLandmarkPannel.isPanelOpened()) || kIsWeb
                         ? Container()
                         : SpeedDial(
                       icon: _mainIcon,
@@ -12835,7 +12837,13 @@ bool _isPlaying=false;
                   //     ),
                   //   ),
                   // ),
-                  !isLiveLocalizing? isSemanticEnabled && _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen || PinLandmarkPannel.isPanelOpened() ? Container():
+                    (!isLiveLocalizing &&
+                        (
+                            (isSemanticEnabled && (_isRoutePanelOpen || _isLandmarkPanelOpen)) ||
+                                PinLandmarkPannel.isPanelOpened()
+                        )) ||
+                  kIsWeb
+                        ? Container():
 
                   Semantics(
                     child: FloatingActionButton(
@@ -12912,7 +12920,8 @@ bool _isPlaying=false;
                       backgroundColor:
                       Colors.white, // Set the background color of the FAB
                     ),
-                  ):Container(),
+                  ),
+
                     SizedBox(height: 30,),
 
                   SizedBox(height: 28.0),
@@ -12920,7 +12929,7 @@ bool _isPlaying=false;
                       (!_isLandmarkPanelOpen &&
                           !_isRoutePanelOpen &&
                           _isBuildingPannelOpen &&
-                          !_isnavigationPannelOpen && user.initialallyLocalised)
+                          !_isnavigationPannelOpen && user.initialallyLocalised) && !kIsWeb
                       ? FloatingActionButton(
                     onPressed: () async {
                       if (user.initialallyLocalised) {

@@ -634,7 +634,6 @@ class _NewsearchpageState extends State<NewSearchPage> {
                       });
                       lastval = val;
                       _controller.text = optionListForUI.toList()[val];
-
                       print("optionListItemBuildingName :${optionListItemBuildingName}");
                       if(optionListItemBuildingName.length==1){
                         await fetchFloors(optionListItemBuildingName.first,optionListForUI.toList()[val].toUpperCase()).then((_){

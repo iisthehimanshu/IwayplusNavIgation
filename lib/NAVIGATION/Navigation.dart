@@ -2513,7 +2513,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                           setState(() {
                             _isExpanded = !_isExpanded;
                           });
-                          // Navigator.of(context).pop();
+                          Navigator.of(context).pop();
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -2978,9 +2978,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(key);
         Building.GlobalAnnotation = globalData;
         GlobalAnnotationController controller = GlobalAnnotationController(data: globalData, polygonTap: polygonTap, apiController: apiController);
-
         controller.wrapPatch();
-
         //closing for a while
         List<Landmarks>? landmarks = await controller.wrapLandmarks();
         if(landmarks != null && landmarks.isNotEmpty){
@@ -3003,8 +3001,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
         return;
       }
-
-
       try {
         var waypointData = await waypointapi().fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
 
@@ -3017,13 +3013,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         try {
           await DataVersionApi().fetchDataVersionApiData(key);
         } catch (e) {}
-
         await apiController.patchAPIController(key, false);
         await apiController.polylineAPIController(key, false);
         await apiController.landmarkAPIController(key, false);
       }
     }));
-
     print("widget.directLandID.length ${widget.directLandID}");
     print("Checking timer: ${SingletonFunctionController.timer}");
     var time = DateTime.now();
@@ -3961,7 +3955,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   late Animation<double> _zoomAnimation;
   late Animation<LatLng> _latLngAnimation;
 
-  Future<void> addselectedRoomMarker(List<LatLng> polygonPoints, String assetPath, {Color? color}) async {
+  Future<void> addselectedRoomMarker(List<LatLng> polygonPoints,String assetPath,{Color? color}) async {
     // Cancel any ongoing animation
     _controller12?.stop();
     _controller12?.dispose();

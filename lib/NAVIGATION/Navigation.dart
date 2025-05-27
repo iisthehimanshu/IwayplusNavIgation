@@ -2339,16 +2339,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         showLowAccuracyDialog();
       }
     });
-    //28.543491,77.1874362
-    print("ZOOM1");
-    _googleMapController!.moveCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: LatLng(28.9469975, 77.1016977), // Replace with your desired coordinates
-          zoom: 17,
-        ),
-      ),
-    );
   }
 
   bool _isExpanded = false;
@@ -2941,9 +2931,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   void apiCalls(context) async {
     List<String> itterated = [];
     NavigationAPIController apiController = NavigationAPIController(createPatch: createPatch, findCentroid: findCentroid, createotherPatch: createotherPatch, createRooms: createRooms, createARPatch: createARPatch, createotherARPatch: createotherARPatch, createMarkers: createMarkers);
+    await DataVersionApi()
+        .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
     try{
-      await DataVersionApi()
-          .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
+
     }catch(e){
       Navigator.pushReplacement(context, MaterialPageRoute(
           builder: (context) => const SomethingWentWrongPage(
@@ -3215,6 +3206,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     double highestweight = 0;
     String nearestBeacon = "";
 
+    print("singleto ${SingletonFunctionController.btadapter.latesILMap}");
+    setState(() {
+      nearestBeacon = SingletonFunctionController.SC_LOCALIZED_BEACON;
+    });
+    // nearestBeacon = findMaxWeightKey(SingletonFunctionController.btadapter.latesILMap);
+    print("singleto nearestBeacon $nearestBeacon");
+
     if (await FlutterBluePlus.isOn) {
       nearestBeacon = findMaxWeightKey(SingletonFunctionController.btadapter.latesILMap);
 
@@ -3240,7 +3238,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       //lastBeaconValue = nearestBeacon;
     });
 
-    nearestBeacon = "";
     // nearestLandmarkToBeacon = nearestBeacon;
     // nearestLandmarkToMacid = highestweight.toString();
 
@@ -12848,15 +12845,7 @@ bool _isPlaying=false;
                   Semantics(
                     child: FloatingActionButton(
                       onPressed: () async {
-                        print("ZOOM1");
-                        _googleMapController!.moveCamera(
-                          CameraUpdate.newCameraPosition(
-                            CameraPosition(
-                              target: LatLng(28.9469975, 77.1016977), // Replace with your desired coordinates
-                              zoom: 17,
-                            ),
-                          ),
-                        );
+
                         debugMarker.clear();
                         if (!user.isnavigating && !isLocalized) {
                           SingletonFunctionController.btadapter.emptyBin();

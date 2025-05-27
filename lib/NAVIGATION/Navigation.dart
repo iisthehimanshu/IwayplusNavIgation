@@ -6090,7 +6090,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                 Container(
                                   padding: EdgeInsets.only(left: 17, bottom: 4),
                                   child: Text(
-                                    "${LocaleData.floor.getString(context)} ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.floor}, ${(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName==snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.venueName)?snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName:("${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.venueName}")},",
+                                    "${LocaleData.floor.getString(context)} ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.floor}${(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName==snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.venueName)?(""):(", ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName}")}",
                                     style: const TextStyle(
                                       fontFamily: "Roboto",
                                       fontSize: 16,

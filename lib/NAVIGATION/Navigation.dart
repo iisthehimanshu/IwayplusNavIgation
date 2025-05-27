@@ -65,6 +65,7 @@ import '../IWAYPLUS/MODELS/FilterInfoModel.dart';
 import '../IWAYPLUS/VenueSelectionScreen.dart';
 import '../IWAYPLUS/websocket/navigationLogManager.dart';
 import '../IWAYPLUS/websocket/navigationLogModel.dart';
+import '../PlayPreview/PlayPreviewManager.dart';
 import '../newSearchPage.dart';
 import 'API/DataVersionApi.dart';
 import 'API/GlobalAnnotationapi.dart';
@@ -2339,16 +2340,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         showLowAccuracyDialog();
       }
     });
-    //28.543491,77.1874362
-    print("ZOOM1");
-    _googleMapController!.moveCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: LatLng(28.9469975, 77.1016977), // Replace with your desired coordinates
-          zoom: 17,
-        ),
-      ),
-    );
   }
 
   bool _isExpanded = false;
@@ -7801,7 +7792,7 @@ int currentCols=0;
         }
       }
       BitmapDescriptor textMarker = await bitmapDescriptorFromTextAndImage(
-          PathState.destinationName, 'assets/pyramids.png',imageSize: const Size(95, 95),color: Colors.black);;
+          PathState.destinationName, 'assets/pyramids.png',imageSize: const Size(95, 95),color: Colors.black);
       // SingletonFunctionController.building.landmarkdata!.then((land) async {
       //   land.landmarksMap?[SingletonFunctionController.building.selectedLandmarkID];
       //
@@ -8250,6 +8241,7 @@ bool _isPlaying=false;
                       Container(
                         child: IconButton(
                             onPressed: () {
+                              PlayPreviewManager().clearPreview();
                               showMarkers();
                               List<double> mvalues = tools.localtoglobal(
                                   PathState.destinationX,
@@ -8429,32 +8421,33 @@ bool _isPlaying=false;
                           ),
                         ),
                       ),
-                      // Container(
-                      //   child: IconButton(
-                      //       onPressed: () {
-                      //         setState(() {
-                      //           PathState.swap();
-                      //           PathState.path.clear();
-                      //           pathMarkers.clear();
-                      //           PathState.directions.clear();
-                      //           if (user.isnavigating == false) {
-                      //             clearPathVariables();
-                      //           }
-                      //           SingletonFunctionController
-                      //               .building.landmarkdata!
-                      //               .then((value) {
-                      //             calculateroute(value.landmarksMap!);
-                      //           });
-                      //         });
-                      //       },
-                      //       icon: Semantics(
-                      //         label: "Swap location",
-                      //         child: Icon(
-                      //           Icons.swap_vert_circle_outlined,
-                      //           size: 24,
-                      //         ),
-                      //       )),
-                      // ),
+                      Container(
+                        child: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                PlayPreviewManager().clearPreview();
+                                PathState.swap();
+                                PathState.path.clear();
+                                pathMarkers.clear();
+                                PathState.directions.clear();
+                                if (user.isnavigating == false) {
+                                  clearPathVariables();
+                                }
+                                SingletonFunctionController
+                                    .building.landmarkdata!
+                                    .then((value) {
+                                  calculateroute(value.landmarksMap!);
+                                });
+                              });
+                            },
+                            icon: Semantics(
+                              label: "Swap location",
+                              child: Icon(
+                                Icons.swap_vert_circle_outlined,
+                                size: 24,
+                              ),
+                            )),
+                      ),
                     ],
                   ),
                   PathState.sourceFloor != PathState.destinationFloor
@@ -8683,6 +8676,7 @@ bool _isPlaying=false;
                                               margin: EdgeInsets.only(right:10),
                                               child: IconButton(
                                                   onPressed:(){
+                                                    PlayPreviewManager().clearPreview();
                                                     showMarkers();
                                                     setState((){
                                                       _isBuildingPannelOpen =
@@ -8816,7 +8810,7 @@ bool _isPlaying=false;
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                         children: [
-                                          kIsWeb?openInAppButton():startNavigationButton(),
+                                          canNavigate()?startNavigationButton():playPreviewButton(),
                                           stepsPreviewButton(),
                                         ],
                                       ),
@@ -8827,7 +8821,7 @@ bool _isPlaying=false;
                                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                         children: [
                                           stepsPreviewButton(),
-                                          kIsWeb?openInAppButton():startNavigationButton()
+                                          canNavigate()?startNavigationButton():playPreviewButton()
                                         ],
                                       ),
                                     ),
@@ -8879,6 +8873,46 @@ bool _isPlaying=false;
         padding: EdgeInsets.symmetric(horizontal: 22.0, vertical: 10.0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),
+        ),
+      ),
+    );
+  }
+
+  Widget playPreviewButton(){
+    return Semantics(
+      label: "Play Preview",
+      hint: "Button. Double tap to activate",
+      sortKey: const OrdinalSortKey(1),
+
+      child: Focus(
+        focusNode: _startbuttonFocus,
+        child: Semantics(
+          excludeSemantics: true,
+          child: ElevatedButton.icon(
+            icon: Icon(Icons.double_arrow_rounded, color: Colors.blue),
+            label: Text('Preview', style: TextStyle(color: Colors.blue)),
+            onPressed: () async {
+              PlayPreviewManager.alignMapToPath=alignMapToPath;
+              PlayPreviewManager.findLift=findLift;
+              PlayPreviewManager.findCommonLift=findCommonLift;
+              PlayPreviewManager.createRooms=(polylinedata value, int floor){
+                createRooms(value, floor);
+                SingletonFunctionController
+                    .building.floor[
+                buildingAllApi
+                    .getStoredString()] = floor;
+              };
+              PlayPreviewManager().playPreviewAnimation(pathList:PathState.singleCellListPath);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              side: BorderSide(color: Colors.blue),
+              padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -8975,6 +9009,17 @@ bool _isPlaying=false;
         ),
       ),
     );
+  }
+
+  bool canNavigate(){
+    if(kIsWeb){
+      return false;
+    }
+    if(PathState.sourceX == user.coordX && PathState.sourceY == user.coordY){
+      return true;
+    }else{
+      return false;
+    }
   }
 
   Future<void> startNavigation() async {
@@ -9285,6 +9330,20 @@ bool _isPlaying=false;
       user.snapper.setPath(user.cellPath);
       await user.snapper.startGpsUpdates();
       user.handleGPS(context);
+
+      double angle = tools.calculateAngleBWUserandCellPath(
+          user.cellPath[user.pathobj.index],
+          user.cellPath[user.pathobj.index + 1],
+          user.pathobj.numCols![user.bid]![user.floor]!,
+          user.theta);
+      String direction = tools.angleToClocks(angle, context) == "None"
+          ? "Straight"
+          : tools.angleToClocks(angle, context);
+      if(direction == "Straight"){
+        speak("Go Straight", "en");
+      }else{
+        speak("Turn $direction", "en");
+      }
     }
   }
 
@@ -11685,6 +11744,17 @@ bool _isPlaying=false;
         combinedMarkers = combinedMarkers.union(Set<Marker>.of(value));
       });
     }
+
+    buildingAllApi.allBuildingID.forEach((key, value) {
+      if (PlayPreviewManager().previewMarker[key] != null &&
+          PlayPreviewManager().previewMarker[key]![SingletonFunctionController.building.floor[key]] !=
+              null) {
+        combinedMarkers = combinedMarkers.union(PlayPreviewManager().previewMarker[key]![
+        SingletonFunctionController.building.floor[key]]!);
+      }
+    });
+
+
     return combinedMarkers;
   }
   Set<Polygon> cachedPolygon = {};
@@ -11733,6 +11803,15 @@ bool _isPlaying=false;
           pathCovered[key]![SingletonFunctionController.building.floor[key]] !=
               null) {
         poly = poly.union(pathCovered[key]![
+        SingletonFunctionController.building.floor[key]]!);
+      }
+    });
+
+    buildingAllApi.allBuildingID.forEach((key, value) {
+      if (PlayPreviewManager().pathCovered[key] != null &&
+          PlayPreviewManager().pathCovered[key]![SingletonFunctionController.building.floor[key]] !=
+              null) {
+        poly = poly.union(PlayPreviewManager().pathCovered[key]![
         SingletonFunctionController.building.floor[key]]!);
       }
     });
@@ -12362,6 +12441,7 @@ bool _isPlaying=false;
     }
     if (_isRoutePanelOpen) {
       setState(() {
+        PlayPreviewManager().clearPreview();
         _isRoutePanelOpen = false;
         _isLandmarkPanelOpen = true;
         showMarkers();
@@ -12848,15 +12928,6 @@ bool _isPlaying=false;
                   Semantics(
                     child: FloatingActionButton(
                       onPressed: () async {
-                        print("ZOOM1");
-                        _googleMapController!.moveCamera(
-                          CameraUpdate.newCameraPosition(
-                            CameraPosition(
-                              target: LatLng(28.9469975, 77.1016977), // Replace with your desired coordinates
-                              zoom: 17,
-                            ),
-                          ),
-                        );
                         debugMarker.clear();
                         if (!user.isnavigating && !isLocalized) {
                           SingletonFunctionController.btadapter.emptyBin();

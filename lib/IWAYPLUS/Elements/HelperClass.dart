@@ -5,7 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:html' as html;
+// import 'dart:html' as html;
 
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
@@ -56,7 +56,7 @@ class HelperClass{
   }
 
   static void openMobileApp() {
-    html.window.open('${AppConfig.baseUrl}/#/deeplink/$locationID', '_self');
+    // html.window.open('${AppConfig.baseUrl}/#/deeplink/$locationID', '_self');
   }
 
   static Future<void> _launchURL(String url) async {

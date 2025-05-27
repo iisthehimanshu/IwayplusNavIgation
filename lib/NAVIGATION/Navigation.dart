@@ -1764,9 +1764,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   Future<void> _handleBeaconLocalization(
       String nearestBeacon, bool speakTTS, bool render, bool providePinSelection) async {
+    final stackTrace = StackTrace.current;
+    print("_handleBeaconLocalization Stack: \n$stackTrace");
     List<Future<void>> apiCalls = [];
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
-      apiCalls.add(landmarkApi().fetchLandmarkData(id: key).then((value) {}));
+      apiCalls.add(landmarkApi().fetchLandmarkData(id: key, outdoor: key == buildingAllApi.outdoorID).then((value) {}));
     });
     // Wait for all API calls to complete
     await Future.wait(apiCalls);
@@ -2318,16 +2320,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           });
         });
       }
-      //   mapState.zoom = 22.0;
-      // _googleMapController.animateCamera(
-      //   CameraUpdate.newCameraPosition(
-      //     CameraPosition(
-      //       target: LatLng(lvalue[0], lvalue[1]), // Use the last known target
-      //       zoom: 22,     // Use the last known zoom
-      //       bearing: user.theta,               // Update the bearing
-      //     ),
-      //   ),
-      // );
+        mapState.zoom = 22.0;
+      _googleMapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(lvalue[0], lvalue[1]), // Use the last known target
+            zoom: 22,     // Use the last known zoom
+            bearing: user.theta,               // Update the bearing
+          ),
+        ),
+      );
 
     }
     Future.delayed(Duration(milliseconds: 5000)).then((value){
@@ -3025,6 +3027,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       print("Waiting for timer and allBuildingCalls...");
       await Future.wait([Future.delayed(Duration(seconds: 1)), SingletonFunctionController.timer!, allBuildingCalls]);
     }else{
+      await Future.wait([allBuildingCalls]);
       print("SingletonFunctionController.timer == null");
     }
     print("localize user got called..");
@@ -6081,7 +6084,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                 Container(
                                   padding: EdgeInsets.only(left: 17, bottom: 4),
                                   child: Text(
-                                    "${LocaleData.floor.getString(context)} ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.floor}, ${(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName==snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.venueName)?snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName:("${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.venueName}")},",
+                                    "${LocaleData.floor.getString(context)} ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.floor}${(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName==snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.venueName)?(""):(", ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName}")}",
                                     style: const TextStyle(
                                       fontFamily: "Roboto",
                                       fontSize: 16,

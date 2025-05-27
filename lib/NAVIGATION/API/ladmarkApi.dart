@@ -31,6 +31,8 @@ class landmarkApi {
       print("Himanshuch ${land.fromJson(responseBody).landmarks![0].buildingName}");
       return land.fromJson(responseBody);
     }
+    final stackTrace = StackTrace.current;
+    print("landmarkAPI Stack: \n$stackTrace");
     print("outdoor boolean $outdoor");
     final Map<String, dynamic> data = {
       "id": id??buildingAllApi.getStoredString(),

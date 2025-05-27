@@ -75,6 +75,8 @@ class NavigationAPIController {
   }
 
   Future<void> landmarkAPIController(String id, bool selected) async {
+    final stackTrace = StackTrace.current;
+    print("landmarkAPIController Stack: \n$stackTrace");
     print("landmarkAPIController $id ${buildingAllApi.outdoorID}");
     var landmarkData = await landmarkApi().fetchLandmarkData(id: id,outdoor: id==buildingAllApi.outdoorID);
     if(selected){

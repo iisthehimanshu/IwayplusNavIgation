@@ -75,6 +75,7 @@ class NavigationAPIController {
   }
 
   Future<void> landmarkAPIController(String id, bool selected) async {
+    print("landmarkAPIController $id ${buildingAllApi.outdoorID}");
     var landmarkData = await landmarkApi().fetchLandmarkData(id: id,outdoor: id==buildingAllApi.outdoorID);
     if(selected){
       SingletonFunctionController.building.landmarkdata = Future.value(landmarkData);

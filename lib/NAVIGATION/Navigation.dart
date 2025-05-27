@@ -7049,7 +7049,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             PathState.destinationX,
             PathState.destinationY,
             PathState.destinationFloor,
-            bid: PathState.destinationBid));
+            bid: PathState.destinationBid,
+        renderDestination: true,
+        renderSource: true));
         SingletonFunctionController
             .building.floor[buildingAllApi.getStoredString()] = user.floor;
 
@@ -7081,7 +7083,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             PathState.destinationFloor,
             bid: PathState.destinationBid,
             liftName: commonlifts[0].name,
-            nextFloor:PathState.sourceFloor ));
+            nextFloor:PathState.sourceFloor,
+        renderDestination: true));
 
         fetchrouteFutures.add(() => fetchroute(
           PathState.sourceX,
@@ -7091,7 +7094,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           PathState.sourceFloor,
           bid: PathState.destinationBid,
           liftName: commonlifts[0].name,
-          nextFloor: PathState.destinationFloor,));
+          nextFloor: PathState.destinationFloor,
+        renderSource: true));
 
         PathState.connections[PathState.destinationBid] = {
           PathState.sourceFloor: calculateindex(
@@ -7134,7 +7138,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               PathState.destinationX,
               PathState.destinationY,
               CampusEntry.floor!,
-              bid: CampusEntry.buildingID));
+              bid: CampusEntry.buildingID,
+          renderDestination: true));
           if (PathState.sourceFloor == buildingEntry!.floor) {
             fetchrouteFutures.add(() => fetchroute(
                 PathState.sourceX,
@@ -7143,7 +7148,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 buildingEntry!.coordinateY!,
                 buildingEntry!.floor!,
                 bid: PathState.sourceBid,
-                renderDestination: false));
+                renderSource: true));
           } else if (PathState.sourceFloor != buildingEntry!.floor) {
             List<dynamic> commonlifts = findCommonLifts(
                 landmarksMap[PathState.sourcePolyID]!,
@@ -7165,7 +7170,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 buildingEntry!.coordinateY!,
                 buildingEntry!.floor!,
                 bid: PathState.sourceBid,
-                renderDestination: false,
                 nextFloor: PathState.sourceFloor));
             fetchrouteFutures.add(() => fetchroute(
                 PathState.sourceX,
@@ -7174,7 +7178,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 commonlifts[0].y1!,
                 PathState.sourceFloor,
                 bid: PathState.sourceBid,
-                nextFloor: buildingEntry!.floor!
+                nextFloor: buildingEntry!.floor!,
+              liftName: commonlifts[0].name,
+              renderSource: true
             ));
 
             PathState.connections[PathState.sourceBid] = {
@@ -7199,6 +7205,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               PathState.destinationY,
               PathState.destinationFloor,
               bid: buildingEntry.buildingID,
+              renderDestination: true
             ));
           } else if (PathState.destinationFloor != buildingEntry!.floor) {
             List<dynamic> commonlifts = findCommonLifts(
@@ -7222,6 +7229,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               PathState.destinationFloor,
               bid: PathState.destinationBid,
               nextFloor: buildingEntry!.floor!,
+                liftName: commonlifts[0].name,
+                renderDestination: true
             ));
 
             fetchrouteFutures.add(() => fetchroute(
@@ -7231,8 +7240,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 commonlifts[0].y2!,
                 buildingEntry!.floor!,
                 bid: PathState.destinationBid,
-                renderDestination: false,
-                nextFloor: PathState.destinationFloor));
+                nextFloor: PathState.destinationFloor,
+              liftName: commonlifts[0].name));
 
             PathState.connections[PathState.sourceBid] = {
               PathState.sourceFloor: calculateindex(
@@ -7253,7 +7262,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               CampusEntry!.coordinateX!,
               CampusEntry!.coordinateY!,
               PathState.sourceFloor,
-              bid: CampusEntry.buildingID,renderDestination: false));
+              bid: CampusEntry.buildingID,
+              renderSource: true));
         }
         runPaths(fetchrouteFutures, autoStart: autoStart);
       });
@@ -7293,7 +7303,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               PathState.destinationY,
               PathState.destinationFloor,
               bid: PathState.destinationBid,
-              renderSource: false));
+            renderDestination: true
+              ));
         } else if (destinationEntry.floor != PathState.destinationFloor) {
           List<dynamic> commonlifts = findCommonLifts(destinationEntry,
               landmarksMap[PathState.destinationPolyID]!, accessibleby??"Lifts");
@@ -7313,7 +7324,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               PathState.destinationY,
               PathState.destinationFloor,
               bid: PathState.destinationBid,
-              nextFloor: destinationEntry.floor!));
+              nextFloor: destinationEntry.floor!,
+            liftName: commonlifts[0].name,
+            renderDestination: true
+          ));
           fetchrouteFutures.add(() => fetchroute(
             destinationEntry.coordinateX!,
             destinationEntry.coordinateY!,
@@ -7321,8 +7335,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             commonlifts[0].y1!,
             destinationEntry.floor!,
             bid: PathState.destinationBid,
-            renderSource: false,
-            nextFloor: PathState.destinationFloor,));
+            nextFloor: PathState.destinationFloor,
+          liftName: commonlifts[0].name));
 
           PathState.connections[PathState.destinationBid] = {
             destinationEntry.floor!: calculateindex(
@@ -7362,9 +7376,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 CampusDestinationEntry!.coordinateX!,
                 CampusDestinationEntry.coordinateY!,
                 CampusSourceEntry.floor!,
-                bid: CampusSourceEntry.buildingID,
-                renderDestination: false,
-                renderSource: false));
+                bid: CampusSourceEntry.buildingID));
           } catch (e) {
             print("calculateroute pathfinding error $e");
             CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
@@ -7383,7 +7395,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               sourceEntry.coordinateY!,
               sourceEntry.floor!,
               bid: PathState.sourceBid,
-              renderDestination: false));
+              renderSource: true));
         } else if (PathState.sourceFloor != sourceEntry.floor) {
           List<dynamic> commonlifts = findCommonLifts(
               landmarksMap[PathState.sourcePolyID]!, sourceEntry, accessibleby??"Lifts");
@@ -7403,7 +7415,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               sourceEntry.coordinateY!,
               sourceEntry.floor!,
               bid: PathState.sourceBid,
-              renderDestination: false,
+              liftName: commonlifts[0].name,
               nextFloor:PathState.sourceFloor));
           fetchrouteFutures.add(() => fetchroute(
             PathState.sourceX,
@@ -7413,6 +7425,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             PathState.sourceFloor,
             bid: PathState.sourceBid,
             nextFloor: sourceEntry.floor!,
+            liftName: commonlifts[0].name,
+            renderSource: true
           ));
 
           PathState.connections[PathState.sourceBid] = {
@@ -7546,8 +7560,8 @@ int currentCols=0;
       {String? bid = null,
         int? nextFloor,
         String? liftName,
-        bool renderSource = true,
-        bool renderDestination = true}) async {
+        bool renderSource = false,
+        bool renderDestination = false}) async {
     print(
         "checks for campus $bid ${SingletonFunctionController.building.floorDimenssion[bid]}");
     print("pathcchec fetchingroute between $sourceX, $sourceY   $destinationX, $destinationY  $bid ");
@@ -7807,7 +7821,7 @@ int currentCols=0;
       //
       // });
       setState(() {
-        if (renderDestination && liftName == null) {
+        if (renderDestination) {
           innerMarker.add(
             Marker(
               markerId: MarkerId('destination${bid}'),
@@ -7817,7 +7831,7 @@ int currentCols=0;
             ),
           );
         }
-        if (!kIsWeb && renderSource && liftName == null) {
+        if (!kIsWeb && renderSource) {
           innerMarker.add(
             Marker(
               markerId: MarkerId('source${bid}'),

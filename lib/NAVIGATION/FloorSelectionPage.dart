@@ -150,9 +150,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
         sortResultsByDistance(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!);
       }
     });
-
-    print("optionListItemBuildingName");
-    print(optionListItemBuildingName);
   }
 
   void sortResultsByDistance(int userLat, int userLng) {

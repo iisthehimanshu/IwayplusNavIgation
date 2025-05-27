@@ -94,10 +94,9 @@ class WebSocketManager {
     final lastString = _deepSortAndStringify(_lastSentMessage);
 
     if (socket.connected && dataString != lastString) {
-      print(data);
       socket.emit('user-log-socket', data);
       _lastSentMessage = _cloneDeep(data);
-      print("socket data $data");
+      // print("socket data $data");
     }
   }
 

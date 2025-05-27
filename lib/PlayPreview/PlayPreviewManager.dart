@@ -85,15 +85,18 @@ class PlayPreviewManager {
         int col1 = next.node ~/ next.numCols;
 
         final buildingId = current.bid!;
+        final nextBuildingId = next.bid!;
         final floorId = current.floor;
+        final nextFloorId = next.floor;
 
-        if(floorId != lastFloorItterated || buildingId != lastBidIterated){
+        if((floorId != lastFloorItterated || buildingId != lastBidIterated) || (floorId != nextFloorId || buildingId != nextBuildingId)){
 
           await alignFloor(floorId, buildingId);
           lastFloorItterated = floorId;
           lastBidIterated = buildingId;
           createRooms(SingletonFunctionController.building.polylinedatamap[lastBidIterated],lastFloorItterated);
           currentCoordinates.clear();
+          continue;
         }
 
         List<double> value = tools.localtoglobal(
@@ -110,45 +113,15 @@ class PlayPreviewManager {
 
         final gStart = gmap.LatLng(value[0], value[1]);
         final gEnd = gmap.LatLng(value1[0], value1[1]);
-        final interpolatedPoints = interpolatePoints(gStart, gEnd, 0.6); // 2 feet = 0.6 m
 
-        for(int j = 0; j<interpolatedPoints.length; j++){
-          final latLng = gmap.LatLng(value[0], value[1]);
-          currentCoordinates.add(interpolatedPoints[j]);
+        if(tools.calculateAerialDist(gStart.latitude, gStart.longitude, gEnd.latitude, gEnd.longitude)<0.5){
+          await iterateFurther(gStart, buildingId, floorId, marker, value1, currentCoordinates);
+        }else{
+          final interpolatedPoints = interpolatePoints(gStart, gEnd, 0.6); // 2 feet = 0.6 m
 
-          final polyline = gmap.Polyline(
-            polylineId: gmap.PolylineId("preview_${floorId}_$i"),
-            points: List.from(currentCoordinates),
-            color: Colors.green,
-            width: 8,
-          );
-          marker = customMarker.move(interpolatedPoints[j], marker);
-          if(interpolatedPoints[j].latitude != value1[0] && interpolatedPoints[j].longitude != value1[1]){
-            double angle = tools.calculateBearing([interpolatedPoints[j].latitude, interpolatedPoints[j].longitude], [value1[0], value1[1]]);
-            marker = customMarker.rotate(angle, marker);
+          for(int j = 0; j<interpolatedPoints.length; j++){
+            await iterateFurther(interpolatedPoints[j], buildingId, floorId, marker, value1, currentCoordinates);
           }
-
-
-
-          // if (turnPoints.contains(current.node)) {
-          //   await alignMapToPath([value[0], value[1]], [value1[0], value1[1]], isTurn: true);
-          // } else {
-          //   if(interpolatedPoints[j].latitude != value1[0] && interpolatedPoints[j].longitude != value1[1]){
-          //     await alignMapToPath([interpolatedPoints[j].latitude, interpolatedPoints[j].longitude], [value1[0], value1[1]]);
-          //   }
-          // }
-
-          // ✅ Accumulate instead of overwrite
-          _pathCovered.putIfAbsent(buildingId, () => {});
-          _pathCovered[buildingId]!.putIfAbsent(floorId, () => <gmap.Polyline>{});
-          _pathCovered[buildingId]![floorId]!.add(polyline);
-
-          _previewMarker.putIfAbsent(buildingId, () => {});
-          _previewMarker[buildingId]!.putIfAbsent(floorId, () => <gmap.Marker>{});
-          _previewMarker[buildingId]![floorId]?.clear();
-          _previewMarker[buildingId]![floorId]!.add(marker);
-
-          await Future.delayed(const Duration(milliseconds: 50));
         }
       }
 
@@ -160,6 +133,44 @@ class PlayPreviewManager {
       _previewMarker.clear();
       _isPlaying = false;
     }
+  }
+
+  Future<void> iterateFurther(gmap.LatLng point, String buildingId, int floorId, gmap.Marker marker, List<double> value1, List<gmap.LatLng> currentCoordinates) async {
+    currentCoordinates.add(point);
+
+    final polyline = gmap.Polyline(
+      polylineId: gmap.PolylineId("preview_${floorId}_${DateTime.now().microsecondsSinceEpoch}"),
+      points: List.from(currentCoordinates),
+      color: Colors.green,
+      width: 8,
+    );
+    marker = customMarker.move(point, marker);
+    if(point.latitude != value1[0] && point.longitude != value1[1]){
+      double angle = tools.calculateBearing([point.latitude, point.longitude], [value1[0], value1[1]]);
+      marker = customMarker.rotate(angle, marker);
+    }
+
+
+
+    // if (turnPoints.contains(current.node)) {
+    //   await alignMapToPath([value[0], value[1]], [value1[0], value1[1]], isTurn: true);
+    // } else {
+    //   if(interpolatedPoints[j].latitude != value1[0] && interpolatedPoints[j].longitude != value1[1]){
+    //     await alignMapToPath([interpolatedPoints[j].latitude, interpolatedPoints[j].longitude], [value1[0], value1[1]]);
+    //   }
+    // }
+
+    // ✅ Accumulate instead of overwrite
+    _pathCovered.putIfAbsent(buildingId, () => {});
+    _pathCovered[buildingId]!.putIfAbsent(floorId, () => <gmap.Polyline>{});
+    _pathCovered[buildingId]![floorId]!.add(polyline);
+
+    _previewMarker.putIfAbsent(buildingId, () => {});
+    _previewMarker[buildingId]!.putIfAbsent(floorId, () => <gmap.Marker>{});
+    _previewMarker[buildingId]![floorId]?.clear();
+    _previewMarker[buildingId]![floorId]!.add(marker);
+
+    await Future.delayed(const Duration(milliseconds: 50));
   }
 
 

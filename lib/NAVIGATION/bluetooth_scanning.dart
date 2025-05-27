@@ -80,9 +80,7 @@ class BLueToothClass {
   void startScanning(HashMap<String, beacon> apibeaconmap) {
     latesILMap.clear();
     latesILMapTimeStamp.clear();
-    if(kDebugMode) print("proof $latesILMap ${latesILMapTimeStamp}");
     SourceTSP = DateTime.now();
-    if(kDebugMode) print("SourceTSP set to : $SourceTSP");
     startbin();
     FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
 
@@ -96,7 +94,6 @@ class BLueToothClass {
           // wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
           if (apibeaconmap.containsKey(MacId)) {
             if (result.timeStamp.difference(SourceTSP).inSeconds>=0 && result.timeStamp.difference(SourceTSP).inSeconds < 10) {
-              if(kDebugMode) print("result.timeStamp.difference(SourceTSP) ${result.timeStamp.difference(SourceTSP)}  ${result.timeStamp.difference(SourceTSP).inSeconds}");
               latesILMap.putIfAbsent(MacId,() => []);
               latesILMapTimeStamp.putIfAbsent(MacId,() => []);
 
@@ -104,7 +101,6 @@ class BLueToothClass {
                 latesILMapTimeStamp[MacId]!.add(result.timeStamp);
                 latesILMap[MacId]!.add(Rssi);
               }
-              if(kDebugMode) print("Beacon $MacId $Rssi ${result.timeStamp.difference(SourceTSP)} ${result.timeStamp} ${SourceTSP}");
             }
             //print(MacId);
             //print("mac1 $MacId    rssi $Rssi");
@@ -114,8 +110,6 @@ class BLueToothClass {
           }
         }
       }
-      if(kDebugMode) print("latesILMap $latesILMap");
-      if(kDebugMode) print("latesILMapTimeStamp $latesILMapTimeStamp");
     });
 
 

@@ -12,6 +12,7 @@ import 'NAVIGATION/ELEMENTS/DestinationPageChipsWidget.dart';
 import 'NAVIGATION/ELEMENTS/SearchpageCategoryResult.dart';
 import 'NAVIGATION/ELEMENTS/SearchpageResults.dart';
 import 'NAVIGATION/FloorSelectionPage.dart';
+import 'NAVIGATION/StringStorage.dart';
 import 'NAVIGATION/singletonClass.dart';
 
 class NewSearchPage extends StatefulWidget {
@@ -197,29 +198,36 @@ class _NewsearchpageState extends State<NewSearchPage> {
   }
 
 
-  void topSearchesFunc(){
+  Future<void> topSearchesFunc() async {
+    List<String> strings = await StringStorage.getStrings();
     setState(() {
-      topSearches.add(Container(margin:EdgeInsets.only(left: 26,top: 12,bottom: 12),child:const Row(
-        children: [
-          Icon(Icons.search_sharp),
-          SizedBox(width: 26,),
-          Text(
-            "Top Searches",
-            style: const TextStyle(
-              fontFamily: "Roboto",
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Color(0xff000000),
-              height: 24/18,
-            ),
-            textAlign: TextAlign.left,
-          )
-        ],
-      ),));
       try{
         if(landmarkData.landmarksMap!=null){
           landmarkData.landmarksMap!.forEach((key, value) {
-            if (value.name != null && value.element!.subType != "beacon") {
+            if (value.name != null && strings.contains(value.properties?.polyId)) {
+              topSearches.add(SearchpageResults(
+                name: "${value.name}",
+                location:
+                "Floor ${value.floor}, ${value
+                    .buildingName}, ${value.venueName}",
+                onClicked: onVenueClicked,
+                ID: value.properties!.polyId!,
+                bid: value.buildingID!,
+                floor: value.floor!,
+                coordX: value.coordinateX!,
+                coordY: value.coordinateY!,
+                accessible:  value.properties!.wheelChairAccessibility??"", distance: 0,
+                icon: Icon(
+                  Icons.access_time,
+                  color: Color(0xff000000),
+                  size: 25,
+                ),
+              ));
+            }
+          });
+
+          landmarkData.landmarksMap!.forEach((key, value) {
+            if (value.name != null && value.element!.subType != "beacon" && !strings.contains(value.properties?.polyId)) {
               if(value.priority!=null && value.priority!>1){
                 topSearches.add(SearchpageResults(
                   name: "${value.name}",
@@ -233,7 +241,11 @@ class _NewsearchpageState extends State<NewSearchPage> {
                   coordX: value.coordinateX!,
                   coordY: value.coordinateY!,
                   accessible:  value.properties!.wheelChairAccessibility??"", distance: 0,
-
+                  icon: Icon(
+                    Icons.star,
+                    color: Color(0xff000000),
+                    size: 25,
+                  ),
                 ));
               }
             }
@@ -288,7 +300,8 @@ class _NewsearchpageState extends State<NewSearchPage> {
   String normalizeText(String text) {
     return text.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toLowerCase();
   }
-  void onVenueClicked(String name, String location, String ID, String bid) {
+  Future<void> onVenueClicked(String name, String location, String ID, String bid) async {
+    await StringStorage.addString(ID);
     Navigator.pop(context, ID);
   }
 

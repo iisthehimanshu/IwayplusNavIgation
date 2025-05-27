@@ -101,8 +101,6 @@ class DirectionInstructionViewModel extends ChangeNotifier {
         _sourceUPHeight+=68;
       }
       if(dir.turnDirection!.contains("Turn")){
-        print("dir.turnDirection!.contains");
-        print(dir.turnDirection);
         totalSourceTurns++;
       }
       if(dir.distanceToNextTurnInFeet != null) {

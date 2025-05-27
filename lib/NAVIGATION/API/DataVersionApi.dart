@@ -21,7 +21,7 @@ class DataVersionApi {
 
     // Check if data exists locally
     final localData = dataBox.get(buildingId);
-
+    print("await _hasInternet() ${await _hasInternet()}  $localData");
     // If local data not present and internet not available, throw error
     if (localData == null && !(await _hasInternet())) {
       throw Exception("No local data and no internet connection available.");
@@ -114,13 +114,24 @@ class DataVersionApi {
   }
 
   Future<bool> _hasInternet() async {
-    try {
-      final result = await http
-          .get(Uri.parse("https://jsonplaceholder.typicode.com/posts/1"))
-          .timeout(const Duration(seconds: 5));
-      return result.statusCode == 200;
-    } catch (_) {
-      return false;
+    if(kIsWeb){
+      try {
+        final result = await http
+            .get(Uri.parse("https://jsonplaceholder.typicode.com/posts/1"))
+            .timeout(const Duration(seconds: 5));
+        print("result.statusCode ${result.statusCode}");
+        return result.statusCode == 200;
+      } catch (_) {
+        return false;
+      }
+    }else{
+      try {
+        final result = await http.get(Uri.parse("https://www.google.com"))
+            .timeout(const Duration(seconds: 5));
+        return result.statusCode == 200;
+      } catch (_) {
+        return false;
+      }
     }
   }
 

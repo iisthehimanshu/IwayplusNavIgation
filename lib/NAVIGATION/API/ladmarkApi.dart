@@ -79,7 +79,7 @@ class landmarkApi {
     else {
 
       HelperClass.showToast("MishorError in LANDMARK API API");
-      throw Exception('Failed to load data ${response.statusCode}');
+      throw Exception('Failed to load data for bid ${id??buildingAllApi.getStoredString()} ${response.body} ${response.statusCode}');
     }
   }
 }

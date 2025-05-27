@@ -2935,10 +2935,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             errorMessage: 'We couldn\'t load the data. Please check your internet connection.',
           )));
     }
-
     _updateProgress();
-
-
     (SingletonFunctionController.btadapter.isScanningOn() == false &&
         isBinEmpty() == true)
         ? controller.executeFunction(buildingAllApi.allBuildingID)
@@ -2999,15 +2996,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         return;
       }
 
+
       try {
         var waypointData = await waypointapi().fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
+
         Building.waypoint[key] = waypointData;
       } catch (_) {}
       print("buildingAllApi.selectedBuildingID ${buildingAllApi.selectedBuildingID}");
-      if (!itterated.contains(key)) {
+      if (!itterated.contains(key)){
         itterated.add(key);
         print("forKeys $key");
-
         try {
           await DataVersionApi().fetchDataVersionApiData(key);
         } catch (e) {}
@@ -3201,6 +3199,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     if (await FlutterBluePlus.isOn) {
       nearestBeacon = findMaxWeightKey(SingletonFunctionController.btadapter.latesILMap);
 
+      print("nearestBeacon:${nearestBeacon}");
+
       // for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
       //
       //   if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
@@ -3222,8 +3222,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     setState(() {
       //lastBeaconValue = nearestBeacon;
     });
-
-    nearestBeacon = "";
     // nearestLandmarkToBeacon = nearestBeacon;
     // nearestLandmarkToMacid = highestweight.toString();
 
@@ -5069,7 +5067,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     List<Landmarks> landmarks = _landData.landmarks!;
     try {
       for (int i = 0; i < landmarks.length; i++) {
+        if(landmarks[i].priority! >1){
+          print("priority lands1 :${landmarks[i].name} ${landmarks[i].buildingID}");
+        }
         if (landmarks[i].floor == floor && landmarks[i].buildingID == (bid ?? buildingAllApi.selectedBuildingID)) {
+          if(landmarks[i].priority! >1){
+            print("priority lands :${landmarks[i].name} ${landmarks[i].buildingID}");
+          }
           if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType == "Classroom" &&
               landmarks[i].coordinateX != null &&
@@ -6037,7 +6041,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                 Container(
                                   padding: EdgeInsets.only(left: 17, bottom: 4),
                                   child: Text(
-                                    "${LocaleData.floor.getString(context)} ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.floor}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName},",
+                                    "${LocaleData.floor.getString(context)} ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.floor}, ${(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName==snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.venueName)?snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName:("${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.venueName}")},",
                                     style: const TextStyle(
                                       fontFamily: "Roboto",
                                       fontSize: 16,
@@ -7626,7 +7630,6 @@ int currentCols=0;
       //         [LatLng(svalue[0],svalue[1]), LatLng(dvalue[0],dvalue[1])]);
       //   }
       // }
-
       List<LatLng> coordinates = [];
       if (PathState.sourceBid == bid && floor == PathState.sourceFloor) {
         for (var node in path) {
@@ -7648,7 +7651,7 @@ int currentCols=0;
               color: oldPolyline.color,
               width: oldPolyline.width,
             );
-            setState(() {
+            setState((){
               // Remove the old polyline and add the updated polyline
               singleroute[bid]![floor]!.remove(oldPolyline);
               singleroute[bid]![floor]!.add(updatedPolyline);
@@ -7664,7 +7667,9 @@ int currentCols=0;
               ));
             });
           }
-          await Future.delayed(Duration(microseconds: 1500));
+          if(!kIsWeb){
+            await Future.delayed(Duration(microseconds: 1500));
+          }
         }
       } else {
         if (singleroute[bid] == null) {

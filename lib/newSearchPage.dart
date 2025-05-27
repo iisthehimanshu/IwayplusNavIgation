@@ -11,6 +11,7 @@ import 'NAVIGATION/APIMODELS/landmark.dart';
 import 'NAVIGATION/ELEMENTS/DestinationPageChipsWidget.dart';
 import 'NAVIGATION/ELEMENTS/SearchpageCategoryResult.dart';
 import 'NAVIGATION/ELEMENTS/SearchpageResults.dart';
+import 'NAVIGATION/FloorSelectionPage.dart';
 import 'NAVIGATION/singletonClass.dart';
 
 class NewSearchPage extends StatefulWidget {
@@ -76,10 +77,10 @@ class _NewsearchpageState extends State<NewSearchPage> {
 
 
   Future<void> loadLandmarkData() async {
-   try {
-     print("entered here");
+    try {
+     print("entered here ${landmarkData.landmarksMap}");
      await Future.forEach(
-         landmarkData.landmarksMap!.entries, (MapEntry keyValue) async {
+         landmarkData.landmarksMap!.entries,(MapEntry keyValue) async {
        var value = keyValue.value;
        if (value.name != null &&
            (value.element!.subType == "restRoom" ||
@@ -110,8 +111,8 @@ class _NewsearchpageState extends State<NewSearchPage> {
      setState(() {
        isUpdated=true;
      });
-   }catch(e){
-     print("error in updating liist ${e}");
+    }catch(e){
+     print("error in updating liist ");
    }
     setState(() {
       isUpdated=false;
@@ -133,6 +134,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
       });
     }
     loadLandmarkData();
+    //pushToFloorSelection();
     super.initState();
   }
 
@@ -150,6 +152,51 @@ class _NewsearchpageState extends State<NewSearchPage> {
       }
     });
   }
+
+
+  pushToFloorSelection() async {
+    await fetchFloors("Research and Innovation Park",widget.previousFilter.toUpperCase()).then((_){
+      print("floors list $floors ");
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FloorSelectionPage(filterName: widget.previousFilter, filterBuildingName: optionListItemBuildingName.first,floors: floors.toList()..sort(),),
+        ),
+      ).then((value){
+        print("value $value");
+        _controller.text="";
+        searchResults = [];
+        searcCategoryhResults = [];
+        vall = -1;
+        floors.clear();
+        onVenueClicked(value[0],value[1],value[2],value[3]);
+        // widget.onClicked(value[0],value[1],value[2],value[3]);
+      });
+    });
+
+  }
+
+  Set<String> floors = {};
+  Future<void> fetchFloors(String building,String name)async{
+    buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
+
+      await landmarkApi().fetchLandmarkData(id: key).then((value){
+
+        value.landmarksMap?.forEach((key, landmark){
+          if (landmark.floor != null &&
+              landmark.buildingName == building &&
+              landmark.name != null &&
+              landmark.name!.toUpperCase().contains(name.toUpperCase())) {
+            print("Matched floor: ${landmark.name} ${landmark.floor}");
+            floors.add(landmark.floor!.toString());
+          }
+        });
+        landmarkData.mergeLandmarks(value.landmarks);
+      });
+    });
+  }
+
+
   void topSearchesFunc(){
     setState(() {
       topSearches.add(Container(margin:EdgeInsets.only(left: 26,top: 12,bottom: 12),child:const Row(
@@ -302,7 +349,6 @@ class _NewsearchpageState extends State<NewSearchPage> {
       });
     }
   }
-
   void search(String searchText) {
     if (searchText.isEmpty) {
       return;
@@ -310,9 +356,9 @@ class _NewsearchpageState extends State<NewSearchPage> {
     setState(() {
       searchResults.clear();
       searcCategoryhResults.clear();
-      optionListItemBuildingName.clear();
+      //optionListItemBuildingName.clear();
     });
-    if (containsSearchText(optionListForUI.toList(), searchText)) {
+    if (containsSearchText(optionListForUI.toList(),searchText)) {
       setState(() {
         category = true;
       });
@@ -568,7 +614,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
                   width: screenWidth,
                   child: ChipsChoice<int>.single(
                     value: vall,
-                    onChanged: (val) {
+                    onChanged: (val) async {
                       print("this is working");
                       if (HelperClass.SemanticEnabled) {
                         // speak("${optionListForUI[val]} selected");
@@ -586,9 +632,32 @@ class _NewsearchpageState extends State<NewSearchPage> {
                       setState(() {
                         vall = val;
                       });
-
                       lastval = val;
                       _controller.text = optionListForUI.toList()[val];
+
+                      print("optionListItemBuildingName :${optionListItemBuildingName}");
+                      if(optionListItemBuildingName.length==1){
+                        await fetchFloors(optionListItemBuildingName.first,optionListForUI.toList()[val].toUpperCase()).then((_){
+                          print("floors list $floors");
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FloorSelectionPage(filterName: optionListForUI.toList()[val].toLowerCase(), filterBuildingName: optionListItemBuildingName.first,floors: floors.toList()..sort(),),
+                            ),
+                          ).then((value){
+                            print("value $value");
+                            _controller.text="";
+                            searchResults = [];
+                            searcCategoryhResults = [];
+                            vall = -1;
+                            floors.clear();
+                            onVenueClicked(value[0],value[1],value[2],value[3]);
+                            // widget.onClicked(value[0],value[1],value[2],value[3]);
+                          });
+                        });
+                      }else{
+                        search(optionListForUI.toList()[val].toLowerCase());
+                      }
                       search(optionListForUI.toList()[val].toLowerCase());
                     },
                     choiceItems: C2Choice.listFrom<int, String>(

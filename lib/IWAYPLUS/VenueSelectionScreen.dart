@@ -569,7 +569,6 @@ if(userLoc!=null){
 
                              //var currentData = venueList[index];
 
-
                              calcDistanceFromUser(buildingsPos,userLoc!);
                             buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
 

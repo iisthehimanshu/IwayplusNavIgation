@@ -13,15 +13,14 @@ class MagnetometerSensor implements BaseSensor {
     return _compassChannel.receiveBroadcastStream().map((event) => event as double);
   }
 
-  final StreamController<double> _controller = StreamController.broadcast();
+  final StreamController<CompassEvent> _controller = StreamController.broadcast();
 
   @override
-  void startListening() {
-    headingStream.listen((onData){
+  void startListening(){
+    FlutterCompass.events!.listen((onData){
       _controller.add(onData);
     });
   }
-
   @override
   Future<void> stopListening() async {
     await _controller.close();
@@ -29,5 +28,5 @@ class MagnetometerSensor implements BaseSensor {
   }
 
   @override
-  Stream<double> get stream => _controller.stream;
+  Stream<CompassEvent> get stream => _controller.stream;
 }

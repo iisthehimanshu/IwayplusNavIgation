@@ -104,6 +104,7 @@ import 'config.dart';
 import 'cutommarker.dart';
 import 'dijkastra.dart';
 import 'directionClass.dart';
+import 'exploreModeScreen.dart';
 import 'fetchrouteParams.dart';
 import 'low_fedility/homepage.dart';
 import 'low_fedility/lowFedility.dart';
@@ -125,9 +126,7 @@ class Navigation extends StatefulWidget {
 }
 
 class _NavigationState extends State<Navigation> with TickerProviderStateMixin, WidgetsBindingObserver {
-
   NetworkManager networkManager = NetworkManager();
-
   ///update above this
   MapState mapState = new MapState();
   Timer? PDRTimer;
@@ -817,8 +816,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       if (!mounted) return; // Prevent setState if the widget is no longer in the tree
       networkManager.ws.updateSensorStatus(compass: true);
       networkManager.ws.updatePermissions(compass: true);
-      double? compassHeading = event;
-      if(mounted || disposed) return;
+      double? compassHeading = event.heading;
         setState(() {
           user.theta = compassHeading!;
           if (mapState.interaction2) {
@@ -1267,7 +1265,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     return finalDirections;
   }
-
   List<String> EM_finalDirections = [];
   List<String> EM_calcDirectionsExploreMode(List<int> userCords, List<int> newUserCord, List<Landmarks> nearbyLandmarkCoords) {
     List<String> finalDirections = [];
@@ -1276,11 +1273,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         nearbyLandmarkCoords[i].coordinateX!,
         nearbyLandmarkCoords[i].coordinateY!
       ]);
-
-      //
-      //
       String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value, context);
-      //
       finalDirections.add(finalvalue);
     }
     return finalDirections;
@@ -3201,17 +3194,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     double highestweight = 0;
     String nearestBeacon = "";
 
-    print("singleto ${SingletonFunctionController.btadapter.latesILMap}");
+
     setState(() {
       nearestBeacon = SingletonFunctionController.SC_LOCALIZED_BEACON;
     });
     // nearestBeacon = findMaxWeightKey(SingletonFunctionController.btadapter.latesILMap);
-    print("singleto nearestBeacon $nearestBeacon");
 
     if (await FlutterBluePlus.isOn) {
       nearestBeacon = findMaxWeightKey(SingletonFunctionController.btadapter.latesILMap);
 
-      print("nearestBeacon:${nearestBeacon}");
 
       // for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
       //
@@ -3271,7 +3262,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     SingletonFunctionController.btadapter.BIN.clear();
   }
   String findMaxWeightKey(Map<String, List<int>> data) {
-    print("findMaxWeightKey $data");
     Map<String, double> makingAVGofdata = {};
     String maxKey = '';
     double maxAvgWeight = double.negativeInfinity;
@@ -4023,7 +4013,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         });
       }
     });
-
     _controller12?.forward();
   }
 
@@ -6861,14 +6850,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       //await createRooms(SingletonFunctionController.building.polylinedatamap[PathState.sourceBid]!, PathState.sourceFloor);
       print("starting calc");
       List<dynamic> result = fetchrouteFutures.map((func) => func()).toList();
+      print("fetchrouteFutures ${result}");
       fitToPath(result);
       for (int i = 0; i < result.length - 1; i++) {
         Map<String, dynamic> dataCurrent = await result[i];
         Map<String, dynamic> dataNext = await result[i + 1];
-
         singleroute.putIfAbsent("${buildingAllApi.outdoorID}", () => Map());
         singleroute["${buildingAllApi.outdoorID}"]!.putIfAbsent(0, () => Set());
-
         singleroute["${buildingAllApi.outdoorID}"]![0]?.add(gmap.Polyline(
           polylineId: PolylineId("${buildingAllApi.outdoorID} misc$i"),
           points: [
@@ -12270,11 +12258,11 @@ bool _isPlaying=false;
     WidgetsBinding.instance.removeObserver(this);
     bluetoothScanAndroidClass.stopScan();
     PB_controller.dispose(); // Dispose of the controller to free up resources
-    for (var controller in _controllers) {
+    for (var controller in _controllers){
       controller.dispose();
     }
-    accData.stopMagnetometer();
-    magnetoData.stopAccelerometer();
+    magnetoData.stopMagnetometer();
+    accData.stopAccelerometer();
     gpsData.stopGps();
     magnetometerSubscription.cancel();
     super.dispose();
@@ -12327,10 +12315,8 @@ bool _isPlaying=false;
     OverlayEntry overlayEntry =
     OverlayEntry(builder: (context) => offstageWidget);
     overlayState.insert(overlayEntry);
-
     // Allow some time for the widget to render
     await Future.delayed(Duration(milliseconds: 10000));
-
     // Capture the widget as an image
     final RenderRepaintBoundary boundary =
     key.currentContext!.findRenderObject() as RenderRepaintBoundary;
@@ -12338,13 +12324,10 @@ bool _isPlaying=false;
     final ByteData? byteData =
     await image.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List pngBytes = byteData!.buffer.asUint8List();
-
     // Remove the widget from the overlay
     overlayEntry.remove();
-
     return BitmapDescriptor.fromBytes(pngBytes);
   }
-
 
   Map<String, double> sortMapByValue(Map<String, double> map) {
     var sortedEntries = map.entries.toList()
@@ -12855,11 +12838,9 @@ bool _isPlaying=false;
                         )) ||
                   kIsWeb
                         ? Container():
-
                   Semantics(
                     child: FloatingActionButton(
                       onPressed: () async {
-
                         debugMarker.clear();
                         if (!user.isnavigating && !isLocalized) {
                           SingletonFunctionController.btadapter.emptyBin();
@@ -12934,51 +12915,69 @@ bool _isPlaying=false;
                           _isBuildingPannelOpen &&
                           !_isnavigationPannelOpen && user.initialallyLocalised) && !kIsWeb
                       ? FloatingActionButton(
-                    onPressed: () async {
-                      if (user.initialallyLocalised) {
-                        setState(() {
-                          if (isLiveLocalizing) {
-                            isLiveLocalizing = false;
-                            HelperClass.showToast(
-                                "Explore mode is disabled");
-                            _exploreModeTimer!.cancel();
-                            _isExploreModePannelOpen = false;
-                            _isBuildingPannelOpen = true;
-                            lastBeaconValue = "";
-                          } else {
-                            speak(
-                                "${LocaleData.exploremodenabled.getString(context)}",
-                                _currentLocale);
-                            isLiveLocalizing = true;
-                            HelperClass.showToast(
-                                "Explore mode enabled");
-                            _exploreModeTimer = Timer.periodic(
-                                Duration(milliseconds: 5000),
-                                    (timer) async {
-                                  if (Platform.isAndroid) {
-                                    SingletonFunctionController.btadapter
-                                        .startScanning(
-                                        SingletonFunctionController
-                                            .apibeaconmap);
-                                  } else {
-                                    SingletonFunctionController.btadapter
-                                        .startScanningIOS(
-                                        SingletonFunctionController
-                                            .apibeaconmap);
-                                  }
-                                  Future.delayed(
-                                      Duration(milliseconds: 2000))
-                                      .then((value) => {
-                                    realTimeReLocalizeUser(
-                                        resBeacons)
-                                    // listenToBin()
-                                  });
-                                });
-                            _isBuildingPannelOpen = false;
-                            _isExploreModePannelOpen = true;
-                          }
-                        });
-                      }
+                    onPressed:()async{
+    if (Platform.isAndroid) {
+                  SingletonFunctionController.btadapter
+                      .startScanning(
+                      SingletonFunctionController
+                          .apibeaconmap);
+                } else {
+                  SingletonFunctionController.btadapter
+                      .startScanningIOS(
+                      SingletonFunctionController
+                          .apibeaconmap);
+                }
+                    Navigator.push(context,MaterialPageRoute(
+                          builder: (BuildContext context) => ExploreScreen(poly: SingletonFunctionController.building.polyLineData!, patchData: SingletonFunctionController
+                              .building.patchData[buildingAllApi.selectedBuildingID]!, destiPoint:true, nearestBeacon:SingletonFunctionController.SC_LOCALIZED_BEACON,)
+                      ),).then((value){
+                        print("poly id:::${value}");
+                        Navigator.pop(context,value);
+                      });
+                      // if (user.initialallyLocalised) {
+                      //   setState(() {
+                      //     if (isLiveLocalizing) {
+                      //       isLiveLocalizing = false;
+                      //       HelperClass.showToast(
+                      //           "Explore mode is disabled");
+                      //       _exploreModeTimer!.cancel();
+                      //       _isExploreModePannelOpen = false;
+                      //       _isBuildingPannelOpen = true;
+                      //       lastBeaconValue = "";
+                      //     } else {
+                      //       speak(
+                      //           "${LocaleData.exploremodenabled.getString(context)}",
+                      //           _currentLocale);
+                      //       isLiveLocalizing = true;
+                      //       HelperClass.showToast(
+                      //           "Explore mode enabled");
+                      //       _exploreModeTimer = Timer.periodic(
+                      //           Duration(milliseconds: 5000),
+                      //               (timer) async {
+                      //             if (Platform.isAndroid) {
+                      //               SingletonFunctionController.btadapter
+                      //                   .startScanning(
+                      //                   SingletonFunctionController
+                      //                       .apibeaconmap);
+                      //             } else {
+                      //               SingletonFunctionController.btadapter
+                      //                   .startScanningIOS(
+                      //                   SingletonFunctionController
+                      //                       .apibeaconmap);
+                      //             }
+                      //             Future.delayed(
+                      //                 Duration(milliseconds: 2000))
+                      //                 .then((value) => {
+                      //               realTimeReLocalizeUser(
+                      //                   resBeacons)
+                      //               // listenToBin()
+                      //             });
+                      //           });
+                      //       _isBuildingPannelOpen = false;
+                      //       _isExploreModePannelOpen = true;
+                      //     }
+                      //   });
+                      // }
                     },
                     child: Semantics(
                       label: "Explore mode",

@@ -75,7 +75,6 @@ class _NewsearchpageState extends State<NewSearchPage> {
     }
   }
 
-
   Future<void> loadLandmarkData() async {
     try {
      print("entered here ${landmarkData.landmarksMap}");

@@ -51,6 +51,7 @@ class BuildingAPIInsideModel {
   String? updatedAt;
   int? iV;
   bool? favourite;
+  List<dynamic>? boundary;
 
   BuildingAPIInsideModel(
       {this.sId,
@@ -75,7 +76,8 @@ class BuildingAPIInsideModel {
         this.createdAt,
         this.updatedAt,
         this.iV,
-        this.favourite
+        this.favourite,
+        this.boundary,
       });
 
   BuildingAPIInsideModel.fromJson(Map<dynamic, dynamic> json) {
@@ -97,7 +99,7 @@ class BuildingAPIInsideModel {
     liveStatus = json['liveStatus'];
     geofencing = json['geofencing'];
     description = json['description'];
-    features = json['features']?.cast<String>();
+    features = json['features'].cast<String>();
     phone = json['phone'];
     website = json['website'];
     venuePhoto = json['venuePhoto'];
@@ -111,6 +113,7 @@ class BuildingAPIInsideModel {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
+    boundary=json['boundary'];
 
   }
 
@@ -140,6 +143,7 @@ class BuildingAPIInsideModel {
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
+    data['boundary']=this.boundary;
     return data;
   }
 }

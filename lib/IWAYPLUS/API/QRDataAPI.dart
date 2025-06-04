@@ -14,8 +14,7 @@ class QRDataAPI{
   String refreshToken = signInBox.get("refreshToken");
 
   Future<List<QRDataAPIModel>?> fetchQRData(List<String> id)async{
-    print("IDfetchQRData");
-    print(id);
+    print("IDfetchQRData $id");
     final String baseUrl = "${AppConfig.baseUrl}/secured/building-qrs";
     final Map<String, dynamic> data = {
       "buildingIds": id

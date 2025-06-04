@@ -19,17 +19,17 @@ class Buildingbyvenueapi {
 
 
   Future<List<Buildingbyvenue>> fetchBuildingIDS(String id) async {
-    //final BuildingByVenueBox = BuildingByVenueAPIBOX.getData();
+    final BuildingByVenueBox = BuildingByVenueAPIBOX.getData();
 
     bool isInternetConnected = await HelperClass.checkInternetConnectivity();
 
 
-    // if(!isInternetConnected && BuildingByVenueBox.length != 0){
-    //   List<dynamic> responseBody = BuildingByVenueBox.get(0)!.responseBody;
-    //   print("INTERNET IS NOT CONNECTED!! BUILDINGBYVENUE API DATA COMMING FROM DATABASE $responseBody");
-    //   List<Buildingbyvenue> buildingList = responseBody.map((data) => Buildingbyvenue.fromJson(data)).toList();
-    //   return buildingList;
-    // }
+    if(!isInternetConnected && BuildingByVenueBox.length != 0){
+      List<dynamic> responseBody = BuildingByVenueBox.get(0)!.responseBody;
+      print("INTERNET IS NOT CONNECTED!! BUILDINGBYVENUE API DATA COMMING FROM DATABASE $responseBody");
+      List<Buildingbyvenue> buildingList = responseBody.map((data) => Buildingbyvenue.fromJson(data)).toList();
+      return buildingList;
+    }
 
     final Map<String, dynamic> data = {
       "venueName": id //venue Name
@@ -44,12 +44,13 @@ class Buildingbyvenueapi {
       },
     );
 
+    print("fetchBuildingIDS ${response.statusCode} ${response.body}");
     if (response.statusCode == 200) {
       List<dynamic> responseBody = json.decode(response.body);
-      // final buildingByVenueData = BuildingByVenueAPIModel(responseBody: responseBody);
+      final buildingByVenueData = BuildingByVenueAPIModel(responseBody: responseBody);
       print("BUILDINGBYVENUE API DATA FROM API $responseBody");
-      //BuildingByVenueBox.add(buildingByVenueData);
-      // buildingByVenueData.save();
+      BuildingByVenueBox.add(buildingByVenueData);
+      buildingByVenueData.save();
       List<Buildingbyvenue> buildingList = responseBody.map((data) => Buildingbyvenue.fromJson(data)).toList();
       return buildingList;
 

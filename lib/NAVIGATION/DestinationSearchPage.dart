@@ -15,8 +15,10 @@ import 'APIMODELS/landmark.dart';
 import 'Elements/DestinationPageChipsWidget.dart';
 import 'Elements/SearchpageCategoryResult.dart';
 import 'Elements/SearchpageResults.dart';
+import 'FloorSelectionPage.dart';
 import 'StringStorage.dart';
 import 'navigationTools.dart';
+
 class DestinationSearchPage extends StatefulWidget {
   String hintText;
   String previousFilter;
@@ -54,8 +56,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   int lastIndex = -1;
   String selectedButton = "";
 
-  @override
 
+  @override
   void initState()  {
     super.initState();
     fetchandBuild();
@@ -68,7 +70,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     // });
     // print(optionListItemBuildingNameNew);
     for (int i = 0; i < optionListForUI.length; i++) {
-      if (optionListForUI[i].toLowerCase() ==
+      if (optionListForUI.toList()[i].toLowerCase() ==
           widget.previousFilter.toLowerCase()) {
         vall = i;
       }
@@ -94,7 +96,51 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       searchHintString = widget.hintText;
     });
 
-    fetchRecents();
+
+    // fetchRecents();
+
+
+    // recentResults.add(Container(
+    //   margin: EdgeInsets.only(left: 16, right: 16, top: 8),
+    //   child: Semantics(
+    //     excludeSemantics: true,
+    //     child: Row(
+    //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //       children: [
+    //         Text(
+    //           "Recent Searches",
+    //           style: const TextStyle(
+    //             fontFamily: "Roboto",
+    //             fontSize: 16,
+    //             fontWeight: FontWeight.w500,
+    //             color: Color(0xff000000),
+    //             height: 23 / 16,
+    //           ),
+    //           textAlign: TextAlign.left,
+    //         ),
+    //         TextButton(
+    //             onPressed: () {
+    //               clearAllRecents();
+    //               recent.clear();
+    //               setState(() {
+    //                 recentResults.clear();
+    //               });
+    //             },
+    //             child: Text(
+    //               "Clear all",
+    //               style: const TextStyle(
+    //                 fontFamily: "Roboto",
+    //                 fontSize: 16,
+    //                 fontWeight: FontWeight.w400,
+    //                 color: Color(0xff24b9b0),
+    //                 height: 25 / 16,
+    //               ),
+    //               textAlign: TextAlign.left,
+    //             ))
+    //       ],
+    //     ),
+    //   ),
+    // ));
   }
   String name = "";
   String floor = "";
@@ -103,6 +149,53 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   String finalName = "";
   bool promptLoader = false;
   Set<String> optionListItemBuildingNameNew = {};
+
+
+  pushToFloorSelection() async {
+    await fetchFloors("AIIMS Bhopal",widget.previousFilter.toUpperCase()).then((_){
+      print("floors list $floors ");
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FloorSelectionPage(filterName: widget.previousFilter, filterBuildingName: optionListItemBuildingName.first,floors: floors.toList()..sort(),),
+        ),
+      ).then((value){
+        print("value $value");
+        _controller.text="";
+        searchResults = [];
+        searcCategoryhResults = [];
+        vall = -1;
+        floors.clear();
+        onVenueClicked(value[0],value[1],value[2],value[3]);
+        // widget.onClicked(value[0],value[1],value[2],value[3]);
+      });
+    });
+
+  }
+
+
+  Set<String> floors = {};
+  Future<void> fetchFloors(String building,String name)async{
+    print("building:${building} ${buildingAllApi.getStoredAllBuildingID()}");
+    buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
+
+      await landmarkApi().fetchLandmarkData(id: key).then((value){
+
+        value.landmarksMap?.forEach((key, landmark){
+          if (landmark.floor != null &&
+              landmark.buildingName == building &&
+              landmark.name != null &&
+              landmark.name!.toUpperCase().contains(name.toUpperCase())) {
+            print("Matched floor: ${landmark.name} ${landmark.floor}");
+            floors.add(landmark.floor!.toString());
+          }
+        });
+        landmarkData.mergeLandmarks(value.landmarks);
+      });
+    });
+  }
+
+
   void _onSearchChanged() {
     List<String> promptArray = ["navigate to","take me to"];
     String userInput = _controller.text.toLowerCase();
@@ -172,7 +265,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             //onVenueClicked(name, floor, polyID, buildingID);
             if(polyID.isNotEmpty){
               HelperClass.showToast("Navigating to ${finalName}");
-              setState(() {
+              setState((){
                 promptLoader = false;
               });
               //Future.delayed(Duration(seconds: 2));
@@ -207,7 +300,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       HelperClass.showToast("Permission not allowed");
       return;
     }
-    setState(() {
+    setState((){
       searchHintString = "";
     });
     await speetchText.listen(onResult: onSpeechResult);
@@ -218,8 +311,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     }
     HelperClass.showToast("Speak to search");
     await Future.delayed(Duration(seconds: 5));
-    micColor = Colors.black;
-    setState(() {});
+    setState((){
+      micColor = Colors.black;
+    });
   }
 
   void onSpeechResult(result) {
@@ -256,17 +350,25 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   }
 
   void fetchandBuild() async {
-    await fetchlist();
-    setState(() {
-      if (_controller.text.isNotEmpty) {
-        search(_controller.text);
-      } else {
-        // print("Filter cleared");
-        topSearchesFunc();
-        searchResults = [];
-        searcCategoryhResults = [];
-        vall = -1;
-      }
+    await fetchlist().then((value){
+      setState(() {
+        if (_controller.text.isNotEmpty) {
+          search(_controller.text);
+        } else {
+          if (widget.previousFilter != "") {
+            setState(() {
+              _controller.text = widget.previousFilter;
+            });
+            pushToFloorSelection();
+          }
+          // print("Filter cleared");
+          topSearchesFunc();
+          loadLandmarkData();
+          searchResults = [];
+          searcCategoryhResults = [];
+          vall = -1;
+        }
+      });
     });
   }
 
@@ -275,6 +377,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       await landmarkApi().fetchLandmarkData(id: key).then((value) {
         landmarkData.mergeLandmarks(value.landmarks);
         optionListItemBuildingNameNew.add(value.landmarks!.first.buildingName!);
+        optionListItemBuildingName.add(value.landmarks!.first.buildingName!);
         print("optionListItemBuildingNameNew${optionListItemBuildingNameNew}");
       });
     });
@@ -303,29 +406,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   Set<String> cardSet = Set();
   // HashMap<String,Landmarks> cardSet = HashMap();
   int selectedChipIndex = -1; // Track selected chip index
+  Set<String> optionListForUI ={};
 
-  List<String> optionList = [
-    'washroom',
-    'cafeteria',
-    'drinking water',
-    'atm',
-    'entry',
-    'lift',
-    'reception',
-
-
-  ];
-  List<String> optionListForUI = [
-    'Washroom',
-    'Cafeteria',
-    'Drinking water',
-    'ATM',
-    'Entry',
-    'Lift',
-    'Reception',
-
-
-  ];
   List<IconData> _icons = [
     Icons.wash_sharp,
     Icons.local_cafe,
@@ -335,6 +417,52 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     Icons.elevator,
     Icons.desk_sharp,
   ];
+
+  bool isUpdated=false;
+  Future<void> loadLandmarkData() async {
+    try {
+      print("entered here ${landmarkData.landmarksMap}");
+      await Future.forEach(
+          landmarkData.landmarksMap!.entries,(MapEntry keyValue) async {
+        var value = keyValue.value;
+        if (value.name != null &&
+            (value.element!.subType == "restRoom" ||
+                value.element!.subType == "Cafeteria" ||
+                value.element!.subType == "main entry" ||
+                value.element!.subType == "Help Desk | Reception" ||
+                value.element!.subType == "lift" ||
+                value.element!.subType == "ATM" ||
+                value.element!.subType == "Drinking Water")) {
+          if (value.element!.subType == "restRoom") {
+            optionListForUI.add("Washroom");
+          } else if (value.element!.subType == "Cafeteria") {
+            print("landmark id is ${value.sId}  with building id ${value.buildingID}");
+            optionListForUI.add("Cafeteria");
+          } else if (value.element!.subType == "main entry") {
+            optionListForUI.add("Entry");
+          } else if (value.element!.subType == "lift") {
+            optionListForUI.add("Lift");
+          } else if (value.element!.subType == "Drinking Water") {
+            optionListForUI.add("Drinking Water");
+          } else if (value.element!.subType == "Help Desk | Reception") {
+            optionListForUI.add("Reception");
+          } else if (value.element!.subType == "ATM") {
+            optionListForUI.add("ATM");
+          }
+        }
+      });
+      setState(() {
+        isUpdated=true;
+      });
+    }catch(e){
+      print("error in updating liist ");
+    }
+    setState(() {
+      isUpdated=false;
+    });
+  }
+
+
 
   void onChipSelected(int index) {
     setState(() {
@@ -360,126 +488,111 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       searchResults.clear();
       searcCategoryhResults.clear();
       optionListItemBuildingName.clear();
-      if (optionList.contains(searchText)) {
+      print("optionListForUI $optionListForUI searchText $searchText");
+      if (optionListForUI.map((e) => e.toLowerCase()).contains(searchText.toLowerCase())){
         category = true;
         topCategory=false;
-        vall = optionList.indexOf(searchText);
-        if (landmarkData.landmarksMap != null) {
+        vall = indexOfCaseInsensitive(optionListForUI.toList(), searchText);
+        print("landmarkData.landmarksMap ${landmarkData.landmarksMap}");
+        if (landmarkData.landmarksMap != null){
           landmarkData.landmarksMap!.forEach((key, value) {
             if (value.name != null && value.element!.subType != "beacons") {
               final lowerCaseName = value.name!.toLowerCase();
-              if(searchText.toLowerCase().contains("entry") && value.element!.subType == "main entry"){
+              print("lowerCaseName $lowerCaseName searchText $searchText");
+              if(value.element!.subType == "main entry"){
                 optionListItemBuildingName.add(value.buildingName!);
-              }else if (lowerCaseName == searchText || lowerCaseName.contains(searchText)) {
+              }else if(lowerCaseName == searchText || lowerCaseName.contains(searchText)) {
                 optionListItemBuildingName.add(value.buildingName!);
               }
             }
+
           });
-          print("entered here");
-          optionListItemBuildingName.forEach((element) {
+          optionListItemBuildingName.forEach((element){
             searcCategoryhResults.add(
-              SearchpageCategoryResults(
-                name: searchText,
-                buildingName: element,
-                onClicked: onVenueClicked,
-              ),
+                SearchpageCategoryResults(
+                  key: UniqueKey(),
+                  name: searchText,
+                  buildingName: element,
+                  onClicked: onVenueClicked,
+                )
             );
           });
         }
-      }
-      else {
+      } else {
         category = false;
         vall = -1;
         topCategory=false;
         if (landmarkData.landmarksMap != null) {
           String normalizedSearchText = normalizeText(searchText);
-          landmarkData.landmarksMap!.forEach((key, value) {
-            if (searchResults.length >= 25 || value.name == null || value.element!.subType == "beacon") {
-              return;
-            }
-            String normalizedValueName = normalizeText(value.name!);
-            if(searchText.toLowerCase() == ("entry")){
-              final fuse = Fuzzy(
-                [normalizedValueName],
-                options: FuzzyOptions(
-                  findAllMatches: true,
-                  tokenize: true,
-                  threshold: 0.5,
-                ),
-              );
-              final result = fuse.search(normalizedSearchText);
-              result.forEach((fuseResult) {
-                print("fuseResult");
-                print(fuseResult);
-                if (fuseResult.score < 0.2) {
-                  if(wantToFilter.isNotEmpty && value.buildingName == wantToFilter){
-                    print('In--IF');
-                    searchResults.add(SearchpageResults(
-                      name: value.name!,
-                      location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
-                      onClicked: onVenueClicked,
-                      ID: value.properties!.polyId!,
-                      bid: value.buildingID!,
-                      floor: value.floor!,
-                      coordX: value.coordinateX!,
-                      coordY: value.coordinateY!,
-                      accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,
-                    ));
-                  }else{
-                    print('In--ELSE');
-                    searchResults.add(SearchpageResults(
-                      name: value.name!,
-                      location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value
-                          .buildingName}, ${value.venueName}",
-                      onClicked: onVenueClicked,
-                      ID: value.properties!.polyId!,
-                      bid: value.buildingID!,
-                      floor: value.floor!,
-                      coordX: value.coordinateX!,
-                      coordY: value.coordinateY!,
-                      accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,
-                    ));
-                  }
-                }
-              });
-            }
-            else if (partialMatch(normalizedValueName, normalizedSearchText)) {
-              final fuse = Fuzzy(
-                [normalizedSearchText],
-                options: FuzzyOptions(
-                  findAllMatches: true,
-                  tokenize: true,
-                  threshold: 1,
-                ),
-              );
-              final result = fuse.search(normalizedSearchText);
-              result.forEach((fuseResult) {
-                if (fuseResult.score < 0.5) {
-                  if((searchResults.isNotEmpty || wantToFilter.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
-                    sortAndSeparateByUserLocation(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,SingletonFunctionController().getlocalizedBeacon()!.floor!,SingletonFunctionController().getlocalizedBeacon()!.buildingID!,value,normalizedSearchText);
-                  }else{
-                    searchResults.add(SearchpageResults(
-                      name: value.name!,
-                      location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
-                      onClicked: onVenueClicked,
-                      ID: value.properties!.polyId!,
-                      bid: value.buildingID!,
-                      floor: value.floor!,
-                      coordX: value.coordinateX!,
-                      coordY: value.coordinateY!,
-                      accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,
-                    ));
-                  }
 
-                }
-              });
-            }
+          final fuse = Fuzzy(
+            landmarkData.landmarks!.map((e) => normalizeText(e.name??e.element?.subType??e.element!.type!)).toList(),
+            options: FuzzyOptions(
+              findAllMatches: true,
+              threshold: 0.4,  // adjust sensitivity
+              tokenize: false, // optional
+            ),
+          );
+          final result = fuse.search(normalizedSearchText);
+          result.sort((a, b) {
+            print("${normalizedSearchText.toLowerCase()} a.item.toLowerCase().split(' ') ${a.item.toLowerCase().split(' ')}");
+            final aHasExact = a.item.toLowerCase().split(' ').contains(normalizedSearchText.toLowerCase());
+            final bHasExact = b.item.toLowerCase().split(' ').contains(normalizedSearchText.toLowerCase());
+
+            if (aHasExact && !bHasExact) return -1;
+            if (!aHasExact && bHasExact) return 1;
+
+            return a.score!.compareTo(b.score!);
           });
+
+          for (var fuseResult in result) {
+            if (fuseResult.score < 0.5) {
+              Landmarks landmark = landmarkData.landmarks!.firstWhere((value)=>normalizeText(value.name??value.element?.subType??value.element!.type!) == fuseResult.item);
+              if ((searchResults.isNotEmpty || wantToFilter.isNotEmpty) &&
+                  SingletonFunctionController().getlocalizedBeacon() !=
+                      null && false) {
+                print("adding ${landmark.name} with score ${fuseResult.score}");
+                sortAndSeparateByUserLocation(
+                    SingletonFunctionController().getlocalizedBeacon()!
+                        .coordinateX!,
+                    SingletonFunctionController().getlocalizedBeacon()!
+                        .coordinateY!,
+                    SingletonFunctionController().getlocalizedBeacon()!
+                        .floor!,
+                    SingletonFunctionController().getlocalizedBeacon()!
+                        .buildingID!, landmark, normalizedSearchText);
+              } else {
+                print("adding ${landmark.name} with score ${fuseResult.score}");
+                print("got into this");
+                searchResults.add(SearchpageResults(
+                  name: landmark.name??landmark.element?.subType??landmark.element!.type!,
+                  location: landmark.buildingID == buildingAllApi.outdoorID
+                      ? "${landmark.venueName}"
+                      : "Floor ${landmark.floor}, ${landmark.venueName}",
+                  onClicked: onVenueClicked,
+                  ID: landmark.properties!.polyId!,
+                  bid: landmark.buildingID!,
+                  floor: landmark.floor!,
+                  coordX: landmark.coordinateX!,
+                  coordY: landmark.coordinateY!,
+                  accessible: landmark.element!.subType == "restRoom" &&
+                      landmark.properties!.washroomType == "Handicapped"
+                      ? "true"
+                      : "false",
+                  distance: 0,
+                ));
+              }
+            }
+          }
         }
       }
     });
   }
 
+  int indexOfCaseInsensitive(List<String> optionListForUI, String searchText) {
+    return optionListForUI.indexWhere(
+            (option) => option.toLowerCase() == searchText.toLowerCase());
+  }
 
   void sortAndSeparateByUserLocation(int userLat, int userLng, int userFloor, String userBuildingID,Landmarks value,String searchedtext) {
 
@@ -488,7 +601,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       searchResults.add(SearchpageResults(
         name: value.name!,
         location: value.buildingID == buildingAllApi.outdoorID ? "${value
-            .venueName}" : "Floor ${value.floor}, ${value.buildingName}, ${value
+            .venueName}" : "Floor ${value.floor}, ${value
             .venueName}",
         onClicked: onVenueClicked,
         ID: value.properties!.polyId!,
@@ -517,14 +630,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     }
 
   }
-
-
-
-
-
-
-
-
   bool partialMatch(String dataName, String searchQuery) {
     String normalizedData = normalizeString(dataName);
     String normalizedQuery = normalizeString(searchQuery);
@@ -540,7 +645,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     // Return the cleaned-up string
     return input;
   }
-
   Future<void> topSearchesFunc() async {
     List<String> strings = await StringStorage.getStrings();
     setState(() {
@@ -604,7 +708,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
 
   String normalizeText(String text) {
-    return text.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toLowerCase();
+    return text.replaceAll(RegExp(r'[^a-zA-Z0-9]'), ' ').toLowerCase();
   }
 
   Future<void> onVenueClicked(String name, String location, String ID, String bid) async {
@@ -612,20 +716,27 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     Navigator.pop(context, ID);
   }
 
-  void fetchRecents() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedData = prefs.getString('recents');
-    if (savedData != null) {
-      recent = jsonDecode(savedData);
-      setState(() {
-        for (List<dynamic> value in recent) {
-          if (buildingAllApi.getStoredAllBuildingID()[value[3]] != null) {
-            searchResults = recentResults;
-          }
-        }
-      });
-    }
-  }
+  // void fetchRecents() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String? savedData = prefs.getString('recents');
+  //   if (savedData != null) {
+  //     recent = jsonDecode(savedData);
+  //     setState(() {
+  //       for (List<dynamic> value in recent) {
+  //         if (buildingAllApi.getStoredAllBuildingID()[value[3]] != null) {
+  //           recentResults.add(SearchpageRecents(
+  //             name: value[0],
+  //             location: value[1],
+  //             onVenueClicked: onVenueClicked,
+  //             ID: value[2],
+  //             bid: value[3],
+  //           ));
+  //           searchResults = recentResults;
+  //         }
+  //       }
+  //     });
+  //   }
+  // }
 
 
   List<String> optionsTags = [];
@@ -637,11 +748,28 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   int vall = -1;
   int newvall = -1;
   int lastval =-1;
-  bool isTyping=true;
 
 
-
-
+  String getIcon(String option) {
+    switch (option.toLowerCase()) {
+      case 'washroom':
+        return 'assets/washroomIcon.png';
+      case 'cafeteria':
+        return 'assets/cafeteria.png';
+      case 'drinking water':
+        return 'assets/waterPoint.png';
+      case 'atm':
+        return 'assets/atmIcon.png';
+      case 'entry':
+        return 'assets/entryExit.png';
+      case 'lift':
+        return 'assets/liftIcon.png';
+      case 'reception':
+        return 'assets/receptionIcon.png';
+      default:
+        return ''; // Return a default icon if no match is found
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -649,6 +777,15 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     double statusBarHeight = MediaQuery.of(context).padding.top;
+
+
+
+    // if(speetchText.isNotListening){
+    //   micColor = Colors.black;
+    //   print("Not listening");
+    // }else{
+    //   micColor = Color(0xff24B9B0);
+    // }
     return Scaffold(
       body: Container(
         padding: EdgeInsets.only(top: statusBarHeight),
@@ -656,6 +793,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         child: !promptLoader? Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
+
             Semantics(
               header: true,
               label: "Search",
@@ -717,18 +855,17 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                     }
                                   },
                                   onSubmitted: (value) {
+
                                     search(value);
                                   },
                                   onChanged: (value) {
-                                    search(value);
                                     if(_controller.text.isEmpty){
-                                      isTyping=true;
+                                      searchResults.clear();
+                                      searcCategoryhResults.clear();
                                       topSearches.clear();
                                       topSearchesFunc();
                                     }else{
-                                      setState(() {
-                                        isTyping=false;
-                                      });
+                                      search(value);
                                     }
                                     // print("Final Set");
                                     // print(cardSet);
@@ -752,7 +889,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                   recentResults = [];
                                   searcCategoryhResults = [];
                                   category=false;
-                                  isTyping=true;
                                   topSearches.clear();
                                   topSearchesFunc();
                                 });
@@ -771,7 +907,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                               if (!micselected) {
                                 micColor = Color(0xff24B9B0);
                               }
-
                               setState(() {});
                             },
                             icon: Semantics(
@@ -787,7 +922,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     ],
                   )),
             ),
-            (searchHintString.toLowerCase().contains("source") && widget.userLocalized != "")?InkWell(
+            (searchHintString.toLowerCase().contains("source") && widget.userLocalized != "")?
+            InkWell(
               onTap: (){
                 Navigator.pop(context, widget.userLocalized);
               },
@@ -813,136 +949,188 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                 ),
               ),
             ):Container(),
-            searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
-            Visibility(
-              visible: isTyping,
-              child: Semantics(
-                label: "Filter Section",
-                header: true,
-                child: Container(
-                  margin: EdgeInsets.only(left: 7,top: 4),
-                  width: screenWidth,
-                  child: ChipsChoice<int>.single(
-                    value: vall,
-                    onChanged: (val) {
-                      if(HelperClass.SemanticEnabled) {
-                        speak("${optionListForUI[val]} selected");
-                      }
-                      selectedButton = optionListForUI[val];
-                      setState(() => vall = val);
-                      lastval = val;
-                      _controller.text = optionListForUI[val];
-                      search(optionListForUI[val]);
-                    },
-                    choiceItems: C2Choice.listFrom<int, String>(
-                      source: optionListForUI,
-                      value: (i, v) => i,
-                      label: (i, v) => v,
-                    ),
-
-                    choiceBuilder: (item, i) {
-                      if(!item.selected){
-                        vall = -1;
-                      }
-                      return DestinationPageChipsWidget(
-                        svgPath: '',
-                        text: optionListForUI[i],
-                        onSelect: item.select!,
-                        selected: item.selected,
-
-                        onTap: (String Text) {
-                          if (Text.isNotEmpty) {
-                            search(Text);
-                          } else {
-                            search(Text);
-                            _controller.text="";
-                            searchResults = [];
-                            searcCategoryhResults = [];
-                            vall = -1;
-                          }
-                        }, icon: _icons[i],
-                      );
-                    },
-                    direction: Axis.horizontal,
+            // searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
+            //
+            // InkWell(
+            //   onTap: (){
+            //   Navigator.push(context,  MaterialPageRoute(
+            //     builder: (BuildContext context) => SelectOnMapScreen(poly: SingletonFunctionController.building.polyLineData!, patchData: SingletonFunctionController
+            //         .building.patchData[buildingAllApi
+            //         .getStoredString()]!, destiPoint: (widget.hintText=="Source location")?false:true,)
+            //   ),).then((value){
+            //     print("poly id:::${value}");
+            //     Navigator.pop(context,value);
+            //   });
+            //   },
+            //   child: Container(
+            //     decoration: BoxDecoration(
+            //       border: Border.all(),
+            //     ),
+            //     margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
+            //     child: Column(
+            //       children:[
+            //         Row(
+            //           mainAxisAlignment: MainAxisAlignment.start,
+            //           children: [
+            //             SizedBox(width: 16,),
+            //             Icon(Icons.map_rounded,size: 25,),
+            //             SizedBox(width: 24,),
+            //             Text(style: const TextStyle(
+            //               fontFamily: "Roboto",
+            //               fontSize: 16,
+            //               fontWeight: FontWeight.w400,
+            //               color: Color(0xff000000),
+            //             ),(widget.hintText=="Source location" || widget.hintText.isEmpty)?"Select Source On Map":"Select Destination On Map")
+            //           ],
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
+            optionListForUI.isNotEmpty?Semantics(
+              label: "Filter Section",
+              header: true,
+              child: Container(
+                margin: EdgeInsets.only(left: 7,top: 4),
+                width: screenWidth,
+                child: ChipsChoice<int>.single(
+                  value: vall,
+                  onChanged: (val) async {
+                    if(HelperClass.SemanticEnabled){
+                      speak("${optionListForUI.toList()[val]} selected");
+                    }
+                    selectedButton = optionListForUI.toList()[val];
+                    setState(() => vall = val);
+                    lastval = val;
+                    _controller.text = optionListForUI.toList()[val];
+                    print("optionListItemBuildingName:${optionListItemBuildingName}");
+                    if(optionListItemBuildingName.length==1){
+                      await fetchFloors(optionListItemBuildingName.first,optionListForUI.toList()[val].toUpperCase()).then((_){
+                        print("floors list $floors");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FloorSelectionPage(filterName: optionListForUI.toList()[val], filterBuildingName: optionListItemBuildingName.first,floors: floors.toList()..sort(),),
+                          ),
+                        ).then((value){
+                          print("value $value");
+                          _controller.text="";
+                          searchResults = [];
+                          searcCategoryhResults = [];
+                          vall = -1;
+                          floors.clear();
+                          onVenueClicked(value[0],value[1],value[2],value[3]);
+                          // widget.onClicked(value[0],value[1],value[2],value[3]);
+                        });
+                      });
+                    }else{
+                      search(optionListForUI.toList()[val]);
+                    }
+                  },
+                  choiceItems: C2Choice.listFrom<int, String>(
+                    source: optionListForUI.toList(),
+                    value: (i, v) => i,
+                    label: (i, v) => v,
                   ),
+
+                  choiceBuilder: (item, i) {
+                    if(!item.selected){
+                      vall = -1;
+                    }
+                    return DestinationPageChipsWidget(
+                      svgPath: '',
+                      text: optionListForUI.toList()[i],
+                      onSelect: item.select!,
+                      selected: item.selected,
+
+                      onTap: (String Text) {
+                        if (Text.isNotEmpty) {
+                          search(Text);
+                        } else {
+                          search(Text);
+                          _controller.text="";
+                          searchResults = [];
+                          searcCategoryhResults = [];
+                          vall = -1;
+                        }
+                      }, icon: _icons[i],
+                    );
+                  },
+                  direction: Axis.horizontal,
                 ),
               ),
-            ),
-            !category && _controller.text.isNotEmpty ? Visibility(
-              visible: isTyping,
-              child: Semantics(
-                header: true,
-                label: "Building Filter section",
-                child: Container(
-                  margin: EdgeInsets.only(left: 7,top: 4),
-                  width: screenWidth,
-                  child: ChipsChoice<int>.single(
-                    value: newvall,
-                    onChanged: (val) {
-
-                      // if(HelperClass.SemanticEnabled) {
-                      //   speak("${optionListItemBuildingName.toList()[val]} selected");
-                      // }
-                      //
-                      // selectedButton = optionListItemBuildingName.toList()[val];
-                      setState(() => newvall = val);
-                      //
-                      //
-                      // //_controller.text = optionListItemBuildingName.toList()[val];
-                      // search(optionListItemBuildingName.toList()[val]);
-                    },
-                    choiceItems: C2Choice.listFrom<int, String>(
-                      source: optionListItemBuildingNameNew.toList(),
-                      value: (i, v) => i,
-                      label: (i, v) => v,
-                    ),
-
-                    choiceBuilder: (item, i) {
-                      if(!item.selected){
-                        newvall = -1;
-                      }
-                      return DestinationPageChipsWidget(
-                        svgPath: '',
-                        text: optionListItemBuildingNameNew.toList()[i],
-                        onSelect: item.select!,
-                        selected: item.selected,
-
-                        onTap: (String Text) {
-                          print("tapped$Text");
-
-                          if (Text.isNotEmpty) {
-                            search(_controller.text,wantToFilter: Text);
-                          }
-                          // else {
-                          //   search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
-                          //   _controller.text="";
-                          //   searchResults = [];
-                          //   searcCategoryhResults = [];
-                          //   newvall = -1;
-                          // }
-                        }, icon: _icons[i],
-                      );
-                    },
-                    direction: Axis.horizontal,
-                  ),
-                ),
-              ),
-            ) : Container(),
-
+            ):Container(),
+            // !category && _controller.text.isNotEmpty ? Semantics(
+            //   header: true,
+            //   label: "Building Filter section",
+            //   child: Container(
+            //     margin: EdgeInsets.only(left: 7,top: 4),
+            //     width: screenWidth,
+            //     child: ChipsChoice<int>.single(
+            //       value: newvall,
+            //       onChanged: (val) {
+            //
+            //         // if(HelperClass.SemanticEnabled) {
+            //         //   speak("${optionListItemBuildingName.toList()[val]} selected");
+            //         // }
+            //         //
+            //         // selectedButton = optionListItemBuildingName.toList()[val];
+            //         setState(() => newvall = val);
+            //         //
+            //         //
+            //         // //_controller.text = optionListItemBuildingName.toList()[val];
+            //         // search(optionListItemBuildingName.toList()[val]);
+            //       },
+            //       choiceItems: C2Choice.listFrom<int, String>(
+            //         source: optionListItemBuildingNameNew.toList(),
+            //         value: (i, v) => i,
+            //         label: (i, v) => v,
+            //       ),
+            //       choiceBuilder: (item, i) {
+            //         if(!item.selected){
+            //           newvall = -1;
+            //         }
+            //         return DestinationPageChipsWidget(
+            //           svgPath: '',
+            //           text: optionListItemBuildingNameNew.toList()[i],
+            //           onSelect: item.select!,
+            //           selected: item.selected,
+            //
+            //           onTap: (String Text) {
+            //             print("tapped$Text");
+            //
+            //             if (Text.isNotEmpty) {
+            //               search(_controller.text,wantToFilter: Text);
+            //             }
+            //             // else {
+            //             //   search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
+            //             //   _controller.text="";
+            //             //   searchResults = [];
+            //             //   searcCategoryhResults = [];
+            //             //   newvall = -1;
+            //             // }
+            //           }, icon: getIcon(optionList[i].toLowerCase())
+            //         );
+            //       },
+            //       direction: Axis.horizontal,
+            //     ),
+            //   ),
+            // ) : Container(),
             SizedBox(height: 4,),
             Divider(thickness: 6,color: Color(0xfff2f3f5)),
             Flexible(
                 flex: 1,
                 child: SingleChildScrollView(
                   child: Semantics(
+                    label: "Search Results",
                     header: true,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: (!category && topCategory)? topSearches:(category)?searcCategoryhResults:searchResults,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: (searcCategoryhResults.isEmpty && searchResults.isEmpty && _controller.text.isEmpty)?topSearches:((category)?searcCategoryhResults:searchResults)
                     ),
                   ),
                 )),
-            if (_controller.text.isNotEmpty && searchResults.isEmpty && (category ? searcCategoryhResults : (!category && topCategory ? topSearches : [])).isEmpty)
+            if (_controller.text.isNotEmpty && searchResults.isEmpty && searcCategoryhResults.isEmpty)
               Column(
                   children: [
                     SizedBox(height: 16,),
@@ -972,6 +1160,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     )
                   ]
               )
+
           ],
         ) : Center(
           child: CircularProgressIndicator(
@@ -981,9 +1170,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       ),
     );
   }
-
-
-
   @override
   void dispose() {
     _controller.removeListener(_onSearchChanged);
@@ -992,7 +1178,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     super.dispose();
   }
 }
-
 class SetInfo {
   String SetInfoLandmarkName;
   String SetInfoBuildingName;

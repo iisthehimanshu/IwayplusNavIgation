@@ -58,9 +58,9 @@ class DirectionHeader extends StatefulWidget {
   }) {
     try {
       double angle = tools.calculateAngleBWUserandCellPath(
-          user.cellPath[0],
-          user.cellPath[1],
-          user.pathobj.numCols![user.bid]![user.floor]!,
+          user.Cellpath[0],
+          user.Cellpath[1],
+          user.pathobj.numCols![user.Bid]![user.floor]!,
           user.theta);
       direction = tools.angleToClocks(angle, context);
       if (direction == "Straight") {
@@ -84,20 +84,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
   bool disposed = false;
-  BluetoothScanAndroidClass bluetoothScanAndroidClass = BluetoothScanAndroidClass();
 
   Map<String, double> ShowsumMap = Map();
   int DirectionIndex = 1;
   int nextTurnIndex = 0;
   bool isSpeaking = false;
   String? threshold;
-  double candorThreshold = 0.0;
-
+  BluetoothScanAndroidClass bluetoothScanAndroidClass = BluetoothScanAndroidClass();
   late Timer Device_timer;
-  bool isSemanticEnabled = false;
-
-
-
 
   void initTts() {
     flutterTts.setCompletionHandler(() {
@@ -107,65 +101,17 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     });
   }
 
-  void setTTSParams(String lngcode)async{
-    try{
-      print("get ios voices ${await flutterTts.getVoices}");
-      if (lngcode == "hi") {
-        if (Platform.isAndroid) {
-          await flutterTts.setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
-        } else {
-          await flutterTts.setVoice({"name": "Lekha", "locale": "hi-IN"});
-        }
-      } else {
-        await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
-      }
-
-      await flutterTts.stop();
-      if (Platform.isAndroid) {
-        await flutterTts.setSpeechRate(0.7);
-      } else {
-        await flutterTts.setSpeechRate(0.55);
-      }
-
-      await flutterTts.setPitch(1.0);
-    }catch(e){
-
-    }
-  }
-
-  late StreamSubscription<Map<String, dynamic>> _bufferSubscription;
-
-
   @override
   void initState() {
     super.initState();
-
-    _bufferSubscription = BLEManager().bufferedDeviceStream.listen((bufferedData) {
-      print("Received buffer: $bufferedData");
-
-    });
-
-
     // initTts();
-
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
-    setTTSParams(_currentLocale);
 
     for (int i = 0; i < widget.user.pathobj.directions.length; i++) {
       direction element = widget.user.pathobj.directions[i];
       //DirectionWidgetList.add(scrollableDirection("${element.turnDirection == "Straight"?"Go Straight":"Turn ${element.turnDirection??""}, and Go Straight"}", '${((element.distanceToNextTurn??1)/UserState.stepSize).ceil()} steps', getCustomIcon(element.turnDirection!)));
     }
-
-    // btadapter.emptyBin();
-    // for (int i = 0; i < btadapter.BIN.length; i++) {
-    //   if (btadapter.BIN[i]!.isNotEmpty) {
-    //     btadapter.BIN[i]!.forEach((key, value) {
-    //       key = "";
-    //       value = 0.0;
-    //     });
-    //   }
-    // }
     if(Platform.isAndroid) {
       Future.delayed(Duration(seconds: 4)).then((_) {
         bluetoothScanAndroidClass.startbin();
@@ -177,21 +123,17 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }else if(Platform.isIOS){
       final scannedDevices = BluetoothScanIOSClass.startScan();
     }
-
-
-
-
-
     setState(() {});
+    localizedOn.clear();
     //btadapter.startScanning(Building.apibeaconmap);
     if(Platform.isAndroid) {
-      _timer = Timer.periodic(Duration(milliseconds: 2000), (timer) {
+      _timer = Timer.periodic(Duration(milliseconds: 3000), (timer) {
         // print("widget.user.pathobj.index");
         // print(widget.user.pathobj.index);
-
-        if (widget.user.pathobj.index > 3) {
-          listenToBin();
-        }
+        listenToBin();
+        // if (widget.user.pathobj.index > 3) {
+        //  listenToBin();
+        // }
       });
     }else if(Platform.isIOS){
       Device_timer = Timer.periodic(Duration(milliseconds: 1000), (timer)  {
@@ -210,43 +152,43 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     widget.getSemanticValue = "";
 
     if (widget.user.floor != widget.user.pathobj.destinationFloor &&
-        widget.user.pathobj.connections[widget.user.bid]?[widget.user.floor] ==
+        widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor] ==
             (widget.user.showcoordY * UserState.cols +
                 widget.user.showcoordX)) {
       speak(
-          convertTolng(
-              "Use this lift and go to ${tools.numericalToAlphabetical(widget.user.pathobj.destinationFloor)} floor",
-              _currentLocale,
-              "",
-              "",
-              0,
-              ""),
+        // convertTolng(
+          "Use this ${widget.user.pathobj.accessiblePath} and go to ${tools.numericalToAlphabetical(widget.user.pathobj.destinationFloor)} floor",
+          //     _currentLocale,
+          //     "",
+          //     "",
+          //     0,
+          //     ""),
           _currentLocale,
           prevpause: true);
     } else if (widget
-            .user.pathobj.numCols![widget.user.bid]![widget.user.floor] !=
+        .user.pathobj.numCols![widget.user.Bid]![widget.user.floor] !=
         null) {
-      turnPoints = tools.getTurnpoints_inCell(widget.user.cellPath);
-      turnPoints.add(widget.user.cellPath.last);
+      turnPoints = tools.getTurnpoints_inCell(widget.user.Cellpath);
+      turnPoints.add(widget.user.Cellpath.last);
 
-      (widget.user.cellPath.length % 2 == 0)
+      (widget.user.Cellpath.length % 2 == 0)
           ? turnPoints
-              .add(widget.user.cellPath[widget.user.cellPath.length - 2])
+          .add(widget.user.Cellpath[widget.user.Cellpath.length - 2])
           : turnPoints
-              .add(widget.user.cellPath[widget.user.cellPath.length - 1]);
+          .add(widget.user.Cellpath[widget.user.Cellpath.length - 1]);
 
       List<Cell> remainingPath =
-          widget.user.cellPath.sublist(widget.user.pathobj.index + 1);
+      widget.user.Cellpath.sublist(widget.user.pathobj.index + 1);
       Cell nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes_inCell(
-          nextTurn, widget.user.cellPath[widget.user.pathobj.index]);
+          nextTurn, widget.user.Cellpath[widget.user.pathobj.index]);
       double angle = 0.0;
       if (widget.user.pathobj.index < widget.user.path.length - 1) {
         //
         angle = tools.calculateAngleBWUserandCellPath(
-            widget.user.cellPath[widget.user.pathobj.index],
-            widget.user.cellPath[widget.user.pathobj.index + 1],
-            widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!,
+            widget.user.Cellpath[widget.user.pathobj.index],
+            widget.user.Cellpath[widget.user.pathobj.index + 1],
+            widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,
             widget.user.theta);
         //
       }
@@ -260,7 +202,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           widget.direction = "Go Straight";
           if (!UserState.ttsOnlyTurns) {
             speak(
-                "${LocaleData.getProperty6('Go Straight', widget.context)} ${tools.convertFeet(widget.distance, widget.context)}}",
+                "${LocaleData.getProperty6('Go Straight', widget.context)} ${tools.convertFeet(widget.distance, widget.context, lngcode: _currentLocale)}}",
                 _currentLocale,
                 prevpause: true);
           }
@@ -276,29 +218,20 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             speak("${widget.direction}", _currentLocale, prevpause: true);
           }
           widget.getSemanticValue =
-              "Turn ${widget.direction}, and Go Straight ${tools.convertFeet(widget.distance, widget.context)}";
+          "Turn ${widget.direction}, and Go Straight ${tools.convertFeet(widget.distance, widget.context, lngcode: _currentLocale)}";
         }
       });
     }
 
-    print("direction${widget.direction}");
-
     try {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-          systemNavigationBarColor: Colors.white // Set the icon color to dark
-          ));
+          systemNavigationBarColor: Colors.white// Set the icon color to dark
+      ));
     } catch (e) {}
   }
 
   @override
   void dispose() {
-
-    if(Platform.isIOS){
-      BluetoothScanIOSClass.stopScan();
-    }else{
-      bluetoothScanAndroidClass.stopScan();
-    }
-    Device_timer.cancel();
     disposed = true;
     flutterTts.stop();
     _timer.cancel();
@@ -310,15 +243,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
   String debuglastNearestbeacon = "";
-  String debuglNearestbeacon = "";
+  String debugNearestbeacon = "";
   Map<String, double> sortedsumMap = {};
   Map<String, List<double>> sumMap = {};
-  Map<String, List<int>> sumRSSI = {};
   Map<String, double> sumMapAvg = {};
-
-  //-------------------------
-  Map<String, double> candorAverageDH = {};
-  //-------------------------
 
   var newMap = <String, double>{};
   String displayString = "";
@@ -326,8 +254,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   double highestAverage = double.negativeInfinity;
 
 
-
-  double highestweight = Platform.isIOS?2.8 : 3.25;
+  double highestweight = Platform.isIOS?3.25 : 2.5;
 
   String? parseString(String input) {
     final regex = RegExp(r'Optional\("(.+?)"\)\s+(\d+\.\d+)');
@@ -353,7 +280,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if (match != null) {
       final device = match.group(1); // Extracts "IW622"
       final value = double.tryParse(match.group(2) ?? '0'); // Extracts 6.0 as a double
-
       // print("Device: $device");
       // print("Value: $value");
       return value.toString();
@@ -363,276 +289,299 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }
   }
 
-
-  List<dynamic> findLastAboveThresholdCandor(Map<String, double> data, double threshold) {
-    String? lastKey;
-    double? lastValue;
-
-    data.forEach((key, value) {
-      if (value > threshold) {
-        lastKey = key; // Store the latest key that exceeds the threshold
-      }
-    });
-
-    return [BluetoothScanAndroidClass().deviceNames[lastKey],lastKey,lastValue]; // Returns the last key that went above the threshold
-  }
-
+  List<String> localizedOn = [];
   Future<bool> listenToBin() async {
-    
-    String nearestBeacon = "";
 
+    String nearestBeacon = "";
     if(Platform.isAndroid) {
       sumMap.clear();
-      nearestBeacon = findNearestBeaconTaksForAndroid();
+      // sumMap = btadapter.calculateAverage();
+      nearestBeacon = bluetoothScanAndroidClass.closestDeviceDetails;
+      sumMapAvg = bluetoothScanAndroidClass.rssiAverage;
+      threshold = bluetoothScanAndroidClass.closestRSSI;
+      print("listenToBin${sumMapAvg} ");
+      print("listenToBin${nearestBeacon} $threshold ");
+      // print("---nearestBeacon");
+      // print(nearestBeacon);
+      debugNearestbeacon = "$nearestBeacon $threshold";
+      sumMap = bluetoothScanAndroidClass.giveSumMapCallBack();
+      print("sumMap $sumMap");
+
+      sumMap.forEach((key, value) {
+        if (value.isNotEmpty) {
+          double average = value.reduce((a, b) => a + b) / value.length;
+          // print("--average");
+          // print(average);
+          if (average > highestAverage) {
+            highestAverage = average;
+            highestKey = key;
+            print("Key $key");
+          }else{
+            print("InfinityELse");
+          }
+        } else {
+          print("else---");
+        }
+      });
+      print("highestKey $highestKey");
     }else if(Platform.isIOS){
-      nearestBeacon = await findNearestBeaconTaksForIOS();
+      String receivedStringFromIOS = await BluetoothScanIOSClass.getBestDevice();
+      print("receivedStringFromIOS");
+      print(receivedStringFromIOS);
+      nearestBeacon = parseString(receivedStringFromIOS)??"";
+
+      threshold = parseStringT(receivedStringFromIOS)??"";
+      debugNearestbeacon = "${nearestBeacon} ${threshold}";
+      setState(() {});
     }
-
-    sortedsumMap.clear();
-    try {
-      if (nearestBeacon != "") {
-        if (widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null) {
-          int beaconCoordinateX = Building.apibeaconmap[nearestBeacon]!.coordinateX!;
-          int beaconCoordinateY = Building.apibeaconmap[nearestBeacon]!.coordinateY!;
-          List<int> beaconcoord = [beaconCoordinateX,beaconCoordinateY];
-
-          if (widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId) {
-            if (widget.user.floor != widget.user.pathobj.destinationFloor && widget.user.pathobj.destinationFloor != widget.user.pathobj.sourceFloor && widget.user.pathobj.destinationFloor == Building.apibeaconmap[nearestBeacon]!.floor) {
-              int distanceFromPath = 100000000;
-              widget.user.cellPath.forEach((node) {
-                if (node.floor == Building.apibeaconmap[nearestBeacon]!.floor || node.bid == Building.apibeaconmap[nearestBeacon]!.buildingID) {
-                  List<int> pathcoord = [node.x, node.y];
-                  double d1 = tools.calculateDistance(beaconcoord, pathcoord);
-                  if (d1 < distanceFromPath) {
-                    distanceFromPath = d1.toInt();
-                  }
-                }
-              });
-
-              if (distanceFromPath > 25) {
-                setEssentialsForReroute(nearestBeacon);
-                return false; //away from path
-              } else {
-                reacedDestinationEssentials(nearestBeacon);
-                return true;
-              }
-            } else if (widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor && candorThreshold >= highestweight) {
-              widget.user.onConnection = false;
-
-              int distanceFromPath = 100000000;
-              int? indexOnPath = null;
-              List<double> newPoint = [];
-              if (widget.user.bid == buildingAllApi.outdoorID) {
-                List<double> beaconLatLng = tools.localtoglobal(beaconcoord[0], beaconcoord[1], SingletonFunctionController.building.patchData[Building.apibeaconmap[nearestBeacon]!.buildingID!]);
-                List<Cell> nearPoints = findTwoNearestPoints(beaconLatLng, widget.user.cellPath, widget.user.bid);
-
-                newPoint = projectCellOntoSegment(beaconLatLng, nearPoints[0], nearPoints[1], widget.user.pathobj.numCols![widget.user.bid]![Building.apibeaconmap[nearestBeacon]!.floor]!);
-
-                List<int> np = tools.findLocalCoordinates(nearPoints[0], nearPoints[1], newPoint);
-                Cell point = Cell((np[1] * nearPoints[0].numCols) + np[0], np[0], np[1], tools.eightcelltransition, newPoint[0], newPoint[1], nearPoints[0].bid, nearPoints[0].floor, nearPoints[0].numCols);
-
-                indexOnPath = insertProjectedPoint(widget.user.cellPath, point);
-                widget.user.path.insert(indexOnPath, point.node);
-                widget.user.cellPath.insert(indexOnPath, Cell(point.node, point.x, point.y, tools.eightcelltransition, point.lat, point.lng, buildingAllApi.outdoorID, point.floor, point.numCols, imaginedCell: true));
-
-              } else {
-                widget.user.cellPath.forEach((node) {
-                  List<int> pathcoord = [node.x, node.y];
-                  double d1 = tools.calculateDistance(beaconcoord, pathcoord);
-                  if (d1 < distanceFromPath) {
-                    distanceFromPath = d1.toInt();
-                    indexOnPath = widget.user.path.indexOf(node.node);
-                  }
-                });
-              }
-              if (distanceFromPath > 25) {
-                setEssentialsForReroute(nearestBeacon);
-                return false; //away from path
-              } else {
-                moveOnPathEssentials(nearestBeacon,indexOnPath);
-                return true; //moved on path
+    print("nearestCheck $nearestBeacon");
+    print("localizedOn $localizedOn");
+    print("highestweight");
+    print(highestweight);
+    List<int> liftCoordinates = [(widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor]??1)%UserState.cols, (widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor]??1)~/UserState.cols];
+    if (nearestBeacon != "") {
+      if (widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId) {
+        print("wilsoninifff $highestweight");
+        print(widget.user.floor ==
+            Building.apibeaconmap[nearestBeacon]!.floor);
+        print(highestweight);
+        print(double.parse(threshold!));
+        //widget.user.pathobj.destinationFloor
+        if (widget.user.floor != widget.user.pathobj.destinationFloor &&
+            widget.user.pathobj.destinationFloor !=
+                widget.user.pathobj.sourceFloor &&
+            widget.user.pathobj.destinationFloor ==
+                Building.apibeaconmap[nearestBeacon]!.floor) {
+          print("wilsoninifff2");
+          localizedOn.add(nearestBeacon);
+          List<int> beaconcoord = [
+            Building.apibeaconmap[nearestBeacon]!.coordinateX!,
+            Building.apibeaconmap[nearestBeacon]!.coordinateY!
+          ];
+          int distanceFromPath = 100000000;
+          widget.user.Cellpath.forEach((node) {
+            if (node.floor == Building.apibeaconmap[nearestBeacon]!.floor ||
+                node.Bid ==
+                    Building.apibeaconmap[nearestBeacon]!.buildingID) {
+              List<int> pathcoord = [node.x, node.y];
+              double d1 = tools.calculateDistance(beaconcoord, pathcoord);
+              if (d1 < distanceFromPath) {
+                distanceFromPath = d1.toInt();
               }
             }
-          }
-        }else{
-          if ((double.parse(threshold!) >= highestweight)){
+          });
+
+          if (distanceFromPath > 30) {
+            print("calling expected function22");
             _timer.cancel();
             widget.repaint(nearestBeacon);
             widget.reroute;
+            DirectionIndex = 1;
+            nextTurnIndex = 1;
+            return false; //away from path
+          } else {
+            await speak(
+                "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor",
+                _currentLocale);
+            await Future.delayed(Duration(seconds: 1));
+            widget.user.onConnection = false;
+
+            widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+            UserState.createCircle(widget.user.lat, widget.user.lng);
+            DirectionIndex = nextTurnIndex;
+            //need to render on beacon for aiims jammu
+            print("calling expected function");
+            widget.paint(nearestBeacon,null,null,render: false);
+            return true;
           }
+        }else if(tools.calculateDistance(liftCoordinates, [widget.user.showcoordX, widget.user.showcoordY])<10){
           return false;
         }
+
+        // else if(widget.user.floor != Building.apibeaconmap[nearestBeacon]!.floor &&  highestweight >= 1.1){
+        //   widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+        //   speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
+        //   widget.paint(nearestBeacon,render: false);
+        //   return true;
+        // }
+
+        else if (!widget.user.onConnection && widget.user.floor ==
+            Building.apibeaconmap[nearestBeacon]!.floor &&
+            highestweight <= double.parse(threshold!)) {
+          print("inelseiflocal");
+          localizedOn.add(nearestBeacon);
+          //
+          List<int> beaconcoord = [
+            Building.apibeaconmap[nearestBeacon]!.coordinateX!,
+            Building.apibeaconmap[nearestBeacon]!.coordinateY!
+          ];
+          List<int> usercoord = [
+            widget.user.showcoordX,
+            widget.user.showcoordY
+          ];
+          double d = tools.calculateDistance(beaconcoord, usercoord);
+          int distanceFromPath = 100000000;
+          int? indexOnPath = null;
+          int numCols = widget
+              .user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!;
+          widget.user.Cellpath.forEach((node) {
+            List<int> pathcoord = [node.x, node.y];
+            double d1 = tools.calculateDistance(beaconcoord, pathcoord);
+            if (d1 < distanceFromPath) {
+              distanceFromPath = d1.toInt();
+              //
+              //
+              indexOnPath = widget.user.path.indexOf(node.node);
+              //
+            }
+          });
+
+          if (distanceFromPath > 30) {
+            print("calling expected function22");
+            _timer.cancel();
+            widget.repaint(nearestBeacon);
+            widget.reroute;
+            DirectionIndex = 1;
+            nextTurnIndex = 1;
+            return false; //away from path
+          } else {
+            double dis = tools.calculateDistance(
+                [widget.user.showcoordX, widget.user.showcoordY],
+                beaconcoord);
+
+            widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+            // if (!UserState.ttsOnlyTurns) {
+            //   speak(
+            //       "${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}",
+            //       _currentLocale);
+            // }
+            widget.user.moveToPointOnPath(indexOnPath!);
+
+            widget.moveUser();
+            DirectionIndex = nextTurnIndex;
+            return true; //moved on path
+          }
+          // if (d < 5) {
+          //
+          //   //near to user so nothing to do
+          //   return true;
+          // } else {
+          //   //
+          //   int distanceFromPath = 100000000;
+          //   int? indexOnPath = null;
+          //   int numCols = widget.user.pathobj.numCols![widget.user
+          //       .Bid]![widget.user.floor]!;
+          //   widget.user.path.forEach((node) {
+          //     List<int> pathcoord = [node % numCols, node ~/ numCols];
+          //     double d1 = tools.calculateDistance(beaconcoord, pathcoord);
+          //     if (d1 < distanceFromPath) {
+          //       distanceFromPath = d1.toInt();
+          //       //
+          //       //
+          //       indexOnPath = widget.user.path.indexOf(node);
+          //       //
+          //     }
+          //   });
+          //
+          //   if (distanceFromPath > 10) {
+          //
+          //     _timer.cancel();
+          //     widget.repaint(nearestBeacon);
+          //     widget.reroute;
+          //     DirectionIndex = 1;
+          //     return false; //away from path
+          //   } else {
+          //
+          //     widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+          //     speak(
+          //         "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+          //         _currentLocale
+          //     );
+          //     widget.user.moveToPointOnPath(indexOnPath!);
+          //     widget.moveUser();
+          //     DirectionIndex = nextTurnIndex;
+          //     return true; //moved on path
+          //   }
+          // }
+
+          //
+          //
+          //
+          //
+          //
+        }else{
+          print("noconditionmatched");
+        }
+      }else{
+        print("wilsonElsecheck");
+        print(widget.user.key );
+        print(Building.apibeaconmap[nearestBeacon]!.sId);
       }
-    } catch (e) {}
+    }else{
+      print("nearestBeacon $nearestBeacon");
+    }
+
+    // btadapter.emptyBin();
 
     return false;
   }
 
-  String findNearestBeaconTaksForAndroid(){
-    String beaconCalculate = "";
-    candorAverageDH = bluetoothScanAndroidClass.candorAverage;
-    List<dynamic> receivedCandorValue = findLastAboveThresholdCandor(candorAverageDH,5.8)??[];
-    beaconCalculate = receivedCandorValue[0]??"";
-    candorThreshold = receivedCandorValue[1]??0.0;
-
-
-    debuglNearestbeacon = beaconCalculate;
-    sumMap = bluetoothScanAndroidClass.giveSumMapCallBack();
-    sumRSSI = bluetoothScanAndroidClass.rssiValues;
-
-    sumMap.forEach((key, value) {
-      if (value.isNotEmpty) {
-        double average = value.reduce((a, b) => a + b) / value.length;
-        if (average > highestAverage) {
-          highestAverage = average;
-          highestKey = key;
-        }
-      } else {
-      }
-    });
-    return beaconCalculate;
-  }
-
-  Future<String> findNearestBeaconTaksForIOS() async {
-    String beaconCalculate = "";
-
-    String receivedStringFromIOS = await BluetoothScanIOSClass.getBestDevice();
-    beaconCalculate = parseString(receivedStringFromIOS)??"";
-    threshold = parseStringT(receivedStringFromIOS)??"";
-    debuglNearestbeacon = "${beaconCalculate} ${threshold}";
-    return beaconCalculate;
-  }
-
-  void setEssentialsForReroute(String nearestBeacon){
-    _timer.cancel();
-    widget.repaint(nearestBeacon);
-    widget.reroute;
-    DirectionIndex = 1;
-    nextTurnIndex = 1;
-  }
-
-
-  void reacedDestinationEssentials(String nearestBeacon){
-    widget.user.onConnection = false;
-    widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-    UserState.createCircle(widget.user.lat, widget.user.lng);
-    speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor", _currentLocale);
-    DirectionIndex = nextTurnIndex;
-    //need to render on beacon for aiims jammu
-    widget.paint(nearestBeacon, null, null, render: false);
-  }
-
-  void moveOnPathEssentials(String nearestBeacon,int? indexOnPath){
-    widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-    if (!UserState.ttsOnlyTurns) {
-      speak("${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}", _currentLocale);
-    }
-    widget.user.moveToPointOnPath(indexOnPath!, context);
-    widget.moveUser();
-    DirectionIndex = nextTurnIndex;
-  }
-
-  int insertProjectedPointInIntList(
-      List<int> path, int projectedPoint, int numCols) {
-    // Helper function to compute x, y for a given element
-    List<int> getXY(int element) {
-      int x = element % numCols;
-      int y = element ~/ numCols;
-      return [x, y];
-    }
-
-    // Calculate x, y for the projected point
-    List<int> projectedXY = getXY(projectedPoint);
-
-    // Find the index to insert the projected point
-    int indexToInsert = path.indexWhere((element) {
-      List<int> elementXY = getXY(element);
-
-      // Compare first by x, then by y if x is the same
-      return (elementXY[0] > projectedXY[0]) ||
-          (elementXY[0] == projectedXY[0] && elementXY[1] > projectedXY[1]);
-    });
-
-    return indexToInsert;
-  }
-
-  int insertProjectedPoint(List<Cell> path, Cell projectedPoint) {
-    // Find the index of the next greater point
-    int indexToInsert = path.indexWhere((cell) {
-      // Compare by some criterion; here we're using the `x` coordinate
-      return (cell.x > projectedPoint.x) ||
-          (cell.x == projectedPoint.x && cell.y > projectedPoint.y);
-    });
-
-    return indexToInsert;
-  }
-
-  List<Cell> findTwoNearestPoints(
-      List<double> beaconcoord, List<Cell> turnPoints, String userBid) {
-    // Sort the list of turn points by distance to the beacon
-    print("turnPoints[0].x ${turnPoints.length} ${turnPoints[0].x}");
-    List<Cell> filteredPoints = turnPoints
-        .where((point) => (point.bid == userBid && point.imaginedCell == false))
-        .toList();
-    print(
-        "filteredPoints[0].x ${filteredPoints.length} ${filteredPoints[0].x}");
-
-    filteredPoints.sort((a, b) => tools
-        .calculateAerialDist(beaconcoord[0], beaconcoord[1], a.lat, a.lng)
-        .compareTo(tools.calculateAerialDist(
-            beaconcoord[0], beaconcoord[1], b.lat, b.lng)));
-    print(
-        "filteredPoints[0].x ${filteredPoints.length} ${filteredPoints[0].x}");
-    // Return the first two points in the sorted list
-    return [filteredPoints[0], filteredPoints[1]];
-  }
-
-  List<double> projectCellOntoSegment(
-      List<double> beaconLatLng, Cell a, Cell b, int numCols) {
-    // Vector AB (lat/lng)
-    double abLat = b.lat - a.lat;
-    double abLng = b.lng - a.lng;
-    // Vector AP (lat/lng)
-    double apLat = beaconLatLng[0] - a.lat;
-    double apLng = beaconLatLng[1] - a.lng;
-    // Dot products
-    double abDotAb = abLat * abLat + abLng * abLng;
-    double apDotAb = apLat * abLat + apLng * abLng;
-
-    // Projection scalar t
-    double t = apDotAb / abDotAb;
-
-    // Clamp t to stay within the segment [0, 1]
-    t = t.clamp(0.0, 1.0);
-
-    // Projected point P' on the line segment
-    double projLat = a.lat + t * abLat;
-    double projLng = a.lng + t * abLng;
-
-    // Convert projected lat/lng back to x/y for the Cell object
-
-    return [projLat, projLng];
-  }
   FlutterTts flutterTts = FlutterTts();
-  Future<void> speak(String msg, String lngcode, {bool prevpause = false}) async {
-    print("checkspeak");
+  Future<void> speak(String msg, String lngcode,
+      {bool prevpause = false}) async {
     if (!UserState.ttsAllStop) {
       if (disposed) return;
-      if (false) {
+
+      // if (isSpeaking) {
+      //   await flutterTts.stop();
+      // }
+      // setState(() {
+      //   isSpeaking = true;
+      // });
+      if (prevpause) {
         await flutterTts.pause();
       }
-      try {
-        // Check if Semantic Mode is enabled
-        if (isSemanticEnabled) {
-          PushNotifications.showSimpleNotification(body: "", payload: "", title: msg);
+      if (Platform.isAndroid) {
+        if (lngcode == "hi") {
+          if (Platform.isAndroid) {
+            await flutterTts
+                .setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
+          } else {
+            await flutterTts.setVoice({"name": "Lekha", "locale": "hi-IN"});
+          }
         } else {
-          await flutterTts.speak(msg);
+          await flutterTts
+              .setVoice({"name": "en-US-language", "locale": "en-US"});
         }
-      } catch (e) {
-        print("Error during TTS: $e");
       }
+      if (isSpeaking) {
+        await flutterTts.stop();
+      }
+      if (Platform.isAndroid) {
+        await flutterTts.setSpeechRate(0.7);
+      } else {
+        // await flutterTts.setSharedInstance(true);
+        // await flutterTts.setIosAudioCategory(IosTextToSpeechAudioCategory.playback,
+        //     [
+        //       IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+        //       IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+        //       IosTextToSpeechAudioCategoryOptions.mixWithOthers,
+        //       IosTextToSpeechAudioCategoryOptions.defaultToSpeaker
+        //     ],
+        //     IosTextToSpeechAudioMode.defaultMode
+        // );
+        await flutterTts.setSpeechRate(0.55);
+      }
+
+      await flutterTts.setPitch(1.0);
+      await flutterTts.speak(msg);
+
+      setState(() {
+        isSpeaking = !isSpeaking;
+      });
     }
   }
+
   Cell findNextTurn(List<Cell> turns, List<Cell> path) {
     // Iterate through the sorted list
     for (int i = 0; i < path.length; i++) {
@@ -651,7 +600,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           0,
           0,
           0,
-          (double angle, {int? currPointer, int? totalCells}) {},
+              (double angle, {int? currPointer, int? totalCells}) {},
           0.0,
           0.0,
           "",
@@ -676,9 +625,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         return "इस लिफ़्ट का उपयोग करें और ${tools.numericalToAlphabetical(widget.user.pathobj.destinationFloor)} मंज़िल पर जाएँ";
       }
     } else if ((widget.user.pathobj.associateTurnWithLandmark[nextTurn] !=
-                null &&
-            widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name !=
-                null) &&
+        null &&
+        widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name !=
+            null) &&
         msg ==
             "You are approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}") {
       if (lngcode == 'en') {
@@ -731,238 +680,236 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     return "";
   }
 
+  Timer? _speakTimer;
+  bool _turnSpoken = false;
   @override
   void didUpdateWidget(DirectionHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final user = widget.user;
-    final pathObj = user.pathobj;
-    final currentFloor = user.floor;
-    final currentBid = user.bid;
-    final showCoordX = user.showcoordX;
-    final showCoordY = user.showcoordY;
-    final path = user.path;
-    final cellPath = user.cellPath;
+    if (widget.user.floor == widget.user.pathobj.sourceFloor &&
+        widget.user.pathobj.connections.isNotEmpty &&
+        widget.user.showcoordY * UserState.cols + widget.user.showcoordX ==
+            widget.user.pathobj.connections[widget.user.Bid]
+            ?[widget.user.pathobj.sourceFloor]) {
+    } else if (widget.user.path.isNotEmpty &&
+        widget.user.Cellpath.length - 1 > widget.user.pathobj.index) {
 
-    // Check if user reached a connection point at the source floor
-    if (_isAtSourceConnection(user)) {
-      return;
-    }
+      List<Cell> remainingPath =
+      widget.user.Cellpath.sublist(widget.user.pathobj.index + 1);
+      //
+      //
+      Cell nextTurn = findNextTurn(turnPoints, remainingPath);
+      //
+      //
 
-    // Process path updates if there are remaining steps
-    if (path.isNotEmpty && cellPath.length - 1 > pathObj.index) {
-      _updateDirectionOnPath(oldWidget, user);
-
-      final remainingPath = cellPath.sublist(pathObj.index + 1);
-      final nextTurn = findNextTurn(turnPoints, remainingPath);
-      nextTurnIndex = pathObj.directions
+      nextTurnIndex = widget.user.pathobj.directions
           .indexWhere((element) => element.node == nextTurn.node);
+      //
 
-      _updateDirectionIndexOnTurn(user);
-
+      if (turnPoints
+          .contains(widget.user.Cellpath[widget.user.pathobj.index])) {
+        if (DirectionIndex + 1 < widget.user.pathobj.directions.length) {
+          DirectionIndex = widget.user.pathobj.directions.indexWhere(
+                  (element) =>
+              element.node ==
+                  widget.user.Cellpath[widget.user.pathobj.index].node) +
+              1;
+        }
+        if (DirectionIndex >= widget.user.pathobj.directions.length) {
+          DirectionIndex = widget.user.pathobj.directions.length - 1;
+        }
+      }
       widget.distance = tools.distancebetweennodes_inCell(
-          nextTurn, cellPath[pathObj.index]);
+          nextTurn, widget.user.Cellpath[widget.user.pathobj.index]);
+      double angle = 0.0;
+      try {
+        angle = tools.calculateAnglefifth(
+            widget.user.Cellpath[widget.user.pathobj.index].node,
+            widget.user.Cellpath[widget.user.pathobj.index + 1].node,
+            widget.user.Cellpath[widget.user.pathobj.index + 2].node,
+            widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+      } catch (e) {
+        print("error to be solved later $e");
+      }
+      if (widget.user.pathobj.index != 0) {
+        try {
+          angle = tools.calculateAnglefifth(
+              widget.user.Cellpath[widget.user.pathobj.index - 1].node,
+              widget.user.Cellpath[widget.user.pathobj.index].node,
+              widget.user.Cellpath[widget.user.pathobj.index + 1].node,
+              widget
+                  .user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        } catch (e) {
+          print("problem to be solved later $e");
+        }
+      }
+      double userangle = tools.calculateAngleBWUserandCellPath(
+          widget.user.Cellpath[widget.user.pathobj.index],
+          widget.user.Cellpath[widget.user.pathobj.index + 1],
+          widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,
+          widget.user.theta);
 
-      final angle = _calculateAngle(user);
-      final userAngle = tools.calculateAngleBWUserandCellPath(
-          cellPath[pathObj.index],
-          cellPath[pathObj.index + 1],
-          pathObj.numCols![currentBid]![currentFloor]!,
-          user.theta);
-
-      final newUserDirection = tools.angleToClocks(userAngle, context);
-      widget.direction = (newUserDirection == "None")
+      widget.direction = tools.angleToClocks(angle, widget.context) == "None"
           ? oldWidget.direction
-          : newUserDirection;
-
-      if (newUserDirection == "Straight") {
+          : tools.angleToClocks(angle, widget.context);
+      String userdirection =
+      tools.angleToClocks(userangle, widget.context) == "None"
+          ? oldWidget.direction
+          : tools.angleToClocks(userangle, widget.context);
+      if (userdirection == "Straight") {
         widget.direction = "Straight";
       }
-      if (pathObj.index < 3) {
-        widget.direction = newUserDirection;
+      if (widget.user.pathobj.index < 3) {
+        widget.direction = userdirection;
       }
 
       if (UserCredentials().getUserPersonWithDisability() == 1 ||
           UserCredentials().getUserPersonWithDisability() == 2) {
-        widget.direction = newUserDirection;
+        widget.direction = userdirection;
       }
 
-      final turnIndex = cellPath.indexOf(nextTurn);
-      turnDirection = _calculateTurnDirection(user, turnIndex, newUserDirection);
+      widget.direction = userdirection;
 
-
-      _handleDirectionChange(oldWidget);
-
-      _handleApproachingDestinationOrTurn(nextTurn, user);
-    }
-  }
-
-  bool _isAtSourceConnection(UserState user) {
-    final pathObj = user.pathobj;
-    return user.floor == pathObj.sourceFloor &&
-        pathObj.connections.isNotEmpty &&
-        user.showcoordY * UserState.cols + user.showcoordX ==
-            pathObj.connections[user.bid]?[pathObj.sourceFloor];
-  }
-
-  void _updateDirectionOnPath(DirectionHeader oldWidget, UserState user) {
-    user.pathobj.connections.forEach((key, value) {
-      value.forEach((inkey, invalue) {
-        if (user.path[user.pathobj.index] == invalue) {
-          widget.direction = "You have reached ";
+      int index = widget.user.Cellpath.indexOf(nextTurn);
+      //
+      double a = 0;
+      if (index + 1 == widget.user.path.length) {
+        if (widget.user.Cellpath[index - 2].Bid ==
+            widget.user.Cellpath[index - 1].Bid &&
+            widget.user.Cellpath[index - 1].Bid ==
+                widget.user.Cellpath[index].Bid) {
+          a = tools.calculateAnglefifth(
+              widget.user.path[index - 2],
+              widget.user.path[index - 1],
+              widget.user.path[index],
+              widget
+                  .user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
         }
-      });
-    });
-  }
-
-  void _updateDirectionIndexOnTurn(UserState user) {
-    if (turnPoints.contains(user.cellPath[user.pathobj.index])) {
-      final currentIndex = user.pathobj.directions.indexWhere(
-              (element) => element.node == user.cellPath[user.pathobj.index].node);
-      if (currentIndex + 1 < user.pathobj.directions.length) {
-        DirectionIndex = currentIndex + 1;
-      }
-      if (DirectionIndex >= user.pathobj.directions.length) {
-        DirectionIndex = user.pathobj.directions.length - 1;
-      }
-    }
-  }
-
-  double _calculateAngle(UserState user) {
-    final pathObj = user.pathobj;
-    final cellPath = user.cellPath;
-    final currentBid = user.bid;
-    final currentFloor = user.floor;
-    double angle = 0.0;
-    try {
-      angle = tools.calculateAnglefifth(
-          cellPath[pathObj.index].node,
-          cellPath[pathObj.index + 1].node,
-          cellPath[pathObj.index + 2].node,
-          pathObj.numCols![currentBid]![currentFloor]!);
-    } catch (e) {
-      print("error to be solved later $e");
-    }
-    if (pathObj.index != 0) {
-      try {
-        angle = tools.calculateAnglefifth(
-            cellPath[pathObj.index - 1].node,
-            cellPath[pathObj.index].node,
-            cellPath[pathObj.index + 1].node,
-            pathObj.numCols![currentBid]![currentFloor]!);
-      } catch (e) {
-        print("problem to be solved later $e");
-      }
-    }
-    return angle;
-  }
-
-  String _calculateTurnDirection(UserState user, int turnIndex, String userDirection) {
-    final pathObj = user.pathobj;
-    final cellPath = user.cellPath;
-    final currentBid = user.bid;
-    final currentFloor = user.floor;
-    double a = 0;
-    if (turnIndex + 1 == user.path.length) {
-      if (cellPath[turnIndex - 2].bid == cellPath[turnIndex - 1].bid &&
-          cellPath[turnIndex - 1].bid == cellPath[turnIndex].bid) {
-        a = tools.calculateAnglefifth(
-            user.path[turnIndex - 2],
-            user.path[turnIndex - 1],
-            user.path[turnIndex],
-            pathObj.numCols![currentBid]![currentFloor]!);
-      }
-    } else {
-      if (cellPath[turnIndex - 1].bid == cellPath[turnIndex].bid &&
-          cellPath[turnIndex].bid == cellPath[turnIndex + 1].bid) {
-        a = tools.calculateAnglefifth(
-            user.path[turnIndex - 1],
-            user.path[turnIndex],
-            user.path[turnIndex + 1],
-            pathObj.numCols![currentBid]![currentFloor]!);
-      }
-    }
-    return userDirection; // Directly using userDirection as it's already calculated
-  }
-
-  void _handleDirectionChange(DirectionHeader oldWidget) {
-    if (oldWidget.direction != widget.direction) {
-      if (oldWidget.direction == "Straight") {
-        Vibration.vibrate();
-        speak(
-            convertTolng(
-                "Turn ${LocaleData.getProperty5(widget.direction, context)}",
-                _currentLocale,
-                widget.direction,
-                "",
-                0,
-                ""),
-            _currentLocale,
-            prevpause: true);
-      } else if (widget.direction == "Straight") {
-        Vibration.vibrate();
-        UserState.isTurn = false;
-        if (!UserState.ttsOnlyTurns) {
-          speak(
-              "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}}",
-              _currentLocale,
-              prevpause: true);
+      } else {
+        if (widget.user.Cellpath[index - 1].Bid ==
+            widget.user.Cellpath[index].Bid &&
+            widget.user.Cellpath[index].Bid ==
+                widget.user.Cellpath[index + 1].Bid) {
+          a = tools.calculateAnglefifth(
+              widget.user.path[index - 1],
+              widget.user.path[index],
+              widget.user.path[index + 1],
+              widget
+                  .user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
         }
       }
-    }
-  }
 
-  void _handleApproachingDestinationOrTurn(Cell nextTurn, UserState user) {
-    final pathObj = user.pathobj;
-    final currentBid = user.bid;
-    final currentFloor = user.floor;
-    if (nextTurn == turnPoints.last && widget.distance == 7) {
-      double angle = 0.0;
-      try {
-        angle = tools.calculateAngleThird(
-            [pathObj.destinationX, pathObj.destinationY],
-            user.path[pathObj.index + 1],
-            user.path[pathObj.index + 2],
-            pathObj.numCols![currentBid]![currentFloor]!);
-      } catch (e) {
-        print("problem to be solved later $e");
-      }
-      if (!UserState.ttsOnlyTurns) {
-        speak(
-            "${widget.direction} ${widget.distance} steps. ${pathObj.destinationName} will be ${tools.angleToClocks2(angle, widget.context)}",
-            _currentLocale);
-      }
-      user.move(context);
-    } else if (nextTurn != turnPoints.last &&
-        pathObj.connections[currentBid]?[currentFloor] != nextTurn &&
-        (widget.distance / UserState.stepSize).ceil() == 7) {
-      final turnDirectionLower = turnDirection.toLowerCase();
-      if (!turnDirectionLower.contains("slight") &&
-          !turnDirectionLower.contains("straight") &&
-          pathObj.index > 4) {
-        final landmark = pathObj.associateTurnWithLandmark[nextTurn];
-        if (landmark != null) {
-          if (!UserState.ttsOnlyTurns) {
+      String direc = tools.angleToClocks(a, widget.context);
+      turnDirection = direc;
+
+      if (oldWidget.direction != widget.direction) {
+        if (oldWidget.direction == "Straight") {
+          _speakTimer?.cancel(); // Cancel any previous timer
+          _turnSpoken = false; // Reset flag
+          if(turnPoints.contains(widget.user.Cellpath[widget.user.pathobj.index])){
+            Vibration.vibrate();
             speak(
                 convertTolng(
-                    "You are approaching ${turnDirection} turn from ${landmark.name!}",
+                    "Turn ${LocaleData.getProperty5(widget.direction, context)}",
                     _currentLocale,
-                    '',
-                    turnDirection,
-                    nextTurn!.node,
+                    widget.direction,
+                    "",
+                    0,
                     ""),
-                _currentLocale);
+                _currentLocale,
+                prevpause: true);
+          }else{
+            _speakTimer = Timer(Duration(seconds: 2), () {
+              if (mounted && oldWidget.direction == widget.direction) {
+                return; // Direction changed back, do not proceed
+              }
+              _turnSpoken = true; // Mark that turn instruction was spoken
+
+              Vibration.vibrate();
+              speak(
+                  convertTolng(
+                      "Turn ${LocaleData.getProperty5(widget.direction, context)}",
+                      _currentLocale,
+                      widget.direction,
+                      "",
+                      0,
+                      ""),
+                  _currentLocale,
+                  prevpause: true);
+            });
           }
-          return;
-        } else {
+        }
+        else if (widget.direction == "Straight") {
+          if (!turnPoints.contains(widget.user.Cellpath[widget.user.pathobj.index]) && !_turnSpoken) return; // Skip "Straight" if "Turn" was never spoken
+
+          Vibration.vibrate();
+          UserState.isTurn = false;
           if (!UserState.ttsOnlyTurns) {
             speak(
-                convertTolng("You are approaching ${turnDirection} turn",
-                    _currentLocale, '', turnDirection, nextTurn!.node, ""),
-                _currentLocale);
+              "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context, lngcode: _currentLocale)}",
+              _currentLocale,
+              prevpause: true,
+            );
           }
-          user.move(widget.context);
-          return;
+        }
+
+
+      }
+
+      if (nextTurn == turnPoints.last && widget.distance == 7) {
+        double angle = 0.0;
+        try {
+          angle = tools.calculateAngleThird(
+              [
+                widget.user.pathobj.destinationX,
+                widget.user.pathobj.destinationY
+              ],
+              widget.user.path[widget.user.pathobj.index + 1],
+              widget.user.path[widget.user.pathobj.index + 2],
+              widget
+                  .user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        } catch (e) {
+          print("problem to be solved later $e");
+        }
+        if (!UserState.ttsOnlyTurns) {
+          speak(
+              "${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle, widget.context)}",
+              _currentLocale);
+        }
+        widget.user.move(context);
+      } else if (nextTurn != turnPoints.last &&
+          widget.user.pathobj.connections[widget.user.Bid]
+          ?[widget.user.floor] !=
+              nextTurn &&
+          (widget.distance / UserState.stepSize).ceil() == 7) {
+        if ((!direc.toLowerCase().contains("slight") &&
+            !direc.toLowerCase().contains("straight")) &&
+            widget.user.pathobj.index > 4) {
+          if (widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null) {
+            if (!UserState.ttsOnlyTurns) {
+              speak(
+                  convertTolng(
+                      "You are approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}",
+                      _currentLocale,
+                      '',
+                      direc,
+                      nextTurn!.node,
+                      ""),
+                  _currentLocale);
+            }
+
+            return;
+            //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
+          } else {
+            if (!UserState.ttsOnlyTurns) {
+              speak(
+                  convertTolng("You are approaching ${direc} turn",
+                      _currentLocale, '', direc, nextTurn!.node, ""),
+                  _currentLocale);
+            }
+            widget.user.move(widget.context);
+            return;
+          }
         }
       }
     }
@@ -1132,8 +1079,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
   @override
   Widget build(BuildContext context) {
-    isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
-
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     double statusBarHeight = MediaQuery.of(context).padding.top;
@@ -1156,21 +1101,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           children: [
             Container(
               padding: EdgeInsets.only(top: 8, bottom: 8),
-              margin: EdgeInsets.only(left: 8, right: 8),
+              margin: EdgeInsets.only(left: 8,right: 8),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(16),
                       bottomRight: Radius.circular(16),
                       topLeft: Radius.circular(16),
                       topRight: Radius.circular(16)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0xff01544f).withOpacity(0.4),
-                      spreadRadius: 5, // How wide the shadow should be
-                      blurRadius: 7, // How soft the shadow should be
-                      offset: Offset(0, 3),
-                    )
-                  ],
+                  boxShadow: [BoxShadow(
+                    color: Color(0xff01544f).withOpacity(0.4),
+                    spreadRadius: 5,                      // How wide the shadow should be
+                    blurRadius: 7,                        // How soft the shadow should be
+                    offset: Offset(0, 3),
+                  )],
                   color: getColor()),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1206,10 +1149,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   ),
                   scrollableDirection(
                       "${widget.direction}",
-                      '${tools.convertFeet(widget.distance, widget.context)}',
+                      '${tools.convertFeet(widget.distance, widget.context, lngcode: _currentLocale)}',
                       getCustomIcon(widget.direction),
                       DirectionIndex,
-                      nextTurnIndex,
+                      DirectionIndex,
                       widget.user.pathobj.directions,
                       widget.user,
                       widget.context),
@@ -1230,19 +1173,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                                 widget.focusOnTurn(widget
                                     .user.pathobj.directions[DirectionIndex]);
                                 if (widget.user.pathobj.directions.length -
-                                            DirectionIndex ==
-                                        2 &&
+                                    DirectionIndex ==
+                                    2 &&
                                     widget
-                                            .user
-                                            .pathobj
-                                            .directions[DirectionIndex]
-                                            .distanceToNextTurnInFeet !=
+                                        .user
+                                        .pathobj
+                                        .directions[DirectionIndex]
+                                        .distanceToNextTurnInFeet !=
                                         null &&
                                     widget
-                                            .user
-                                            .pathobj
-                                            .directions[DirectionIndex]
-                                            .distanceToNextTurnInFeet! <=
+                                        .user
+                                        .pathobj
+                                        .directions[DirectionIndex]
+                                        .distanceToNextTurnInFeet! <=
                                         5 &&
                                     DirectionIndex + 1 <
                                         widget.user.pathobj.directions.length) {
@@ -1257,7 +1200,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                           icon: Icon(
                             Icons.arrow_forward_ios_outlined,
                             color: DirectionIndex + 1 <
-                                    widget.user.pathobj.directions.length
+                                widget.user.pathobj.directions.length
                                 ? Colors.white
                                 : Colors.grey,
                             size: 24,
@@ -1269,64 +1212,40 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             ),
             DirectionIndex == nextTurnIndex
                 ? Semantics(
-                    excludeSemantics: true,
-                    child: Container(
-                      width: 98,
-                      height: 39,
-                      margin: EdgeInsets.only(left: 9, top: 5),
-                      padding: EdgeInsets.only(left: 16, right: 16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                        color: Color(0xff013633),
+              excludeSemantics: true,
+              child: Container(
+                width: 98,
+                height: 39,
+                margin: EdgeInsets.only(left: 9, top: 5),
+                padding: EdgeInsets.only(left: 16, right: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                  color: Color(0xff013633),
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      "${LocaleData.then.getString(context)}",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xffFFFFFF),
+                        height: 25 / 16,
                       ),
-                      child: Row(
-                        children: [
-                          Text(
-                            "${LocaleData.then.getString(context)}",
-                            style: const TextStyle(
-                              fontFamily: "Roboto",
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xffFFFFFF),
-                              height: 25 / 16,
-                            ),
-                            textAlign: TextAlign.left,
-                          ),
-                          SizedBox(
-                            width: 6,
-                          ),
-                          // Text(DirectionIndex.toString()),
-                          // Text(nextTurnIndex.toString())
-                          getNextCustomIcon(turnDirection)
-                        ],
-                      ),
+                      textAlign: TextAlign.left,
                     ),
-                  )
+                    SizedBox(
+                      width: 6,
+                    ),
+                    // Text(DirectionIndex.toString()),
+                    // Text(nextTurnIndex.toString())
+                    getNextCustomIcon(turnDirection)
+                  ],
+                ),
+              ),
+            )
                 : Container(),
-
-            // Container(
-            //   width: screenWidth,
-            //   height: 300,
-            //   child: SingleChildScrollView(
-            //     scrollDirection: Axis.horizontal,
-            //     child: Column(
-            //       crossAxisAlignment: CrossAxisAlignment.start,
-            //       children: [
-            //         //Text("Beacon ${highestKey} - ${highestAverage}"),
-            //         // Text(debuglNearestbeacon),
-            //         Text(sumMap.entries.map((entry) => '${entry.key}: ${entry.value.join(", ")}').join("\n")),
-            //         // //Text(displayString),
-            //         // Text("-------"),
-            //         Text(sumRSSI.toString()),
-            //         Text(BluetoothScanAndroidClass().rssiWeight.toString()),
-            //         Text("$debuglNearestbeacon $candorThreshold"),
-            //
-            //         // Text(Building.apibeaconmap.containsKey(debuglNearestbeacon).toString()),
-            //       ],
-            //     ),
-            //   ),
-            // ),
-
             // Container(
             //   width: 300,
             //   height: 100,
@@ -1335,13 +1254,25 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             //     child: Column(
             //       crossAxisAlignment: CrossAxisAlignment.start,
             //       children: [
-            //
             //         Text(sumMap.toString()),
-            //
+            //         Text(sumMapAvg.toString()),
             //       ],
             //     ),
             //   ),
             // ),
+            Container(
+              width: 300,
+              height: 100,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(sumMapAvg.toString()),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -1404,11 +1335,11 @@ class scrollableDirection extends StatelessWidget {
 
   String chooseSteps() {
     try {
-      // print("DirectionIndex $DirectionIndex and $nextTurnIndex");
-      if (listOfDirections.isNotEmpty && DirectionIndex < listOfDirections.length) {
+      if (listOfDirections.isNotEmpty &&
+          DirectionIndex < listOfDirections.length) {
         if (listOfDirections[DirectionIndex].isDestination) {
           return "";
-        } else if (nextTurnIndex == -1 || DirectionIndex == nextTurnIndex) {
+        } else if (DirectionIndex == nextTurnIndex) {
           return '$steps';
         } else {
           return '${tools.convertFeet((listOfDirections[DirectionIndex].distanceToNextTurnInFeet ?? 1).toInt(), context)}';
@@ -1431,7 +1362,7 @@ class scrollableDirection extends StatelessWidget {
             color: Colors.blueAccent,
             size: 40,
           );
-        } else if (nextTurnIndex == -1 || DirectionIndex == nextTurnIndex) {
+        } else if (DirectionIndex == nextTurnIndex) {
           return i;
         } else {
           return _DirectionHeaderState.getCustomIcon(

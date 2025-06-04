@@ -57,8 +57,8 @@ class PlayPreviewManager {
         pathList.first.numCols,
       );
       int lastFloorItterated = pathList.first.floor;
-      String lastBidIterated = pathList.first.bid!;
-      await alignFloor(pathList.first.floor, pathList.first.bid!);
+      String lastBidIterated = pathList.first.Bid!;
+      await alignFloor(pathList.first.floor, pathList.first.Bid!);
 
       gmap.Marker marker = gmap.Marker(
         markerId: gmap.MarkerId("preview_marker"),
@@ -84,8 +84,8 @@ class PlayPreviewManager {
         int row1 = next.node % next.numCols;
         int col1 = next.node ~/ next.numCols;
 
-        final buildingId = current.bid!;
-        final nextBuildingId = next.bid!;
+        final buildingId = current.Bid!;
+        final nextBuildingId = next.Bid!;
         final floorId = current.floor;
         final nextFloorId = next.floor;
 
@@ -102,13 +102,13 @@ class PlayPreviewManager {
         List<double> value = tools.localtoglobal(
           row,
           col,
-          SingletonFunctionController.building.patchData[current.bid],
+          SingletonFunctionController.building.patchData[current.Bid],
         );
 
         List<double> value1 = tools.localtoglobal(
           row1,
           col1,
-          SingletonFunctionController.building.patchData[current.bid],
+          SingletonFunctionController.building.patchData[current.Bid],
         );
 
         final gStart = gmap.LatLng(value[0], value[1]);
@@ -125,7 +125,7 @@ class PlayPreviewManager {
         }
       }
 
-      print("✅ Animation complete for ${pathList.first.bid} | Floor ${pathList.first.floor}");
+      print("✅ Animation complete for ${pathList.first.Bid} | Floor ${pathList.first.floor}");
       // _pathCovered.clear();
     } catch (e) {
       print("❌ Error in preview animation: $e");

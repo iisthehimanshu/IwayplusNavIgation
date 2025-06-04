@@ -92,6 +92,7 @@ Future<void> localDBInitialsation() async {
   Hive.registerAdapter(VenueBeaconAPIModelAdapter());
   await Hive.openBox<VenueBeaconAPIModel>('VenueBeaconAPIModelFile');
 
+
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');
   await Hive.openBox('Filters');

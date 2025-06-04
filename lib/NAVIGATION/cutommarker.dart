@@ -1,15 +1,18 @@
+import 'dart:ui';
+
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class customMarker {
   // Your Marker class details
 
-  static Marker rotate(double rotationParam, Marker marker ) {
+  static Marker rotate(double rotationParam, Marker marker, {bool isNavigating = false}) {
     return Marker(
       markerId: marker.markerId,
       position: marker.position,
       icon: marker.icon,
       rotation: rotationParam ?? marker.rotation, // Use the new rotation value if provided, otherwise keep the old one
-      anchor: marker.anchor
+      anchor: isNavigating?Offset(0.5, 0.5):marker.anchor
+
     );
   }
 

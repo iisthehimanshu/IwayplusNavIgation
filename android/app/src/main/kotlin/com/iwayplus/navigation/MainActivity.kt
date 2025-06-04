@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
+import android.bluetooth.le.ScanSettings
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.BroadcastReceiver
@@ -22,11 +23,12 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
-import android.os.SystemClock
+
+import android.annotation.SuppressLint
+import android.bluetooth.le.ScanRecord
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 
 
 
@@ -36,33 +38,11 @@ class MainActivity : FlutterActivity() {
     private lateinit var bluetoothLeScanner: BluetoothLeScanner
     private val deviceDetailsList = mutableListOf<String>()
     private var isScanning = false
-    private var gravityValues = FloatArray(3)
-    private var magneticValues = FloatArray(3)
-    private var rotationVectorValue = FloatArray(5)
-
-    private var lastUpdateTime: Long = 0
-    private val COMPASS_UPDATE_RATE_MS:Long = 100L
-
 
     private val METHOD_CHANNEL = "com.example.bluetooth/scan"
     private val EVENT_CHANNEL = "com.example.bluetooth/scanUpdates"
-
-    //implemented magnetometere streams
-    private val COMPASS_CHANNEL = "com.example.navigation/compass"
-
-
     private var eventSink: EventChannel.EventSink? = null
 
-    private var eventSinkCompass: EventChannel.EventSink? = null
-
-    private fun lowPassFilter(input: FloatArray, output: FloatArray?): FloatArray {
-        val alpha = 0.25f
-        if (output == null) return input
-        for (i in input.indices) {
-            output[i] = output[i] + alpha * (input[i] - output[i])
-        }
-        return output
-    }
 
 
     private val scanCallback = object : ScanCallback() {
@@ -84,6 +64,7 @@ class MainActivity : FlutterActivity() {
                 // for ActivityCompat#requestPermissions for more details.
                 return
             }
+
 
             // Extract device name
             if (device.name != null && device.name.contains("IW")) {
@@ -123,7 +104,7 @@ class MainActivity : FlutterActivity() {
                 Raw Data: $rawData""".trimIndent()
 
 
-                //Log.d("BluetoothScan--", "New Device Found: $deviceDetails")
+                // Log.d("BluetoothScan--", "New Device Found: $deviceDetails")
                 eventSink?.success(deviceDetails)
             }
         }
@@ -150,21 +131,17 @@ class MainActivity : FlutterActivity() {
             }
         }
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothAdapter = bluetoothManager.adapter
-        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-        Log.d("bluetooth adapter","valuees${bluetoothAdapter},${bluetoothLeScanner}")
         if (bluetoothAdapter != null && bluetoothAdapter.isEnabled) {
             bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
         } else {
             // Handle gracefully — maybe prompt to enable Bluetooth
             Log.w("BLE", "Bluetooth is OFF or unavailable")
         }
-
         if (!hasPermissions()) {
             requestPermissions()
         }
@@ -176,6 +153,7 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
+        // Bluetooth MethodChannel
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "startScan" -> {
@@ -192,131 +170,90 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
-        EventChannel(flutterEngine.dartExecutor.binaryMessenger,EVENT_CHANNEL).setStreamHandler(object : EventChannel.StreamHandler {
-            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                eventSink = events
-            }
 
-            override fun onCancel(arguments: Any?) {
-                eventSink = null
-            }
-        })
-
-
-        EventChannel(flutterEngine.dartExecutor.binaryMessenger, COMPASS_CHANNEL).setStreamHandler(
+        // Bluetooth EventChannel
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, EVENT_CHANNEL).setStreamHandler(
             object : EventChannel.StreamHandler {
-                private lateinit var sensorManager: SensorManager
-                private lateinit var sensorListener: SensorEventListener
-
                 override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                    eventSinkCompass = events
-                    sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-
-                    val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-                    val magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
-                    val rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
-
-                    sensorListener = object : SensorEventListener {
-                        override fun onSensorChanged(event: SensorEvent?) {
-                            if (event == null) return
-
-                            when (event.sensor.type) {
-                                Sensor.TYPE_ROTATION_VECTOR -> {
-                                    rotationVectorValue = lowPassFilter(event.values.clone(), rotationVectorValue)
-                                }
-
-                                Sensor.TYPE_ACCELEROMETER -> {
-                                    gravityValues = lowPassFilter(event.values.clone(), gravityValues)
-                                }
-
-                                Sensor.TYPE_MAGNETIC_FIELD -> {
-                                    magneticValues = lowPassFilter(event.values.clone(), magneticValues)
-                                }
-                            }
-
-                            val currentTime = SystemClock.elapsedRealtime()
-                            if (currentTime - lastUpdateTime > COMPASS_UPDATE_RATE_MS) {
-                                lastUpdateTime = currentTime
-                                val heading = updateHeading()
-                                heading?.let {
-//                                    Log.d("HeadingPlugin", "Heading: $it")
-                                    eventSinkCompass?.success(it)
-                                }
-                            }
-                        }
-
-                        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-                    }
-
-                    // ✅ Register all three sensors
-                    sensorManager.registerListener(sensorListener, accelerometer, SensorManager.SENSOR_DELAY_GAME)
-                    sensorManager.registerListener(sensorListener, magnetometer, SensorManager.SENSOR_DELAY_GAME)
-                    sensorManager.registerListener(sensorListener, rotationVectorSensor, SensorManager.SENSOR_DELAY_GAME)
+                    eventSink = events
                 }
 
                 override fun onCancel(arguments: Any?) {
-                    sensorManager.unregisterListener(sensorListener)
+                    eventSink = null
                 }
             }
         )
 
-    }
+        // GPS EventChannel
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setStreamHandler(
+            object : EventChannel.StreamHandler {
+                override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                    // Log.d("startLocationUpdates", "starting");
+                    GpseventSink = events
+                    startLocationUpdates()
+                }
 
-    private fun updateHeading(): Double? {
-        val rotationMatrix = FloatArray(9)
-        val orientation = FloatArray(3)
-        var heading: Float
-        if (rotationVectorValue != null) {
-            SensorManager.getRotationMatrixFromVector(rotationMatrix, rotationVectorValue)
-            SensorManager.getOrientation(rotationMatrix, orientation)
-            heading = Math.toDegrees(orientation[0].toDouble()).toFloat()
-            if (heading > 180) {
-                heading -= 360
+                override fun onCancel(arguments: Any?) {
+                    stopLocationUpdates()
+                }
             }
-
-            // Log.d("Rotation", "Using rotation vector: $heading")
-            return heading.toDouble()
-        }
-        if (gravityValues != null && magneticValues != null &&
-            SensorManager.getRotationMatrix(rotationMatrix, null, gravityValues, magneticValues)) {
-
-            val remappedMatrix = FloatArray(9)
-            SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Z, remappedMatrix)
-            SensorManager.getOrientation(remappedMatrix, orientation)
-            heading = Math.toDegrees(orientation[0].toDouble()).toFloat()
-            if (heading > 180) {
-                heading -= 360
-            }
-
-            //  Log.d("Rotation", "Using accel + mag: $heading")
-            return heading.toDouble()
-        }
-
-        return null
+        )
     }
-
-
-
 
 
     private fun startScan() {
-        if (!isScanning) {
-            if (!bluetoothAdapter.isEnabled) {
-                Toast.makeText(this, "Bluetooth is not enabled", Toast.LENGTH_SHORT).show()
-                return
-            }
+        if (isScanning) {
+            Log.d("BluetoothScan", "Scan already in progress.")
+            return
+        }
 
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions()
-                return
-            }
+        if (!bluetoothAdapter.isEnabled) {
+            Toast.makeText(this, "Bluetooth is not enabled", Toast.LENGTH_SHORT).show()
+            Log.d("BluetoothScan", "Bluetooth is OFF")
+            return
+        }
 
-            Log.d("BluetoothScan", "Starting BLE scan...")
+        // Permissions check
+        val requiredPermissions = mutableListOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT
+        )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            requiredPermissions.add(Manifest.permission.BLUETOOTH_ADVERTISE)
+        }
+
+        val missingPermissions = requiredPermissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (missingPermissions.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, missingPermissions.toTypedArray(), 101)
+            Log.d("BluetoothScan", "Requesting missing permissions.")
+//            return
+        }
+
+        if (!::bluetoothLeScanner.isInitialized) {
+            bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+        }
+
+        val scanSettings = ScanSettings.Builder()
+            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+            .build()
+
+        try {
             bluetoothLeScanner.startScan(scanCallback)
-
             isScanning = true
+            Log.d("BluetoothScan", "BLE scanning started.")
+        } catch (e: SecurityException) {
+            Log.e("BluetoothScan", "Scan failed due to missing permissions: ${e.message}")
+            Toast.makeText(this, "Permission denied for scanning", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Log.e("BluetoothScan", "Scan failed: ${e.message}")
         }
     }
+
 
     private fun stopScan() {
         try {
@@ -372,10 +309,85 @@ class MainActivity : FlutterActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(discoveryReceiver)
+        try {
+            unregisterReceiver(discoveryReceiver)
+        } catch (e: IllegalArgumentException) {
+            Log.w("MainActivity", "Receiver not registered: ${e.message}")
+        }
+
     }
 
 
+    private val CHANNEL = "gps_scan"
+    private var locationManager: LocationManager? = null
+    private var GpseventSink: EventChannel.EventSink? = null
+
+    @SuppressLint("MissingPermission")
+    private fun startLocationUpdates() {
+        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+        Log.d("startLocationUpdates", "Initializing location updates")
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.d("startLocationUpdates", "Permission denied for location updates")
+            GpseventSink?.error("PERMISSION_DENIED", "Location permission not granted", null)
+            return
+        }
+
+        // Check if GPS or Network provider is enabled
+        val isGpsEnabled = locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) ?: false
+        val isNetworkEnabled = locationManager?.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ?: false
+
+        if (!isGpsEnabled && !isNetworkEnabled) {
+            Log.d("startLocationUpdates", "No location provider enabled")
+            GpseventSink?.error("NO_PROVIDER", "No location provider enabled", null)
+            return
+        }
+
+        if (isGpsEnabled) {
+            locationManager?.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                1000, // Time interval in milliseconds
+                0f,  // Distance interval in meters
+                locationListener
+            )
+        }
+
+        if (isNetworkEnabled) {
+            locationManager?.requestLocationUpdates(
+                LocationManager.NETWORK_PROVIDER,
+                1000,
+                0f,
+                locationListener
+            )
+        }
+    }
 
 
+    // Persistent LocationListener to prevent garbage collection
+    private val locationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+//            Log.d("GPS", "New location received: $location")
+            val data = mapOf(
+                "latitude" to location.latitude,
+                "longitude" to location.longitude,
+                "accuracy" to location.accuracy,
+            )
+            GpseventSink?.success(data)
+        }
+
+        override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+        override fun onProviderEnabled(provider: String) {
+//            Log.d("GPS", "GPS Provider enabled")
+        }
+
+        override fun onProviderDisabled(provider: String) {
+//            Log.d("GPS", "GPS Provider disabled")
+            GpseventSink?.error("GPS_DISABLED", "GPS provider is disabled", null)
+        }
+    }
+
+
+    private fun stopLocationUpdates() {
+        locationManager?.removeUpdates { }
+    }
 }

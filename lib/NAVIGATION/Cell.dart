@@ -12,14 +12,14 @@ class Cell{
   double lng;
   final Function(double angle, {int? currPointer,int? totalCells}) move;
   bool ttsEnabled;
-  String? bid;
+  String? Bid;
   int floor;
   int numCols;
   bool imaginedCell;
   int? imaginedIndex;
   Location? position;
 
-  Cell(this.node, this.x, this.y, this.move, this.lat, this.lng,this.bid, this.floor, this.numCols, {this.ttsEnabled = true, this.imaginedCell = false, this.imaginedIndex, this.position});
+  Cell(this.node, this.x, this.y, this.move, this.lat, this.lng,this.Bid, this.floor, this.numCols, {this.ttsEnabled = true, this.imaginedCell = false, this.imaginedIndex, this.position});
    
   Map<String, dynamic> toJson() => {
     'node': node,
@@ -28,7 +28,7 @@ class Cell{
     'lat': lat,
     'lng': lng,
     'ttsEnabled': ttsEnabled,
-    'bid': bid,
+    'bid': Bid,
     'floor': floor,
     'numCols': numCols,
     'imaginedCell': imaginedCell,

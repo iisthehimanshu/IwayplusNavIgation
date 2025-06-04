@@ -719,7 +719,7 @@ class tools {
 
     mergedList = mergedList.sublist(index);
 
-    if (mergedList.every((item) => (item.bid == buildingAllApi.outdoorID && item.floor == mergedList.first.floor))) {
+    if (mergedList.every((item) => (item.Bid == buildingAllApi.outdoorID && item.floor == mergedList.first.floor))) {
       for (int i = 1; i < mergedList.length; i++) {
         var prevCell = mergedList[i - 1];
         var currentCell = mergedList[i];
@@ -729,11 +729,11 @@ class tools {
     }
 
 
-    if(mergedList.every((item) => (item.bid == mergedList.first.bid && item.floor == mergedList.first.floor))){
+    if(mergedList.every((item) => (item.Bid == mergedList.first.Bid && item.floor == mergedList.first.floor))){
       return mergedList.length.toDouble();
     }
 
-    if(mergedList.every((item) => (item.bid == mergedList.first.bid))){
+    if(mergedList.every((item) => (item.Bid == mergedList.first.Bid))){
       List<List<Cell>> result = partitionByProperty(mergedList,(item) => item.floor == mergedList.first.floor);
       result.forEach((list){
         totalDistance = totalDistance + list.length;
@@ -748,8 +748,8 @@ class tools {
     for (int i = 0; i < mergedList.length; i++) {
       Cell currentCell = mergedList[i];
 
-      if (firstCell == null || currentCell.bid != currentBid || currentCell.floor != currentFloor) {
-        // If first cell is null or bid/floor changes, finalize the previous sublist distance
+      if (firstCell == null || currentCell.Bid != currentBid || currentCell.floor != currentFloor) {
+        // If first cell is null or Bid/floor changes, finalize the previous sublist distance
         if (firstCell != null && i > 0) {
           // Calculate distance between firstCell and the previous cell in the list
           Cell lastCell = mergedList[i - 1];
@@ -759,7 +759,7 @@ class tools {
 
         // Update the first cell, currentBid, and currentFloor for the new sublist
         firstCell = currentCell;
-        currentBid = currentCell.bid;
+        currentBid = currentCell.Bid;
         currentFloor = currentCell.floor;
       }
 
@@ -1002,8 +1002,8 @@ class tools {
 
   static List<Cell> findAllPointsOfSegment(List<Cell> path, List<Cell> segment){
     List<Cell> points = [];
-    int startIndex = path.indexWhere((cell)=>cell.x == segment[0].x && cell.y == segment[0].y && cell.bid == segment[0].bid);
-    int endIndex = path.indexWhere((cell)=>cell.x == segment[1].x && cell.y == segment[1].y && cell.bid == segment[1].bid);
+    int startIndex = path.indexWhere((cell)=>cell.x == segment[0].x && cell.y == segment[0].y && cell.Bid == segment[0].Bid);
+    int endIndex = path.indexWhere((cell)=>cell.x == segment[1].x && cell.y == segment[1].y && cell.Bid == segment[1].Bid);
     for(int i = startIndex; i<= endIndex; i++){
       points.add(path[i]);
     }
@@ -1280,7 +1280,7 @@ class tools {
 
 
   static double calculateAngleBWUserandCellPath(Cell user, Cell node , int cols,double theta) {
-    if(user.bid != node.bid){
+    if(user.Bid != node.Bid){
       return double.nan;
     }
     List<int> a = [user.x, user.y];
@@ -1469,16 +1469,16 @@ class tools {
     turns.add(path.last);
     double Nextdistance = tools.calculateAerialDist(turns[0].lat,turns[0].lng, turns[1].lat,turns[1].lng);
 
-    List<direction> Directions = [direction(path[0].node, "Straight", null, Nextdistance, null,path[0].x,path[0].y,path[0].floor,path[0].bid,numCols:path[0].numCols)];
+    List<direction> Directions = [direction(path[0].node, "Straight", null, Nextdistance, null,path[0].x,path[0].y,path[0].floor,path[0].Bid,numCols:path[0].numCols)];
     for(int i = 1 ; i<turns.length-1 ; i++){
-      if(turns[i].bid != turns[i-1].bid || turns[i].floor != turns[i-1].floor){
+      if(turns[i].Bid != turns[i-1].Bid || turns[i].floor != turns[i-1].floor){
         if(lifts.last != null){
           Directions.insert(Directions.length-1, lifts.removeLast()!);
         }else{
           lifts.removeLast();
         }
       }
-      if(turns[i].bid != turns[i+1].bid){
+      if(turns[i].Bid != turns[i+1].Bid){
         continue;
       }
       int index = path.indexOf(turns[i]);
@@ -1486,13 +1486,13 @@ class tools {
       double Prevdistance = tools.calculateDistance([turns[i].x,turns[i].y], [turns[i-1].x,turns[i-1].y]);
 
       double angle = tools.calculateAnglefifth_inCell(path[index-1], path[index], path[index+1]);
-      if(path[index-1].bid != path[index].bid){
+      if(path[index-1].Bid != path[index].Bid){
         angle = 0;
       }
       String direc = tools.angleToClocks(angle,context);
-      Directions.add(direction(turns[i].node, direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance,turns[i].x,turns[i].y,turns[i].floor,turns[i].bid,numCols:turns[i].numCols));
+      Directions.add(direction(turns[i].node, direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance,turns[i].x,turns[i].y,turns[i].floor,turns[i].Bid,numCols:turns[i].numCols));
     }
-    Directions.add(direction(turns.last.node, "Straight", null, 1, null,turns.last.x,turns.last.y,turns.last.floor,turns.last.bid,numCols:turns.last.numCols));
+    Directions.add(direction(turns.last.node, "Straight", null, 1, null,turns.last.x,turns.last.y,turns.last.floor,turns.last.Bid,numCols:turns.last.numCols));
     return Directions;
   }
 
@@ -1600,7 +1600,7 @@ class tools {
     List<Landmarks> nearbyLandmarks = [];
     for (Cell node in path) {
       landmarksMap.forEach((key, value) {
-        if (node.floor == value.floor && value.name != null && value.buildingID == node.bid && value.element!.subType != "beacons" && value.element!.subType != "lift") {
+        if (node.floor == value.floor && value.name != null && value.buildingID == node.Bid && value.element!.subType != "beacons" && value.element!.subType != "lift") {
           List<int> pCoord = [node.x,node.y];
           double d = 0.0;
           if (value.doorX == null) {
@@ -1610,8 +1610,11 @@ class tools {
 
             d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
           }
-          if (d < distance) {
-
+          if(value.name == "Entry to Dental and Physiatry OPD"){
+            print("distance calculated for ${value.name} is $d");
+          }
+          if (d <= distance) {
+            print("adding ${value.name} to the list");
             if (!nearbyLandmarks.contains(value)) {
 
               nearbyLandmarks.add(value);
@@ -1773,11 +1776,11 @@ class tools {
       distance = 100;
     }
     List<int> pCoord = [];
-    pCoord.add(user.coordX!);
-    pCoord.add(user.coordY!);
+    pCoord.add(user.showcoordX!);
+    pCoord.add(user.showcoordY!);
     landmarksMap.forEach((key, value) {
 
-      if(user.bid == value.buildingID && value.element!.subType != "beacons" && value.coordinateX!=null){
+      if(user.Bid == value.buildingID && value.element!.subType != "beacons" && value.coordinateX!=null){
         if (user.floor == value.floor) {
 
           double d = 0.0;
@@ -2366,7 +2369,7 @@ class tools {
     for(int i=1;i<pathNodes.length-1;i++){
 
 
-      if(pathNodes[i].bid == buildingAllApi.outdoorID){
+      if(pathNodes[i].Bid == buildingAllApi.outdoorID){
         res.add(pathNodes[i]);
         continue;
       }
@@ -2701,9 +2704,13 @@ class tools {
     return feet / UserState.stepSize.ceil();
   }
 
-  static String convertFeet(int feet,context) {
+  static String convertFeet(int feet,context, {String lngcode = "en"}) {
     if (UserCredentials().getUserPathDetails().contains('Distance in meters')) {
-      return '${feetToMeters(feet).toStringAsFixed(0)} meter';
+      if(lngcode == "hi"){
+        return '${feetToMeters(feet).toStringAsFixed(0)} मीटर';
+      }else{
+        return '${feetToMeters(feet).toStringAsFixed(0)} meter';
+      }
     }else {
       return '${feetToSteps(feet).toStringAsFixed(0)} ${LocaleData.steps.getString(context)}';
     }

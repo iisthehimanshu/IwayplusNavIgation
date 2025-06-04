@@ -39,6 +39,7 @@ import 'NAVIGATION/DATABASE/DATABASEMODEL/VenueBeaconAPIModel.dart';
 import 'NAVIGATION/DATABASE/DATABASEMODEL/WayPointModel.dart';
 import 'NAVIGATION/MapManager/GoogleMapManager.dart';
 import 'NAVIGATION/Panel Manager/PanelManager.dart';
+import 'NAVIGATION/ViewModel/LocalizedScreenViewModel.dart';
 import 'NAVIGATION/webHome.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -62,6 +63,7 @@ Future<void> main() async {
               ),
               update: (_, panelManager, previous) => GoogleMapManager(panelManager),
             ),
+            ChangeNotifierProvider(create: (_) => LocalizedScreenViewModel()),
           ],
           child: const MobileApp(),
         ),

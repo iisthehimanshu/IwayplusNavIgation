@@ -6,6 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:iwaymaps/NAVIGATION/DatabaseManager/SwitchDataBase.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 
+import '../APIMODELS/beaconData.dart';
 import '../APIMODELS/landmark.dart';
 import '../APIMODELS/patchDataModel.dart';
 import '../APIMODELS/polylinedata.dart' as polyline_model;
@@ -57,8 +58,6 @@ class RenderingManager {
   RenderingManager(){
     polygonController.polygonTap = interactionmanager.polygonTap;
   }
-
-
 
   double _zoomLevel = 17.0;
 
@@ -125,6 +124,8 @@ class RenderingManager {
         }
       }
 
+      venueManager.getBeaconDataAllBuildings();
+
       return;
     }catch(e){
 
@@ -133,6 +134,20 @@ class RenderingManager {
       venueManager.runDataVersionCycle();
     }
   }
+
+  Future<void> addNewMarker(beacon beaconvalue,List<double> coordinates) async {
+    Map<String, Set<Marker>>? value = await markerController.addInitialMarker(beaconvalue, coordinates);
+    if(value!=null){
+      _lowPriorityMarkers[beaconvalue.buildingID!] =
+          value["low"] ?? {};
+      _midPriorityMarkers[beaconvalue.buildingID!] =
+          value["mid"] ?? {};
+      _highPriorityMarkers[beaconvalue.buildingID!] =
+          value["high"] ?? {};
+    }
+  }
+
+
 
   Future<void> changeFloorOfBuilding(String buildingID, int floor) async {
     polyline_model.polylinedata? polylineData = await venueManager.getPolylinePolygonData(buildingID);

@@ -3042,7 +3042,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         print("forKeys $key");
 
         try {
-          await RepositoryManager().getDataVersionData(key);
+          await RepositoryManager().getPatchDataNew(key);
           // await DataVersionApi().fetchDataVersionApiData(key);
         } catch (e) {}
 
@@ -9859,6 +9859,7 @@ bool _isPlaying=false;
           (Route<dynamic> route) => false,
     );
   }
+
   Future<void> alignMapToPath(List<double> A, List<double> B,{bool isTurn=false}) async {
     print("enteredddd");
     print(onStart);

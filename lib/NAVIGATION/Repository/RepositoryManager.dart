@@ -149,6 +149,8 @@ class RepositoryManager{
     Future<dynamic> runAPICallLandmarkData(String bID,{bool generateJSON = false}) async {
         Detail landmarkDetail = apiDetails.landmark(dataBaseManager.getAccessToken(), bID);
         Response dataFromAPI = await networkManager.api.request(landmarkDetail);
+        print("dataFromAPI.data.runtimeType");
+        print(dataFromAPI.data.runtimeType);
         if(generateJSON){
             final landmarkData = LandMarkApiModel(responseBody: dataFromAPI.data);
             DataBaseManager().saveData(landmarkData, landmarkDetail, bID);
@@ -499,101 +501,6 @@ class RepositoryManager{
                 if (kDebugMode) {
                     generateJSON? print("GENERATED JSON FOR DATA VERSION $bID") : print("DATA VERSION DATA FROM API");
                 }
-                // if (preLoadedDataBox.containsKey(apiData.versionData!.buildingID)) {
-                //     print('DATA ALREADY PRESENT');
-                //     final databaseData = DataVersion.fromJson(preLoadedDataBox.get(apiData.versionData!.buildingID)!.responseBody);
-                //     if (apiData.versionData!.buildingDataVersion != databaseData.versionData!.buildingDataVersion) {
-                //         print("match ${apiData.versionData!.buildingID!} and $bID");
-                //         VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!.buildingID!] = true;
-                //         shouldBeInjected = true;
-                //         print("Building Version Change = true ${apiData.versionData!.buildingDataVersion} ${databaseData.versionData!.buildingDataVersion}");
-                //     } else {
-                //         print("match ${apiData.versionData!.buildingID!} and $bID");
-                //         VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!.buildingID!] = false;
-                //         print("Building Version Change = false");
-                //     }
-                //
-                //     if (apiData.versionData!.patchDataVersion !=
-                //         databaseData.versionData!.patchDataVersion) {
-                //         VersionInfo.buildingPatchDataVersionUpdate[apiData.versionData!
-                //             .buildingID!] = true;
-                //         shouldBeInjected = true;
-                //         print("Patch Version Change = true ${apiData.versionData!
-                //             .patchDataVersion} ${databaseData.versionData!
-                //             .patchDataVersion}");
-                //     } else {
-                //         print("match ${apiData.versionData!.buildingID!} and $bID");
-                //
-                //         VersionInfo.buildingPatchDataVersionUpdate[apiData.versionData!
-                //             .buildingID!] = false;
-                //         print("Patch Version Change = false");
-                //     }
-                //
-                //     if (apiData.versionData!.landmarksDataVersion !=
-                //         databaseData.versionData!.landmarksDataVersion) {
-                //         VersionInfo.buildingLandmarkDataVersionUpdate[apiData.versionData!
-                //             .buildingID!] = true;
-                //         shouldBeInjected = true;
-                //         print("Landmark Version Change = true ${apiData.versionData!
-                //             .landmarksDataVersion} ${databaseData.versionData!
-                //             .landmarksDataVersion}");
-                //     } else {
-                //         print("match ${apiData.versionData!.buildingID!} and $bID");
-                //
-                //         VersionInfo.buildingLandmarkDataVersionUpdate[apiData.versionData!
-                //             .buildingID!] = false;
-                //         print("Landmark Version Change = false");
-                //     }
-                //
-                //     if (apiData.versionData!.polylineDataVersion !=
-                //         databaseData.versionData!.polylineDataVersion) {
-                //         VersionInfo.buildingPolylineDataVersionUpdate[apiData.versionData!
-                //             .buildingID!] = true;
-                //         shouldBeInjected = true;
-                //         print("Polyline Version Change = true ${apiData.versionData!
-                //             .polylineDataVersion} ${databaseData.versionData!
-                //             .polylineDataVersion}");
-                //     } else {
-                //         print("match ${apiData.versionData!.buildingID!} and $bID");
-                //
-                //         VersionInfo.buildingPolylineDataVersionUpdate[apiData.versionData!
-                //             .buildingID!] = false;
-                //         print(VersionInfo.buildingPolylineDataVersionUpdate[apiData
-                //             .versionData!.buildingID!]);
-                //         print(apiData.versionData!.buildingID!);
-                //         print("Polyline Version Change = false");
-                //     }
-                //     if (shouldBeInjected) {
-                //         final dataVersionData = DB2DataVersionLocalModel(
-                //             responseBody: dataVersionDataFromAPI.data);
-                //         DataBox.delete(DataVersion
-                //             .fromJson(dataVersionDataFromAPI.data)
-                //             .versionData!
-                //             .buildingID);
-                //         print("database deleted ${DataBox.containsKey(DataVersion
-                //             .fromJson(dataVersionDataFromAPI.data)
-                //             .versionData!
-                //             .buildingID)}");
-                //         DataBaseManager().saveData(dataVersionData, dataVersionDetails, bID);
-                //         print("New Data ${DataVersion
-                //             .fromJson(dataVersionDataFromAPI.data)
-                //             .versionData!
-                //             .buildingID} ${dataVersionData}");
-                //         dataVersionData.save();
-                //     }
-                // } else {
-                //     print('DATA NOT PRESENT');
-                //     VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!.buildingID!] = false;
-                //     VersionInfo.buildingPatchDataVersionUpdate[apiData.versionData!.buildingID!] = false;
-                //     VersionInfo.buildingLandmarkDataVersionUpdate[apiData.versionData!.buildingID!] = false;
-                //     VersionInfo.buildingPolylineDataVersionUpdate[apiData.versionData!.buildingID!] = false;
-                //     if (!shouldBeInjected) {
-                //         print('DATA INJECTED');
-                //         final dataVersionData = DB2DataVersionLocalModel(responseBody: dataVersionDataFromAPI.data);
-                //
-                //         DataBaseManager().saveData(dataVersionData, dataVersionDetails, bID);
-                //     }
-                // }
             }
         }
         // final DataBox = dataVersionDetails.dataBaseGetDataDB2!();
@@ -794,7 +701,7 @@ class RepositoryManager{
     }
 
 
-    Future<dynamic> getBeaconDataNew(String bID){
+    List<dynamic> getBeaconDataNew(String bID){
         Detail beaconDetail = apiDetails.buildingBeacons(dataBaseManager.getAccessToken(), bID);
 
         if(SwitchDataBase().isGreenDataBaseActive()){

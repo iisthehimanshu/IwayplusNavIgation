@@ -15,6 +15,9 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <uses-permission
         android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
@@ -78,6 +81,10 @@
 
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyA0U_ddvL7t0gRdteVw_9MpVER1N0oqfY8"/>
+        <service
+            android:name=".BluetoothScanService"
+            android:foregroundServiceType="location"
+            android:exported="false" />
 
     </application>
 </manifest>

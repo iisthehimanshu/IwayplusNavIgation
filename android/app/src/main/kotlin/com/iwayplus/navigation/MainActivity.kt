@@ -27,7 +27,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.SystemClock
-
+import com.example.yourapp.BluetoothScanService
 
 
 class MainActivity : FlutterActivity() {
@@ -42,6 +42,8 @@ class MainActivity : FlutterActivity() {
 
     private var lastUpdateTime: Long = 0
     private val COMPASS_UPDATE_RATE_MS:Long = 100L
+    private val PERMISSION_REQUEST_CODE = 1001
+
 
 
     private val METHOD_CHANNEL = "com.example.bluetooth/scan"
@@ -171,6 +173,17 @@ class MainActivity : FlutterActivity() {
 
         val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
         registerReceiver(discoveryReceiver, filter)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED
+            || ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT),
+                PERMISSION_REQUEST_CODE)
+        } else {
+            // Permissions already granted: start service
+            val intent = Intent(this, BluetoothScanService::class.java)
+            ContextCompat.startForegroundService(this, intent)
+        }
+
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -186,6 +199,23 @@ class MainActivity : FlutterActivity() {
                     stopScan()
                     result.success("Scanning stopped")
                 }
+                "startScanBackground" -> {
+                    Log.d("startScanBackground","startScanBackground started")
+                    val intent = Intent(this, BluetoothScanService::class.java)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(intent)
+                    } else {
+                        startService(intent)
+                    }
+                    result.success("Background Scan started")
+                }
+                "stopScanBackground" -> {
+                    val intent = Intent(this, BluetoothScanService::class.java)
+                    stopService(intent)
+                    result.success("Scan stopped")
+                }
+
+
                 "getScannedDevices" -> {
                     result.success(deviceDetailsList)
                 }
@@ -373,6 +403,8 @@ class MainActivity : FlutterActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(discoveryReceiver)
+        val serviceIntent = Intent(this, BluetoothScanService::class.java)
+        stopService(serviceIntent)
     }
 
 

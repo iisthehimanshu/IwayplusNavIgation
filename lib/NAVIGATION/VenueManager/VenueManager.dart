@@ -1,4 +1,5 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:iwaymaps/NAVIGATION/APIMODELS/beaconData.dart';
 import 'package:iwaymaps/NAVIGATION/VenueManager/BuildingStore.dart';
 import '../APIMODELS/Buildingbyvenue.dart';
 import '../APIMODELS/landmark.dart';
@@ -54,6 +55,20 @@ class VenueManager extends BuildingStore{
       polylinedata? buildingData = await RepositoryManager().getPolylineDataNew(buildingID);
       return buildingData;
   }
+
+  Future<List<dynamic>?> getBeaconDataAllBuildings() async {
+    if(buildings.isEmpty) return null;
+    List<dynamic> beaconData = [];
+    for(var building in buildings){
+      List<dynamic> buildingData = await RepositoryManager().getBeaconDataNew(building.sId!);
+      if(buildingData != null){
+          beaconData.addAll(buildingData);
+      }
+    }
+    print("beaconData $beaconData");
+    return beaconData;
+  }
+
 
   Future<List<polylinedata>?> getPolylinePolygonDataAllBuildings() async {
     print("polylinedata buildings $buildings");

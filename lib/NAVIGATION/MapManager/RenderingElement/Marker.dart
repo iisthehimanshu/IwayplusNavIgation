@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../APIMODELS/beaconData.dart';
 import '../../APIMODELS/landmark.dart';
 
 class ElementMarker {
@@ -12,6 +13,16 @@ class ElementMarker {
   ElementMarker() {
     canvas = Canvas(pictureRecorder);
   }
+
+
+  Map<String, Set<Marker>> addInitialMarker(beacon value,List<double> coordinates){
+    Map<String,Set<Marker>> marker = {};
+
+    Marker newMarker = _buildMarker(name: value.sId!, lat: coordinates[0], lng: coordinates[1], icon: BitmapDescriptor.defaultMarker);
+    marker["mid"]?.add(newMarker);
+    return marker;
+  }
+
 
   Future<Map<String,Set<Marker>>?> createMarkers(land landmarkData, int floor) async {
     Map<String,Set<Marker>> markers = {};

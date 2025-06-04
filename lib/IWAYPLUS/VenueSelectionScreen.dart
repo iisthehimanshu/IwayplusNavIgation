@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_svg/svg.dart';
@@ -27,6 +28,7 @@ import 'package:iwaymaps/NAVIGATION/Panel%20Manager/PanelManager.dart';
 import 'package:iwaymaps/NAVIGATION/Panel%20Manager/PanelState.dart';
 import 'package:iwaymaps/NAVIGATION/Repository/RepositoryManager.dart';
 import 'package:iwaymaps/NAVIGATION/VenueManager/VenueManager.dart';
+import 'package:iwaymaps/NAVIGATION/ViewModel/LocalizedScreenViewModel.dart';
 import 'package:provider/provider.dart';
 import '../NAVIGATION/BluetoothScanAndroid.dart';
 import '../NAVIGATION/Network/NetworkManager.dart';
@@ -56,6 +58,7 @@ import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'MODELS/VenueModel.dart';
 import 'NotificationScreen.dart';
 import 'package:iwaymaps/IWAYPLUS/FIREBASE NOTIFICATION API/PushNotifications.dart';
+import 'package:iwaymaps/NAVIGATION/BluetoothService.dart';
 
 class VenueSelectionScreen extends StatefulWidget{
 
@@ -77,10 +80,10 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   bool isLocating=false;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    BLEManager bleManager = BLEManager();
     PanelState.none;
+    BLEManager bleManager = BLEManager();
     bleManager.startScanning(
       bufferSize: 6,
       streamFrequency: 6,
@@ -90,7 +93,9 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     bleManager.bufferedDeviceStream.listen((bufferedData) {
       // You can update UI or process data here
       print("Scanned data: $bufferedData");
-      GoogleMapManager(PanelManager()).setNearestLandmark(bufferedData);
+
+      if(mounted) context.read<LocalizedScreenViewModel>().setNearestBeacon = bufferedData;
+      // GoogleMapManager(PanelManager()).setNearestLandmark(bufferedData);
       // if(mounted) context.read<GoogleMapManager>().setNearestLandmark(bufferedData);
     });
     NotificationSocket.receiveMessage();
@@ -106,6 +111,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     print(venueHashMap);
     requestStoragePermission();
   }
+
   Future<void> requestStoragePermission() async {
     // Ask for regular storage permission (Android <11)
     var status = await Permission.manageExternalStorage.request();
@@ -353,6 +359,17 @@ if(userLoc!=null){
       textColor: Colors.white,
       fontSize: 16.0,
     );
+  }
+  static const methodChannel = MethodChannel('com.example.bluetooth/scan');
+
+
+  Future<void> startBagScan() async {
+    try {
+      await methodChannel.invokeMethod('startScanBackground');
+
+    } on PlatformException catch (e) {
+      print("Failed to stop scan: ${e.message}");
+    }
   }
 
   calcDistanceFromUser(List<VenueModel> buildingsPos,Position userLoc){
@@ -741,7 +758,7 @@ if(userLoc!=null){
                       ],
 
                     )
-                )
+                ),
               ],
             )
         ),

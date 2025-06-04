@@ -14,45 +14,8 @@ class GoogleMapManager extends RenderingManager with ChangeNotifier {
   GoogleMapController? _controller;
   GoogleMapController? get controller => _controller;
   CameraPosition get initialPosition => _initialPosition;
-  String _nearestBeacon = "";
-  bool _showNearestLandmarkPanelVar = false;
-  String? get nearestBeacon => _nearestBeacon;
-  bool get showNearestLandmarkPanel => _showNearestLandmarkPanelVar;
-
 
   final PanelManager panelManager;
-
-
-  void setNearestLandmark(String beaconValue) {
-    print(beaconValue);
-    _nearestBeacon = beaconValue;
-    print("_nearestBeacon$_nearestBeacon");
-  }
-
-  Future<void> showNearestLandmarkPanelIfBeaconExists() async {
-    print("showNearestLandmarkPanelIfBeaconExists");
-    if (_nearestBeacon.isNotEmpty) {
-      panelManager.showPanel(PanelState.localized);
-
-      await BLEManager().waitForBufferEmitCompletion().then((_){
-        print("timerCompleted");
-        BLEManager().stopScanning();
-        notifyListeners();
-      });
-    }else{
-      print("_nearestBeacon.isEmpty");
-    }
-  }
-
-  void closeNearestLandmarkPanel() {
-    _showNearestLandmarkPanelVar = false;
-    notifyListeners();
-  }
-
-  void resetBeaconState() {
-    _nearestBeacon = "";
-    _showNearestLandmarkPanelVar = false;
-  }
 
   CameraPosition _initialPosition = const CameraPosition(
     target: LatLng(28.6139, 77.2090),
@@ -67,7 +30,7 @@ class GoogleMapManager extends RenderingManager with ChangeNotifier {
     notifyListeners();
     fitPolygonsInView(polygons);
 
-    showNearestLandmarkPanelIfBeaconExists();
+    // showNearestLandmarkPanelIfBeaconExists();
   }
 
   void onCameraMove(CameraPosition position) {

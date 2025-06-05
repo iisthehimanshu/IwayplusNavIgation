@@ -588,15 +588,12 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       }
     });
   }
-
   int indexOfCaseInsensitive(List<String> optionListForUI, String searchText) {
     return optionListForUI.indexWhere(
             (option) => option.toLowerCase() == searchText.toLowerCase());
   }
 
   void sortAndSeparateByUserLocation(int userLat, int userLng, int userFloor, String userBuildingID,Landmarks value,String searchedtext) {
-
-
     if (value.name!.toLowerCase().contains(searchedtext.toLowerCase()) && value.buildingID==userBuildingID && value.floor==userFloor) {
       searchResults.add(SearchpageResults(
         name: value.name!,
@@ -654,8 +651,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             if (value.name != null && strings.contains(value.properties?.polyId)) {
               topSearches.add(SearchpageResults(
                 name: "${value.name}",
-                location:
-                "Floor ${value.floor}, ${value
+                location: "Floor ${value.floor}, ${value
                     .buildingName}, ${value.venueName}",
                 onClicked: onVenueClicked,
                 ID: value.properties!.polyId!,

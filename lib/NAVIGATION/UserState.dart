@@ -1014,7 +1014,16 @@ class UserState {
       } else {
         return "$destname की ओर आगे बढ़ते रहें";
       }
-    }else{
+    }else if(msg=="Passing by ${name}")
+      {
+        if(lngCode=='en'){
+          return msg;
+        }else{
+          return "${name} से गुजरते हुए";
+        }
+      }
+
+    else{
       return msg;
     }
   }

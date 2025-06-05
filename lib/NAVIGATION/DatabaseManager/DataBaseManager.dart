@@ -53,6 +53,7 @@ class DataBaseManager implements DBManager {
     databaseBox.put(bID, dataModel);
   }
 
+  @override
   Future<void> saveDataDB2(dynamic dataModel, Detail details, String bID) async {
     final databaseBox = details.dataBaseGetDataDB2!();
     databaseBox.put(bID, dataModel);
@@ -65,27 +66,32 @@ class DataBaseManager implements DBManager {
     return data;
   }
 
+  @override
   dynamic getDataDB2(Detail details, String bID) {
     final databaseBox = details.dataBaseGetDataDB2!();
     final data = databaseBox.get(bID);
     return data;
   }
 
+  @override
   dynamic getDataBaseKeysDB2(Detail details){
     final databaseBox = details.dataBaseGetDataDB2!();
     return databaseBox.keys;
   }
+
+  @override
   dynamic getDataBaseValuesDB2(Detail details){
     final databaseBox = details.dataBaseGetDataDB2!();
     return databaseBox.values;
   }
 
-
+  @override
   dynamic getDataBaseKeys(Detail details){
     final databaseBox = details.dataBaseGetData!();
     return databaseBox.keys;
   }
 
+  @override
   dynamic getDataBaseValues(Detail details){
     final databaseBox = details.dataBaseGetData!();
     return databaseBox.values;

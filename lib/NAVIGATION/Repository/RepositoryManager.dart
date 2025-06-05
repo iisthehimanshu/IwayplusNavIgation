@@ -68,7 +68,7 @@ class RepositoryManager{
         // }
         if(landmarkBox.containsKey(bID)){
             if(kDebugMode){
-                print("Data from DB for ID $bID");
+                print("LANDMARK DATA FROM DATABASE--");
             }
             LandMarkApiModel responseFromDatabase = DataBaseManager().getData(landmarkDetail, bID);
             return landmarkDetail.conversionFunction(responseFromDatabase.responseBody);
@@ -81,7 +81,7 @@ class RepositoryManager{
                 final landmarkData = LandMarkApiModel(responseBody: dataFromAPI.data);
                 DataBaseManager().saveData(landmarkData,landmarkDetail,bID);
                 if (kDebugMode) {
-                    print("Data recieved from API for ${landmarkDetail.conversionFunction(dataFromAPI.data).landmarks.first.buildingName}");
+                    print("LANDMARK DATA FROM API--");
                 }
                 return landmarkDetail.conversionFunction(dataFromAPI.data);
             }else if(dataFromAPI.statusCode == 201){
@@ -101,14 +101,14 @@ class RepositoryManager{
 
         if(polylineBox.containsKey(bID)){
             if (kDebugMode) {
-              print("Data from DB");
+              print("POLYLINE DATA FROM DATABASE--");
             }
             PolyLineAPIModel responseFromDatabase = DataBaseManager().getData(polylineDetail, bID);
             return polylineDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(polylineDetail);
             if (kDebugMode) {
-              print("Data from API");
+              print("POLYLINE DATA FROM API--");
             }
             if(dataFromAPI.statusCode == 200) {
                 final polyLineData = PolyLineAPIModel(
@@ -246,14 +246,14 @@ class RepositoryManager{
 
         if(patchBox.containsKey(bID)){
             if (kDebugMode) {
-              print("Data from DB");
+              print("PATCH DATA FROM DATABASE--");
             }
             PatchAPIModel responseFromDatabase = DataBaseManager().getData(patchDetail, bID);
             return patchDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(patchDetail);
             if (kDebugMode) {
-              print("Data from API");
+              print("PATCH DATA FROM API--");
             }
             if(dataFromAPI.statusCode == 200) {
                 final patchData = PatchAPIModel(responseBody: dataFromAPI.data);
@@ -273,14 +273,14 @@ class RepositoryManager{
 
         if(beaconBox.containsKey(bID)){
             if (kDebugMode) {
-              print("Data from DB");
+              print("SINGLE BUILDING BEACON DATA FROM DATABASE--");
             }
             BeaconAPIModel responseFromDatabase = DataBaseManager().getData(beaconDetail, bID);
             return beaconDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(beaconDetail);
             if (kDebugMode) {
-              print("Data from API");
+              print("SINGLE BUILDING BEACON DATA FROM API--");
             }
             if(dataFromAPI.statusCode == 200) {
                 final beaconData = BeaconAPIModel(responseBody: dataFromAPI.data);
@@ -301,14 +301,14 @@ class RepositoryManager{
 
         if(venueBeaconBox.containsKey(VenueManager().venueName)){
             if (kDebugMode) {
-                print("VENUE BEACON DATA FROM DATABASE");
+                print("VENUE BEACON DATA FROM DATABASE--");
             }
             VenueBeaconAPIModel responseFromDatabase = DataBaseManager().getData(venueBeaconDetail, VenueManager().venueName);
             return venueBeaconDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(venueBeaconDetail);
             if (kDebugMode) {
-                print("VENUE BEACON DATA FROM API");
+                print("VENUE BEACON DATA FROM API--");
             }
             if(dataFromAPI.statusCode == 200) {
                 final venueBeaconData = VenueBeaconAPIModel(responseBody: dataFromAPI.data);
@@ -330,7 +330,7 @@ class RepositoryManager{
             final buildingByVenueBox = buildingByVenueDetail.dataBaseGetData!();
             if(buildingByVenueBox.containsKey(venueName)) {
                 if (kDebugMode) {
-                    print("Data from DB");
+                    print("BUILDING BY VENUE DATA FROM DATABASE--");
                 }
                 BuildingByVenueAPIModel responseFromDatabase = DataBaseManager()
                     .getData(buildingByVenueDetail, venueName);
@@ -339,7 +339,7 @@ class RepositoryManager{
         }else {
             Response dataFromAPI = await networkManager.api.request(buildingByVenueDetail);
             if (kDebugMode) {
-              print("Data from API");
+              print("BUILDING BY VENUE DATA FROM API--");
             }
             if(dataFromAPI.statusCode == 200) {
                 // final buildingByVenueData = BuildingByVenueAPIModel(
@@ -361,14 +361,14 @@ class RepositoryManager{
 
         if(globalAnnotationBox.containsKey(bID)){
             if (kDebugMode) {
-              print("Data from DB");
+              print("GLOBAL ANNOTATION FROM DATABASE--");
             }
             GlobalAnnotationAPIModel responseFromDatabase = DataBaseManager().getData(globalAnnotationDetail, bID);
             return globalAnnotationDetail.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(globalAnnotationDetail);
             if (kDebugMode) {
-              print("Data from API");
+              print("GLOBAL ANNOTATION FROM API--");
             }
             if(dataFromAPI.statusCode == 200) {
                 final globalAnnotationData = GlobalAnnotationAPIModel(responseBody: dataFromAPI.data);
@@ -389,14 +389,14 @@ class RepositoryManager{
 
         if(waypointBox.containsKey(bID)){
             if (kDebugMode) {
-              print("Data from DB");
+              print("WAYPOINT DATA FROM DATABASE--");
             }
             WayPointModel responseFromDatabase = DataBaseManager().getData(waypointDetails, bID);
             return waypointDetails.conversionFunction(responseFromDatabase.responseBody);
         }else {
             Response dataFromAPI = await networkManager.api.request(waypointDetails);
             if (kDebugMode) {
-              print("Data from API");
+              print("WAYPOINT DATA FROM API--");
             }
             if(dataFromAPI.statusCode == 200) {
                 final wayPointData = WayPointModel(
@@ -418,7 +418,7 @@ class RepositoryManager{
         for (var bid in bIDS) {
             if(campusBox.containsKey(bid)){
                 if (kDebugMode) {
-                    print("Data from DB");
+                    print("CAMPUS DATA FROM DATABASE--");
                 }
                 OutDoorModel responseFromDatabase = DataBaseManager().getData(campusDetails, bid);
                 return campusDetails.conversionFunction(responseFromDatabase.responseBody);
@@ -427,7 +427,7 @@ class RepositoryManager{
 
         Response dataFromAPI = await networkManager.api.request(campusDetails);
         if (kDebugMode) {
-            print("Data from API");
+            print("CAMPUS DATA FROM API--");
         }
         if(dataFromAPI.statusCode == 200) {
             final campusData = OutDoorModel(responseBody: dataFromAPI.data);

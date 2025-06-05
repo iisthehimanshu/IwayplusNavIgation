@@ -1303,7 +1303,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       if (lngcode == 'en') {
         return msg;
       } else {
-        return "आप ${tools.numericalToAlphabetical(user.floor)} मंजिल पर हैं, ${user.locationName} आपके ${LocaleData.properties5[finalvalue]?.getString(context)} पर है";
+        return "आप ${tools.numericalToAlphabetical(user.floor)} मंजिल पर हैं, ${user.locationName} आपके ${LocaleData.properties5[finalvalue]?.getString(context)} ओर है";
       }
     } else if (msg == "Confirm Your Location Amongst Below Given List") {
       if (lngcode == 'en') {

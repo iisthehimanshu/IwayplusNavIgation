@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/IWAYPLUS/VenueSelectionScreen.dart';
 import 'package:iwaymaps/NAVIGATION/Navigation.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../NAVIGATION/MapManager/MapScreen.dart';
 import '../NAVIGATION/Network/NetworkManager.dart';
+import '../NAVIGATION/arScreen.dart';
 import 'Elements/QRLandmarkScreen.dart';
 import 'FavouriteScreen.dart';
 import 'ProfilePage.dart';
@@ -72,13 +72,13 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-
-  Future<Position> getUsersCurrentLatLng()async{
-
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-
-    return position;
-  }
+  //
+  // Future<Position> getUsersCurrentLatLng()async{
+  //
+  //   Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+  //
+  //   return position;
+  // }
 
   Future<void> requestBluetoothConnectPermission() async {
     final PermissionStatus permissionStatus = await Permission.bluetooth.request();

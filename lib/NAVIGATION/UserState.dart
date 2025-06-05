@@ -257,9 +257,9 @@ class UserState {
           return;
         }
 
-        if (!gpsStreamHandler.isStreamActive()) {
-          //gpsHandler();
-        }
+        // if (!gpsStreamHandler.isStreamActive()) {
+        //   //gpsHandler();
+        // }
 
         Cell previousPoint = tools.findingprevpoint(cellPath, pathobj.index);
         print("next cell ${cellPath[pathobj.index].x},${cellPath[pathobj.index].y}");
@@ -278,9 +278,9 @@ class UserState {
         return;
       }
       print("inside else condition movement");
-      if(gpsStreamHandler.isStreamActive()){
-        gpsStreamHandler.stopStream();
-      }
+      // if(gpsStreamHandler.isStreamActive()){
+      //   gpsStreamHandler.stopStream();
+      // }
 
       initializeStepsArray(0, [2]);
       if (cellPath[pathobj.index].bid != null &&

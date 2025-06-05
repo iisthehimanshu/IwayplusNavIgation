@@ -17,7 +17,6 @@ import 'package:iwaymaps/NAVIGATION/buildingState.dart';
 import "package:google_maps_flutter_platform_interface/src/types/polyline.dart" as gmap;
 import '/NAVIGATION/APIMODELS/polylinedata.dart' as ply;
 import 'package:google_maps_flutter_platform_interface/src/types/polyline.dart' as gmappol;
-import 'package:geodesy/geodesy.dart' as geo;
 import 'package:iwaymaps/NAVIGATION/navigationTools.dart';
 import 'package:iwaymaps/NAVIGATION/buildingState.dart' as bs;
 
@@ -68,7 +67,6 @@ class _MapScreenState extends State<MapScreen> {
   List<LatLng> poly = <LatLng>[];
   HashMap<String,LatLng> idLatLngHashMap = new HashMap();
   HashMap<String,bool> chekIfRendered = new HashMap();
-  geo.Geodesy geodesy = geo.Geodesy();
   bool _isLandmarkPanelOpen = false;
 
 
@@ -716,10 +714,11 @@ class _MapScreenState extends State<MapScreen> {
                 double distanceThreshold = 100.0;
                 String closestBuildingId = "";
                 idLatLngHashMap.forEach((String buildingId, LatLng storedLatLng) {
-                  num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
-                    geo.LatLng(storedLatLng.latitude, storedLatLng.longitude),
-                    geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
-                  );
+                  num distance = 0;
+                  // geo.Geodesy().distanceBetweenTwoGeoPoints(
+                  //   geo.LatLng(storedLatLng.latitude, storedLatLng.longitude),
+                  //   geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
+                  // );
 
                   if (distance < distanceThreshold) {
                     closestBuildingId = buildingId;

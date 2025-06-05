@@ -46,7 +46,7 @@ class PathSnapper {
   }
 
   final _snappedCellController = StreamController<Map<String,dynamic>>();
-  GPS gps = GPS();
+  // GPS gps = GPS();
 
   PathSnapper();
 
@@ -73,8 +73,8 @@ class PathSnapper {
 
   // Stop listening to GPS updates
   void stopGpsUpdates() {
-    gps.stopGpsUpdates();
-    gps.dispose();
+    // gps.stopGpsUpdates();
+    // gps.dispose();
   }
 
   // Process GPS data

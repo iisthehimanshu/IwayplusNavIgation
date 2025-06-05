@@ -12,6 +12,12 @@
 @import app_settings;
 #endif
 
+#if __has_include(<ar_flutter_plugin/ArFlutterPlugin.h>)
+#import <ar_flutter_plugin/ArFlutterPlugin.h>
+#else
+@import ar_flutter_plugin;
+#endif
+
 #if __has_include(<bluetooth_enable_fork/BluetoothEnablePlugin.h>)
 #import <bluetooth_enable_fork/BluetoothEnablePlugin.h>
 #else
@@ -102,10 +108,10 @@
 @import path_provider_foundation;
 #endif
 
-#if __has_include(<permission_handler_apple/PermissionHandlerPlugin.h>)
-#import <permission_handler_apple/PermissionHandlerPlugin.h>
+#if __has_include(<permission_handler/PermissionHandlerPlugin.h>)
+#import <permission_handler/PermissionHandlerPlugin.h>
 #else
-@import permission_handler_apple;
+@import permission_handler;
 #endif
 
 #if __has_include(<qr_code_scanner/FlutterQrPlugin.h>)
@@ -160,6 +166,7 @@
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
   [AppSettingsPlugin registerWithRegistrar:[registry registrarForPlugin:@"AppSettingsPlugin"]];
+  [ArFlutterPlugin registerWithRegistrar:[registry registrarForPlugin:@"ArFlutterPlugin"]];
   [BluetoothEnablePlugin registerWithRegistrar:[registry registrarForPlugin:@"BluetoothEnablePlugin"]];
   [ConnectivityPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"ConnectivityPlusPlugin"]];
   [FPPDeviceInfoPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FPPDeviceInfoPlusPlugin"]];

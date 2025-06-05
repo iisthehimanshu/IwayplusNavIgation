@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/NAVIGATION/Sensor/baseSensorClass.dart';
 
 import '../GPSService.dart';
@@ -20,18 +19,20 @@ class GpsSensor extends BaseSensor{
     });
   }
 
-  Future<Position> getCurrentCoordinates() async {
-    return Geolocator.getCurrentPosition();
-  }
+  // Future<Position> getCurrentCoordinates() async {
+  //   // return Geolocator.getCurrentPosition();
+  //
+  // }
 
   Future<bool> checkPermission() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-
-    return permission == LocationPermission.always ||
-        permission == LocationPermission.whileInUse;
+    // LocationPermission permission = await Geolocator.checkPermission();
+    // if (permission == LocationPermission.denied) {
+    //   permission = await Geolocator.requestPermission();
+    // }
+    //
+    // return permission == LocationPermission.always ||
+    //     permission == LocationPermission.whileInUse;
+    return false;
   }
 
 

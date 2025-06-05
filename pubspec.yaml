@@ -44,7 +44,7 @@ dependencies:
   sliding_up_panel: ^2.0.0+1
   flutter_blue_plus: ^1.32.7
   shimmer: ^3.0.0
-  permission_handler: ^11.3.1
+  permission_handler: ^8.1.6
   flutter_tts: ^3.8.5
   flutter_compass: ^0.8.0
   flutter_svg: ^2.0.9
@@ -65,7 +65,6 @@ dependencies:
   geodesy: ^0.10.2
   chips_choice: ^3.0.1
   turf: ^0.0.10
-  geolocator: ^12.0.0
   upgrader:
   lottie: ^2.6.0
   speech_to_text:
@@ -100,9 +99,8 @@ dependencies:
   google_maps_cluster_manager: ^3.1.0
   go_router: ^15.1.1
   url_launcher:
-
-
-
+  ar_flutter_plugin: ^0.6.1
+#  arkit_plugin: ^1.1.2
 
 
 

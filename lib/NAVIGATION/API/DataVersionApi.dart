@@ -20,12 +20,12 @@ class DataVersionApi {
     bool shouldBeInjected = false;
 
     // Check if data exists locally
-    final localData = dataBox.get(buildingId);
-
-    // If local data not present and internet not available, throw error
-    if (localData == null && !(await _hasInternet())) {
-      throw Exception("No local data and no internet connection available.");
-    }
+    // final localData = dataBox.get(buildingId);
+    //
+    // // If local data not present and internet not available, throw error
+    // if (localData == null && !(await _hasInternet())) {
+    //   throw Exception("No local data and no internet connection available.");
+    // }
 
     try {
       final response = await http.post(

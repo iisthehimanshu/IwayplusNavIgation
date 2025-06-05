@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:geodesy/geodesy.dart';
+
 import 'package:hive/hive.dart';
 
 import '../../IWAYPLUS/API/buildingAllApi.dart';

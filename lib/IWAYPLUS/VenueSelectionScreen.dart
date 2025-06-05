@@ -10,8 +10,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geodesy/geodesy.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/IWAYPLUS/websocket/NotifIcationSocket.dart';
 import 'package:iwaymaps/NAVIGATION/API/BuildingAPI.dart';
@@ -73,7 +71,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     NotificationSocket.receiveMessage();
     // checkForUpdate();
     //startScan();
-    getLocs();
+    // getLocs();
 
     apiCall();
     print("venueHashMap");
@@ -191,49 +189,49 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   }
 
 
-  void getLocs()async{
-    setState(() {
-      isLocating=true;
-    });
-    userLoc= await getUsersCurrentLatLng();
-if(userLoc!=null){
-  UserState.geoLat=userLoc!.latitude;
-  UserState.geoLng=userLoc!.longitude;
-}else{
-  userLoc=Position(longitude: 77.18803031572772, latitude:  28.544277333724025, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
-}
-    if(mounted){
-      setState(() {
-        isLocating=false;
+//   void getLocs()async{
+//     setState(() {
+//       isLocating=true;
+//     });
+//     userLoc= await getUsersCurrentLatLng();
+// if(userLoc!=null){
+//   UserState.geoLat=userLoc!.latitude;
+//   UserState.geoLng=userLoc!.longitude;
+// }else{
+//   userLoc=Position(longitude: 77.18803031572772, latitude:  28.544277333724025, timestamp: DateTime.now(), accuracy: 100, altitude: 1, speed: 100, speedAccuracy: 100,heading: 0.0);
+// }
+//     if(mounted){
+//       setState(() {
+//         isLocating=false;
+//
+//       });
+//     }
+//
+//   }
 
-      });
-    }
-
-  }
-
-  var locBox=Hive.box('LocationPermission');
-  Position? userLoc;
-
-  Future<Position?> getUsersCurrentLatLng()async{
-   //if ((locBox.get('location')==null)?false:locBox.get('location')) {
-      try{
-        Position? position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-        Geolocator.getLocationAccuracy();
-        return position;
-      }catch(e){
-        print("error in location fetching");
-        return null;
-      }
-
-
-
-   // }
-    // else{
-    //   Position pos=Position(longitude: 79.10139, latitude:  28.947555, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
-    //   return pos;
-    // }
-
-  }
+  // var locBox=Hive.box('LocationPermission');
+  // Position? userLoc;
+  //
+  // Future<Position?> getUsersCurrentLatLng()async{
+  //  //if ((locBox.get('location')==null)?false:locBox.get('location')) {
+  //     try{
+  //       Position? position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+  //       Geolocator.getLocationAccuracy();
+  //       return position;
+  //     }catch(e){
+  //       print("error in location fetching");
+  //       return null;
+  //     }
+  //
+  //
+  //
+  //  // }
+  //   // else{
+  //   //   Position pos=Position(longitude: 79.10139, latitude:  28.947555, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
+  //   //   return pos;
+  //   // }
+  //
+  // }
 
 
   void apiCall() async  {
@@ -329,21 +327,21 @@ if(userLoc!=null){
     );
   }
 
-  calcDistanceFromUser(List<VenueModel> buildingsPos,Position userLoc){
-    // buildingsPos.clear();
-    // finalDist.clear();
-    print("userlocs");
-    print(buildingsPos[0].coordinates);
-    print(userLoc);
-
-    for(int i=0;i<buildingsPos.length;i++){
-      int dist=getDistanceFromLatLonInKm(buildingsPos[i].coordinates[0],buildingsPos[i].coordinates[1],userLoc.latitude,userLoc.longitude);
-      buildingsPos[i].dist=dist;
-      finalDist.add(dist);
-    }
-    // print("finalDist");
-    // print(finalDist);
-  }
+  // calcDistanceFromUser(List<VenueModel> buildingsPos,Position userLoc){
+  //   // buildingsPos.clear();
+  //   // finalDist.clear();
+  //   print("userlocs");
+  //   print(buildingsPos[0].coordinates);
+  //   print(userLoc);
+  //
+  //   for(int i=0;i<buildingsPos.length;i++){
+  //     int dist=getDistanceFromLatLonInKm(buildingsPos[i].coordinates[0],buildingsPos[i].coordinates[1],userLoc.latitude,userLoc.longitude);
+  //     buildingsPos[i].dist=dist;
+  //     finalDist.add(dist);
+  //   }
+  //   // print("finalDist");
+  //   // print(finalDist);
+  // }
   List<VenueModel> buildingsPos=[];
   List<int> finalDist=[];
 
@@ -569,7 +567,7 @@ if(userLoc!=null){
 
                              //var currentData = venueList[index];
 
-                             calcDistanceFromUser(buildingsPos,userLoc!);
+                             // calcDistanceFromUser(buildingsPos,userLoc!);
                             buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
 
                             var currentData = buildingsPos[index];
@@ -586,7 +584,7 @@ if(userLoc!=null){
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc,),
+                                    builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist),
                                   ),
                                 );
                               },
@@ -617,7 +615,7 @@ if(userLoc!=null){
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc),
+                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist),
                                     ),
                                   );
                                 },
@@ -645,7 +643,7 @@ if(userLoc!=null){
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc),
+                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist),
                                     ),
                                   );
                                 },
@@ -693,7 +691,7 @@ if(userLoc!=null){
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc),
+                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist),
                                     ),
                                   );
                                 },

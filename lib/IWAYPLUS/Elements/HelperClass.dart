@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 // import 'dart:html' as html;
 
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/NAVIGATION/config.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -248,24 +247,24 @@ class HelperClass{
 
   }
 
-  static Future<int> getGeoFenced(String venueName,Position userPos)async{
-  await buildingApicall();
-  List<buildingAll>? buildingList=venueHashMap[venueName];
-  for(int i=0;i<buildingList!.length;i++){
-    var currentData=buildingList[i];
-    if(currentData.geofencing!=null && currentData.geofencing!){
-      for(int j=0;j<venueList.length;j++){
-        if(userPos.latitude.toStringAsFixed(2)==venueList[j].coordinates[0].toStringAsFixed(2) && userPos.longitude.toStringAsFixed(2)==venueList[j].coordinates[1].toStringAsFixed(2)){
-          return 0;
-        }
-      }
-    }else{
-      return 1;
-    }
-  }
-  return 2;
-
-  }
+  // static Future<int> getGeoFenced(String venueName,Position userPos)async{
+  // await buildingApicall();
+  // List<buildingAll>? buildingList=venueHashMap[venueName];
+  // for(int i=0;i<buildingList!.length;i++){
+  //   var currentData=buildingList[i];
+  //   if(currentData.geofencing!=null && currentData.geofencing!){
+  //     for(int j=0;j<venueList.length;j++){
+  //       if(userPos.latitude.toStringAsFixed(2)==venueList[j].coordinates[0].toStringAsFixed(2) && userPos.longitude.toStringAsFixed(2)==venueList[j].coordinates[1].toStringAsFixed(2)){
+  //         return 0;
+  //       }
+  //     }
+  //   }else{
+  //     return 1;
+  //   }
+  // }
+  // return 2;
+  //
+  // }
 
 
   double getBinWeight(int rssi){

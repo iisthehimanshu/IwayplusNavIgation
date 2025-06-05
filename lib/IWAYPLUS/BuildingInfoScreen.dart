@@ -10,9 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:geodesy/geodesy.dart';
+
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
-import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/NAVIGATION/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
@@ -37,9 +36,9 @@ class BuildingInfoScreen extends StatefulWidget {
   String? venuePhone;
   String? venueWebsite;
   int? dist;
-  Position? currentLatLng;
+  // Position? currentLatLng;
 
-  BuildingInfoScreen({ this.receivedAllBuildingList,this.venueTitle,this.venueDescription,this.venueCategory,this.venueAddress,this.venuePhone,this.venueWebsite,this.dist,this.currentLatLng});
+  BuildingInfoScreen({ this.receivedAllBuildingList,this.venueTitle,this.venueDescription,this.venueCategory,this.venueAddress,this.venuePhone,this.venueWebsite,this.dist});
 
 
   @override
@@ -366,7 +365,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                 title: Container(
 
                                   decoration: BoxDecoration(
-                                      color:  ((widget.currentLatLng!.latitude.toStringAsFixed(2)==(28.54343736711034).toStringAsFixed(2) && widget.currentLatLng!.longitude.toStringAsFixed(2)==(77.18752205371858).toStringAsFixed(2)) || widget.dist==0)?Colors.white:Colors.black.withOpacity(0.2),
+                                      color: Colors.black.withOpacity(0.2),
                                       border: Border.all(
                                         color: Color(0xffEBEBEB),
                                       ),

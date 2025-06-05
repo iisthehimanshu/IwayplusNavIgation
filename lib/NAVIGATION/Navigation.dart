@@ -26,7 +26,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geodesy/geodesy.dart' as geo;
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -177,10 +176,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   UserState user = UserState(
       floor: 0, coordX: 0, coordY: 0, lat: 0.0, lng: 0.0, key: "", theta: 0.0);
   pathState PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
-
   late String manufacturer;
   double step_threshold = 0.6;
-
   static const Duration _ignoreDuration = Duration(milliseconds: 20);
   UserAccelerometerEvent? _userAccelerometerEvent;
   DateTime? _userAccelerometerUpdateTime;
@@ -192,8 +189,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   late StreamSubscription<AccelerometerEvent>? pdr;
   Duration sensorInterval = Duration(milliseconds: 100);
   late final pinLandmarkPannel PinLandmarkPannel;
-
-
   late StreamSubscription<CompassEvent> compassSubscription;
   bool detected = false;
   List<String> allBuildingList = [];
@@ -470,6 +465,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     // Create the animation
     _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
       ..addListener(() {
+        if(disposed) return;
         _updateCircle(user.lat, user.lng);
       });
 
@@ -817,6 +813,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       networkManager.ws.updateSensorStatus(compass: true);
       networkManager.ws.updatePermissions(compass: true);
       double? compassHeading = event.heading;
+      if(disposed) return;
         setState(() {
           user.theta = compassHeading!;
           if (mapState.interaction2) {
@@ -2873,22 +2870,22 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   LatLng? _userLocation;
   double? _accuracy;
   Future<void> _cation() async {
-    Position position =
+    // Position position =
 
     //Position(longitude: 77.10259, latitude:  28.947595, timestamp: DateTime.now(), accuracy: 10, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
 
-    await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+    // await Geolocator.getCurrentPosition(
+    //   desiredAccuracy: LocationAccuracy.high,
+    // );
 
     setState(() {
-      _userLocation = LatLng(position.latitude, position.longitude);
-      _accuracy = position.accuracy;
-      UserState.geoLat = position.latitude;
-      UserState.geoLng = position.longitude;
-      print("positionnn");
-      print(_accuracy);
-      print(position);
+      // _userLocation = LatLng(position.latitude, position.longitude);
+      // _accuracy = position.accuracy;
+      // UserState.geoLat = position.latitude;
+      // UserState.geoLng = position.longitude;
+      // print("positionnn");
+      // print(_accuracy);
+      // print(position);
       print(UserState.geoLat);
       print(UserState.geoLng); // Get accuracy in meters
     });

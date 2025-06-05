@@ -1,13 +1,19 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data' as typed_data;
 import 'dart:ui' as ui;
 import 'dart:ui';
 import 'dart:math' as math;
+// import 'package:ar_flutter_plugin/managers/ar_anchor_manager.dart';
+// import 'package:ar_flutter_plugin/managers/ar_location_manager.dart';
+// import 'package:ar_flutter_plugin/managers/ar_object_manager.dart';
+// import 'package:ar_flutter_plugin/managers/ar_session_manager.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:collection/collection.dart' as pac;
 import 'package:fluster/fluster.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +24,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:fuzzy/bitap/bitap.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
+import 'package:iwaymaps/NAVIGATION/arScreen.dart';
 import 'package:iwaymaps/NAVIGATION/pathState.dart';
 import 'package:iwaymaps/NAVIGATION/singletonClass.dart';
 import 'package:sensors_plus/sensors_plus.dart';
@@ -277,11 +284,11 @@ class _ExploreScreenState extends State<ExploreScreen> with TickerProviderStateM
   Timer? _timer;
   @override
   void initState(){
+    flutterTts = FlutterTts();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
-
     _animationController = AnimationController(
       duration: Duration(milliseconds: 800), // Adjust for smoother animation
       vsync: this,
@@ -296,34 +303,128 @@ class _ExploreScreenState extends State<ExploreScreen> with TickerProviderStateM
     createRooms(widget.poly, SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]!.floor()??0);
     paintUser(widget.nearestBeacon,null,null);
     handleCompassEvents();
-      _timer = Timer.periodic(Duration(seconds: 5), (Timer t) {
-        if (Platform.isAndroid) {
-          SingletonFunctionController.btadapter
-              .startScanning(
-              SingletonFunctionController
-                  .apibeaconmap);
-        } else {
-          SingletonFunctionController.btadapter
-              .startScanningIOS(
-              SingletonFunctionController
-                  .apibeaconmap);
-        }
-        Future.delayed(Duration(seconds: 2), () async {
-         await realTimeReLocalizeUser(SingletonFunctionController.apibeaconmap);
-        });
-      });
-
+    startOrientationListener();
+      // _timer = Timer.periodic(Duration(seconds: 5), (Timer t) {
+      //   if (Platform.isAndroid) {
+      //     SingletonFunctionController.btadapter
+      //         .startScanning(
+      //         SingletonFunctionController
+      //             .apibeaconmap);
+      //   }else{
+      //     SingletonFunctionController.btadapter
+      //         .startScanningIOS(
+      //         SingletonFunctionController
+      //             .apibeaconmap);
+      //   }
+      //   Future.delayed(Duration(seconds: 2), () async {
+      //    await realTimeReLocalizeUser(SingletonFunctionController.apibeaconmap);
+      //   });
+      // });
     super.initState();
   }
 
   @override
   void dispose(){
     magnetoData.stopMagnetometer();
+    _accelerometerSub!.cancel();
     _timer?.cancel();
     _controller.dispose();
     _animationController!.dispose();
     _animation.removeListener((){});
     super.dispose();
+  }
+
+  StreamSubscription? _accelerometerSub;
+  void startOrientationListener() {
+    _accelerometerSub = accelerometerEvents.listen((AccelerometerEvent event) {
+      double x= event.x;
+      double y = event.y;
+      double z = event.z;
+
+      // Normalize the vector
+      double magnitude = sqrt(x * x + y * y + z * z);
+      x /= magnitude;
+      y /= magnitude;
+      z /= magnitude;
+
+      // Threshold to detect if device is upright (portrait, screen vertical)
+      // When held vertically facing forward: z ≈ 0, y ≈ 1, x ≈ 0
+      print("_cameraOpened ${x.abs()} ${_cameraOpened}");
+      if ((z.abs() < 0.4) && (y > 0.8)){
+        print("Device held vertically!");
+        openCamera();
+      }else if(x.abs() > 0.13 && _cameraOpened){
+        // Held horizontally - Landscape
+        _cameraOpened = false;
+        Future.delayed(const Duration(milliseconds: 200), () {
+          if (mounted) Navigator.of(context).pop();
+        });
+        // Closes AR screen and goes back to Explore Mode
+        print('Device is held horizontally — returning to Explore Mode');
+      }
+    });
+  }
+  bool _cameraOpened = false;
+
+  Route _fadeRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 700),
+    );
+  }
+
+
+  void openCamera() {
+    if (!_cameraOpened) {
+      _cameraOpened = true;
+      print("Opening AR Camera...");
+      Navigator.of(context).push(_fadeRoute(const ArScreen()));
+      // Navigate to AR screen or initialize camera
+      // Future.delayed(Duration(seconds: 5), () {
+      //   _cameraOpened = false; // Allow retrigger after delay
+      // });
+    }
+  }
+
+
+
+  Future<void> speak(String msg, String lngcode, {bool prevpause = false}) async {
+    if(kIsWeb){
+      return;
+    }
+    if (!UserState.ttsAllStop){
+      if (prevpause) {
+        await flutterTts.pause();
+      }
+      try {
+        if (lngcode == "hi") {
+          if (Platform.isAndroid) {
+            await flutterTts.setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
+          } else {
+            await flutterTts.setVoice({"name": "Lekha", "locale": "hi-IN"});
+          }
+        } else {
+          await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
+        }
+        await flutterTts.stop();
+        if (Platform.isAndroid) {
+          await flutterTts.setSpeechRate(0.7);
+        } else {
+          await flutterTts.setSpeechRate(0.55);
+        }
+        await flutterTts.setPitch(1.0);
+        // Check if Semantic Mode is enabled
+          await flutterTts.speak(msg);
+      } catch (e) {
+        print("Error during TTS: $e");
+      }
+    }
   }
   String firstValue = "";
   LatLng lastExplorePosition = LatLng(0.0, 0.0);
@@ -614,6 +715,7 @@ class _ExploreScreenState extends State<ExploreScreen> with TickerProviderStateM
 
 
   Future<void> identifyFrontLandmark() async {
+    print("landmark function running");
     List<int> transitionValue = tools.eightcelltransition(user.theta);
     List<int> newUserCord = [
       user.coordX + transitionValue[0],
@@ -658,6 +760,7 @@ class _ExploreScreenState extends State<ExploreScreen> with TickerProviderStateM
     }
   }
   Future<void> identifyFrontService(List<Landmarks> resList) async {
+    print("service function running");
     List<int> transitionValue = tools.eightcelltransition(user.theta);
     List<int> newUserCord = [
       user.coordX + transitionValue[0],
@@ -708,7 +811,6 @@ class _ExploreScreenState extends State<ExploreScreen> with TickerProviderStateM
     }
     if (closestLandmark != null) {
       final Uint8List iconMarker = await getImagesFromMarker('assets/dot.png', 30);
-
       lastExploredLoc = closestLandmark.sId!;
       lastService = closestLandmark.sId!;
       recentlyTriggeredServices.add(closestLandmark.sId!);
@@ -717,6 +819,7 @@ class _ExploreScreenState extends State<ExploreScreen> with TickerProviderStateM
         recentlyTriggeredServices.remove(closestLandmark!.sId!);
       });
       Vibration.vibrate();
+      speak("${options[lastValueStored]} is ${minDistance.toStringAsFixed(0)} meters away", "EN");
       animateSelectedMarker("${minDistance.toStringAsFixed(0)} mtr", closestLatLng);
       setCameraPositionusingCoords(
         [LatLng(user.lat, user.lng)],
@@ -1342,40 +1445,6 @@ class _ExploreScreenState extends State<ExploreScreen> with TickerProviderStateM
     }
   }
 
-  Future<void> speak(String msg, String lngcode, {bool prevpause = false}) async {
-    if(kIsWeb){
-      return;
-    }
-    if (!UserState.ttsAllStop) {
-
-      if (prevpause) {
-        await flutterTts.pause();
-      }
-      try {
-        if (lngcode == "hi") {
-          if (Platform.isAndroid) {
-            await flutterTts.setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
-          } else {
-            await flutterTts.setVoice({"name": "Lekha", "locale": "hi-IN"});
-          }
-        } else {
-          await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
-        }
-
-        await flutterTts.stop();
-        if (Platform.isAndroid) {
-          await flutterTts.setSpeechRate(0.7);
-        } else {
-          await flutterTts.setSpeechRate(0.55);
-        }
-
-        await flutterTts.setPitch(1.0);
-        // Check if Semantic Mode is enabled
-      } catch (e) {
-        print("Error during TTS: $e");
-      }
-    }
-  }
 
   Set<Marker> restBuildingMarker = Set();
   void _updateMarkers(double zoom) {
@@ -3145,6 +3214,7 @@ class _ExploreScreenState extends State<ExploreScreen> with TickerProviderStateM
   ];
   List<Landmarks> resList=[];
   bool _isService=false;
+  bool _isExplored=false;
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -3415,13 +3485,43 @@ class _ExploreScreenState extends State<ExploreScreen> with TickerProviderStateM
             bottom: 200.0, // Adjust the position as needed
             right: 18.0,
             child: Visibility(
+              visible:_isExplored,
+              child: FloatingActionButton(
+                backgroundColor:(_isExplored)? Colors.red:Colors.cyan,
+                onPressed:(){
+                  if(_isExplored){
+                    HelperClass.showToast("Explore Mode Disabled");
+                    setState(() {
+                      _isExplored=true;
+                    });
+                    _exploreModeTimer!.cancel();
+                  }else{
+                    if(_exploreModeTimer==null){
+                      _exploreModeTimer=Timer.periodic(Duration(seconds: 2),(_){
+                        identifyFrontLandmark();
+                      });
+                      setState((){
+                        _isExplored=false;
+                      });
+                    }
+                  }
+                },child:Icon(CupertinoIcons.antenna_radiowaves_left_right,color: Colors.white,),),
+            ),
+          ),
+          Positioned(
+            bottom: 200.0, // Adjust the position as needed
+            right: 18.0,
+            child: Visibility(
               visible: _isService,
               child: FloatingActionButton(
                 backgroundColor: Colors.red,
                 onPressed: (){
                 setState((){
                   _isService=false;
+                  _isExplored=true;
                 });
+                recentlyTriggeredServices.clear();
+                lastService="";
                 _exploreModeMarker.clear();
                 _exploreModeTimer2!.cancel();
                 _exploreModeTimer = Timer.periodic(Duration(seconds:2), (Timer t) {

@@ -34,7 +34,6 @@ class _MainScreenState extends State<MainScreen> {
     FavouriteScreen(),
     ProfilePage()
   ];
-
   @override
   void initState() {
     super.initState();

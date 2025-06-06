@@ -789,277 +789,295 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     return Scaffold(
       body: Container(
         padding: EdgeInsets.only(top: statusBarHeight),
-        color: Colors.white,
+        color: Color(0xfff2f3f5),
         child: !promptLoader? Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-
-            Semantics(
-              header: true,
-              label: "Search",
-              child: Container(
-                  width: screenWidth - 32,
-                  height: 48,
-                  margin: EdgeInsets.only(top: 16, left: 16, right: 17),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color:
-                      containerBoxColor, // You can customize the border color
-                      width: 1.0, // You can customize the border width
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      SizedBox(width: 6,),
-                      Container(
-                        width: 48,
+            Container(
+              color: Colors.white,
+              child: Column(
+                children: [
+                  Semantics(
+                    header: true,
+                    label: "Search",
+                    child: Container(
+                        width: screenWidth - 32,
                         height: 48,
-                        child: IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          icon: Semantics(
-                            label: "Back",
-                            child: SvgPicture.asset(
-                                "assets/DestinationSearchPage_BackIcon.svg"),
+                        margin: EdgeInsets.only(top: 16, left: 16, right: 17),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color:
+                            containerBoxColor, // You can customize the border color
+                            width: 1.0, // You can customize the border width
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: FocusScope(
-                          autofocus: true,
-                          child: Focus(
-                            child: Container(
-                                child: TextField(
-                                  autofocus: true,
-                                  controller: _controller,
-                                  decoration: InputDecoration(
-                                    hintText: "${searchHintString}",
-                                    border: InputBorder.none, // Remove default border
-                                  ),
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff18181b),
-                                    height: 25 / 16,
-                                  ),
-                                  onTap: () {
-                                    if (containerBoxColor == Color(0xffA1A1AA)) {
-                                      containerBoxColor = Color(0xff24B9B0);
-                                    } else {
-                                      containerBoxColor = Color(0xffA1A1AA);
-                                    }
-                                  },
-                                  onSubmitted: (value) {
-
-                                    search(value);
-                                  },
-                                  onChanged: (value) {
-                                    if(_controller.text.isEmpty){
-                                      searchResults.clear();
-                                      searcCategoryhResults.clear();
-                                      topSearches.clear();
-                                      topSearchesFunc();
-                                    }else{
-                                      search(value);
-                                    }
-                                    // print("Final Set");
-                                    // print(cardSet);
-                                  },
-                                )),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(right: 6),
-                        width: 40,
-                        height: 48,
-                        child: Center(
-                          child: _controller.text.isNotEmpty
-                              ? IconButton(
-                              onPressed: (){
-                                _controller.text = "";
-                                setState((){
-                                  vall = -1;
-                                  search(_controller.text);
-                                  recentResults = [];
-                                  searcCategoryhResults = [];
-                                  category=false;
-                                  topSearches.clear();
-                                  topSearchesFunc();
-                                });
-                              },
-                              icon: Semantics(
-                                  container: true,
-                                  label: "Close", child: Icon(Icons.close)))
-                              : IconButton(
-                            onPressed: () {
-                              initSpeech();
-                              setState(() {
-                                speetchText.isListening
-                                    ? stopListening()
-                                    : startListening();
-                              });
-                              if (!micselected) {
-                                micColor = Color(0xff24B9B0);
-                              }
-                              setState(() {});
-                            },
-                            icon: Semantics(
-                              label: "Voice Search",
-                              child: Icon(
-                                Icons.mic,
-                                color: micColor,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(width: 6,),
+                            Container(
+                              width: 48,
+                              height: 48,
+                              child: IconButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                icon: Semantics(
+                                  label: "Back",
+                                  child: SvgPicture.asset(
+                                      "assets/DestinationSearchPage_BackIcon.svg"),
+                                ),
                               ),
                             ),
+                            Expanded(
+                              child: FocusScope(
+                                autofocus: true,
+                                child: Focus(
+                                  child: Container(
+                                      child: TextField(
+                                        autofocus: true,
+                                        controller: _controller,
+                                        decoration: InputDecoration(
+                                          hintText: "${searchHintString}",
+                                          border: InputBorder.none, // Remove default border
+                                        ),
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xff18181b),
+                                          height: 25 / 16,
+                                        ),
+                                        onTap: () {
+                                          if (containerBoxColor == Color(0xffA1A1AA)) {
+                                            containerBoxColor = Color(0xff24B9B0);
+                                          } else {
+                                            containerBoxColor = Color(0xffA1A1AA);
+                                          }
+                                        },
+                                        onSubmitted: (value) {
+
+                                          search(value);
+                                        },
+                                        onChanged: (value) {
+                                          if(_controller.text.isEmpty){
+                                            searchResults.clear();
+                                            searcCategoryhResults.clear();
+                                            topSearches.clear();
+                                            topSearchesFunc();
+                                          }else{
+                                            search(value);
+                                          }
+                                          // print("Final Set");
+                                          // print(cardSet);
+                                        },
+                                      )),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(right: 6),
+                              width: 40,
+                              height: 48,
+                              child: Center(
+                                child: _controller.text.isNotEmpty
+                                    ? IconButton(
+                                    onPressed: (){
+                                      _controller.text = "";
+                                      setState((){
+                                        vall = -1;
+                                        search(_controller.text);
+                                        recentResults = [];
+                                        searcCategoryhResults = [];
+                                        category=false;
+                                        topSearches.clear();
+                                        topSearchesFunc();
+                                      });
+                                    },
+                                    icon: Semantics(
+                                        container: true,
+                                        label: "Close", child: Icon(Icons.close)))
+                                    : IconButton(
+                                  onPressed: () {
+                                    initSpeech();
+                                    setState(() {
+                                      speetchText.isListening
+                                          ? stopListening()
+                                          : startListening();
+                                    });
+                                    if (!micselected) {
+                                      micColor = Color(0xff24B9B0);
+                                    }
+                                    setState(() {});
+                                  },
+                                  icon: Semantics(
+                                    label: "Voice Search",
+                                    child: Icon(
+                                      Icons.mic,
+                                      color: micColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )),
+                  ),
+                  optionListForUI.isNotEmpty?Semantics(
+                    label: "Filter Section",
+                    header: true,
+                    child: Container(
+                      padding: EdgeInsets.only(top: 8, bottom: 8),
+                      width: screenWidth,
+                      child: ChipsChoice<int>.single(
+                        value: vall,
+                        onChanged: (val) async {
+                          if(HelperClass.SemanticEnabled){
+                            speak("${optionListForUI.toList()[val]} selected");
+                          }
+                          selectedButton = optionListForUI.toList()[val];
+                          setState(() => vall = val);
+                          lastval = val;
+                          _controller.text = optionListForUI.toList()[val];
+                          print("optionListItemBuildingName:${optionListItemBuildingName}");
+                          if(optionListItemBuildingName.length==1){
+                            await fetchFloors(optionListItemBuildingName.first,optionListForUI.toList()[val].toUpperCase()).then((_){
+                              print("floors list $floors");
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => FloorSelectionPage(filterName: optionListForUI.toList()[val], filterBuildingName: optionListItemBuildingName.first,floors: floors.toList()..sort(),),
+                                ),
+                              ).then((value){
+                                print("value $value");
+                                _controller.text="";
+                                searchResults = [];
+                                searcCategoryhResults = [];
+                                vall = -1;
+                                floors.clear();
+                                onVenueClicked(value[0],value[1],value[2],value[3]);
+                                // widget.onClicked(value[0],value[1],value[2],value[3]);
+                              });
+                            });
+                          }else{
+                            search(optionListForUI.toList()[val]);
+                          }
+                        },
+                        choiceItems: C2Choice.listFrom<int, String>(
+                          source: optionListForUI.toList(),
+                          value: (i, v) => i,
+                          label: (i, v) => v,
+                        ),
+
+                        choiceBuilder: (item, i) {
+                          if(!item.selected){
+                            vall = -1;
+                          }
+                          return DestinationPageChipsWidget(
+                            svgPath: '',
+                            text: optionListForUI.toList()[i],
+                            onSelect: item.select!,
+                            selected: item.selected,
+
+                            onTap: (String Text) {
+                              if (Text.isNotEmpty) {
+                                search(Text);
+                              } else {
+                                search(Text);
+                                _controller.text="";
+                                searchResults = [];
+                                searcCategoryhResults = [];
+                                vall = -1;
+                              }
+                            }, icon: _icons[i],
+                          );
+                        },
+                        direction: Axis.horizontal,
+                      ),
+                    ),
+                  ):Container(),
+                  (searchHintString.toLowerCase().contains("source") && widget.userLocalized != "")?
+                  InkWell(
+                    onTap: (){
+                      Navigator.pop(context, widget.userLocalized);
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(left: 16,right: 16),
+                      padding: EdgeInsets.only(top: 8, bottom: 8),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Color(0xfff2f3f5), // light gray line
+                            width: 1,
                           ),
                         ),
                       ),
-                    ],
-                  )),
-            ),
-            (searchHintString.toLowerCase().contains("source") && widget.userLocalized != "")?
-            InkWell(
-              onTap: (){
-                Navigator.pop(context, widget.userLocalized);
-              },
-              child: Container(
-                margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(width: 16,),
-                        Image.asset("assets/rw.png"),
-                        SizedBox(width: 24,),
-                        Text(style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xff000000),
-                        ),"Your Current Location")
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ):Container(),
-            // searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
-            //
-            // InkWell(
-            //   onTap: (){
-            //   Navigator.push(context,  MaterialPageRoute(
-            //     builder: (BuildContext context) => SelectOnMapScreen(poly: SingletonFunctionController.building.polyLineData!, patchData: SingletonFunctionController
-            //         .building.patchData[buildingAllApi
-            //         .getStoredString()]!, destiPoint: (widget.hintText=="Source location")?false:true,)
-            //   ),).then((value){
-            //     print("poly id:::${value}");
-            //     Navigator.pop(context,value);
-            //   });
-            //   },
-            //   child: Container(
-            //     decoration: BoxDecoration(
-            //       border: Border.all(),
-            //     ),
-            //     margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
-            //     child: Column(
-            //       children:[
-            //         Row(
-            //           mainAxisAlignment: MainAxisAlignment.start,
-            //           children: [
-            //             SizedBox(width: 16,),
-            //             Icon(Icons.map_rounded,size: 25,),
-            //             SizedBox(width: 24,),
-            //             Text(style: const TextStyle(
-            //               fontFamily: "Roboto",
-            //               fontSize: 16,
-            //               fontWeight: FontWeight.w400,
-            //               color: Color(0xff000000),
-            //             ),(widget.hintText=="Source location" || widget.hintText.isEmpty)?"Select Source On Map":"Select Destination On Map")
-            //           ],
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
-            optionListForUI.isNotEmpty?Semantics(
-              label: "Filter Section",
-              header: true,
-              child: Container(
-                margin: EdgeInsets.only(left: 7,top: 4),
-                width: screenWidth,
-                child: ChipsChoice<int>.single(
-                  value: vall,
-                  onChanged: (val) async {
-                    if(HelperClass.SemanticEnabled){
-                      speak("${optionListForUI.toList()[val]} selected");
-                    }
-                    selectedButton = optionListForUI.toList()[val];
-                    setState(() => vall = val);
-                    lastval = val;
-                    _controller.text = optionListForUI.toList()[val];
-                    print("optionListItemBuildingName:${optionListItemBuildingName}");
-                    if(optionListItemBuildingName.length==1){
-                      await fetchFloors(optionListItemBuildingName.first,optionListForUI.toList()[val].toUpperCase()).then((_){
-                        print("floors list $floors");
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => FloorSelectionPage(filterName: optionListForUI.toList()[val], filterBuildingName: optionListItemBuildingName.first,floors: floors.toList()..sort(),),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 30,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                  color: Color(0xff24B9B0).withOpacity(0.1), // change color as needed
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(Icons.my_location, size: 20, color: Color(0xff24B9B0),),
+                              ),
+                              SizedBox(width: 8,),
+                              Text(style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xff000000),
+                              ),"Your Location")
+                            ],
                           ),
-                        ).then((value){
-                          print("value $value");
-                          _controller.text="";
-                          searchResults = [];
-                          searcCategoryhResults = [];
-                          vall = -1;
-                          floors.clear();
-                          onVenueClicked(value[0],value[1],value[2],value[3]);
-                          // widget.onClicked(value[0],value[1],value[2],value[3]);
-                        });
-                      });
-                    }else{
-                      search(optionListForUI.toList()[val]);
-                    }
-                  },
-                  choiceItems: C2Choice.listFrom<int, String>(
-                    source: optionListForUI.toList(),
-                    value: (i, v) => i,
-                    label: (i, v) => v,
+                        ],
+                      ),
+                    ),
+                  ):Container(),
+                  InkWell(
+                    onTap: (){
+                      Navigator.pop(context, widget.userLocalized);
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(left: 16,right: 16),
+                      padding: EdgeInsets.only(top: 8, bottom: 8),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 30,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                  color: Color(0xffF1F0F0), // change color as needed
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(Icons.map, size: 20, color: Colors.black,),
+                              ),
+                              SizedBox(width: 8,),
+                              Text(style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xff000000),
+                              ),"Choose on Map")
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-
-                  choiceBuilder: (item, i) {
-                    if(!item.selected){
-                      vall = -1;
-                    }
-                    return DestinationPageChipsWidget(
-                      svgPath: '',
-                      text: optionListForUI.toList()[i],
-                      onSelect: item.select!,
-                      selected: item.selected,
-
-                      onTap: (String Text) {
-                        if (Text.isNotEmpty) {
-                          search(Text);
-                        } else {
-                          search(Text);
-                          _controller.text="";
-                          searchResults = [];
-                          searcCategoryhResults = [];
-                          vall = -1;
-                        }
-                      }, icon: _icons[i],
-                    );
-                  },
-                  direction: Axis.horizontal,
-                ),
+                ],
               ),
-            ):Container(),
+            ),
             // !category && _controller.text.isNotEmpty ? Semantics(
             //   header: true,
             //   label: "Building Filter section",
@@ -1116,17 +1134,20 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             //     ),
             //   ),
             // ) : Container(),
-            SizedBox(height: 4,),
-            Divider(thickness: 6,color: Color(0xfff2f3f5)),
+            SizedBox(height: 9,),
             Flexible(
                 flex: 1,
                 child: SingleChildScrollView(
                   child: Semantics(
                     label: "Search Results",
                     header: true,
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: (searcCategoryhResults.isEmpty && searchResults.isEmpty && _controller.text.isEmpty)?topSearches:((category)?searcCategoryhResults:searchResults)
+                    child: Container(
+                      color: Colors.white,
+                      padding: EdgeInsets.only(left: 16, top: 16, right: 16, bottom: 16),
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: (searcCategoryhResults.isEmpty && searchResults.isEmpty && _controller.text.isEmpty)?topSearches:((category)?searcCategoryhResults:searchResults)
+                      ),
                     ),
                   ),
                 )),

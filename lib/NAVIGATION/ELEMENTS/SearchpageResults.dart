@@ -30,7 +30,7 @@ class SearchpageResults extends StatefulWidget {
     this.icon = const Icon(
       Icons.location_on_outlined,
       color: Color(0xff000000),
-      size: 25,
+      size: 22,
     )
   });
 
@@ -61,21 +61,23 @@ class _SearchpageResultsState extends State<SearchpageResults> {
         widget.onClicked(widget.name, widget.location, widget.ID, widget.bid);
       },
       child: Container(
-        margin: EdgeInsets.only(top: 10, left: 16, right: 16),
+        padding: EdgeInsets.only(top: 8, bottom: 8),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(
-            color: Color(0xffEBEBEB),
+          border: Border(
+            bottom: BorderSide(
+              color: Colors.grey.shade300, // light gray line
+              width: 1,
+            ),
           ),
-          borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
         child: Row(
           children: [
             Column(
               children: [
                 Container(
-                  margin: EdgeInsets.only(left: 8),
-                  padding: EdgeInsets.all(7),
+                  height: 32,
+                  width: 32,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Color(0xffF5F5F5),
@@ -105,7 +107,7 @@ class _SearchpageResultsState extends State<SearchpageResults> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        margin: EdgeInsets.only(top: 12, left: 18),
+                        margin: EdgeInsets.only(left: 8),
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
                             maxWidth: MediaQuery.of(context).size.width-100, // Adjust width if needed
@@ -123,7 +125,7 @@ class _SearchpageResultsState extends State<SearchpageResults> {
                         ),
                       ),
                       Container(
-                        margin: EdgeInsets.only(top: 3, bottom: 14, left: 18),
+                        margin: EdgeInsets.only(top: 2, left: 8),
                         child: Text(
                           HelperClass.truncateString(widget.location, 40),
                           style: const TextStyle(

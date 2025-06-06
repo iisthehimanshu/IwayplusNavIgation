@@ -623,7 +623,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
                 label: "Facilities Filter",
                 header: true,
                 child: Container(
-                  margin: EdgeInsets.only(left: 7, top: 4),
+                  margin: EdgeInsets.only(top: 4),
                   width: screenWidth,
                   child: ChipsChoice<int>.single(
                     value: vall,
@@ -711,9 +711,13 @@ class _NewsearchpageState extends State<NewSearchPage> {
                   child: Semantics(
                     label: 'Available Buildings with ${_controller.text} Facilities',
                     header: true,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children:(searcCategoryhResults.isNotEmpty)?searcCategoryhResults:(searchResults.isNotEmpty)?searchResults:(topSearches.isNotEmpty)?topSearches:[]
+                    child: Container(
+                      padding: EdgeInsets.only(left: 16, top: 16, right: 16, bottom: 16),
+                      color: Colors.white,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children:(searcCategoryhResults.isNotEmpty)?searcCategoryhResults:(searchResults.isNotEmpty)?searchResults:(topSearches.isNotEmpty)?topSearches:[]
+                      ),
                     ),
                   ),
                 )),

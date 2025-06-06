@@ -96,7 +96,7 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
         });
       },
       child: Container(
-        margin: EdgeInsets.only(top: 10,left: 16,right: 16),
+        margin: EdgeInsets.only(top: 10),
         decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(

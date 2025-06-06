@@ -32,20 +32,16 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
       label: widget.text,
       toggled: widget.selected,
       child: AnimatedContainer(
-        margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 7),
-        padding: EdgeInsets.all(8),
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        padding: EdgeInsets.only(top: 10, left: 6, bottom: 10, right: 6),
         clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: widget.selected ? Colors.black : Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey, // Shadow color
-              offset: Offset(0, 2), // Offset of the shadow
-              blurRadius: 4, // Spread of the shadow
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Colors.grey.shade300, // border color
+              width: 1,                    // border width
             ),
-          ],
-        ),
+            borderRadius: BorderRadius.circular(8),
+          ),
         duration: Duration(milliseconds: 600),
         child: InkWell(
           borderRadius: BorderRadius.all(Radius.circular(10.0)), // Updated borderRadius

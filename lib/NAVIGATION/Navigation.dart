@@ -823,6 +823,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       networkManager.ws.updateSensorStatus(compass: true);
       networkManager.ws.updatePermissions(compass: true);
       double? compassHeading = event;
+      print("magnetometerStream ${compassHeading}");
         setState(() {
           user.theta = compassHeading!;
           if (mapState.interaction2) {
@@ -1290,7 +1291,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     paintUser(nearestBeacon, null, null, speakTTS: false);
   }
 
-  String convertTolng(String msg, String lngcode, String finalvalue) {
+  String convertTolng(String msg, String lngcode, String finalvalue,String nearbyLandName,String finalvalue2){
     if (msg ==
         "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}") {
       if (lngcode == 'en') {
@@ -1303,13 +1304,28 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       if (lngcode == 'en') {
         return msg;
       } else {
-        return "आप ${tools.numericalToAlphabetical(user.floor)} मंजिल पर हैं, ${user.locationName} आपके ${LocaleData.properties5[finalvalue]?.getString(context)} पर है";
+        return "आप ${tools.numericalToAlphabetical(user.floor)} मंजिल पर हैं, ${user.locationName} आपके ${LocaleData.properties5[finalvalue]?.getString(context)} ओर है";
       }
-    } else if (msg == "Confirm Your Location Amongst Below Given List") {
+    }else if (msg=="You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${nearbyLandName} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}")
+      {
+        if(lngcode=='en'){
+          return msg;
+        }else{
+          return "आप ${tools.numericalToAlphabetical(user.floor)} मंजिल पर हैं, ${user.locationName} आपके ${LocaleData.properties5[finalvalue]?.getString(context)} ओर है और ${nearbyLandName} आपके ${LocaleData.properties5[finalvalue2]?.getString(context)} ओर है।";
+        }
+      } else if (msg == "Confirm Your Location Amongst Below Given List") {
       if (lngcode == 'en') {
         return msg;
-      } else {
+      }
+      else {
         return "नीचे दी गई सूची में से अपना स्थान पुष्टि करें";
+      }
+    }else if(msg=="Go Straight")
+    {
+      if(lngcode=='en'){
+        return msg;
+      }else{
+        return "सीधे जाओ";
       }
     }
     return "";
@@ -1933,7 +1949,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     SingletonFunctionController.building.floor[landmarks.first.buildingID!] = landmarks.first.floor??0;
     await createRooms(SingletonFunctionController.building.polylinedatamap[landmarks.first.buildingID]!, landmarks.first.floor??0);
     await Future.delayed(Duration(milliseconds: 1000));
-    speak(convertTolng("Confirm Your Location Amongst Below Given List", _currentLocale, ''), _currentLocale);
+    speak(convertTolng("Confirm Your Location Amongst Below Given List", _currentLocale, '','',''), _currentLocale);
     focusOnPinLandmark(LatLng(double.parse(landmarks.first.properties!.latitude!), double.parse(landmarks.first.properties!.longitude!)));
     for (var landmark in landmarks){
       addNearbyLandmarkMarkers(LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),landmark.sId??"", landmark.name??"", !landmark.properties!.isWaypoint);
@@ -2232,24 +2248,31 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
       fitPolygonInScreen(patch.first);
       if (speakTTS) {
-        if (finalvalue == null) {
+        if (finalvalue == null){
           speak(
               convertTolng(
                   "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}",
                   _currentLocale,
-                  ''),
+                  '','',''),
               _currentLocale);
         } else {
           if(getallnearbylandmark.length>2 && distBetweenLandmarks<=20 && finalvalue2!=null){
+
             speak(
+                convertTolng(
                 "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
+                    _currentLocale,
+                  finalvalue,
+                  getallnearbylandmark[1].name.toString(),
+                    finalvalue2
+                ),
                 _currentLocale);
           }else{
             speak(
                 convertTolng(
                     "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
                     _currentLocale,
-                    finalvalue),
+                    finalvalue,'',''),
                 _currentLocale);
           }
 
@@ -2263,19 +2286,25 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               convertTolng(
                   "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}",
                   _currentLocale,
-                  ''),
+                  '','',''),
               _currentLocale);
         } else {
           if(getallnearbylandmark.length>2 && distBetweenLandmarks<=20 && finalvalue2!=null){
             speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
+                convertTolng(
+                    "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
+                    _currentLocale,
+                    finalvalue,
+                    getallnearbylandmark[1].name.toString(),
+                    finalvalue2
+                ),
                 _currentLocale);
           }else{
             speak(
                 convertTolng(
                     "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
                     _currentLocale,
-                    finalvalue),
+                    finalvalue,'',''),
                 _currentLocale);
           }
         }
@@ -8921,7 +8950,7 @@ bool _isPlaying=false;
           excludeSemantics: true,
           child: ElevatedButton.icon(
             icon: Icon(Icons.navigation, color: Colors.white),
-            label: Text('Start', style: TextStyle(color: Colors.white)),
+            label: Text(LocaleData.start.getString(context) ,style: TextStyle(color: Colors.white)),
             onPressed: () async {
               startNavigation();
             },
@@ -9326,9 +9355,9 @@ bool _isPlaying=false;
           ? "Straight"
           : tools.angleToClocks(angle, context);
       if(direction == "Straight"){
-        speak("Go Straight", _currentLocale);
+        speak(convertTolng("Go Straight", _currentLocale, '', '', ''), _currentLocale);
       }else{
-        speak("Turn $direction", _currentLocale);
+        speak(convertTolng("Turn $direction", _currentLocale, '', '', ''), _currentLocale);
       }
     }
   }

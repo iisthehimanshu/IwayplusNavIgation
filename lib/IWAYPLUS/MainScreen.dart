@@ -13,7 +13,6 @@ import '../NAVIGATION/Network/NetworkManager.dart';
 import 'Elements/QRLandmarkScreen.dart';
 import 'FavouriteScreen.dart';
 import 'ProfilePage.dart';
-import 'package:iwaymaps/NAVIGATION/RippleButton.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;

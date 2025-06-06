@@ -524,7 +524,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         topCategory=false;
         if (landmarkData.landmarksMap != null) {
           String normalizedSearchText = normalizeText(searchText);
-
           final fuse = Fuzzy(
             landmarkData.landmarks!.map((e) => normalizeText(e.name??e.element?.subType??e.element!.type!)).toList(),
             options: FuzzyOptions(
@@ -538,13 +537,10 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             print("${normalizedSearchText.toLowerCase()} a.item.toLowerCase().split(' ') ${a.item.toLowerCase().split(' ')}");
             final aHasExact = a.item.toLowerCase().split(' ').contains(normalizedSearchText.toLowerCase());
             final bHasExact = b.item.toLowerCase().split(' ').contains(normalizedSearchText.toLowerCase());
-
             if (aHasExact && !bHasExact) return -1;
             if (!aHasExact && bHasExact) return 1;
-
             return a.score!.compareTo(b.score!);
           });
-
           for (var fuseResult in result) {
             if (fuseResult.score < 0.5) {
               Landmarks landmark = landmarkData.landmarks!.firstWhere((value)=>normalizeText(value.name??value.element?.subType??value.element!.type!) == fuseResult.item);

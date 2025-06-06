@@ -1003,15 +1003,15 @@ class UserState {
       }
     } else if (nextBuildingName != "" &&
         msg == "Entering $nextBuildingName. Continue ahead.") {
-      if (lngCode == 'en') {
+      if (lngCode == 'en'){
         return msg;
-      } else {
+      }else{
         return "$nextBuildingName में प्रवेश कर रहे हैं। आगे बढ़ते रहें।";
       }
     } else if (destname != "" && msg == "Continue ahead towards $destname") {
-      if (lngCode == 'en') {
+      if(lngCode == 'en'){
         return msg;
-      } else {
+      }else{
         return "$destname की ओर आगे बढ़ते रहें";
       }
     }else if(msg=="Passing by ${name}")

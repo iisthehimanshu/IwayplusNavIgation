@@ -83,21 +83,21 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   void initState() {
     super.initState();
     PanelState.none;
-    BLEManager bleManager = BLEManager();
-    bleManager.startScanning(
-      bufferSize: 6,
-      streamFrequency: 6,
-      duration: null,
-    );
-
-    bleManager.bufferedDeviceStream.listen((bufferedData) {
-      // You can update UI or process data here
-      print("Scanned data: $bufferedData");
-
-      if(mounted) context.read<LocalizedScreenViewModel>().setNearestBeacon = bufferedData;
-      // GoogleMapManager(PanelManager()).setNearestLandmark(bufferedData);
-      // if(mounted) context.read<GoogleMapManager>().setNearestLandmark(bufferedData);
-    });
+    // BLEManager bleManager = BLEManager();
+    // bleManager.startScanning(
+    //   bufferSize: 6,
+    //   streamFrequency: 6,
+    //   duration: null,
+    // );
+    //
+    // bleManager.bufferedDeviceStream.listen((bufferedData) {
+    //   // You can update UI or process data here
+    //   print("Scanned data: $bufferedData");
+    //
+    //   if(mounted) context.read<LocalizedScreenViewModel>().setNearestBeacon = bufferedData;
+    //   // GoogleMapManager(PanelManager()).setNearestLandmark(bufferedData);
+    //   // if(mounted) context.read<GoogleMapManager>().setNearestLandmark(bufferedData);
+    // });
     NotificationSocket.receiveMessage();
     // checkForUpdate();
     //startScan();
